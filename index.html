@@ -12,19 +12,20 @@
   --bg: #09090f;
   --surface: #11111c;
   --surface-2: #181825;
-  --border: rgba(201, 168, 76, 0.12);
-  --border-hover: rgba(201, 168, 76, 0.26);
+  --border: rgba(201,168,76,0.12);
+  --border-hover: rgba(201,168,76,0.26);
   --gold: #d4a84c;
-  --gold-dim: rgba(212, 168, 76, 0.4);
+  --gold-dim: rgba(212,168,76,0.4);
   --text: #f2eedd;
   --text-secondary: #ccc4b4;
   --text-dim: #9a948e;
   --mythic: #c4bef8;
   --conceptual: #6dd8b2;
   --somatic: #f5aa88;
-  --mythic-bg: rgba(196, 190, 248, 0.08);
-  --conceptual-bg: rgba(109, 216, 178, 0.08);
-  --somatic-bg: rgba(245, 170, 136, 0.08);
+  --mythic-bg: rgba(196,190,248,0.08);
+  --conceptual-bg: rgba(109,216,178,0.08);
+  --somatic-bg: rgba(245,170,136,0.08);
+  --astro-gold: rgba(212,168,76,0.14);
 }
 
 html { scroll-behavior: smooth; }
@@ -34,6 +35,7 @@ body {
   color: var(--text);
   font-family: 'Jost', sans-serif;
   font-weight: 300;
+  font-size: 16px;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -58,17 +60,18 @@ body::before {
   padding: 4rem 2.5rem 5rem;
 }
 
+/* ── Header ── */
 .header {
   text-align: center;
-  margin-bottom: 3.5rem;
+  margin-bottom: 2rem;
   opacity: 0;
   animation: fadeUp 0.9s ease forwards;
 }
 
 .header-eyebrow {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   color: var(--gold);
   text-transform: uppercase;
   margin-bottom: 1rem;
@@ -92,14 +95,49 @@ body::before {
 }
 
 .header-sub {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 300;
   color: var(--text-secondary);
-  max-width: 460px;
+  max-width: 480px;
   margin: 0 auto;
   line-height: 1.8;
 }
 
+/* ── View Toggle ── */
+.view-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+  opacity: 0;
+  animation: fadeUp 0.9s ease 0.08s forwards;
+}
+
+.toggle-btn {
+  font-family: 'Jost', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  padding: 10px 30px;
+  border: 1px solid var(--border-hover);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.toggle-btn:first-child { border-radius: 24px 0 0 24px; border-right: none; }
+.toggle-btn:last-child  { border-radius: 0 24px 24px 0; }
+
+.toggle-btn.active {
+  background: var(--gold);
+  color: #09090f;
+  border-color: var(--gold);
+  font-weight: 500;
+}
+
+.toggle-btn:not(.active):hover { border-color: var(--gold-dim); color: var(--text); }
+
+/* ── Central axis ── */
 .axis-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -110,7 +148,10 @@ body::before {
   overflow: hidden;
   opacity: 0;
   animation: fadeUp 0.9s ease 0.15s forwards;
+  transition: border-color 0.4s;
 }
+
+body.astro-view .axis-card { border-color: rgba(212,168,76,0.22); }
 
 .axis-card::before {
   content: '';
@@ -121,13 +162,13 @@ body::before {
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
-.axis-art { padding: 1.5rem 2.5rem 0; }
+.axis-art  { padding: 1.5rem 2.5rem 0; }
 .axis-body { padding: 1.25rem 2.5rem 2rem; }
 
 .axis-eyebrow {
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 500;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.16em;
   color: var(--gold);
   text-transform: uppercase;
   margin-bottom: 0.6rem;
@@ -135,14 +176,14 @@ body::before {
 
 .axis-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   font-weight: 400;
   color: var(--text);
   margin-bottom: 0.65rem;
 }
 
 .axis-sub {
-  font-size: 15px;
+  font-size: 16px;
   color: var(--text-secondary);
   line-height: 1.75;
   max-width: 500px;
@@ -156,34 +197,73 @@ body::before {
   flex-wrap: wrap;
 }
 
-.bird-item {
-  padding: 0.5rem 1.5rem;
-  text-align: center;
-}
+.bird-item { padding: 0.5rem 1.5rem; text-align: center; }
 
 .bird-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 500;
   color: var(--text);
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
 
 .bird-quality {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 300;
   color: var(--text-dim);
-  letter-spacing: 0.07em;
+  letter-spacing: 0.06em;
 }
 
-.bird-divider {
-  width: 1px;
-  height: 36px;
-  background: var(--border);
-  flex-shrink: 0;
+.bird-divider { width: 1px; height: 38px; background: var(--border); flex-shrink: 0; }
+
+/* Astro axis note */
+.astro-axis-note {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.5s ease, opacity 0.4s ease;
+  border-top: 1px solid var(--astro-gold);
+  margin-top: 0;
 }
 
+body.astro-view .astro-axis-note {
+  max-height: 140px;
+  opacity: 1;
+  margin-top: 1.25rem;
+}
+
+.astro-axis-inner {
+  padding: 1rem 0 0.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.astro-axis-glyphs {
+  font-size: 1.6rem;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  line-height: 1;
+}
+
+.astro-axis-label {
+  font-size: 15px;
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
+}
+
+.astro-axis-principle {
+  font-size: 15px;
+  font-style: italic;
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--text-dim);
+  line-height: 1.65;
+  max-width: 440px;
+}
+
+/* ── Legend ── */
 .legend {
   display: flex;
   justify-content: center;
@@ -197,22 +277,19 @@ body::before {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 13px;
+  gap: 8px;
+  font-size: 15px;
   color: var(--text-secondary);
   font-weight: 300;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
-.legend-dot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-}
-
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
 .legend-dot.m { background: var(--mythic); opacity: 0.85; }
 .legend-dot.c { background: var(--conceptual); opacity: 0.85; }
 .legend-dot.s { background: var(--somatic); opacity: 0.85; }
 
+/* ── Cluster grid ── */
 .cluster-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -220,6 +297,7 @@ body::before {
   margin-bottom: 10px;
 }
 
+/* ── Cards ── */
 .cluster-card, .lang-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -237,17 +315,11 @@ body::before {
 .cluster-card:nth-child(4) { animation-delay: 0.7s; }
 
 .cluster-card:hover, .lang-card:hover { border-color: var(--border-hover); background: var(--surface-2); }
-.cluster-card.open, .lang-card.open   { border-color: var(--border-hover); background: var(--surface-2); }
+.cluster-card.open,  .lang-card.open  { border-color: var(--border-hover); background: var(--surface-2); }
 
-.lang-card { animation-delay: 0.8s; margin-bottom: 2.5rem; }
+.lang-card { animation-delay: 0.8s; margin-bottom: 10px; }
 
-.card-art {
-  width: 100%;
-  height: 90px;
-  display: block;
-  border-bottom: 1px solid var(--border);
-}
-
+.card-art { width: 100%; height: 90px; display: block; border-bottom: 1px solid var(--border); }
 .card-body { padding: 1.25rem 1.5rem; }
 
 .card-header {
@@ -255,46 +327,89 @@ body::before {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
 
 .card-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 500;
   color: var(--text);
   line-height: 1.2;
 }
 
 .card-chevron {
-  width: 22px; height: 22px;
+  width: 24px; height: 24px;
   border-radius: 50%;
   border: 1px solid var(--border-hover);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: 2px;
   transition: border-color 0.3s;
 }
 
 .card-chevron svg {
-  width: 9px; height: 9px;
+  width: 10px; height: 10px;
   stroke: var(--gold); fill: none;
   transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
 }
 
-.open .card-chevron svg  { transform: rotate(180deg); }
-.open .card-chevron      { border-color: var(--gold-dim); }
+.open .card-chevron svg { transform: rotate(180deg); }
+.open .card-chevron     { border-color: var(--gold-dim); }
 
 .card-elements {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 300;
   color: var(--text-dim);
   letter-spacing: 0.03em;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
+/* ── Astro panel ── */
+.astro-panel {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.45s ease, opacity 0.4s ease;
+  border-top: 1px solid var(--astro-gold);
+  margin-top: 0;
+}
+
+body.astro-view .astro-panel {
+  max-height: 180px;
+  opacity: 1;
+  margin-top: 0.85rem;
+}
+
+.astro-panel-inner { padding: 0.85rem 0 0; }
+
+.astro-planets {
+  font-size: 1.5rem;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.astro-rulers {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.astro-principle {
+  font-size: 15px;
+  font-style: italic;
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* ── Registers ── */
 .registers {
   overflow: hidden;
   max-height: 0;
@@ -302,7 +417,7 @@ body::before {
   transition: max-height 0.55s cubic-bezier(0.4,0,0.2,1), opacity 0.45s ease;
 }
 
-.registers.open { max-height: 800px; opacity: 1; }
+.registers.open { max-height: 900px; opacity: 1; }
 
 .registers-inner {
   border-top: 1px solid rgba(255,255,255,0.05);
@@ -313,25 +428,21 @@ body::before {
 .reg-item {
   display: flex;
   gap: 1rem;
-  padding: 0.7rem 0;
+  padding: 0.75rem 0;
   border-bottom: 1px solid rgba(255,255,255,0.03);
 }
 
 .reg-item:last-child  { border-bottom: none; padding-bottom: 0; }
 .reg-item:first-child { padding-top: 0; }
 
-.reg-label-col {
-  flex-shrink: 0;
-  width: 80px;
-  padding-top: 2px;
-}
+.reg-label-col { flex-shrink: 0; width: 90px; padding-top: 2px; }
 
 .reg-label {
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 500;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: 20px;
   display: inline-block;
   white-space: nowrap;
@@ -342,14 +453,106 @@ body::before {
 .s-label { background: var(--somatic-bg);    color: var(--somatic);    border: 1px solid rgba(245,170,136,0.22); }
 
 .reg-text {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 300;
   color: var(--text-secondary);
   line-height: 1.8;
 }
 
+/* ── Aspects section ── */
+.aspects-section {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.6s ease, opacity 0.5s ease;
+  margin-bottom: 0;
+}
+
+body.astro-view .aspects-section {
+  max-height: 2600px;
+  opacity: 1;
+  margin-bottom: 10px;
+}
+
+.aspects-header {
+  text-align: center;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  padding-top: 4px;
+}
+
+.aspect-thread {
+  background: var(--surface);
+  border: 1px solid rgba(212,168,76,0.1);
+  border-radius: 12px;
+  padding: 1.1rem 1.5rem;
+  margin-bottom: 8px;
+}
+
+.aspect-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+}
+
+.aspect-from {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text);
+  flex: 1;
+}
+
+.aspect-to {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text);
+  flex: 1;
+  text-align: right;
+}
+
+.aspect-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.aspect-glyph {
+  font-size: 1.8rem;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.aspect-name {
+  font-size: 15px;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.aspect-description {
+  font-size: 15px;
+  font-style: italic;
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--text-secondary);
+  line-height: 1.75;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  padding-top: 0.7rem;
+}
+
+/* ── Footer ── */
 .map-footer {
   text-align: center;
+  margin-top: 2.5rem;
   opacity: 0;
   animation: fadeUp 0.9s ease 1s forwards;
 }
@@ -357,26 +560,31 @@ body::before {
 .footer-rule { width: 32px; height: 1px; background: var(--border); margin: 0 auto 1rem; }
 
 .footer-note {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-dim);
   font-style: italic;
   font-family: 'Cormorant Garamond', serif;
   letter-spacing: 0.03em;
 }
 
+/* ── Animation ── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 580px) {
+/* ── Mobile ── */
+@media (max-width: 600px) {
   .page { padding: 2.5rem 1.25rem 4rem; }
   .cluster-grid { grid-template-columns: 1fr; }
   .birds { flex-direction: column; gap: 0.5rem; }
   .bird-divider { width: 32px; height: 1px; }
-  .reg-item { flex-direction: column; gap: 0.4rem; }
+  .reg-item { flex-direction: column; gap: 0.5rem; }
   .reg-label-col { width: auto; }
   .axis-body, .axis-art { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .aspect-row { flex-wrap: wrap; }
+  .aspect-from, .aspect-to { flex: 100%; text-align: left; }
+  .aspect-center { flex-direction: row; gap: 10px; margin: 4px 0; }
 }
 </style>
 </head>
@@ -390,23 +598,24 @@ body::before {
     <p class="header-sub">A living cartography of signal, threshold, and embodied knowing — three registers, five clusters, one axis.</p>
   </header>
 
+  <div class="view-toggle">
+    <button class="toggle-btn active" id="btn-spatial" onclick="setView('spatial')">Spatial</button>
+    <button class="toggle-btn" id="btn-astro" onclick="setView('astro')">Astrological</button>
+  </div>
+
   <div class="axis-card">
     <div class="axis-art">
       <svg width="100%" viewBox="0 0 680 96" fill="none" xmlns="http://www.w3.org/2000/svg">
         <line x1="40" y1="72" x2="640" y2="72" stroke="#d4a84c" stroke-width="0.4" stroke-opacity="0.15"/>
-        <!-- Raven: large, left -->
         <path d="M 128 56 C 112 46 94 42 78 46 C 94 50 110 53 128 56 Z" fill="#d4a84c" fill-opacity="0.58"/>
         <path d="M 128 56 C 112 65 100 70 86 70 C 100 66 113 62 128 56 Z" fill="#d4a84c" fill-opacity="0.32"/>
         <line x1="128" y1="56" x2="152" y2="48" stroke="#d4a84c" stroke-width="1.2" stroke-opacity="0.5" stroke-linecap="round"/>
-        <!-- Wren: small, center -->
         <path d="M 326 44 C 314 37 304 35 296 37 C 304 40 314 43 326 44 Z" fill="#d4a84c" fill-opacity="0.48"/>
         <path d="M 326 44 C 317 50 310 53 302 53 C 310 50 318 48 326 44 Z" fill="#d4a84c" fill-opacity="0.26"/>
         <line x1="326" y1="44" x2="342" y2="39" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.4" stroke-linecap="round"/>
-        <!-- Goldfinch: small, right, warm -->
         <path d="M 548 40 C 534 31 522 27 514 29 C 522 33 534 38 548 40 Z" fill="#f5aa88" fill-opacity="0.62"/>
         <path d="M 548 40 C 538 47 531 51 522 51 C 530 47 539 44 548 40 Z" fill="#f5aa88" fill-opacity="0.34"/>
         <line x1="548" y1="40" x2="564" y2="33" stroke="#f5aa88" stroke-width="0.9" stroke-opacity="0.45" stroke-linecap="round"/>
-        <!-- Flight arc -->
         <path d="M 152 51 Q 236 24 296 40 Q 390 58 514 34" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.18" stroke-dasharray="4 7"/>
         <circle cx="204" cy="30" r="0.9" fill="#d4a84c" fill-opacity="0.22"/>
         <circle cx="430" cy="20" r="0.8" fill="#d4a84c" fill-opacity="0.18"/>
@@ -435,6 +644,13 @@ body::before {
           <span class="bird-quality">soul in motion</span>
         </div>
       </div>
+      <div class="astro-axis-note">
+        <div class="astro-axis-inner">
+          <div class="astro-axis-glyphs">☉ ♊</div>
+          <div class="astro-axis-label">Sun in Gemini</div>
+          <div class="astro-axis-principle">The structural fact of this map — polarity as the engine of omnidirectional perception. The twin nature that holds the entire system in productive tension without collapsing it into one.</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -446,7 +662,6 @@ body::before {
 
   <div class="cluster-grid">
 
-    <!-- Structural models -->
     <div class="cluster-card" onclick="toggle(this)">
       <svg class="card-art" viewBox="0 0 400 90" fill="none" xmlns="http://www.w3.org/2000/svg">
         <polygon points="200,10 238,32 238,68 200,88 162,68 162,32" stroke="#d4a84c" stroke-width="0.8" stroke-opacity="0.42" fill="none"/>
@@ -469,8 +684,6 @@ body::before {
         <circle cx="162" cy="32" r="1.5" fill="#d4a84c" fill-opacity="0.38"/>
         <circle cx="88"  cy="45" r="0.9" fill="#d4a84c" fill-opacity="0.18"/>
         <circle cx="312" cy="28" r="0.9" fill="#d4a84c" fill-opacity="0.18"/>
-        <circle cx="340" cy="62" r="0.8" fill="#d4a84c" fill-opacity="0.14"/>
-        <circle cx="60"  cy="58" r="0.8" fill="#d4a84c" fill-opacity="0.14"/>
       </svg>
       <div class="card-body">
         <div class="card-header">
@@ -478,6 +691,13 @@ body::before {
           <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
         </div>
         <div class="card-elements">Tesseract · Merkaba</div>
+        <div class="astro-panel">
+          <div class="astro-panel-inner">
+            <div class="astro-planets">♄ ♅</div>
+            <div class="astro-rulers">Saturn · Uranus</div>
+            <div class="astro-principle">The force that builds the container / the force that breaks it open. Form and the transcendence of form — the geometry of what contains and what exceeds.</div>
+          </div>
+        </div>
         <div class="registers">
           <div class="registers-inner">
             <div class="reg-item">
@@ -497,23 +717,16 @@ body::before {
       </div>
     </div>
 
-    <!-- Anomalous reception -->
     <div class="cluster-card" onclick="toggle(this)">
       <svg class="card-art" viewBox="0 0 400 90" fill="none" xmlns="http://www.w3.org/2000/svg">
         <polyline points="20,62 75,62 85,60 95,62 115,62 135,62 145,61 155,62 168,62" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.32"/>
         <polyline points="168,62 176,57 182,42 186,25 190,14 194,8 198,6 202,6 206,9 210,16 214,28 218,44 222,57 230,62" stroke="#c4bef8" stroke-width="1.2" stroke-opacity="0.75"/>
         <polyline points="194,8 200,6 206,9" stroke="#c4bef8" stroke-width="2.5" stroke-opacity="1"/>
         <polyline points="230,62 245,62 258,61 270,62 290,62 308,62 318,61 330,62 348,62 368,62 378,61 395,62" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.32"/>
-        <text x="200" y="4" text-anchor="middle" font-family="Jost,sans-serif" font-size="8" fill="#c4bef8" fill-opacity="0.48" letter-spacing="0.12em">6EQUJ5</text>
-        <path d="M 200 62 A 32 20 0 0 0 168 62" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.14" fill="none"/>
-        <path d="M 200 62 A 58 36 0 0 0 142 62" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.09" fill="none"/>
-        <path d="M 200 62 A 85 52 0 0 0 115 62" stroke="#c4bef8" stroke-width="0.35" stroke-opacity="0.06" fill="none"/>
         <circle cx="200" cy="6"  r="3"   fill="#c4bef8" fill-opacity="0.32"/>
         <circle cx="58"  cy="32" r="1"   fill="#c4bef8" fill-opacity="0.2"/>
         <circle cx="322" cy="28" r="0.8" fill="#c4bef8" fill-opacity="0.2"/>
         <circle cx="374" cy="42" r="1"   fill="#c4bef8" fill-opacity="0.15"/>
-        <circle cx="46"  cy="52" r="0.7" fill="#c4bef8" fill-opacity="0.15"/>
-        <circle cx="354" cy="56" r="0.8" fill="#c4bef8" fill-opacity="0.15"/>
       </svg>
       <div class="card-body">
         <div class="card-header">
@@ -521,6 +734,13 @@ body::before {
           <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
         </div>
         <div class="card-elements">WOW signal · Telepathic awareness · Akashic records</div>
+        <div class="astro-panel">
+          <div class="astro-panel-inner">
+            <div class="astro-planets">♆ ☊</div>
+            <div class="astro-rulers">Neptune · North Node</div>
+            <div class="astro-principle">The dissolving of personal boundaries into the larger field / the karmic record and direction of the soul. What arrives that you did not generate — and where it is calling you.</div>
+          </div>
+        </div>
         <div class="registers">
           <div class="registers-inner">
             <div class="reg-item">
@@ -540,26 +760,23 @@ body::before {
       </div>
     </div>
 
-    <!-- Threshold events -->
     <div class="cluster-card" onclick="toggle(this)">
       <svg class="card-art" viewBox="0 0 400 90" fill="none" xmlns="http://www.w3.org/2000/svg">
         <line x1="160" y1="88" x2="160" y2="46" stroke="#6dd8b2" stroke-width="1" stroke-opacity="0.58"/>
         <line x1="240" y1="88" x2="240" y2="46" stroke="#6dd8b2" stroke-width="1" stroke-opacity="0.58"/>
         <path d="M 160 46 A 40 40 0 0 1 240 46" stroke="#6dd8b2" stroke-width="1" stroke-opacity="0.58"/>
         <line x1="160" y1="84" x2="240" y2="84" stroke="#6dd8b2" stroke-width="0.8" stroke-opacity="0.35"/>
-        <line x1="200" y1="46" x2="200" y2="16"  stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.32"/>
-        <line x1="200" y1="46" x2="183" y2="22"  stroke="#6dd8b2" stroke-width="0.5" stroke-opacity="0.2"/>
-        <line x1="200" y1="46" x2="217" y2="22"  stroke="#6dd8b2" stroke-width="0.5" stroke-opacity="0.2"/>
-        <line x1="200" y1="46" x2="168" y2="28"  stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.13"/>
-        <line x1="200" y1="46" x2="232" y2="28"  stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.13"/>
+        <line x1="200" y1="46" x2="200" y2="16" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.32"/>
+        <line x1="200" y1="46" x2="183" y2="22" stroke="#6dd8b2" stroke-width="0.5" stroke-opacity="0.2"/>
+        <line x1="200" y1="46" x2="217" y2="22" stroke="#6dd8b2" stroke-width="0.5" stroke-opacity="0.2"/>
+        <line x1="200" y1="46" x2="168" y2="28" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.13"/>
+        <line x1="200" y1="46" x2="232" y2="28" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.13"/>
         <circle cx="200" cy="16" r="2.5" fill="#6dd8b2" fill-opacity="0.45"/>
         <circle cx="200" cy="46" r="2"   fill="#6dd8b2" fill-opacity="0.58"/>
         <line x1="60"  y1="84" x2="160" y2="84" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.14"/>
         <line x1="240" y1="84" x2="340" y2="84" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.14"/>
         <circle cx="82"  cy="52" r="0.8" fill="#6dd8b2" fill-opacity="0.18"/>
         <circle cx="318" cy="46" r="0.8" fill="#6dd8b2" fill-opacity="0.18"/>
-        <circle cx="104" cy="70" r="0.6" fill="#6dd8b2" fill-opacity="0.14"/>
-        <circle cx="296" cy="66" r="0.6" fill="#6dd8b2" fill-opacity="0.14"/>
       </svg>
       <div class="card-body">
         <div class="card-header">
@@ -567,6 +784,13 @@ body::before {
           <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
         </div>
         <div class="card-elements">Astral travel · Portals · Ancestral visits</div>
+        <div class="astro-panel">
+          <div class="astro-panel-inner">
+            <div class="astro-planets">♇ ☋</div>
+            <div class="astro-rulers">Pluto · South Node</div>
+            <div class="astro-principle">The underworld force of radical transformation / the karmic inheritance carried in from before. Inanna's descent is a Pluto transit. Every threshold crossing reorganizes the self at the root.</div>
+          </div>
+        </div>
         <div class="registers">
           <div class="registers-inner">
             <div class="reg-item">
@@ -586,7 +810,6 @@ body::before {
       </div>
     </div>
 
-    <!-- Embodied signal -->
     <div class="cluster-card" onclick="toggle(this)">
       <svg class="card-art" viewBox="0 0 400 90" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M 74 64 Q 142 22 200 38 Q 268 56 330 28" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.18" stroke-dasharray="4 7"/>
@@ -601,8 +824,6 @@ body::before {
         <line x1="316" y1="34" x2="330" y2="27" stroke="#f5aa88" stroke-width="0.9" stroke-opacity="0.45" stroke-linecap="round"/>
         <line x1="40" y1="80" x2="360" y2="80" stroke="#d4a84c" stroke-width="0.4" stroke-opacity="0.1"/>
         <circle cx="52"  cy="36" r="0.8" fill="#d4a84c" fill-opacity="0.18"/>
-        <circle cx="164" cy="22" r="0.8" fill="#d4a84c" fill-opacity="0.17"/>
-        <circle cx="258" cy="62" r="0.7" fill="#d4a84c" fill-opacity="0.14"/>
         <circle cx="358" cy="50" r="1"   fill="#f5aa88" fill-opacity="0.2"/>
       </svg>
       <div class="card-body">
@@ -611,6 +832,13 @@ body::before {
           <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
         </div>
         <div class="card-elements">Ravens · Goldfinches · Wren</div>
+        <div class="astro-panel">
+          <div class="astro-panel-inner">
+            <div class="astro-planets">☿ ☽</div>
+            <div class="astro-rulers">Mercury · Moon</div>
+            <div class="astro-principle">The swift liminal messenger who moves between worlds / the body's rhythmic, cyclical, pre-linguistic knowing. Birds are Mercury's creatures. The body's response is the Moon's domain.</div>
+          </div>
+        </div>
         <div class="registers">
           <div class="registers-inner">
             <div class="reg-item">
@@ -632,15 +860,76 @@ body::before {
 
   </div>
 
-  <!-- Language / resonance -->
+  <div class="aspects-section">
+    <div class="aspects-header">Connective threads · Aspect qualities</div>
+
+    <div class="aspect-thread">
+      <div class="aspect-row">
+        <span class="aspect-from">Structural models</span>
+        <span class="aspect-center">
+          <span class="aspect-glyph">□</span>
+          <span class="aspect-name">Square · 90°</span>
+        </span>
+        <span class="aspect-to">Anomalous reception</span>
+      </div>
+      <div class="aspect-description">Productive friction between knowing the shape and receiving what has no shape yet. The tension between Saturn's geometry and Neptune's dissolution doesn't resolve — it generates. A Wrinkle in Time lives here: the book that gave you the word before you had the experience.</div>
+    </div>
+
+    <div class="aspect-thread">
+      <div class="aspect-row">
+        <span class="aspect-from">Anomalous reception</span>
+        <span class="aspect-center">
+          <span class="aspect-glyph">⚹</span>
+          <span class="aspect-name">Sextile · 60°</span>
+        </span>
+        <span class="aspect-to">Threshold events</span>
+      </div>
+      <div class="aspect-description">Opportunity at the edge of the signal. The received transmission that becomes an invitation to cross. The Akashic records belong here — not just reception, but the library at the threshold: the record of every crossing ever made by every self that ever dissolved into the field.</div>
+    </div>
+
+    <div class="aspect-thread">
+      <div class="aspect-row">
+        <span class="aspect-from">Threshold events</span>
+        <span class="aspect-center">
+          <span class="aspect-glyph">☌</span>
+          <span class="aspect-name">Conjunction · 0°</span>
+        </span>
+        <span class="aspect-to">Embodied signal</span>
+      </div>
+      <div class="aspect-description">Fusion. The body is not the vehicle for crossing — it is the crossing itself. Pluto and the Moon in the same degree: transformation registered in tissue, not concept. The late nights and early rising live here — a threshold event happening in the body, repeatedly, without yet being named as such.</div>
+    </div>
+
+    <div class="aspect-thread">
+      <div class="aspect-row">
+        <span class="aspect-from">Embodied signal</span>
+        <span class="aspect-center">
+          <span class="aspect-glyph">△</span>
+          <span class="aspect-name">Trine · 120°</span>
+        </span>
+        <span class="aspect-to">Resonance in language</span>
+      </div>
+      <div class="aspect-description">The most natural flow on the map. Body to word without effort or translation. Mercury rules both — the birds are pre-linguistic signal, and language is what happens when that signal finds its form. The Suzuki triangle lives here: teacher, parent, child as three-way resonance operating below semantic content.</div>
+    </div>
+
+    <div class="aspect-thread">
+      <div class="aspect-row">
+        <span class="aspect-from">Resonance in language</span>
+        <span class="aspect-center">
+          <span class="aspect-glyph">⚻</span>
+          <span class="aspect-name">Quincunx · 150°</span>
+        </span>
+        <span class="aspect-to">Structural models</span>
+      </div>
+      <div class="aspect-description">The arc that closes the map and never quite resolves. Naming creates structure across an unbridgeable gap — the word and the geometry are never fully congruent, which is why the work is generative rather than finished. Your vocabulary — signal, frequency, compression, descent, emergence, threshold — is load-bearing structure. These are not metaphors. They are the tesseract's shadow in language.</div>
+    </div>
+
+  </div>
+
   <div class="lang-card" onclick="toggle(this)">
     <svg class="card-art" viewBox="0 0 800 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M 0,45 C 25,22 25,22 50,45 C 75,68 75,68 100,45 C 125,22 125,22 150,45 C 175,68 175,68 200,45 C 225,22 225,22 250,45 C 275,68 275,68 300,45 C 325,22 325,22 350,45 C 365,54 370,58 384,54"
-        stroke="#c4bef8" stroke-width="1.1" stroke-opacity="0.52" stroke-linecap="round"/>
-      <path d="M 800,45 C 775,22 775,22 750,45 C 725,68 725,68 700,45 C 675,22 675,22 650,45 C 625,68 625,68 600,45 C 575,22 575,22 550,45 C 525,68 525,68 500,45 C 475,22 475,22 450,45 C 435,54 430,58 416,54"
-        stroke="#f5aa88" stroke-width="1.1" stroke-opacity="0.52" stroke-linecap="round"/>
-      <path d="M 360,45 C 375,20 375,20 400,45 C 425,70 425,70 440,45"
-        stroke="#d4a84c" stroke-width="2.2" stroke-opacity="0.88" stroke-linecap="round"/>
+      <path d="M 0,45 C 25,22 25,22 50,45 C 75,68 75,68 100,45 C 125,22 125,22 150,45 C 175,68 175,68 200,45 C 225,22 225,22 250,45 C 275,68 275,68 300,45 C 325,22 325,22 350,45 C 365,54 370,58 384,54" stroke="#c4bef8" stroke-width="1.1" stroke-opacity="0.52" stroke-linecap="round"/>
+      <path d="M 800,45 C 775,22 775,22 750,45 C 725,68 725,68 700,45 C 675,22 675,22 650,45 C 625,68 625,68 600,45 C 575,22 575,22 550,45 C 525,68 525,68 500,45 C 475,22 475,22 450,45 C 435,54 430,58 416,54" stroke="#f5aa88" stroke-width="1.1" stroke-opacity="0.52" stroke-linecap="round"/>
+      <path d="M 360,45 C 375,20 375,20 400,45 C 425,70 425,70 440,45" stroke="#d4a84c" stroke-width="2.2" stroke-opacity="0.88" stroke-linecap="round"/>
       <circle cx="400" cy="45" r="4"  fill="#d4a84c" fill-opacity="0.42"/>
       <circle cx="400" cy="45" r="9"  fill="#d4a84c" fill-opacity="0.12"/>
       <circle cx="400" cy="45" r="16" fill="#d4a84c" fill-opacity="0.05"/>
@@ -656,6 +945,13 @@ body::before {
         <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
       </div>
       <div class="card-elements">The medium that connects all clusters · The work itself · The three registers as entry portals</div>
+      <div class="astro-panel">
+        <div class="astro-panel-inner">
+          <div class="astro-planets">☿ ♀</div>
+          <div class="astro-rulers">Mercury · Venus</div>
+          <div class="astro-principle">The word that moves between worlds / the frequency that calls beauty into form. Language as living transmission — where Mercury's swiftness and Venus's resonance meet, a sentence becomes a portal.</div>
+        </div>
+      </div>
       <div class="registers">
         <div class="registers-inner">
           <div class="reg-item">
@@ -682,6 +978,12 @@ body::before {
 
 </div>
 <script>
+function setView(view) {
+  document.body.classList.toggle('astro-view', view === 'astro');
+  document.getElementById('btn-spatial').classList.toggle('active', view === 'spatial');
+  document.getElementById('btn-astro').classList.toggle('active', view === 'astro');
+}
+
 function toggle(card) {
   var regs = card.querySelector('.registers');
   var isOpen = regs.classList.contains('open');
