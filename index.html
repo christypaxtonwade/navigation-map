@@ -55,15 +55,15 @@ body::before {
 .page {
   position: relative;
   z-index: 1;
-  max-width: 820px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 4rem 2.5rem 5rem;
+  padding: 4rem 3rem 6rem;
 }
 
 /* ── Header ── */
 .header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
   opacity: 0;
   animation: fadeUp 0.9s ease forwards;
 }
@@ -79,7 +79,7 @@ body::before {
 
 .header-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(2.8rem, 6.5vw, 4.2rem);
+  font-size: clamp(3rem, 6vw, 4.8rem);
   font-weight: 300;
   font-style: italic;
   color: var(--text);
@@ -88,17 +88,17 @@ body::before {
 }
 
 .header-rule {
-  width: 48px;
+  width: 56px;
   height: 1px;
   background: var(--gold-dim);
-  margin: 1.25rem auto;
+  margin: 1.5rem auto;
 }
 
 .header-sub {
   font-size: 17px;
   font-weight: 300;
   color: var(--text-secondary);
-  max-width: 480px;
+  max-width: 600px;
   margin: 0 auto;
   line-height: 1.8;
 }
@@ -117,7 +117,7 @@ body::before {
   font-size: 15px;
   font-weight: 400;
   letter-spacing: 0.1em;
-  padding: 10px 30px;
+  padding: 11px 36px;
   border: 1px solid var(--border-hover);
   background: transparent;
   color: var(--text-secondary);
@@ -141,8 +141,8 @@ body::before {
 .axis-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  margin-bottom: 1.25rem;
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -158,36 +158,36 @@ body.astro-view .axis-card { border-color: rgba(212,168,76,0.22); }
   position: absolute;
   top: 0; left: 50%;
   transform: translateX(-50%);
-  width: 260px; height: 1px;
+  width: 320px; height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
-.axis-art  { padding: 1.5rem 2.5rem 0; }
-.axis-body { padding: 1.25rem 2.5rem 2rem; }
+.axis-art  { padding: 2rem 3rem 0; }
+.axis-body { padding: 1.5rem 3rem 2.5rem; }
 
 .axis-eyebrow {
   font-size: 15px;
   font-weight: 500;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   color: var(--gold);
   text-transform: uppercase;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.7rem;
 }
 
 .axis-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.9rem;
+  font-size: 2.2rem;
   font-weight: 400;
   color: var(--text);
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.7rem;
 }
 
 .axis-sub {
-  font-size: 16px;
+  font-size: 17px;
   color: var(--text-secondary);
-  line-height: 1.75;
-  max-width: 500px;
-  margin: 0 auto 1.5rem;
+  line-height: 1.8;
+  max-width: 620px;
+  margin: 0 auto 2rem;
 }
 
 .birds {
@@ -195,17 +195,18 @@ body.astro-view .axis-card { border-color: rgba(212,168,76,0.22); }
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+  gap: 0;
 }
 
-.bird-item { padding: 0.5rem 1.5rem; text-align: center; }
+.bird-item { padding: 0.6rem 2rem; text-align: center; }
 
 .bird-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 500;
   color: var(--text);
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 
 .bird-quality {
@@ -215,7 +216,7 @@ body.astro-view .axis-card { border-color: rgba(212,168,76,0.22); }
   letter-spacing: 0.06em;
 }
 
-.bird-divider { width: 1px; height: 38px; background: var(--border); flex-shrink: 0; }
+.bird-divider { width: 1px; height: 42px; background: var(--border); flex-shrink: 0; }
 
 /* Astro axis note */
 .astro-axis-note {
@@ -228,21 +229,21 @@ body.astro-view .axis-card { border-color: rgba(212,168,76,0.22); }
 }
 
 body.astro-view .astro-axis-note {
-  max-height: 140px;
+  max-height: 160px;
   opacity: 1;
-  margin-top: 1.25rem;
+  margin-top: 1.5rem;
 }
 
 .astro-axis-inner {
-  padding: 1rem 0 0.25rem;
+  padding: 1.25rem 0 0.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .astro-axis-glyphs {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   color: var(--gold);
   letter-spacing: 0.15em;
   line-height: 1;
@@ -251,24 +252,24 @@ body.astro-view .astro-axis-note {
 .astro-axis-label {
   font-size: 15px;
   color: var(--text-secondary);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
 }
 
 .astro-axis-principle {
-  font-size: 15px;
+  font-size: 16px;
   font-style: italic;
   font-family: 'Cormorant Garamond', serif;
   color: var(--text-dim);
-  line-height: 1.65;
-  max-width: 440px;
+  line-height: 1.7;
+  max-width: 560px;
 }
 
 /* ── Legend ── */
 .legend {
   display: flex;
   justify-content: center;
-  gap: 1.75rem;
-  margin-bottom: 1.25rem;
+  gap: 2.5rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
   opacity: 0;
   animation: fadeUp 0.9s ease 0.25s forwards;
@@ -277,14 +278,14 @@ body.astro-view .astro-axis-note {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   font-size: 15px;
   color: var(--text-secondary);
   font-weight: 300;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
-.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .legend-dot.m { background: var(--mythic); opacity: 0.85; }
 .legend-dot.c { background: var(--conceptual); opacity: 0.85; }
 .legend-dot.s { background: var(--somatic); opacity: 0.85; }
@@ -293,15 +294,15 @@ body.astro-view .astro-axis-note {
 .cluster-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 /* ── Cards ── */
 .cluster-card, .lang-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
   transition: border-color 0.25s, background 0.25s;
@@ -317,41 +318,41 @@ body.astro-view .astro-axis-note {
 .cluster-card:hover, .lang-card:hover { border-color: var(--border-hover); background: var(--surface-2); }
 .cluster-card.open,  .lang-card.open  { border-color: var(--border-hover); background: var(--surface-2); }
 
-.lang-card { animation-delay: 0.8s; margin-bottom: 10px; }
+.lang-card { animation-delay: 0.8s; margin-bottom: 14px; }
 
-.card-art { width: 100%; height: 90px; display: block; border-bottom: 1px solid var(--border); }
-.card-body { padding: 1.25rem 1.5rem; }
+.card-art { width: 100%; height: 110px; display: block; border-bottom: 1px solid var(--border); }
+.card-body { padding: 1.6rem 1.8rem; }
 
 .card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 7px;
+  gap: 16px;
+  margin-bottom: 8px;
 }
 
 .card-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.3rem;
+  font-size: 1.45rem;
   font-weight: 500;
   color: var(--text);
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .card-chevron {
-  width: 24px; height: 24px;
+  width: 26px; height: 26px;
   border-radius: 50%;
   border: 1px solid var(--border-hover);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: 3px;
   transition: border-color 0.3s;
 }
 
 .card-chevron svg {
-  width: 10px; height: 10px;
+  width: 11px; height: 11px;
   stroke: var(--gold); fill: none;
   transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
 }
@@ -364,7 +365,7 @@ body.astro-view .astro-axis-note {
   font-weight: 300;
   color: var(--text-dim);
   letter-spacing: 0.03em;
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 /* ── Astro panel ── */
@@ -378,15 +379,15 @@ body.astro-view .astro-axis-note {
 }
 
 body.astro-view .astro-panel {
-  max-height: 180px;
+  max-height: 220px;
   opacity: 1;
-  margin-top: 0.85rem;
+  margin-top: 1rem;
 }
 
-.astro-panel-inner { padding: 0.85rem 0 0; }
+.astro-panel-inner { padding: 1rem 0 0; }
 
 .astro-planets {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   color: var(--gold);
   letter-spacing: 0.14em;
   line-height: 1;
@@ -397,16 +398,16 @@ body.astro-view .astro-panel {
   font-size: 15px;
   font-weight: 400;
   color: var(--text-dim);
-  letter-spacing: 0.06em;
-  margin-bottom: 6px;
+  letter-spacing: 0.07em;
+  margin-bottom: 8px;
 }
 
 .astro-principle {
-  font-size: 15px;
+  font-size: 16px;
   font-style: italic;
   font-family: 'Cormorant Garamond', serif;
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
 /* ── Registers ── */
@@ -417,32 +418,36 @@ body.astro-view .astro-panel {
   transition: max-height 0.55s cubic-bezier(0.4,0,0.2,1), opacity 0.45s ease;
 }
 
-.registers.open { max-height: 900px; opacity: 1; }
+.registers.open { max-height: 1000px; opacity: 1; }
 
 .registers-inner {
   border-top: 1px solid rgba(255,255,255,0.05);
-  padding-top: 1rem;
-  margin-top: 1rem;
+  padding-top: 1.1rem;
+  margin-top: 1.1rem;
 }
 
 .reg-item {
   display: flex;
-  gap: 1rem;
-  padding: 0.75rem 0;
+  gap: 1.25rem;
+  padding: 0.9rem 0;
   border-bottom: 1px solid rgba(255,255,255,0.03);
 }
 
 .reg-item:last-child  { border-bottom: none; padding-bottom: 0; }
 .reg-item:first-child { padding-top: 0; }
 
-.reg-label-col { flex-shrink: 0; width: 90px; padding-top: 2px; }
+.reg-label-col {
+  flex-shrink: 0;
+  width: 110px;
+  padding-top: 3px;
+}
 
 .reg-label {
   font-size: 15px;
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 20px;
   display: inline-block;
   white-space: nowrap;
@@ -453,10 +458,10 @@ body.astro-view .astro-panel {
 .s-label { background: var(--somatic-bg);    color: var(--somatic);    border: 1px solid rgba(245,170,136,0.22); }
 
 .reg-text {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 300;
   color: var(--text-secondary);
-  line-height: 1.8;
+  line-height: 1.85;
 }
 
 /* ── Aspects section ── */
@@ -469,64 +474,67 @@ body.astro-view .astro-panel {
 }
 
 body.astro-view .aspects-section {
-  max-height: 2600px;
+  max-height: 3000px;
   opacity: 1;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .aspects-header {
   text-align: center;
   font-size: 15px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   color: var(--gold);
   text-transform: uppercase;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   padding-top: 4px;
 }
 
 .aspect-thread {
   background: var(--surface);
   border: 1px solid rgba(212,168,76,0.1);
-  border-radius: 12px;
-  padding: 1.1rem 1.5rem;
-  margin-bottom: 8px;
+  border-radius: 14px;
+  padding: 1.4rem 2rem;
+  margin-bottom: 10px;
 }
 
 .aspect-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.7rem;
+  gap: 1.5rem;
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
 }
 
 .aspect-from {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 500;
   color: var(--text);
   flex: 1;
+  min-width: 160px;
 }
 
 .aspect-to {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 500;
   color: var(--text);
   flex: 1;
   text-align: right;
+  min-width: 160px;
 }
 
 .aspect-center {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   flex-shrink: 0;
 }
 
 .aspect-glyph {
-  font-size: 1.8rem;
+  font-size: 2rem;
   color: var(--gold);
   line-height: 1;
 }
@@ -534,33 +542,33 @@ body.astro-view .aspects-section {
 .aspect-name {
   font-size: 15px;
   color: var(--text-dim);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
 .aspect-description {
-  font-size: 15px;
+  font-size: 16px;
   font-style: italic;
   font-family: 'Cormorant Garamond', serif;
   color: var(--text-secondary);
-  line-height: 1.75;
+  line-height: 1.85;
   border-top: 1px solid rgba(255,255,255,0.04);
-  padding-top: 0.7rem;
+  padding-top: 0.85rem;
 }
 
 /* ── Footer ── */
 .map-footer {
   text-align: center;
-  margin-top: 2.5rem;
+  margin-top: 3rem;
   opacity: 0;
   animation: fadeUp 0.9s ease 1s forwards;
 }
 
-.footer-rule { width: 32px; height: 1px; background: var(--border); margin: 0 auto 1rem; }
+.footer-rule { width: 36px; height: 1px; background: var(--border); margin: 0 auto 1.1rem; }
 
 .footer-note {
-  font-size: 15px;
+  font-size: 16px;
   color: var(--text-dim);
   font-style: italic;
   font-family: 'Cormorant Garamond', serif;
@@ -573,18 +581,25 @@ body.astro-view .aspects-section {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Tablet ── */
+@media (max-width: 900px) {
+  .page { padding: 3rem 2rem 5rem; }
+  .cluster-grid { gap: 10px; }
+  .card-body { padding: 1.4rem 1.5rem; }
+}
+
 /* ── Mobile ── */
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .page { padding: 2.5rem 1.25rem 4rem; }
   .cluster-grid { grid-template-columns: 1fr; }
   .birds { flex-direction: column; gap: 0.5rem; }
-  .bird-divider { width: 32px; height: 1px; }
+  .bird-divider { width: 40px; height: 1px; }
   .reg-item { flex-direction: column; gap: 0.5rem; }
   .reg-label-col { width: auto; }
   .axis-body, .axis-art { padding-left: 1.25rem; padding-right: 1.25rem; }
-  .aspect-row { flex-wrap: wrap; }
   .aspect-from, .aspect-to { flex: 100%; text-align: left; }
   .aspect-center { flex-direction: row; gap: 10px; margin: 4px 0; }
+  .aspect-to { text-align: left; }
 }
 </style>
 </head>
@@ -605,23 +620,23 @@ body.astro-view .aspects-section {
 
   <div class="axis-card">
     <div class="axis-art">
-      <svg width="100%" viewBox="0 0 680 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <line x1="40" y1="72" x2="640" y2="72" stroke="#d4a84c" stroke-width="0.4" stroke-opacity="0.15"/>
-        <path d="M 128 56 C 112 46 94 42 78 46 C 94 50 110 53 128 56 Z" fill="#d4a84c" fill-opacity="0.58"/>
-        <path d="M 128 56 C 112 65 100 70 86 70 C 100 66 113 62 128 56 Z" fill="#d4a84c" fill-opacity="0.32"/>
-        <line x1="128" y1="56" x2="152" y2="48" stroke="#d4a84c" stroke-width="1.2" stroke-opacity="0.5" stroke-linecap="round"/>
-        <path d="M 326 44 C 314 37 304 35 296 37 C 304 40 314 43 326 44 Z" fill="#d4a84c" fill-opacity="0.48"/>
-        <path d="M 326 44 C 317 50 310 53 302 53 C 310 50 318 48 326 44 Z" fill="#d4a84c" fill-opacity="0.26"/>
-        <line x1="326" y1="44" x2="342" y2="39" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.4" stroke-linecap="round"/>
-        <path d="M 548 40 C 534 31 522 27 514 29 C 522 33 534 38 548 40 Z" fill="#f5aa88" fill-opacity="0.62"/>
-        <path d="M 548 40 C 538 47 531 51 522 51 C 530 47 539 44 548 40 Z" fill="#f5aa88" fill-opacity="0.34"/>
-        <line x1="548" y1="40" x2="564" y2="33" stroke="#f5aa88" stroke-width="0.9" stroke-opacity="0.45" stroke-linecap="round"/>
-        <path d="M 152 51 Q 236 24 296 40 Q 390 58 514 34" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.18" stroke-dasharray="4 7"/>
-        <circle cx="204" cy="30" r="0.9" fill="#d4a84c" fill-opacity="0.22"/>
-        <circle cx="430" cy="20" r="0.8" fill="#d4a84c" fill-opacity="0.18"/>
-        <circle cx="480" cy="62" r="1"   fill="#d4a84c" fill-opacity="0.14"/>
-        <circle cx="62"  cy="42" r="0.8" fill="#d4a84c" fill-opacity="0.18"/>
-        <circle cx="624" cy="52" r="1"   fill="#f5aa88" fill-opacity="0.2"/>
+      <svg width="100%" viewBox="0 0 900 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="40" y1="74" x2="860" y2="74" stroke="#d4a84c" stroke-width="0.4" stroke-opacity="0.15"/>
+        <path d="M 160 58 C 140 46 118 42 98 46 C 118 51 138 55 160 58 Z" fill="#d4a84c" fill-opacity="0.58"/>
+        <path d="M 160 58 C 140 67 126 72 106 72 C 124 67 141 63 160 58 Z" fill="#d4a84c" fill-opacity="0.32"/>
+        <line x1="160" y1="58" x2="188" y2="49" stroke="#d4a84c" stroke-width="1.3" stroke-opacity="0.5" stroke-linecap="round"/>
+        <path d="M 432 46 C 418 38 406 35 396 37 C 406 41 418 44 432 46 Z" fill="#d4a84c" fill-opacity="0.48"/>
+        <path d="M 432 46 C 420 53 412 57 402 57 C 412 53 421 50 432 46 Z" fill="#d4a84c" fill-opacity="0.26"/>
+        <line x1="432" y1="46" x2="450" y2="40" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.4" stroke-linecap="round"/>
+        <path d="M 720 40 C 704 30 690 26 680 28 C 690 32 704 37 720 40 Z" fill="#f5aa88" fill-opacity="0.62"/>
+        <path d="M 720 40 C 708 48 700 52 690 52 C 699 48 709 45 720 40 Z" fill="#f5aa88" fill-opacity="0.34"/>
+        <line x1="720" y1="40" x2="738" y2="33" stroke="#f5aa88" stroke-width="0.9" stroke-opacity="0.45" stroke-linecap="round"/>
+        <path d="M 188 52 Q 300 24 396 40 Q 520 60 680 32" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.18" stroke-dasharray="4 8"/>
+        <circle cx="270" cy="28" r="0.9" fill="#d4a84c" fill-opacity="0.2"/>
+        <circle cx="570" cy="20" r="0.8" fill="#d4a84c" fill-opacity="0.17"/>
+        <circle cx="630" cy="64" r="1"   fill="#d4a84c" fill-opacity="0.13"/>
+        <circle cx="72"  cy="44" r="0.8" fill="#d4a84c" fill-opacity="0.17"/>
+        <circle cx="820" cy="54" r="1"   fill="#f5aa88" fill-opacity="0.2"/>
       </svg>
     </div>
     <div class="axis-body">
@@ -662,28 +677,31 @@ body.astro-view .aspects-section {
 
   <div class="cluster-grid">
 
+    <!-- Structural models -->
     <div class="cluster-card" onclick="toggle(this)">
-      <svg class="card-art" viewBox="0 0 400 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polygon points="200,10 238,32 238,68 200,88 162,68 162,32" stroke="#d4a84c" stroke-width="0.8" stroke-opacity="0.42" fill="none"/>
-        <polygon points="200,28 220,39 220,61 200,72 180,61 180,39" stroke="#d4a84c" stroke-width="0.7" stroke-opacity="0.28" fill="none"/>
-        <line x1="200" y1="10" x2="200" y2="28" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
-        <line x1="238" y1="32" x2="220" y2="39" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
-        <line x1="238" y1="68" x2="220" y2="61" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
-        <line x1="200" y1="88" x2="200" y2="72" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
-        <line x1="162" y1="68" x2="180" y2="61" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
-        <line x1="162" y1="32" x2="180" y2="39" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
-        <line x1="200" y1="10" x2="200" y2="50" stroke="#d4a84c" stroke-width="0.35" stroke-opacity="0.14"/>
-        <line x1="238" y1="32" x2="200" y2="50" stroke="#d4a84c" stroke-width="0.35" stroke-opacity="0.14"/>
-        <line x1="162" y1="32" x2="200" y2="50" stroke="#d4a84c" stroke-width="0.35" stroke-opacity="0.14"/>
-        <circle cx="200" cy="50" r="2.5" fill="#d4a84c" fill-opacity="0.55"/>
-        <circle cx="200" cy="10" r="1.5" fill="#d4a84c" fill-opacity="0.38"/>
-        <circle cx="238" cy="32" r="1.5" fill="#d4a84c" fill-opacity="0.38"/>
-        <circle cx="238" cy="68" r="1.5" fill="#d4a84c" fill-opacity="0.38"/>
-        <circle cx="200" cy="88" r="1.5" fill="#d4a84c" fill-opacity="0.38"/>
-        <circle cx="162" cy="68" r="1.5" fill="#d4a84c" fill-opacity="0.38"/>
-        <circle cx="162" cy="32" r="1.5" fill="#d4a84c" fill-opacity="0.38"/>
-        <circle cx="88"  cy="45" r="0.9" fill="#d4a84c" fill-opacity="0.18"/>
-        <circle cx="312" cy="28" r="0.9" fill="#d4a84c" fill-opacity="0.18"/>
+      <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="280,10 326,36 326,82 280,108 234,82 234,36" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.42" fill="none"/>
+        <polygon points="280,32 304,45 304,73 280,86 256,73 256,45" stroke="#d4a84c" stroke-width="0.7" stroke-opacity="0.28" fill="none"/>
+        <line x1="280" y1="10" x2="280" y2="32" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
+        <line x1="326" y1="36" x2="304" y2="45" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
+        <line x1="326" y1="82" x2="304" y2="73" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
+        <line x1="280" y1="108" x2="280" y2="86" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
+        <line x1="234" y1="82" x2="256" y2="73" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
+        <line x1="234" y1="36" x2="256" y2="45" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
+        <line x1="280" y1="10" x2="280" y2="59" stroke="#d4a84c" stroke-width="0.35" stroke-opacity="0.14"/>
+        <line x1="326" y1="36" x2="280" y2="59" stroke="#d4a84c" stroke-width="0.35" stroke-opacity="0.14"/>
+        <line x1="234" y1="36" x2="280" y2="59" stroke="#d4a84c" stroke-width="0.35" stroke-opacity="0.14"/>
+        <circle cx="280" cy="59" r="3"   fill="#d4a84c" fill-opacity="0.55"/>
+        <circle cx="280" cy="10" r="1.8" fill="#d4a84c" fill-opacity="0.38"/>
+        <circle cx="326" cy="36" r="1.8" fill="#d4a84c" fill-opacity="0.38"/>
+        <circle cx="326" cy="82" r="1.8" fill="#d4a84c" fill-opacity="0.38"/>
+        <circle cx="280" cy="108" r="1.8" fill="#d4a84c" fill-opacity="0.38"/>
+        <circle cx="234" cy="82" r="1.8" fill="#d4a84c" fill-opacity="0.38"/>
+        <circle cx="234" cy="36" r="1.8" fill="#d4a84c" fill-opacity="0.38"/>
+        <circle cx="100" cy="55" r="1"   fill="#d4a84c" fill-opacity="0.16"/>
+        <circle cx="460" cy="35" r="1"   fill="#d4a84c" fill-opacity="0.16"/>
+        <circle cx="500" cy="75" r="0.8" fill="#d4a84c" fill-opacity="0.12"/>
+        <circle cx="60"  cy="70" r="0.8" fill="#d4a84c" fill-opacity="0.12"/>
       </svg>
       <div class="card-body">
         <div class="card-header">
@@ -717,16 +735,21 @@ body.astro-view .aspects-section {
       </div>
     </div>
 
+    <!-- Anomalous reception -->
     <div class="cluster-card" onclick="toggle(this)">
-      <svg class="card-art" viewBox="0 0 400 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polyline points="20,62 75,62 85,60 95,62 115,62 135,62 145,61 155,62 168,62" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.32"/>
-        <polyline points="168,62 176,57 182,42 186,25 190,14 194,8 198,6 202,6 206,9 210,16 214,28 218,44 222,57 230,62" stroke="#c4bef8" stroke-width="1.2" stroke-opacity="0.75"/>
-        <polyline points="194,8 200,6 206,9" stroke="#c4bef8" stroke-width="2.5" stroke-opacity="1"/>
-        <polyline points="230,62 245,62 258,61 270,62 290,62 308,62 318,61 330,62 348,62 368,62 378,61 395,62" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.32"/>
-        <circle cx="200" cy="6"  r="3"   fill="#c4bef8" fill-opacity="0.32"/>
-        <circle cx="58"  cy="32" r="1"   fill="#c4bef8" fill-opacity="0.2"/>
-        <circle cx="322" cy="28" r="0.8" fill="#c4bef8" fill-opacity="0.2"/>
-        <circle cx="374" cy="42" r="1"   fill="#c4bef8" fill-opacity="0.15"/>
+      <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polyline points="20,76 90,76 104,73 118,76 142,76 168,76 180,74 192,76 210,76" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.32"/>
+        <polyline points="210,76 221,69 229,52 234,32 237,18 240,10 243,8 247,8 250,11 253,20 256,36 259,54 264,70 274,76" stroke="#c4bef8" stroke-width="1.3" stroke-opacity="0.75"/>
+        <polyline points="240,10 247,8 253,20" stroke="#c4bef8" stroke-width="2.8" stroke-opacity="1"/>
+        <polyline points="274,76 292,76 308,74 322,76 348,76 372,76 384,74 396,76 420,76 446,76 460,74 480,76 520,76 540,76" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.32"/>
+        <path d="M 247 76 A 40 25 0 0 0 207 76" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.14" fill="none"/>
+        <path d="M 247 76 A 72 46 0 0 0 175 76" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.09" fill="none"/>
+        <path d="M 247 76 A 106 64 0 0 0 141 76" stroke="#c4bef8" stroke-width="0.35" stroke-opacity="0.06" fill="none"/>
+        <circle cx="247" cy="8"  r="3.5" fill="#c4bef8" fill-opacity="0.32"/>
+        <circle cx="70"  cy="38" r="1"   fill="#c4bef8" fill-opacity="0.18"/>
+        <circle cx="420" cy="34" r="0.9" fill="#c4bef8" fill-opacity="0.18"/>
+        <circle cx="490" cy="52" r="1"   fill="#c4bef8" fill-opacity="0.14"/>
+        <circle cx="50"  cy="60" r="0.8" fill="#c4bef8" fill-opacity="0.14"/>
       </svg>
       <div class="card-body">
         <div class="card-header">
@@ -760,23 +783,26 @@ body.astro-view .aspects-section {
       </div>
     </div>
 
+    <!-- Threshold events -->
     <div class="cluster-card" onclick="toggle(this)">
-      <svg class="card-art" viewBox="0 0 400 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <line x1="160" y1="88" x2="160" y2="46" stroke="#6dd8b2" stroke-width="1" stroke-opacity="0.58"/>
-        <line x1="240" y1="88" x2="240" y2="46" stroke="#6dd8b2" stroke-width="1" stroke-opacity="0.58"/>
-        <path d="M 160 46 A 40 40 0 0 1 240 46" stroke="#6dd8b2" stroke-width="1" stroke-opacity="0.58"/>
-        <line x1="160" y1="84" x2="240" y2="84" stroke="#6dd8b2" stroke-width="0.8" stroke-opacity="0.35"/>
-        <line x1="200" y1="46" x2="200" y2="16" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.32"/>
-        <line x1="200" y1="46" x2="183" y2="22" stroke="#6dd8b2" stroke-width="0.5" stroke-opacity="0.2"/>
-        <line x1="200" y1="46" x2="217" y2="22" stroke="#6dd8b2" stroke-width="0.5" stroke-opacity="0.2"/>
-        <line x1="200" y1="46" x2="168" y2="28" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.13"/>
-        <line x1="200" y1="46" x2="232" y2="28" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.13"/>
-        <circle cx="200" cy="16" r="2.5" fill="#6dd8b2" fill-opacity="0.45"/>
-        <circle cx="200" cy="46" r="2"   fill="#6dd8b2" fill-opacity="0.58"/>
-        <line x1="60"  y1="84" x2="160" y2="84" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.14"/>
-        <line x1="240" y1="84" x2="340" y2="84" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.14"/>
-        <circle cx="82"  cy="52" r="0.8" fill="#6dd8b2" fill-opacity="0.18"/>
-        <circle cx="318" cy="46" r="0.8" fill="#6dd8b2" fill-opacity="0.18"/>
+      <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="210" y1="106" x2="210" y2="56" stroke="#6dd8b2" stroke-width="1.1" stroke-opacity="0.58"/>
+        <line x1="350" y1="106" x2="350" y2="56" stroke="#6dd8b2" stroke-width="1.1" stroke-opacity="0.58"/>
+        <path d="M 210 56 A 70 70 0 0 1 350 56" stroke="#6dd8b2" stroke-width="1.1" stroke-opacity="0.58"/>
+        <line x1="210" y1="100" x2="350" y2="100" stroke="#6dd8b2" stroke-width="0.9" stroke-opacity="0.35"/>
+        <line x1="280" y1="56" x2="280" y2="18" stroke="#6dd8b2" stroke-width="0.7" stroke-opacity="0.32"/>
+        <line x1="280" y1="56" x2="254" y2="28" stroke="#6dd8b2" stroke-width="0.55" stroke-opacity="0.2"/>
+        <line x1="280" y1="56" x2="306" y2="28" stroke="#6dd8b2" stroke-width="0.55" stroke-opacity="0.2"/>
+        <line x1="280" y1="56" x2="226" y2="36" stroke="#6dd8b2" stroke-width="0.45" stroke-opacity="0.13"/>
+        <line x1="280" y1="56" x2="334" y2="36" stroke="#6dd8b2" stroke-width="0.45" stroke-opacity="0.13"/>
+        <circle cx="280" cy="18" r="3"   fill="#6dd8b2" fill-opacity="0.45"/>
+        <circle cx="280" cy="56" r="2.5" fill="#6dd8b2" fill-opacity="0.58"/>
+        <line x1="80"  y1="100" x2="210" y2="100" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.14"/>
+        <line x1="350" y1="100" x2="480" y2="100" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.14"/>
+        <circle cx="108" cy="64" r="0.9" fill="#6dd8b2" fill-opacity="0.18"/>
+        <circle cx="452" cy="58" r="0.9" fill="#6dd8b2" fill-opacity="0.18"/>
+        <circle cx="130" cy="84" r="0.7" fill="#6dd8b2" fill-opacity="0.14"/>
+        <circle cx="430" cy="80" r="0.7" fill="#6dd8b2" fill-opacity="0.14"/>
       </svg>
       <div class="card-body">
         <div class="card-header">
@@ -810,21 +836,23 @@ body.astro-view .aspects-section {
       </div>
     </div>
 
+    <!-- Embodied signal -->
     <div class="cluster-card" onclick="toggle(this)">
-      <svg class="card-art" viewBox="0 0 400 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M 74 64 Q 142 22 200 38 Q 268 56 330 28" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.18" stroke-dasharray="4 7"/>
-        <path d="M 116 58 C 98 46 80 42 64 46 C 80 50 97 54 116 58 Z" fill="#d4a84c" fill-opacity="0.58"/>
-        <path d="M 116 58 C 100 67 88 72 74 72 C 88 68 101 64 116 58 Z" fill="#d4a84c" fill-opacity="0.32"/>
-        <line x1="116" y1="58" x2="140" y2="50" stroke="#d4a84c" stroke-width="1.2" stroke-opacity="0.48" stroke-linecap="round"/>
-        <path d="M 208 40 C 197 33 187 31 180 33 C 187 36 197 39 208 40 Z" fill="#d4a84c" fill-opacity="0.48"/>
-        <path d="M 208 40 C 199 46 193 49 186 49 C 193 46 200 44 208 40 Z" fill="#d4a84c" fill-opacity="0.26"/>
-        <line x1="208" y1="40" x2="222" y2="35" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.38" stroke-linecap="round"/>
-        <path d="M 316 34 C 303 25 292 22 284 24 C 292 27 303 31 316 34 Z" fill="#f5aa88" fill-opacity="0.62"/>
-        <path d="M 316 34 C 307 41 300 45 292 45 C 299 42 307 39 316 34 Z" fill="#f5aa88" fill-opacity="0.34"/>
-        <line x1="316" y1="34" x2="330" y2="27" stroke="#f5aa88" stroke-width="0.9" stroke-opacity="0.45" stroke-linecap="round"/>
-        <line x1="40" y1="80" x2="360" y2="80" stroke="#d4a84c" stroke-width="0.4" stroke-opacity="0.1"/>
-        <circle cx="52"  cy="36" r="0.8" fill="#d4a84c" fill-opacity="0.18"/>
-        <circle cx="358" cy="50" r="1"   fill="#f5aa88" fill-opacity="0.2"/>
+      <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 90 80 Q 192 28 280 46 Q 380 68 470 34" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.18" stroke-dasharray="4 8"/>
+        <path d="M 150 70 C 128 56 106 52 84 56 C 106 61 126 66 150 70 Z" fill="#d4a84c" fill-opacity="0.58"/>
+        <path d="M 150 70 C 128 80 114 86 94 86 C 112 82 130 77 150 70 Z" fill="#d4a84c" fill-opacity="0.32"/>
+        <line x1="150" y1="70" x2="180" y2="61" stroke="#d4a84c" stroke-width="1.3" stroke-opacity="0.48" stroke-linecap="round"/>
+        <path d="M 288 48 C 274 40 262 37 254 40 C 262 43 274 46 288 48 Z" fill="#d4a84c" fill-opacity="0.48"/>
+        <path d="M 288 48 C 276 55 268 59 260 59 C 268 56 277 53 288 48 Z" fill="#d4a84c" fill-opacity="0.26"/>
+        <line x1="288" y1="48" x2="306" y2="42" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.38" stroke-linecap="round"/>
+        <path d="M 446 40 C 430 30 416 26 406 28 C 416 32 430 37 446 40 Z" fill="#f5aa88" fill-opacity="0.62"/>
+        <path d="M 446 40 C 434 49 424 53 414 53 C 423 50 434 46 446 40 Z" fill="#f5aa88" fill-opacity="0.34"/>
+        <line x1="446" y1="40" x2="464" y2="32" stroke="#f5aa88" stroke-width="0.9" stroke-opacity="0.45" stroke-linecap="round"/>
+        <line x1="50"  y1="96" x2="510" y2="96" stroke="#d4a84c" stroke-width="0.4" stroke-opacity="0.1"/>
+        <circle cx="64"  cy="44" r="0.9" fill="#d4a84c" fill-opacity="0.17"/>
+        <circle cx="500" cy="60" r="1"   fill="#f5aa88" fill-opacity="0.18"/>
+        <circle cx="214" cy="26" r="0.8" fill="#d4a84c" fill-opacity="0.16"/>
       </svg>
       <div class="card-body">
         <div class="card-header">
@@ -860,6 +888,7 @@ body.astro-view .aspects-section {
 
   </div>
 
+  <!-- Aspects -->
   <div class="aspects-section">
     <div class="aspects-header">Connective threads · Aspect qualities</div>
 
@@ -925,19 +954,20 @@ body.astro-view .aspects-section {
 
   </div>
 
+  <!-- Resonance in language -->
   <div class="lang-card" onclick="toggle(this)">
-    <svg class="card-art" viewBox="0 0 800 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M 0,45 C 25,22 25,22 50,45 C 75,68 75,68 100,45 C 125,22 125,22 150,45 C 175,68 175,68 200,45 C 225,22 225,22 250,45 C 275,68 275,68 300,45 C 325,22 325,22 350,45 C 365,54 370,58 384,54" stroke="#c4bef8" stroke-width="1.1" stroke-opacity="0.52" stroke-linecap="round"/>
-      <path d="M 800,45 C 775,22 775,22 750,45 C 725,68 725,68 700,45 C 675,22 675,22 650,45 C 625,68 625,68 600,45 C 575,22 575,22 550,45 C 525,68 525,68 500,45 C 475,22 475,22 450,45 C 435,54 430,58 416,54" stroke="#f5aa88" stroke-width="1.1" stroke-opacity="0.52" stroke-linecap="round"/>
-      <path d="M 360,45 C 375,20 375,20 400,45 C 425,70 425,70 440,45" stroke="#d4a84c" stroke-width="2.2" stroke-opacity="0.88" stroke-linecap="round"/>
-      <circle cx="400" cy="45" r="4"  fill="#d4a84c" fill-opacity="0.42"/>
-      <circle cx="400" cy="45" r="9"  fill="#d4a84c" fill-opacity="0.12"/>
-      <circle cx="400" cy="45" r="16" fill="#d4a84c" fill-opacity="0.05"/>
-      <line x1="0" y1="45" x2="800" y2="45" stroke="#d4a84c" stroke-width="0.3" stroke-opacity="0.08"/>
-      <circle cx="82"  cy="20" r="0.8" fill="#c4bef8" fill-opacity="0.2"/>
-      <circle cx="164" cy="70" r="0.8" fill="#c4bef8" fill-opacity="0.2"/>
-      <circle cx="708" cy="20" r="0.8" fill="#f5aa88" fill-opacity="0.2"/>
-      <circle cx="634" cy="70" r="0.8" fill="#f5aa88" fill-opacity="0.2"/>
+    <svg class="card-art" viewBox="0 0 1100 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 0,55 C 30,28 30,28 60,55 C 90,82 90,82 120,55 C 150,28 150,28 180,55 C 210,82 210,82 240,55 C 270,28 270,28 300,55 C 330,82 330,82 360,55 C 390,28 390,28 420,55 C 440,66 448,72 468,67" stroke="#c4bef8" stroke-width="1.2" stroke-opacity="0.52" stroke-linecap="round"/>
+      <path d="M 1100,55 C 1070,28 1070,28 1040,55 C 1010,82 1010,82 980,55 C 950,28 950,28 920,55 C 890,82 890,82 860,55 C 830,28 830,28 800,55 C 770,82 770,82 740,55 C 710,28 710,28 680,55 C 660,66 652,72 632,67" stroke="#f5aa88" stroke-width="1.2" stroke-opacity="0.52" stroke-linecap="round"/>
+      <path d="M 440,55 C 462,24 462,24 550,55 C 638,86 638,86 660,55" stroke="#d4a84c" stroke-width="2.5" stroke-opacity="0.88" stroke-linecap="round"/>
+      <circle cx="550" cy="55" r="5"  fill="#d4a84c" fill-opacity="0.42"/>
+      <circle cx="550" cy="55" r="12" fill="#d4a84c" fill-opacity="0.12"/>
+      <circle cx="550" cy="55" r="22" fill="#d4a84c" fill-opacity="0.05"/>
+      <line x1="0" y1="55" x2="1100" y2="55" stroke="#d4a84c" stroke-width="0.3" stroke-opacity="0.08"/>
+      <circle cx="100" cy="24" r="0.9" fill="#c4bef8" fill-opacity="0.2"/>
+      <circle cx="200" cy="86" r="0.9" fill="#c4bef8" fill-opacity="0.2"/>
+      <circle cx="970" cy="24" r="0.9" fill="#f5aa88" fill-opacity="0.2"/>
+      <circle cx="870" cy="86" r="0.9" fill="#f5aa88" fill-opacity="0.2"/>
     </svg>
     <div class="card-body">
       <div class="card-header">
