@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Ancestral Weaving — Christy Paxton Wade</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #07080d;
+  --surface: #0f1018;
+  --surface-2: #161720;
+  --border: rgba(180,155,100,0.12);
+  --border-hover: rgba(180,155,100,0.24);
+  --gold: #c9a87c;
+  --gold-bright: #dfc090;
+  --gold-dim: rgba(201,168,124,0.35);
+  --text: #ede8dc;
+  --text-secondary: #c8c0b0;
+  --text-dim: #8a8478;
+  --text-faint: #4e4c46;
+  --mythic: #c4bef8;
+  --conceptual: #6dd8b2;
+  --somatic: #f5aa88;
+  --sigil: rgba(201,168,124,0.06);
+  --timeline: rgba(180,155,100,0.18);
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(180,155,100,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(180,155,100,0.018) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+}
+.page {
+  position: relative; z-index: 1;
+  max-width: 1100px; margin: 0 auto;
+  padding: 4rem 3rem 7rem;
+}
+.header {
+  text-align: center; margin-bottom: 3.5rem;
+  opacity: 0; animation: fadeUp 1s ease forwards;
+}
+.header-eyebrow {
+  font-size: 15px; font-weight: 400;
+  letter-spacing: 0.22em; color: var(--gold);
+  text-transform: uppercase; margin-bottom: 1.25rem;
+}
+.header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 300; font-style: italic;
+  color: var(--text); line-height: 1.0;
+  letter-spacing: -0.01em;
+}
+.header-rule {
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 1.75rem auto;
+}
+.header-sub {
+  font-size: 17px; font-weight: 300;
+  color: var(--text-secondary);
+  max-width: 580px; margin: 0 auto 1rem; line-height: 1.85;
+}
+.triquetra-note {
+  font-size: 15px; font-style: italic;
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--text-dim); margin-bottom: 1.5rem;
+  letter-spacing: 0.02em;
+}
+.header-link {
+  display: inline-block; font-size: 15px; font-weight: 400;
+  color: var(--gold); letter-spacing: 0.08em;
+  text-decoration: none; border-bottom: 1px solid var(--gold-dim);
+  padding-bottom: 2px; transition: color 0.2s, border-color 0.2s;
+}
+.header-link:hover { color: var(--gold-bright); border-color: var(--gold); }
+.legend {
+  display: flex; justify-content: center;
+  gap: 1.75rem; margin-bottom: 5rem; flex-wrap: wrap;
+  opacity: 0; animation: fadeUp 1s ease 0.1s forwards;
+}
+.legend-item {
+  display: flex; align-items: center;
+  gap: 8px; font-size: 15px;
+  color: var(--text-secondary); letter-spacing: 0.04em;
+}
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-dot.terroir    { background: var(--gold); opacity: 0.7; }
+.legend-dot.unresolved { background: var(--somatic); opacity: 0.7; }
+.legend-dot.thread     { background: var(--mythic); opacity: 0.7; }
+.legend-dot.lineage    { background: var(--conceptual); opacity: 0.7; }
+.legend-dot.sigil      { background: var(--gold-bright); opacity: 0.6; }
+
+/* Timeline */
+.timeline { position: relative; padding-left: 3rem; }
+.timeline::before {
+  content: ''; position: absolute;
+  left: 0; top: 0; bottom: 0; width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--timeline) 5%, var(--timeline) 95%, transparent);
+}
+
+/* Ancestor */
+.ancestor {
+  position: relative; margin-bottom: 5rem;
+  opacity: 0; animation: fadeUp 1s ease forwards;
+}
+.ancestor::before {
+  content: ''; position: absolute;
+  left: -3rem; top: 1.6rem;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--gold); opacity: 0.5;
+  transform: translateX(-4px);
+}
+.ancestor-date {
+  position: absolute; left: -3rem; top: 0;
+  transform: translateX(-100%) translateX(-16px);
+  font-size: 15px; font-weight: 300; color: var(--text-faint);
+  letter-spacing: 0.05em; white-space: nowrap;
+  text-align: right; width: 130px; padding-top: 1.4rem;
+}
+.ancestor-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+  transition: border-color 0.3s;
+}
+.ancestor-card:hover { border-color: var(--border-hover); }
+.ancestor-header {
+  padding: 2rem 2.5rem 1.5rem; cursor: pointer;
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 1.5rem;
+}
+.ancestor-name-block { flex: 1; }
+.ancestor-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem; font-weight: 400;
+  color: var(--text); line-height: 1.1;
+  margin-bottom: 0.35rem; font-style: italic;
+}
+.ancestor-epithet {
+  font-size: 15px; font-weight: 400;
+  color: var(--gold); letter-spacing: 0.06em; margin-bottom: 0.5rem;
+}
+.ancestor-meta {
+  font-size: 15px; font-weight: 300;
+  color: var(--text-dim); letter-spacing: 0.03em; line-height: 1.6;
+}
+.ancestor-chevron {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid var(--border-hover);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 6px; transition: border-color 0.3s;
+}
+.ancestor-chevron svg {
+  width: 11px; height: 11px; stroke: var(--gold); fill: none;
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.ancestor.open .ancestor-chevron svg { transform: rotate(180deg); }
+.ancestor.open .ancestor-chevron     { border-color: var(--gold-dim); }
+.ancestor-layers {
+  max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height 0.65s cubic-bezier(0.4,0,0.2,1), opacity 0.5s ease;
+}
+.ancestor.open .ancestor-layers { max-height: 4000px; opacity: 1; }
+.ancestor-layers-inner {
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 2rem 2.5rem;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem 2rem;
+}
+
+/* Sigil layer - full width */
+.layer-sigil-full {
+  grid-column: 1 / -1;
+}
+
+.layer {
+  padding: 1.4rem 1.6rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.layer-terroir    { background: rgba(201,168,124,0.04); border-color: rgba(201,168,124,0.1); }
+.layer-unresolved { background: rgba(245,170,136,0.04); border-color: rgba(245,170,136,0.1); }
+.layer-thread     { background: rgba(196,190,248,0.04); border-color: rgba(196,190,248,0.1); }
+.layer-lineage    { background: rgba(109,216,178,0.04); border-color: rgba(109,216,178,0.1); }
+.layer-sigil      { background: var(--sigil); border-color: rgba(201,168,124,0.15); }
+
+.layer-label {
+  font-size: 15px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.layer-label-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.layer-terroir    .layer-label-dot { background: var(--gold); }
+.layer-unresolved .layer-label-dot { background: var(--somatic); }
+.layer-thread     .layer-label-dot { background: var(--mythic); }
+.layer-lineage    .layer-label-dot { background: var(--conceptual); }
+.layer-sigil      .layer-label-dot { background: var(--gold-bright); }
+.layer-terroir    .layer-label { color: var(--gold); }
+.layer-unresolved .layer-label { color: var(--somatic); }
+.layer-thread     .layer-label { color: var(--mythic); }
+.layer-lineage    .layer-label { color: var(--conceptual); }
+.layer-sigil      .layer-label { color: var(--gold-bright); }
+.layer-text {
+  font-size: 16px; font-weight: 300;
+  color: var(--text-secondary); line-height: 1.85;
+}
+.layer-thread .layer-text em,
+.layer-lineage .layer-text em { font-style: normal; font-weight: 500; color: var(--text); }
+
+/* Sigil inner layout */
+.sigil-inner {
+  display: flex; gap: 2rem; align-items: flex-start;
+}
+.sigil-art {
+  flex-shrink: 0; width: 100px; height: 100px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(201,168,124,0.2);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.sigil-art svg { width: 80px; height: 80px; }
+.sigil-description { flex: 1; }
+.sigil-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-weight: 500;
+  color: var(--gold-bright); margin-bottom: 0.5rem;
+  letter-spacing: 0.03em;
+}
+.sigil-text {
+  font-size: 16px; font-weight: 300;
+  color: var(--text-secondary); line-height: 1.85;
+}
+
+/* Connective thread */
+.connective-thread {
+  margin-bottom: 5rem; padding: 2rem 2.5rem;
+  background: var(--surface);
+  border: 1px solid rgba(201,168,124,0.1);
+  border-left: 3px solid var(--gold-dim);
+  border-radius: 14px;
+  opacity: 0; animation: fadeUp 1s ease forwards;
+}
+.thread-label {
+  font-size: 15px; font-weight: 500;
+  letter-spacing: 0.14em; color: var(--gold);
+  text-transform: uppercase; margin-bottom: 0.5rem;
+}
+.thread-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight: 400;
+  font-style: italic; color: var(--text);
+  margin-bottom: 0.75rem; line-height: 1.2;
+}
+.thread-text {
+  font-size: 16px; font-weight: 300;
+  color: var(--text-secondary); line-height: 1.85;
+}
+
+/* Era divider */
+.era-divider {
+  text-align: center; margin: 4rem 0 3rem;
+  opacity: 0; animation: fadeUp 1s ease forwards;
+}
+.era-label {
+  font-size: 15px; font-weight: 400;
+  letter-spacing: 0.2em; color: var(--text-faint);
+  text-transform: uppercase; display: inline-block;
+  padding: 0 1.5rem; position: relative;
+}
+.era-label::before, .era-label::after {
+  content: ''; position: absolute; top: 50%;
+  width: 80px; height: 1px; background: var(--timeline);
+}
+.era-label::before { right: 100%; }
+.era-label::after  { left: 100%; }
+
+/* Footer */
+.weaving-footer {
+  text-align: center; margin-top: 5rem; padding-top: 3rem;
+  border-top: 1px solid var(--border);
+  opacity: 0; animation: fadeUp 1s ease 0.5s forwards;
+}
+.footer-note {
+  font-size: 16px; font-style: italic;
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--text-dim); line-height: 1.8;
+  max-width: 500px; margin: 0 auto 1.5rem;
+}
+.footer-link {
+  font-size: 15px; color: var(--gold);
+  text-decoration: none; letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px;
+  transition: color 0.2s;
+}
+.footer-link:hover { color: var(--gold-bright); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ancestor:nth-child(1)  { animation-delay: 0.1s; }
+.ancestor:nth-child(2)  { animation-delay: 0.18s; }
+.ancestor:nth-child(3)  { animation-delay: 0.26s; }
+.ancestor:nth-child(4)  { animation-delay: 0.34s; }
+.ancestor:nth-child(5)  { animation-delay: 0.42s; }
+.ancestor:nth-child(6)  { animation-delay: 0.5s; }
+.ancestor:nth-child(7)  { animation-delay: 0.58s; }
+.ancestor:nth-child(8)  { animation-delay: 0.66s; }
+.ancestor:nth-child(9)  { animation-delay: 0.74s; }
+.ancestor:nth-child(10) { animation-delay: 0.82s; }
+.ancestor:nth-child(11) { animation-delay: 0.9s; }
+.ancestor:nth-child(12) { animation-delay: 0.98s; }
+.ancestor:nth-child(13) { animation-delay: 1.06s; }
+.ancestor:nth-child(14) { animation-delay: 1.14s; }
+.ancestor:nth-child(15) { animation-delay: 1.22s; }
+
+@media (max-width: 760px) {
+  .page { padding: 2.5rem 1.25rem 5rem; }
+  .timeline { padding-left: 1.5rem; }
+  .ancestor-date { display: none; }
+  .ancestor-layers-inner { grid-template-columns: 1fr; }
+  .ancestor-header { padding: 1.5rem 1.5rem 1.25rem; }
+  .ancestor-layers-inner { padding: 1.25rem; }
+  .connective-thread { padding: 1.5rem; }
+  .sigil-inner { flex-direction: column; }
+  .layer-sigil-full { grid-column: 1; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="header">
+  <div class="header-eyebrow">Christy Paxton Wade</div>
+  <h1 class="header-title">The Ancestral Weaving</h1>
+  <div class="header-rule"></div>
+  <p class="header-sub">A living archive of blood lineage — each ancestor grounded in their terroir, their unresolved patterns witnessed with truth and innerstanding, their threads woven forward into the present.</p>
+  <p class="triquetra-note">The Druidic triquetra on the left shoulder — land, sea, sky; past, present, future; maiden, mother, crone — is carried in the body as a living sigil of this weaving.</p>
+  <a href="index.html" class="header-link">← Return to the Navigation Map</a>
+</header>
+
+<div class="legend">
+  <div class="legend-item"><span class="legend-dot terroir"></span> The Terroir</div>
+  <div class="legend-item"><span class="legend-dot unresolved"></span> The Unresolved</div>
+  <div class="legend-item"><span class="legend-dot thread"></span> The Living Thread</div>
+  <div class="legend-item"><span class="legend-dot lineage"></span> The Lineage</div>
+  <div class="legend-item"><span class="legend-dot sigil"></span> The Sigil</div>
+</div>
+
+<div class="timeline">
+
+<div class="era-divider"><span class="era-label">Mythic · Ancient</span></div>
+
+<!-- BRAN FENDIGAID -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">mythic · pre-Roman</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Bran Fendigaid ap Llyr</div>
+        <div class="ancestor-epithet">Blessed Raven · King of Britain · Keeper of the Cauldron</div>
+        <div class="ancestor-meta">Island of the Mighty · Wales · Second Branch of the Mabinogion</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">Harlech on the coast of northwest Wales — the edge of the known world, where the sea meets the rock and the wind carries the voices of the dead. Bran sat on a rock by the sea watching the Irish fleet approach, and in that image is everything about his nature: the giant who holds the boundary between worlds, who sees what is coming and waits with patience rather than fear. His father Llyr was the sea itself. His mother Penarddun was of the underworld. He was born between realms — too large for either, sovereign of both.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">He possessed the Cauldron of Rebirth — the dead placed within it emerged whole, silent, unable to speak but fully restored. He gave this cauldron to the Irish king Matholwch as compensation for an insult, then led an army to Ireland when his sister Branwen was enslaved. He was mortally wounded by a poisoned spear through the foot. Dying, he commanded his seven surviving companions to cut off his head, carry it to the White Hill in London, and bury it there facing France — to guard Britain from invasion. For eighty-seven years the severed head presided over feasting and fellowship, speaking, prophesying, singing. The unresolved: the leader who must be sacrificed so his people survive. The head that continues to speak after the body has fallen. The cauldron that restores life but cannot restore voice.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Bran is the deep root from which the Grail legend grows — the wounded king, the cauldron that heals, the question that must be asked. Robert de Boron names the Grail King Bron. The Fisher King's wound in the thigh mirrors Bran's wound in the foot. <em>Gradlon Mawr</em> carries this same pattern of the sacrificial king — the father who must abandon what he loves to survive. <em>Arthur</em> is Bran's mythic heir — the once and future king is an echo of the head that waits under the White Hill, guarding Britain until it is needed. And the Raven — Bran's sacred bird — speaks directly to the central axis of this entire lineage.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Anomalous reception · Threshold events · Embodied signal. The head that speaks after death, the cauldron that holds the boundary between living and dead, the severed sovereign whose consciousness continues. Bran illuminates the deepest layer of the threshold cluster — the question of what form of presence survives the body's end. His name means Raven. His blood runs directly forward into the Arthur lineage and into this weaving.</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Raven in flight - stylized -->
+                <path d="M 40 20 C 28 16 18 20 12 28 C 18 26 26 26 34 30 L 40 36 L 46 30 C 54 26 62 26 68 28 C 62 20 52 16 40 20 Z" fill="#c9a87c" fill-opacity="0.55"/>
+                <path d="M 40 36 C 36 42 34 50 36 58 L 40 62 L 44 58 C 46 50 44 42 40 36 Z" fill="#c9a87c" fill-opacity="0.35"/>
+                <!-- Wing detail -->
+                <path d="M 34 30 C 30 34 28 40 30 46" stroke="#c9a87c" stroke-width="0.7" stroke-opacity="0.4" fill="none"/>
+                <path d="M 46 30 C 50 34 52 40 50 46" stroke="#c9a87c" stroke-width="0.7" stroke-opacity="0.4" fill="none"/>
+                <!-- Cauldron below -->
+                <path d="M 28 68 Q 28 74 40 74 Q 52 74 52 68 L 50 60 L 30 60 Z" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.45" fill="none"/>
+                <path d="M 32 60 Q 40 56 48 60" stroke="#c9a87c" stroke-width="0.6" stroke-opacity="0.3" fill="none"/>
+                <!-- Eye glow -->
+                <circle cx="40" cy="26" r="1.5" fill="#c9a87c" fill-opacity="0.6"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">The Raven and the Cauldron · Bendigeidfran</div>
+              <div class="sigil-text">Bran carries two primary symbols: the Raven, his sacred bird and the meaning of his name — the messenger between worlds, the keeper of the threshold, the voice that speaks what the living cannot see. And the Cauldron of Rebirth — the vessel that holds the boundary between death and life. In heraldic tradition, the raven is a charge of prophecy and sovereignty. The cauldron as vessel precedes the Grail in the British mythic sequence: it holds what no sword can win and no crown can purchase — the capacity to restore what has been lost. Together these symbols encode the central frequency of this lineage: that the speaking voice, the prophetic capacity, the ability to hold the dead and the living in the same field — these do not end with the body.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOUDICCA -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">died c. 61 AD</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Boudicca</div>
+        <div class="ancestor-epithet">Queen of the Iceni · Warrior of the Land</div>
+        <div class="ancestor-meta">East Anglia, Roman Britain · died c. 61 AD</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">The marshes and oak forests of East Anglia — Iceni territory, cold and flat, threaded with rivers. Roman occupation had remade Britain's southern coast into a province, but the interior tribes still held their gods, their land-right, their ways. When her husband Prasutagus died, Rome seized everything — the land, the wealth, her daughters. She stood on soil her ancestors had held for generations and watched it be named property of the Empire.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">She raised three tribes and burned three cities — Colchester, London, St Albans — to ash. The red-haired queen who screamed back at an empire. But she lost. What she lost with her was a model of sovereignty so old it had no Roman name. The unresolved: the body of a woman as territory, subject to conquest. This wound does not stay in the first century. It travels forward in every woman who has had to become war in order to be heard.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Resonates with <em>Lady Godiva</em> — another body made political, another act of sovereignty performed in flesh rather than armor. With <em>Magdalene</em> — the witness who stays when the armies have left. With <em>Robert the Bruce</em> — total defeat followed by the question of whether to continue. Her fire lives in anyone who has ever burned something down in order to reclaim the ground beneath it.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Body as active practice · Embodied signal · Threshold events. The body as the site of political resistance. The land and the self as one territory. Her life illuminates what happens when sovereignty is stripped from the body — and what it costs to take it back.</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Iceni horse - stylized coin motif -->
+                <path d="M 18 50 C 18 40 24 32 34 30 C 44 28 54 32 60 42 C 56 38 48 36 42 40 C 36 44 34 52 38 58 C 30 56 18 60 18 50 Z" fill="#c9a87c" fill-opacity="0.4"/>
+                <!-- Legs -->
+                <line x1="28" y1="54" x2="24" y2="68" stroke="#c9a87c" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round"/>
+                <line x1="36" y1="56" x2="34" y2="70" stroke="#c9a87c" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round"/>
+                <line x1="50" y1="52" x2="48" y2="66" stroke="#c9a87c" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round"/>
+                <!-- Head -->
+                <circle cx="58" cy="38" r="6" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.45" fill="none"/>
+                <circle cx="60" cy="36" r="1.5" fill="#c9a87c" fill-opacity="0.5"/>
+                <!-- Spear -->
+                <line x1="10" y1="20" x2="50" y2="44" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.4"/>
+                <polygon points="10,20 14,24 8,26" fill="#c9a87c" fill-opacity="0.45"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">The Iceni Horse and Spear</div>
+              <div class="sigil-text">The Iceni tribe minted coins bearing a stylized horse — the most sacred animal in Celtic Britain, symbol of sovereignty, freedom, and the right to the land. The horse was not merely transport or wealth; it was the embodiment of the tribe's claim to its territory. Paired with the spear — the weapon of the warrior queen — these two charges encode the frequency Boudicca carries: the sovereign who moves, the body that fights, the land that remembers what was taken. The Iceni horse appears in your lineage not as decoration but as a living marker of the sovereignty claim that was never fully extinguished.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAGDALENE — full card -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">1st century AD</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Mary Magdalene</div>
+        <div class="ancestor-epithet">Apostle to the Apostles · Keeper of the Teaching · Witness at the Threshold</div>
+        <div class="ancestor-meta">Galilee · Jerusalem · Provence · 1st century AD</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">Magdala on the western shore of the Sea of Galilee — a prosperous fishing town in a land under Roman occupation, where the old Jewish mystical traditions were already in ferment with new teachings. She was a woman of means, possibly of some standing, who joined the itinerant ministry with resources of her own. The garden of the empty tomb was in Jerusalem. The cave of the Sainte-Baume in Provence, where later tradition holds she lived for thirty years in contemplation, is a limestone cave in the Massif of La Sainte-Baume — dark, humid, ancient, tasting of the earth. Both lands hold her: the sun-baked Palestinian spring, and the deep Provençal forest.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">She was the first witness of resurrection — in all four Gospels, she is at the tomb. She is sent: go and tell. But when she tells the apostles, they do not believe her. The one who received the transmission first was not believed. Pope Gregory I in 591 AD conflated her with the unnamed sinful woman of Luke 7 — collapsing the apostle into the penitent, the witness into the prostitute. This conflation was not corrected by the Catholic Church until 1969. In the hidden record — the Gnostic Gospels, the traditions of southern France — she is the companion, the keeper of the deeper teaching, the one whose understanding exceeded Peter's and whom he could not bear to honor for that reason. The unresolved: the transmission given to a woman that the institution could not receive from a woman, and so rewrote.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Magdalene is the connective thread between <em>threshold events</em> and <em>anomalous reception</em> for the entire weaving. She is the one who stayed at the threshold of death and did not flee — the witness-function itself. She resonates with <em>Boudicca</em> — both women whose full capacity was denied by the systems that surrounded them. With <em>Eleanor of Aquitaine</em> — both held a teaching or a culture that the dominant institution needed to suppress. With <em>Bertila of Spoleto</em> and <em>Almodis de la Marche</em> — women named in official documents as equal participants whose equality was then systematically erased. The tradition of the Magdalene in Provence connects directly to the Occitan sovereignty lineage — Eleanor, Almodis, the troubadours — through the same south of France.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Threshold events · Anomalous reception · Resonance in language. The witness who receives the signal first and is not believed. The keeper of the teaching that the institution could not hold. Her life illuminates the deepest layer of anomalous reception — not the signal that arrives from the cosmos, but the signal that arrives through a human vessel, and what happens when that vessel is not recognized by the systems meant to receive it.</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Alabaster jar -->
+                <path d="M 32 20 L 30 22 L 28 32 L 28 58 Q 28 64 40 64 Q 52 64 52 58 L 52 32 L 50 22 L 48 20 Z" stroke="#c9a87c" stroke-width="0.9" stroke-opacity="0.55" fill="rgba(201,168,124,0.06)"/>
+                <!-- Jar neck -->
+                <path d="M 34 20 Q 40 16 46 20" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.45" fill="none"/>
+                <!-- Opening at top -->
+                <ellipse cx="40" cy="20" rx="6" ry="2.5" stroke="#c9a87c" stroke-width="0.7" stroke-opacity="0.4" fill="none"/>
+                <!-- Ointment flowing -->
+                <path d="M 38 18 C 36 12 32 10 30 8" stroke="#c9a87c" stroke-width="0.6" stroke-opacity="0.35" fill="none"/>
+                <path d="M 42 18 C 44 12 48 10 50 8" stroke="#c9a87c" stroke-width="0.6" stroke-opacity="0.35" fill="none"/>
+                <!-- Three stars (Mary of three faces) -->
+                <circle cx="40" cy="7"  r="1.2" fill="#c9a87c" fill-opacity="0.5"/>
+                <circle cx="30" cy="7"  r="0.8" fill="#c9a87c" fill-opacity="0.35"/>
+                <circle cx="50" cy="7"  r="0.8" fill="#c9a87c" fill-opacity="0.35"/>
+                <!-- Horizontal line - the threshold -->
+                <line x1="24" y1="38" x2="56" y2="38" stroke="#c9a87c" stroke-width="0.4" stroke-opacity="0.25" stroke-dasharray="3 4"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">The Alabaster Jar · Vas Spirituale</div>
+              <div class="sigil-text">The alabaster jar of precious ointment is Magdalene's primary symbol across all traditions — canonical, Gnostic, and the lineage of southern France. The jar that is broken open, the ointment poured without reservation, the fragrance that fills the entire room. In alchemical tradition the vas spirituale — the spiritual vessel — is the container that holds transformation. Magdalene's jar encodes this double meaning: the physical act of anointing as consecration, and the capacity to be the vessel that holds what is too precious for careful administration. She does not pour sparingly. This is the frequency she carries: total offering, the recognition that the moment of encounter is worth the entire contents of the vessel.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="era-divider" style="animation-delay:0.1s"><span class="era-label">Post-Roman · Arthurian</span></div>
+
+<!-- GRADLON MAWR -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">c. 4th–5th century</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Gradlon Mawr ap Cynan</div>
+        <div class="ancestor-epithet">King of Cornouaille · Builder of Ys · The Father at the Threshold</div>
+        <div class="ancestor-meta">Cornouaille, Brittany · Bay of Douarnenez · c. 4th–5th century</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">The Finistère coast of Brittany — land's end, where the granite cliffs drop into the Atlantic and the Bay of Douarnenez holds the memory of a city that once existed below the tide line. Cornouaille was the southwestern kingdom of Armorica, the Brittany settled by refugees from post-Roman Britain, carrying their Celtic language and their gods across the sea. Gradlon was the son of Conan Meriadoc, himself a legendary founder of Breton civilization. He ruled from a magnificent city built on land reclaimed from the sea — Ker-Is, the Low City — protected by a great dyke, its gate-key worn always at the king's neck.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">In his youth Gradlon loved a fairy sorceress, Malgven — half-woman, half of the old world. She died giving birth to their daughter Dahut, who carried her mother's face and the old Druidic gods in her blood. Gradlon built the city for Dahut. When Dahut opened the floodgates on a stormy night — seduced or manipulated by a figure dressed in red, the old world's last act of defiance — the sea swallowed Ys. Gradlon fled on his magical horse Morvarc'h, which could run on the sea's surface. At the saint's command, he pushed Dahut into the waves. She became a mermaid, still singing in the depths. Gradlon survived and rebuilt his capital at Quimper, where his stone statue stands before the cathedral to this day. The unresolved: the father who was given an impossible choice — the daughter he loved, or his own life. The old world that could not survive into the new. The city that still rings its bells at low tide.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Resonates with <em>Bran Fendigaid</em> — the king who sacrifices what he loves most for the continuation of his people. With <em>Melusine</em> — the Breton fairy lineage, the woman of the old world who lives in water, who cannot be held by the new order's categories. With <em>Gradlon's daughter Dahut</em> — the submerged sacred feminine, the Druidic inheritance that was pushed into the depths and continues to sing there. His horse Morvarc'h running on the sea surface is the oldest image in this lineage of navigation across threshold spaces — the capacity to move through what should be impossible terrain.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Threshold events · Animal and nature medicine · Structural models. The drowned city is the oldest image in Breton culture of a world lost to the sea — a civilization submerged but not destroyed, its bells still audible in the right conditions. Gradlon illuminates the threshold cluster through the most elemental possible lens: the city below the water, the father who had to let the daughter go, the boundary between old world and new built into the landscape of Brittany itself.</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Morvarc'h - horse running on waves -->
+                <!-- Waves -->
+                <path d="M 8 54 Q 16 48 24 54 Q 32 60 40 54 Q 48 48 56 54 Q 64 60 72 54" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.4" fill="none"/>
+                <path d="M 8 62 Q 16 56 24 62 Q 32 68 40 62 Q 48 56 56 62 Q 64 68 72 62" stroke="#c9a87c" stroke-width="0.6" stroke-opacity="0.28" fill="none"/>
+                <!-- Horse body running -->
+                <path d="M 22 46 C 22 36 30 28 40 28 C 50 28 58 34 60 44 C 54 38 46 36 42 40 C 38 44 36 52 40 56 C 34 54 22 56 22 46 Z" fill="#c9a87c" fill-opacity="0.42"/>
+                <!-- Legs (slightly above the waves) -->
+                <line x1="28" y1="50" x2="26" y2="60" stroke="#c9a87c" stroke-width="1" stroke-opacity="0.45" stroke-linecap="round"/>
+                <line x1="36" y1="52" x2="36" y2="62" stroke="#c9a87c" stroke-width="1" stroke-opacity="0.45" stroke-linecap="round"/>
+                <line x1="48" y1="50" x2="46" y2="60" stroke="#c9a87c" stroke-width="1" stroke-opacity="0.45" stroke-linecap="round"/>
+                <!-- Horse head -->
+                <circle cx="58" cy="38" r="5" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.4" fill="none"/>
+                <!-- Key at neck -->
+                <circle cx="44" cy="36" r="2" stroke="#c9a87c" stroke-width="0.6" stroke-opacity="0.5" fill="none"/>
+                <line x1="44" y1="38" x2="44" y2="44" stroke="#c9a87c" stroke-width="0.6" stroke-opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">Morvarc'h Above the Waves · The Key of Ys</div>
+              <div class="sigil-text">Two symbols define Gradlon's frequency: the horse Morvarc'h — the magical black horse that runs on the surface of the sea, that crosses what should not be crossable — and the key to the gates of Ys, worn always at the king's neck. The horse encodes the capacity for impossible navigation, the ability to move across threshold spaces that would drown anyone else. The key encodes both sovereign responsibility and vulnerability — the thing held closest to the heart that is also the thing that, if taken, destroys everything. In Breton heraldry Gradlon's associations are with the sea, the wave, and the drowned city: a civilization still present beneath the water's surface, audible at low tide. This lineage carries both the capacity to cross impossible thresholds and the knowledge of what is lost when the key is given to the wrong hands.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ARTHUR -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">c. 5th–6th century</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">King Arthur</div>
+        <div class="ancestor-epithet">Once and Future King · The Sovereignty Question · Rex Quondam Rexque Futurus</div>
+        <div class="ancestor-meta">Post-Roman Britain · Camelot · Avalon · c. 5th–6th century</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">Post-Roman Britain in the chaos years after the legions withdrew — the towns decaying, the roads crumbling, the Saxon migrations pressing from the east. The historical Arthur, whoever he was, operated in this gap: a war-leader, possibly a cavalry commander, who held the British resistance together across multiple battles. The sites associated with him are in the Celtic west — Somerset, Wales, Cornwall, the Scottish borders — the places that remembered the old ways longest. Camelot is not a place on any map. It is a description of a quality of social order: the court where the table has no head, where the sword comes from the lake rather than from conquest, where the king's legitimacy derives not from force but from the land's recognition.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">The Round Table has no head. Arthur imagined a structure of equals — and it fell, from within, through the very love and loyalty it generated. Lancelot's faithfulness to his king and his love for the queen could not be reconciled. Mordred, the shadow-son, the unacknowledged wound, destroyed what was built. Arthur did not die — he was taken to Avalon, to heal, to wait. The once and future king: the sovereignty pattern that has not yet fully arrived in history, that sleeps somewhere, that will return when Britain needs it most. The unresolved is this perpetual deferral. The table is set. The king has not come back. The wound in the land continues. The question has not yet been asked that would heal the Fisher King.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Arthur is <em>Bran Fendigaid's</em> mythic heir — the sleeping guardian under the hill follows directly from the severed head under the White Hill. With <em>Merlin</em> — inseparable, the king and his architect-seer. With <em>Robert the Bruce</em> — the historical Bruce heard the Arthur legend and took it literally: when he was hiding in a cave after his defeats, watching a spider try again and again, he understood himself in the Arthur pattern. With <em>Henry the Fowler</em> — the builder of the conditions for a sovereignty that transcends personal power. Arthur illuminates the central axis of this entire weaving: what does it mean to carry a sovereign frequency in a world not yet ready for it?</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Structural models · Threshold events · Anomalous reception. The Round Table as the only structural model in Western mythology explicitly designed for equality. Excalibur from the Lady of the Lake — sovereignty given by the feminine, not taken by force. The Grail quest as the search for the question that heals — not the answer, the question. Arthur's lineage cluster is structural models, because his deepest contribution is not what he did but what he imagined: a geometry of governance that the world has been trying to build ever since.</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Three gold crowns on blue (traditional attributed arms of Arthur) -->
+                <!-- Round table as foundation -->
+                <circle cx="40" cy="52" r="20" stroke="#c9a87c" stroke-width="0.7" stroke-opacity="0.3" fill="none"/>
+                <circle cx="40" cy="52" r="14" stroke="#c9a87c" stroke-width="0.5" stroke-opacity="0.2" fill="none" stroke-dasharray="3 4"/>
+                <!-- Crown 1 - top -->
+                <path d="M 36 18 L 36 24 L 37.5 22 L 40 26 L 42.5 22 L 44 24 L 44 18 Z" fill="#c9a87c" fill-opacity="0.55"/>
+                <line x1="36" y1="26" x2="44" y2="26" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.5"/>
+                <!-- Crown 2 - lower left -->
+                <path d="M 18 46 L 18 52 L 19.5 50 L 22 54 L 24.5 50 L 26 52 L 26 46 Z" fill="#c9a87c" fill-opacity="0.45"/>
+                <line x1="18" y1="54" x2="26" y2="54" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.45"/>
+                <!-- Crown 3 - lower right -->
+                <path d="M 54 46 L 54 52 L 55.5 50 L 58 54 L 60.5 50 L 62 52 L 62 46 Z" fill="#c9a87c" fill-opacity="0.45"/>
+                <line x1="54" y1="54" x2="62" y2="54" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.45"/>
+                <!-- Sword (Excalibur) -->
+                <line x1="40" y1="34" x2="40" y2="68" stroke="#c9a87c" stroke-width="1" stroke-opacity="0.5"/>
+                <line x1="34" y1="44" x2="46" y2="44" stroke="#c9a87c" stroke-width="1" stroke-opacity="0.45"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">Three Crowns and the Round Table · Attributed Arms of Arthur</div>
+              <div class="sigil-text">The arms traditionally attributed to King Arthur in medieval heraldry carry three gold crowns on an azure field — the three crowns of the three kingdoms he held, or in some traditions the three realms: land, sea, and sky. The Round Table appears not in heraldry but as the central structural symbol of his sovereignty — a geometry of governance with no head, no hierarchy, each seat equal to every other. Excalibur, the sword from the lake, encodes the most radical sovereignty principle in the British tradition: legitimate authority is not seized, it is given by the feminine principle of the land itself. These three symbols together — crowns of earned recognition, the table without a head, the sword from water — describe the frequency Arthur carries in this lineage: the possibility of a structure that holds both power and equality simultaneously.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MERLIN -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">c. 5th–6th century</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Merlin</div>
+        <div class="ancestor-epithet">Myrddin Wyllt · Architect of the Pattern · The Shapeshifter at the Edge</div>
+        <div class="ancestor-meta">Wales · Camelot · The Crystal Cave · c. 5th–6th century</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">The historical Merlin is likely a composite of several figures, chief among them Myrddin Wyllt — the Wild Merlin, a historical 6th-century Welsh bard who lost his mind at the Battle of Arfderydd (573 AD), fled into the Caledonian Forest, and lived there alone for years, prophesying and speaking with animals. The forest of Caledon in southern Scotland: ancient oak, wolf territory, the place where human civilization ends and the older world begins. Geoffrey of Monmouth later merged this figure with the earlier Ambrosius Aurelianus, creating the Merlin of Arthurian legend — the fatherless child, the seer who prepared the conditions for a king he would not live to see fully reign.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">He who prepared everything could not protect himself. Merlin, by most traditions, was imprisoned by his own teaching — Nimue or Morgan le Fay, a student of his magic, enclosed him in a crystal cave or a hawthorn tree or a tower of air, where he remains. He who built the conditions for the once and future king is suspended in the moment before the king's return, unable to act, still present, still waiting. The unresolved: the seer who cannot see their own entrapment. The teacher whose deepest teaching was received by the student who used it to bind them. The architect who built the vessel but is not free to inhabit it.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Merlin and <em>Arthur</em> are inseparable — the seer and the sovereign, the architect and the king. Merlin also resonates with <em>Bran Fendigaid</em> — both figures whose consciousness continues in suspension, waiting for the right moment. With <em>Henry the Fowler</em> — the one who prepares the conditions without inhabiting the throne. With the wild forest exile of Myrddin Wyllt resonates the animal and nature medicine cluster — the seer who had to enter the forest, lose human society, speak with animals, in order to receive what the civilized world could not give him.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Anomalous reception · Structural models · Animal and nature medicine. Merlin illuminates the anomalous reception cluster most directly — the figure who receives what has not yet happened, who speaks from a position outside ordinary time. His madness in the forest was not a breakdown but a recalibration: the human nervous system overwhelmed by a perception bandwidth too large for the social world to hold. The crystal cave is an image of the preserved consciousness — not dead, not lost, suspended in clarity, waiting.</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Dragon (red dragon of Wales / Merlin's prophecy) -->
+                <!-- Body -->
+                <path d="M 20 50 C 20 38 28 30 40 32 C 52 34 60 44 56 54 C 52 48 44 44 40 48 C 36 52 36 60 40 64 C 32 62 20 62 20 50 Z" fill="#c9a87c" fill-opacity="0.38"/>
+                <!-- Wings -->
+                <path d="M 36 36 C 28 28 18 28 14 36 C 22 34 30 36 36 44 Z" fill="#c9a87c" fill-opacity="0.28"/>
+                <path d="M 48 38 C 56 30 66 30 70 38 C 62 36 54 38 48 46 Z" fill="#c9a87c" fill-opacity="0.28"/>
+                <!-- Head -->
+                <circle cx="56" cy="46" r="7" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.45" fill="none"/>
+                <!-- Eye -->
+                <circle cx="58" cy="44" r="2" fill="#c9a87c" fill-opacity="0.55"/>
+                <!-- Crystal -->
+                <polygon points="40,8 44,18 40,22 36,18" stroke="#c9a87c" stroke-width="0.7" stroke-opacity="0.5" fill="rgba(201,168,124,0.1)"/>
+                <line x1="40" y1="8" x2="40" y2="22" stroke="#c9a87c" stroke-width="0.4" stroke-opacity="0.3"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">The Red Dragon and the Crystal · Prophetic Sight</div>
+              <div class="sigil-text">Merlin's first great prophecy involved two dragons fighting beneath the foundations of Vortigern's tower — a red dragon and a white, the red representing Britain, the white representing the Saxon invaders. The red dragon became the symbol of Wales and the Welsh national flag. For Merlin the dragon encodes prophetic sight — the ability to perceive the forces at war beneath the surface of visible events. The crystal cave is the second symbol: the preserved consciousness, the clear substance that holds everything without distortion, that neither ages nor forgets. In alchemy, the crystal is the philosopher's stone in its most transparent form — perfect clarity achieved through endurance. Together the dragon and the crystal describe what Merlin carries in this lineage: the capacity to see what is coming, and the patience to hold that seeing in perfect preservation until the world is ready to receive it.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="era-divider" style="animation-delay:0.1s"><span class="era-label">Early Medieval</span></div>
+
+<!-- BERTILA OF SPOLETO -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">c. 860 – 915</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Bertila of Spoleto</div>
+        <div class="ancestor-epithet">Holy Roman Empress · Consors Regni · Partner in Rule</div>
+        <div class="ancestor-meta">Northern Italy, Spoleto, Friuli · c. 860 – 915</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">Post-Carolingian Italy — the crumbling architecture of Charlemagne's empire giving way to competing dukedoms, Magyar invasions, and the rising power of local bishops. The Apennines, the Po Valley, the marble churches of Friuli. The Supponid family of Spoleto controlled key passes through central Italy. Bertila grew up in a world of strategic alliance and necessary marriage, where power was built through the patient accumulation of charters, co-signatures, and ecclesiastical patronage. She married Berengar of Friuli around 880 and navigated thirty-five years of his failed campaigns, Magyar devastation, and Italian noble rebellion.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">She was titled consors regni — partner in rule — not merely wife but co-signatory, intercessor, active political force. In 915 she became Holy Roman Empress. And then, within that same year, she was probably poisoned — possibly at Berengar's own order — accused of infidelity and of consulting an evil Circe. The accusation of the sorceress-advisor was the oldest weapon against a powerful woman. She had reached the summit and was removed from it immediately. The unresolved: what it costs to hold power in a system that needs a woman's influence but cannot permit her authority.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Resonates with <em>Almodis de la Marche</em> — named co-ruler in official documents, murdered when her influence exceeded what the men around her could bear. With <em>Eleanor of Aquitaine</em> — the consort who was never merely consort, imprisoned when she became inconvenient. The pattern of the woman who holds the actual governance while the man holds the title is ancient and repetitive in this lineage.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Structural models · Threshold events. The architecture of rule built without the legitimating title. Her life asks: what structures does a woman build when she cannot hold the structure in her own name?</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Supponid lion rampant -->
+                <path d="M 36 20 C 32 18 28 22 28 28 C 28 34 32 36 36 34 L 36 42 C 36 50 40 56 44 56 L 44 64 L 48 64 L 48 56 C 52 56 56 50 56 42 L 56 34 C 60 36 64 34 64 28 C 64 22 60 18 56 20 L 52 24 L 44 20 Z" stroke="#c9a87c" stroke-width="0.9" stroke-opacity="0.5" fill="rgba(201,168,124,0.08)"/>
+                <!-- Crown -->
+                <path d="M 34 16 L 34 20 L 36 18 L 40 22 L 44 18 L 46 20 L 46 16 Z" fill="#c9a87c" fill-opacity="0.5"/>
+                <!-- Eye -->
+                <circle cx="38" cy="24" r="1.5" fill="#c9a87c" fill-opacity="0.55"/>
+                <!-- Consors Regni motto line -->
+                <line x1="24" y1="70" x2="56" y2="70" stroke="#c9a87c" stroke-width="0.5" stroke-opacity="0.3"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">The Crowned Lion · Consors Regni</div>
+              <div class="sigil-text">The Supponid family of Spoleto bore the lion — one of the primary charges of the Italian nobility, the beast of sovereignty and valor. For Bertila the crowned lion carries a double meaning: the crown of the Holy Roman Empress she briefly held, and the lion rampant as the posture of rising, reaching, claiming authority. But the most important sigil she carries is invisible — the phrase in the royal charters: consors regni, partner in rule. This was not a courtesy title. It was a legal designation of co-sovereignty, recorded in official documents, witnessed by bishops and nobles. The word consors is the deepest frequency in her lineage: she was written into the law of the land as a partner, even as the law was used to destroy her. The lion wears the crown. The crown does not stay. The consors remains in the record.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HENRY THE FOWLER -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">876 – 936</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Henry the Fowler</div>
+        <div class="ancestor-epithet">King of East Francia · Founder of the Ottonian Dynasty</div>
+        <div class="ancestor-meta">Saxony, East Francia · 876 – 936</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">The Saxon heartland — forest, river, the cold grey light of northern Europe. Viking raids from the north, Magyar horsemen devastating from the east, the political vacuum of the collapsing Carolingian empire. Henry was Duke of Saxony before he was king. The legend of his name: he was birdcatching when the bishops arrived to offer him the crown of East Francia. He finished what he was doing first — an image of the man who is not seduced by urgency, who completes the immediate task before attending to the imperial one.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">He negotiated a nine-year truce with the Magyars and used every year of it to build what had not existed — fortified towns, trained cavalry, a defense system that would hold after he was gone. He won the Battle of Riade in 933. His deepest legacy is invisible: he built the container before he fought the battle. The unresolved: how power is transmitted. He died a king, not an emperor — the foundation his dynasty stood upon and rarely named.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Resonates with <em>Robert the Bruce</em> — the patient rebuilder after catastrophic loss, who used the time of apparent defeat to construct what would actually hold. With <em>Merlin</em> — the figure who prepares the ground for the king without becoming the king. With <em>Sir John Brocas</em> — the loyal builder of institution who served through two reigns and built lasting structures without claiming center stage.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Structural models · Body as active practice. The man who builds the container rather than filling it prematurely. His life illuminates the principle of preparation as sovereignty — true power is constructed in the years before the battle, not during it.</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Ottonian black eagle -->
+                <path d="M 40 16 C 34 16 26 20 24 28 C 28 26 32 26 36 28 L 40 32 L 44 28 C 48 26 52 26 56 28 C 54 20 46 16 40 16 Z" fill="#c9a87c" fill-opacity="0.45"/>
+                <path d="M 40 32 L 38 42 L 32 50 L 40 48 L 48 50 L 42 42 Z" fill="#c9a87c" fill-opacity="0.35"/>
+                <!-- Wing extensions -->
+                <path d="M 36 28 C 28 32 18 30 14 36 C 22 34 30 36 36 42 Z" fill="#c9a87c" fill-opacity="0.28"/>
+                <path d="M 44 28 C 52 32 62 30 66 36 C 58 34 50 36 44 42 Z" fill="#c9a87c" fill-opacity="0.28"/>
+                <!-- Crown -->
+                <path d="M 35 14 L 35 18 L 37 16 L 40 20 L 43 16 L 45 18 L 45 14 Z" fill="#c9a87c" fill-opacity="0.5"/>
+                <!-- Eye -->
+                <circle cx="38" cy="22" r="1.5" fill="#c9a87c" fill-opacity="0.55"/>
+                <!-- Fortified tower (his legacy) -->
+                <rect x="34" y="56" width="12" height="16" stroke="#c9a87c" stroke-width="0.7" stroke-opacity="0.4" fill="none"/>
+                <rect x="34" y="54" width="4" height="4" stroke="#c9a87c" stroke-width="0.6" stroke-opacity="0.35" fill="none"/>
+                <rect x="42" y="54" width="4" height="4" stroke="#c9a87c" stroke-width="0.6" stroke-opacity="0.35" fill="none"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">The Ottonian Eagle and the Fortified Tower</div>
+              <div class="sigil-text">The Ottonian dynasty that Henry founded used the black eagle of Saxony — a charge that would eventually become the imperial eagle of the Holy Roman Empire and later of Germany itself. The eagle faces forward, crowned, sovereign — the bird of Jupiter, of imperial authority, of vision that scans the horizon. Beside it the fortified tower: the specific legacy Henry built during his truce years — the burgen, the defended towns that transformed the Saxon landscape from a raided territory into a system of mutual protection. These two symbols together encode his frequency: the visionary authority that builds from the ground up rather than descending from above. The eagle sees far. The tower lasts.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="era-divider" style="animation-delay:0.1s"><span class="era-label">High Medieval</span></div>
+
+<!-- MELUSINE -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">mythic · 10th–12th c.</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Melusine</div>
+        <div class="ancestor-epithet">Fairy Serpent of Lusignan · Ancestral Mother · She Who Flies Rather Than Submit</div>
+        <div class="ancestor-meta">Poitou · Lusignan · Forest Spring · mythic ancestor of House of Lusignan</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">The Poitevin landscape — limestone, spring water, forest springs sacred before Christianity named them otherwise. The House of Lusignan traced its founding to a fairy woman encountered at a forest spring. The spring, the serpent, the condition of privacy on Saturdays: these are the remnants of a pre-Christian sovereignty goddess whose power was bound by treaty to a human lineage. She built the castle of Lusignan — it rose overnight, constructed by invisible hands — as the founding act of a dynasty. The myth carries the memory of a time when the feminine and the land were not separate categories.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">Raymondin broke the promise. He looked. He saw her serpent form in the bath on Saturday and said nothing — until anger gave him cause to name it publicly: you are a serpent, a false thing. She transformed fully, flew from the castle as a winged serpent, and was never seen again in human form. She appears still before the death of every Lord of Lusignan. The unresolved: the woman who holds a single boundary, who asks only one thing, and watches it violated when it becomes inconvenient. The part of the self that must be hidden to be acceptable, and what happens when it is seen without readiness or love.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Resonates with <em>Almodis de la Marche</em> — who married directly into the Lusignan line and carried Melusine's mythic inheritance into the governance of Catalonia. With <em>Boudicca</em> — the woman whose power lived in a form the dominant culture could not fully name or contain. With <em>Gradlon's daughter Dahut</em> — both women of the old world who became water-spirits when the new order could not hold them. Melusine is the root of a lineage that keeps producing women too large for their containers.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Animal and nature medicine · Threshold events · Anomalous reception. The nature-spirit at the root of the family tree. Her myth illuminates the contract between the human and the more-than-human, and what is lost when that contract is broken by shame or exposure. The serpent who flies rather than submit is the oldest available image of feminine sovereignty.</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Melusine - woman/serpent form -->
+                <!-- Serpent coils below -->
+                <path d="M 30 50 Q 20 56 22 64 Q 24 72 34 70 Q 44 68 46 60 Q 48 52 40 50 Q 32 48 30 50 Z" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.45" fill="rgba(201,168,124,0.06)"/>
+                <path d="M 40 50 Q 52 48 58 56 Q 64 64 56 68 Q 48 72 46 66" stroke="#c9a87c" stroke-width="0.7" stroke-opacity="0.35" fill="none"/>
+                <!-- Feminine figure above - wings spread -->
+                <ellipse cx="40" cy="30" rx="8" ry="12" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.4" fill="none"/>
+                <!-- Wings -->
+                <path d="M 36 26 C 26 20 16 22 14 30 C 22 28 30 30 36 36 Z" fill="#c9a87c" fill-opacity="0.22"/>
+                <path d="M 44 26 C 54 20 64 22 66 30 C 58 28 50 30 44 36 Z" fill="#c9a87c" fill-opacity="0.22"/>
+                <!-- Crown / head -->
+                <circle cx="40" cy="18" r="5" stroke="#c9a87c" stroke-width="0.7" stroke-opacity="0.4" fill="none"/>
+                <path d="M 36 14 L 36 16 L 38 15 L 40 17 L 42 15 L 44 16 L 44 14" stroke="#c9a87c" stroke-width="0.6" stroke-opacity="0.45" fill="none"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">The Winged Serpent · House of Lusignan</div>
+              <div class="sigil-text">Melusine appears in the arms and legends of the House of Lusignan as a mermaid or serpent-woman — her winged serpent form at the moment of flight became the sigil of the dynasty she founded. In heraldic tradition the serpent is a charge of wisdom, regeneration, and protection; the wings add the dimension of transcendence, of the wisdom that cannot be earthbound. The Lusignan arms incorporated her image precisely because her nature — half-human, half-other — was understood as the source of the dynasty's power, not its scandal. When you carry Melusine's lineage you carry this: the capacity that lives in the form that must remain partly hidden, and the knowledge of what it means when that form is forcibly revealed. The serpent that flies rather than submit is one of the oldest available images of the feminine sovereign choosing freedom over accommodation.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LADY GODIVA -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">c. 1040 – 1080</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Lady Godiva</div>
+        <div class="ancestor-epithet">Countess of Mercia · The Sovereign Ride</div>
+        <div class="ancestor-meta">Coventry, Mercia, England · c. 1040 – 1080</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">Anglo-Saxon Mercia in the decades before the Norman Conquest — monasteries, market towns, earls whose power was still rooted in ancient land-right. Godiva and her husband Leofric, Earl of Mercia, were major patrons of the Church and major landholders. She was a woman of genuine power and genuine piety — founding monasteries, witnessing charters, holding her own estates. The Coventry she rode through was a town her husband taxed into suffering. She asked him to relent. He said: ride naked through the market and I will.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">She rode. The townspeople, by legend, shuttered their windows. The act was a woman using her body as instrument of political intervention when no other instrument was available to her. The unresolved is the way the story became about the nakedness rather than the power — the act of radical self-exposure as strategy rather than violation, this reading largely lost. She gave her dignity to buy the town's freedom. The debt was never named as such.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Resonates with <em>Boudicca</em> — the body made instrument of political act. With <em>Almodis de la Marche</em> — the woman who uses available tools, however unconventional, to reshape her situation. With <em>Melusine</em> — the woman whose true nature, made visible, becomes both source of power and legend. The thread: what happens when the female body is the only currency recognized by the system, and how women have navigated that constraint with intelligence.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Body as active practice · Threshold events · Resonance in language. Her story asks the central question of the entire weaving: how does a woman act when the system has made her body the only recognized form of speech?</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- White horse with flowing hair (Godiva's ride) -->
+                <path d="M 16 48 C 16 36 24 28 36 28 C 48 28 58 36 60 46 C 54 40 46 38 42 42 C 38 46 36 54 40 60 C 32 58 16 58 16 48 Z" fill="#c9a87c" fill-opacity="0.38"/>
+                <!-- Flowing hair / mane -->
+                <path d="M 36 28 C 32 22 28 18 24 16" stroke="#c9a87c" stroke-width="1" stroke-opacity="0.4" stroke-linecap="round"/>
+                <path d="M 38 26 C 36 18 34 12 30 10" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.32" stroke-linecap="round"/>
+                <path d="M 40 24 C 40 14 38 8 36 6" stroke="#c9a87c" stroke-width="0.6" stroke-opacity="0.25" stroke-linecap="round"/>
+                <!-- Legs -->
+                <line x1="24" y1="54" x2="22" y2="68" stroke="#c9a87c" stroke-width="1" stroke-opacity="0.45" stroke-linecap="round"/>
+                <line x1="34" y1="56" x2="32" y2="70" stroke="#c9a87c" stroke-width="1" stroke-opacity="0.45" stroke-linecap="round"/>
+                <line x1="48" y1="54" x2="46" y2="68" stroke="#c9a87c" stroke-width="1" stroke-opacity="0.45" stroke-linecap="round"/>
+                <!-- Head -->
+                <circle cx="58" cy="40" r="6" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.42" fill="none"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">The White Horse · Sovereign Exposure</div>
+              <div class="sigil-text">The horse Godiva rode is typically depicted as white — the color of sovereignty in Celtic tradition, the sacred horse that carries the body of the queen in ritual procession. The white horse is the oldest symbol of the land's sovereignty in British mythology: Epona, the horse goddess; the white horse cut into the chalk at Uffington; the mare that consecrates the king in Indo-European ritual. Godiva's ride, stripped of the titillation that history layered onto it, is a ritual act in the ancient lineage of the sovereignty goddess who rides out to be witnessed by the people. Her hair — unbound, flowing over her nakedness — is the only garment of the consecrated feminine. The white horse carries both the vulnerability and the power of the woman who offers the most sacred thing she has in exchange for justice.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ALMODIS DE LA MARCHE -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">c. 1020 – 1071</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Almodis de la Marche</div>
+        <div class="ancestor-epithet">Countess of Barcelona · Consors et Auctrix · She Who Wrote the Law</div>
+        <div class="ancestor-meta">Limousin · Toulouse · Barcelona · c. 1020 – 1071</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">Occitania at its height — the culture of troubadours, of courtly love as philosophy, of Latin and Arabic scholarship flowing northward from al-Andalus. The limestone plateaus and warm rivers between the Pyrenees and the Massif Central, where the vernacular language of Occitan was giving birth to the first secular poetry of Western Europe. Almodis was born into this world, married into the Lusignan line — Melusine's direct descendants — and moved through three marriages across the most politically significant courts of southern France and the Spanish March. She was abducted from Toulouse by Ramon Berenguer I, taken by fleet from Narbonne while still married. They were both excommunicated. She accepted this.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">She co-authored the Usages of Barcelona — the first comprehensive legal code of Catalonia — and was named in it as consors et auctrix: partner and author. Her husband called her radiant upon earth. Her stepson murdered her in October 1071, stabbing her in the castle she had helped build. The unresolved: the woman who writes the law has no protection under it. She built a legal architecture for a dynasty that could not protect her from the violence inside its own walls.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Resonates with <em>Eleanor of Aquitaine</em> — the Occitan sovereignty lineage, women who held culture and governance together in their own persons. With <em>Bertila of Spoleto</em> — named co-ruler in official documents, murdered when influence exceeded what the men around her could bear. With <em>Melusine</em> — she married directly into the Lusignan line. Her sons by three different fathers all supported each other — a maternal web of loyalty crossing political borders.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Structural models · Resonance in language · Creative record. The woman who builds legal and cultural infrastructure and is killed by the structure she built. The Usages of Barcelona survived. Her name in them did not survive into common knowledge.</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Four bars (Catalan flag - the Senyera - which Almodis helped create) -->
+                <rect x="16" y="14" width="48" height="52" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.4" fill="none" rx="2"/>
+                <!-- Four red bars on gold - simplified -->
+                <rect x="16" y="22" width="48" height="7" fill="#c9a87c" fill-opacity="0.38" rx="1"/>
+                <rect x="16" y="36" width="48" height="7" fill="#c9a87c" fill-opacity="0.38" rx="1"/>
+                <rect x="16" y="50" width="48" height="7" fill="#c9a87c" fill-opacity="0.38" rx="1"/>
+                <!-- Quill (auctrix - author) -->
+                <path d="M 56 8 C 52 12 50 18 52 24 C 54 20 58 16 62 14 C 60 10 58 8 56 8 Z" fill="#c9a87c" fill-opacity="0.45"/>
+                <line x1="52" y1="24" x2="46" y2="38" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.45" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">The Four Bars and the Quill · The Senyera and the Usages</div>
+              <div class="sigil-text">The four red bars on a gold field — the Senyera, still the flag of Catalonia — were established during the reign of Ramon Berenguer I, the count Almodis married and co-ruled with. The legend of the four bars involves the Holy Roman Emperor dipping his fingers in the blood of a dying Catalan warrior and drawing them across a gold shield — but the legal and political architecture that made Catalonia coherent enough to have a lasting emblem was co-created by Almodis. The quill beside it represents the phrase consors et auctrix — partner and author. She was not merely a witness to the law; she wrote it. The four bars endure. Her authorship was nearly erased. The Senyera flies over Catalonia still, carrying the frequency of the woman who wrote the first law in the language of the people.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ELEANOR OF AQUITAINE -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">1122 – 1204</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Eleanor of Aquitaine</div>
+        <div class="ancestor-epithet">Queen of France and England · Duchess in Her Own Right · The Long Endurance</div>
+        <div class="ancestor-meta">Aquitaine · Paris · London · 1122 – 1204</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">She was born heir to the largest territory in France — Aquitaine and Gascony, the warm south, the olive-and-vine country of Occitania. She brought this territory into two marriages: Louis VII of France, then Henry II of England. She went on Crusade. She governed England as regent. She patronized the troubadours and helped shape the literature of courtly love into a cultural force. She was one of the most educated women of her century and one of the most powerful people — regardless of gender — in Western Europe.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">Henry imprisoned her for sixteen years after she supported her sons' rebellion against him. Sixteen years in comfortable captivity — Sarum, Winchester, various castles — her power suspended, her territory held for her but not by her. She outlived Henry, was released by her son Richard, and governed again at eighty. But the sixteen years ask a question: what does it mean to survive a confinement that long and emerge still yourself? The unresolved is the cost of that survival — what was held, what was lost, what could never be spoken.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Resonates with <em>Almodis de la Marche</em> — the Occitan sovereignty lineage, women who carry culture as governance. With <em>Robert the Bruce</em> — the long imprisonment followed by the decision to continue. Her court at Poitiers after her separation from Louis — where she gathered poets — is the clearest historical example of the Creative Record cluster: how art and story can be held as instruments of governance, how a woman imprisoned in body can continue to govern through the cultural forms she has set in motion.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Creative record · Resonance in language · Structural models. The great patron who shapes culture from inside political constraint. Her life illuminates how the creative record cluster functions as a form of sovereignty that cannot be imprisoned.</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Eagle of Aquitaine (Eleanor's personal arms) -->
+                <path d="M 40 14 C 32 14 22 20 20 30 C 26 26 32 26 38 30 L 40 34 L 42 30 C 48 26 54 26 60 30 C 58 20 48 14 40 14 Z" fill="#c9a87c" fill-opacity="0.42"/>
+                <path d="M 40 34 L 38 44 L 32 54 L 40 52 L 48 54 L 42 44 Z" fill="#c9a87c" fill-opacity="0.3"/>
+                <!-- Eagle wings spread wider -->
+                <path d="M 38 30 C 28 26 14 28 10 36 C 20 32 30 34 38 40 Z" fill="#c9a87c" fill-opacity="0.25"/>
+                <path d="M 42 30 C 52 26 66 28 70 36 C 60 32 50 34 42 40 Z" fill="#c9a87c" fill-opacity="0.25"/>
+                <!-- Crown -->
+                <path d="M 34 12 L 34 16 L 36 14 L 40 18 L 44 14 L 46 16 L 46 12 Z" fill="#c9a87c" fill-opacity="0.5"/>
+                <!-- Lyre (troubadours / court of love) -->
+                <path d="M 34 62 Q 34 70 40 70 Q 46 70 46 62" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.45" fill="none"/>
+                <line x1="34" y1="62" x2="34" y2="56" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.4"/>
+                <line x1="46" y1="62" x2="46" y2="56" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.4"/>
+                <line x1="36" y1="58" x2="44" y2="58" stroke="#c9a87c" stroke-width="0.5" stroke-opacity="0.35"/>
+                <line x1="37" y1="62" x2="37" y2="56" stroke="#c9a87c" stroke-width="0.4" stroke-opacity="0.3"/>
+                <line x1="40" y1="62" x2="40" y2="56" stroke="#c9a87c" stroke-width="0.4" stroke-opacity="0.3"/>
+                <line x1="43" y1="62" x2="43" y2="56" stroke="#c9a87c" stroke-width="0.4" stroke-opacity="0.3"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">The Eagle of Aquitaine and the Lyre</div>
+              <div class="sigil-text">Eleanor's personal arms featured the Eagle of Aquitaine — a gold eagle on a red field, the emblem of the duchy she held in her own right from the age of fifteen. The eagle is the highest-flying bird, the one that sees from the greatest distance, the charge of imperial sovereignty and prophetic vision. Eleanor's eagle differs from Henry's Plantagenet lions in one crucial respect: it is hers alone, not acquired through marriage. The lyre represents what she built that could not be imprisoned — the court at Poitiers, the troubadour tradition, the culture of courtly love as a philosophical system that encoded the sovereignty of the beloved. When Eleanor was confined to Sarum Castle, the songs her poets had composed continued to circulate through every court in Europe. The eagle endured. The lyre kept singing. The woman who creates culture governs in perpetuity.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SIR JOHN BROCAS -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">c. 1298 – 1365</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Sir John Brocas</div>
+        <div class="ancestor-epithet">Knight of Windsor · Master of the King's Horse · The Insider-Outsider</div>
+        <div class="ancestor-meta">Gascony · Windsor · Berkshire, England · c. 1298 – 1365</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">His father Arnold was a Gascon officer in the English army, killed almost certainly at Bannockburn in 1314. The three Brocas brothers were brought as orphaned boys to Windsor Castle and raised under Edward II's protection. Windsor: the great round tower on the Thames, still charged with Edward III's ambition to revive the Round Table. John grew up inside the idea of Arthurian chivalry as a living political project. He invested in land near Windsor, married an English woman, and rooted himself in the country his father died serving. By 1340 he was at the Naval Battle of Sluys. He was knighted shortly after.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">He served Edward III closely enough to be given robes for the great tournaments that led to the founding of the Order of the Garter. But neither he nor his sons were made Knights of the Garter. The historians note: there may have been prejudice against Gascons rising too high. He was loyal enough to be present at the founding of the highest order of English chivalry, but foreign enough to be excluded from it. The unresolved: the servant of a culture that will take your father's life and your own service but will not fully name you as its own.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Resonates with <em>Henry the Fowler</em> — the builder of institution who operates in service of a larger vision without claiming its center. With <em>Arthur and Merlin</em> — he lived inside Edward III's deliberate Arthurian revival, the actual horses and tournaments through which a medieval king tried to resurrect the round table. His son Bernard became one of the Black Prince's closest companions. The Brocas thread: foreigners who gave everything to an English project that never quite made them English.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Structural models · Threshold events. The orphaned child raised in the castle of power. The insider-outsider. His life illuminates the pattern of the diaspora body — the person who serves a culture from within it while never being fully absorbed, and what that productive marginality makes possible.</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Brocas arms: Sable, a lion rampant guardant Or -->
+                <!-- Dark field -->
+                <rect x="14" y="10" width="52" height="60" rx="4" fill="rgba(0,0,0,0.4)" stroke="#c9a87c" stroke-width="0.7" stroke-opacity="0.4"/>
+                <!-- Lion rampant guardant (facing viewer) -->
+                <path d="M 36 22 C 30 20 26 24 26 30 C 26 36 30 38 34 36 L 34 46 C 34 54 38 60 44 60 L 44 68 L 48 68 L 48 60 C 54 58 58 52 58 44 L 58 36 C 62 38 66 36 66 30 C 66 24 62 20 56 22 L 52 26 L 44 22 Z" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.6" fill="rgba(201,168,124,0.12)"/>
+                <!-- Face forward (guardant) -->
+                <circle cx="44" cy="26" r="4" stroke="#c9a87c" stroke-width="0.7" stroke-opacity="0.5" fill="none"/>
+                <circle cx="42" cy="25" r="1.2" fill="#c9a87c" fill-opacity="0.5"/>
+                <circle cx="46" cy="25" r="1.2" fill="#c9a87c" fill-opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">Sable, a Lion Rampant Guardant Or · Brocas Arms</div>
+              <div class="sigil-text">The documented Brocas arms are precisely these: a gold lion rampant guardant on a black field. The sable field — black — is the color of determination, constancy, and grief in heraldic tradition. The lion rampant guardant is distinct from the ordinary lion rampant: this lion faces the viewer directly, its gaze meeting yours rather than turned in profile. This is the posture of the witness, the one who looks back at you while rising. The gold lion on black encodes the fundamental tension of this ancestor's life: brilliance within darkness, valor within constraint, the Gascon knight who carried the gold of service on the field of his father's foreign death. The lion looks forward, directly. It does not turn away.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROBERT THE BRUCE -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">1274 – 1329</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Robert de Bruce</div>
+        <div class="ancestor-epithet">King of Scots · The Spider's Lesson · The Rebuilt Sovereignty</div>
+        <div class="ancestor-meta">Ayrshire · Borders · Scotland · 1274 – 1329</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">Scotland under English occupation — the hills and lochs of Ayrshire, the Borders as terrain of guerrilla war, hiding, cold, endurance. Bruce came from Anglo-Norman nobility, had served Edward I of England, had wavered between factions. He had John Comyn murdered at a Franciscan church in Dumfries — a sacrilege that forced his hand — and was crowned King of Scots at Scone in 1306. Then Edward I destroyed his army, executed his friends, imprisoned his wife and daughter. Bruce fled to the islands with perhaps a handful of men.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">The cave and the spider. A man in total defeat watching a spider try again and again to spin its web until it succeeded. He returned. He rebuilt. Bannockburn in 1314 came after eight years of hiding and beginning again. But he died in 1329 without seeing his son's coronation, without knowing if what he had built would hold. The unresolved: whether the work of rebuilding means anything if you don't live to see it established. And the murder at Dumfries — the necessary violence that made everything else possible and left a stain the victory never quite washed clean.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Resonates with <em>Henry the Fowler</em> — the patient builder who uses the time of apparent defeat as the material of eventual victory. With <em>Eleanor of Aquitaine</em> — the long imprisonment followed by emergence. With <em>Boudicca</em> — defeat that doesn't end the story. The spider thread: the capacity to begin again, not because success is assured, but because beginning again is what the living do.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Body as active practice · Threshold events · Structural models. Complete defeat as the precondition for the real work. The spider is his totem: small, patient, responsive to conditions, trying again without drama.</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Bruce arms: Or, a lion rampant Gules (gold field, red lion) -->
+                <rect x="14" y="10" width="52" height="60" rx="4" fill="rgba(201,168,124,0.1)" stroke="#c9a87c" stroke-width="0.7" stroke-opacity="0.4"/>
+                <!-- Red (here gold stroke) lion rampant -->
+                <path d="M 36 22 C 30 20 26 24 26 30 C 26 36 30 38 34 36 L 34 46 C 34 54 38 60 44 60 L 44 68 L 48 68 L 48 60 C 54 58 58 52 58 44 L 58 36 C 62 38 66 36 66 30 C 66 24 62 20 56 22 L 52 26 L 44 22 Z" stroke="#c9a87c" stroke-width="1" stroke-opacity="0.7" fill="rgba(201,168,124,0.18)"/>
+                <!-- Spider in corner (the lesson) -->
+                <circle cx="20" cy="16" r="3" fill="#c9a87c" fill-opacity="0.35"/>
+                <line x1="20" y1="13" x2="20" y2="8"  stroke="#c9a87c" stroke-width="0.5" stroke-opacity="0.4"/>
+                <line x1="17" y1="15" x2="12" y2="12" stroke="#c9a87c" stroke-width="0.5" stroke-opacity="0.4"/>
+                <line x1="23" y1="15" x2="28" y2="12" stroke="#c9a87c" stroke-width="0.5" stroke-opacity="0.4"/>
+                <line x1="17" y1="18" x2="12" y2="20" stroke="#c9a87c" stroke-width="0.5" stroke-opacity="0.4"/>
+                <line x1="23" y1="18" x2="28" y2="20" stroke="#c9a87c" stroke-width="0.5" stroke-opacity="0.4"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">Or, a Lion Rampant Gules · The Spider's Web · Royal Arms of Scotland</div>
+              <div class="sigil-text">The Royal Arms of Scotland — or, a lion rampant gules, double-tressure flory counter-flory — are among the oldest and most precisely documented royal arms in Europe. The gold field of the Bruce line carries the lion rampant in red: gold for sovereignty, valor, and generosity; red for the sacrifice and the fire of reclamation. This lion is the ancestor of the lion in Christy's personal triquetra lineage — the lion that appears across multiple bloodlines, gold on red and gold on black, the dominant charge of this entire weaving. The spider, added here in the corner, is not heraldic but mythic: the small creature that taught the greatest lesson in this lineage about what patience, repetition, and refusal to accept permanent defeat actually look like in practice. Begin again. And again. Until the web holds.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="era-divider" style="animation-delay:0.1s"><span class="era-label">Renaissance</span></div>
+
+<!-- FRANÇOISE DE FOIX — CONSTANCE DE CHÂTEAUBRIANT -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">c. 1495 – 1537</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Françoise de Foix</div>
+        <div class="ancestor-epithet">Comtesse de Châteaubriant · La Mye du Roi · The Patron in the Tower</div>
+        <div class="ancestor-meta">House of Foix · Brittany · The French Court · c. 1495 – 1537</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">The French Renaissance court of Francis I — Amboise, Fontainebleau, the Loire Valley — glittering, lethal, operating by rules that could destroy a woman in a single season. Françoise was born into the House of Foix, the great Gascon noble family with connections to the crown of Navarre, and brought to court as a lady-in-waiting to Queen Anne of Brittany. The Château de Châteaubriant, the seat she married into, sits in the limestone country of southern Brittany — older, heavier, less dazzling than the Loire castles but more enduring. By 1519 she was publicly known as the king's first official mistress. Francis called her la mye du roi — the sweetheart of the king — before the assembled court at the Dauphin's baptism. Against her wishes.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">She was the first of Francis's official mistresses — a decade of proximity to power without the power itself. When he was captured at Pavia in 1525, his regent-mother used the absence to install a younger rival. Françoise returned to her husband Jean de Laval at Châteaubriant in 1528 — the jealous, violent man who had tolerated the affair while Francis rewarded him with governorships, and who now had her alone. She died on October 16, 1537. Contemporary rumors spoke of poisoning, of the tower, of a husband's slow revenge. The documentation is incomplete. The pattern is ancient: the woman whose value to powerful men made her a target for the man who was supposed to protect her. The unresolved: what happened between 1528 and 1537 in the Château de Châteaubriant, and whether the woman who had been called radiant by a king died in a tower built by his favor.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Resonates with <em>Eleanor of Aquitaine</em> — the woman of genuine culture and intelligence whose confinement was made possible by the political arrangements that had supposedly protected her. With <em>Almodis de la Marche</em> — murdered inside the structure she helped build. With <em>Bertila of Spoleto</em> — the woman who reaches the summit of proximity to power and is removed in the same year. The House of Foix connects her directly to the Navarre and Aquitaine lineages — she is the bearer of the Occitan sovereignty frequency into the French Renaissance, the last woman in this lineage for whom that culture was a living inheritance rather than a historical memory.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">Creative record · Resonance in language · Threshold events. The cultural patron whose intellectual life survived the collapse of her political one. She had a translation of Plutarch's Life of Antony dedicated to her — she was read, taken seriously, recognized as a mind. That recognition did not protect her body. Her life illuminates the creative record cluster through its most painful question: what does a woman's intelligence count for in a world that values her primarily as a political object?</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- House of Foix arms: Or, three bars gules (simplified) -->
+                <rect x="16" y="12" width="48" height="56" rx="3" fill="rgba(201,168,124,0.08)" stroke="#c9a87c" stroke-width="0.7" stroke-opacity="0.4"/>
+                <rect x="16" y="24" width="48" height="8" fill="#c9a87c" fill-opacity="0.32" rx="1"/>
+                <rect x="16" y="40" width="48" height="8" fill="#c9a87c" fill-opacity="0.32" rx="1"/>
+                <rect x="16" y="56" width="48" height="8" fill="#c9a87c" fill-opacity="0.32" rx="1"/>
+                <!-- Tower (the Châteaubriant tower, possible imprisonment) -->
+                <rect x="34" y="4"  width="12" height="14" stroke="#c9a87c" stroke-width="0.7" stroke-opacity="0.45" fill="none"/>
+                <rect x="34" y="4"  width="4"  height="4"  stroke="#c9a87c" stroke-width="0.5" stroke-opacity="0.35" fill="none"/>
+                <rect x="42" y="4"  width="4"  height="4"  stroke="#c9a87c" stroke-width="0.5" stroke-opacity="0.35" fill="none"/>
+                <!-- Single window (light in the tower) -->
+                <circle cx="40" cy="12" r="1.5" fill="#c9a87c" fill-opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">Or, Three Bars Gules · The Tower of Châteaubriant</div>
+              <div class="sigil-text">The House of Foix bore three red bars on a gold field — the same horizontally banded structure as the Catalan Senyera, the same lineage of sovereign women marking their territory with color and line. The three bars encode the three estates she inhabited simultaneously: the noblewoman, the royal mistress, the wife in the tower. The tower of Châteaubriant appears as the second symbol not as confirmed fact but as the myth that contains the truth the documentation cannot: the woman who shone at court, who had translations dedicated to her, who was called radiant — reduced to a room, a window, a dimming. In the tradition of this lineage, towers appear as both prison and sanctuary: Eleanor at Sarum, Melusine in the castle she built, Magdalene in her cave. The tower is where the women of this lineage go to survive what cannot be survived in the open world. The light in the window persists.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHRISTINA YOUNG — placeholder -->
+<div class="ancestor" onclick="toggleAncestor(this)">
+  <div class="ancestor-date">entering the weaving</div>
+  <div class="ancestor-card">
+    <div class="ancestor-header">
+      <div class="ancestor-name-block">
+        <div class="ancestor-name">Christina Young</div>
+        <div class="ancestor-epithet">She of the Sovereign Descent · Awaiting the Full Story</div>
+        <div class="ancestor-meta">Lives in the Sovereign Descent lineage · details emerging</div>
+      </div>
+      <span class="ancestor-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="ancestor-layers">
+      <div class="ancestor-layers-inner">
+        <div class="layer layer-terroir">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Terroir</div>
+          <div class="layer-text">Christina Young is present in this lineage through the Sovereign Descent — the thread that connects to the chapter of that name in <em>Revolutionary Icons</em>. Her specific terrain, her era, and the geography she inhabited are awaiting the fuller story. What is known is that she has spoken into this lineage with enough clarity to be named here, and that her presence in the Sovereign Descent work means she carries the frequency of that particular threshold: the crossing from the unresolved into the reclaimed. Her terroir will be written when she brings it forward.</div>
+        </div>
+        <div class="layer layer-unresolved">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Unresolved</div>
+          <div class="layer-text">The unresolved in Christina Young's thread is not yet fully visible. What she carried, what was done to her, what she could not complete in her own lifetime — these are questions the lineage work will answer as her story emerges. The placeholder itself is significant: she has made herself known before the full account is ready. This is the nature of ancestral weaving — the ancestors do not wait to be fully researched before they arrive. They arrive first. The story follows.</div>
+        </div>
+        <div class="layer layer-thread">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Living Thread</div>
+          <div class="layer-text">Christina Young lives in the <em>Sovereign Descent</em> lineage — the thread of women whose sovereignty was taken from them and who passed the potential of its reclamation forward through their bloodline. She resonates with every woman in this weaving whose full capacity was not recognized in her own lifetime. Her living thread will be drawn more precisely as her story reveals itself.</div>
+        </div>
+        <div class="layer layer-lineage">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Lineage</div>
+          <div class="layer-text">To be determined. Christina Young's map coordinates within the navigation system will emerge from the fuller story. What is already visible is that she belongs to the sovereign descent cluster — the lineage of women whose unresolved patterns are the precise material of the healing work this weaving serves.</div>
+        </div>
+        <div class="layer layer-sigil layer-sigil-full">
+          <div class="layer-label"><span class="layer-label-dot"></span>The Sigil</div>
+          <div class="sigil-inner">
+            <div class="sigil-art">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Placeholder: an open, receptive vessel -->
+                <path d="M 24 28 L 20 64 Q 20 68 40 68 Q 60 68 60 64 L 56 28 Z" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.4" fill="rgba(201,168,124,0.04)"/>
+                <!-- Opening at top - wide, receiving -->
+                <path d="M 24 28 Q 40 20 56 28" stroke="#c9a87c" stroke-width="0.8" stroke-opacity="0.45" fill="none"/>
+                <!-- Light entering -->
+                <line x1="40" y1="10" x2="40" y2="24" stroke="#c9a87c" stroke-width="0.6" stroke-opacity="0.4" stroke-dasharray="2 3"/>
+                <line x1="32" y1="12" x2="34" y2="24" stroke="#c9a87c" stroke-width="0.5" stroke-opacity="0.28" stroke-dasharray="2 3"/>
+                <line x1="48" y1="12" x2="46" y2="24" stroke="#c9a87c" stroke-width="0.5" stroke-opacity="0.28" stroke-dasharray="2 3"/>
+                <circle cx="40" cy="8" r="2" fill="#c9a87c" fill-opacity="0.4"/>
+              </svg>
+            </div>
+            <div class="sigil-description">
+              <div class="sigil-name">The Open Vessel · Awaiting the Full Story</div>
+              <div class="sigil-text">Christina Young's sigil is held here as an open vessel — not empty, but receptive, awaiting the content that will fill it as her story comes more fully into focus. The vessel that is open at the top is one of the oldest sacred forms: the cup, the grail, the chalice. It receives what descends. It holds what is poured. It offers what it contains. The light entering from above is not metaphor but signal — she has already made herself known through the Sovereign Descent lineage, and the fact of her arrival into this weaving before her full story is told is itself significant. The ancestors come first. We follow with the research and the writing. This vessel waits for her to fill it with what she needs us to know.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end timeline -->
+
+<div class="weaving-footer">
+  <p class="footer-note">This archive is living. Each entry will deepen as the ancestors speak more clearly, and new voices will enter the weaving as they make themselves known. The research is the practice. The writing is the witness.</p>
+  <a href="index.html" class="footer-link">← Return to the Navigation Map</a>
+</div>
+
+</div><!-- end page -->
+
+<script>
+function toggleAncestor(el) {
+  var wasOpen = el.classList.contains('open');
+  el.classList.toggle('open', !wasOpen);
+}
+</script>
+</body>
+</html>
