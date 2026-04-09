@@ -25,6 +25,9 @@
   --conceptual-bg: rgba(109,216,178,0.08);
   --somatic-bg: rgba(245,170,136,0.08);
   --astro-gold: rgba(212,168,76,0.14);
+  /* Arc colours */
+  --descent: rgba(196,190,248,0.08);
+  --return: rgba(109,216,178,0.08);
 }
 html { scroll-behavior: smooth; }
 body {
@@ -61,24 +64,24 @@ body::before {
   font-weight: 300; font-style: italic;
   color: var(--text); line-height: 1.05;
 }
-.header-rule {
-  width: 48px; height: 1px;
-  background: var(--gold-dim); margin: 1.25rem auto;
-}
+.header-rule { width: 48px; height: 1px; background: var(--gold-dim); margin: 1.25rem auto; }
 .header-sub {
   font-size: 16px; font-weight: 300;
   color: var(--text-secondary);
-  max-width: 460px; margin: 0 auto 1rem; line-height: 1.8;
+  max-width: 520px; margin: 0 auto 0.75rem; line-height: 1.8;
 }
-.weaving-link {
-  display: inline-block; font-size: 15px;
-  font-weight: 400; color: var(--gold);
-  letter-spacing: 0.08em; text-decoration: none;
-  border-bottom: 1px solid var(--gold-dim);
-  padding-bottom: 2px;
+.header-links {
+  display: flex; justify-content: center;
+  gap: 2rem; flex-wrap: wrap; margin-top: 0.75rem;
+}
+.header-link {
+  font-size: 15px; font-weight: 400;
+  color: var(--gold); letter-spacing: 0.08em;
+  text-decoration: none;
+  border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px;
   transition: color 0.2s, border-color 0.2s;
 }
-.weaving-link:hover { color: #dfc090; border-color: var(--gold); }
+.header-link:hover { color: #dfc090; border-color: var(--gold); }
 
 /* ── View Toggle ── */
 .view-toggle {
@@ -99,10 +102,10 @@ body::before {
 .toggle-btn.active { background: var(--gold); color: #09090f; border-color: var(--gold); font-weight: 500; }
 .toggle-btn:not(.active):hover { border-color: var(--gold-dim); color: var(--text); }
 
-/* ── Axis ── */
+/* ── Central axis ── */
 .axis-card {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 16px; margin-bottom: 1.25rem;
+  border-radius: 16px; margin-bottom: 1.5rem;
   text-align: center; position: relative; overflow: hidden;
   opacity: 0; animation: fadeUp 0.9s ease 0.15s forwards;
   transition: border-color 0.4s;
@@ -127,8 +130,7 @@ body.astro-view .axis-card { border-color: rgba(212,168,76,0.22); }
 }
 .axis-sub {
   font-size: 17px; color: var(--text-secondary);
-  line-height: 1.8; max-width: 620px;
-  margin: 0 auto 2rem;
+  line-height: 1.8; max-width: 620px; margin: 0 auto 2rem;
 }
 .birds { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; }
 .bird-item { padding: 0.6rem 2rem; text-align: center; }
@@ -146,9 +148,25 @@ body.astro-view .axis-card { border-color: rgba(212,168,76,0.22); }
 }
 body.astro-view .astro-axis-note { max-height: 160px; opacity: 1; margin-top: 1.5rem; }
 .astro-axis-inner { padding: 1.25rem 0 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.astro-axis-glyphs { font-size: 1.8rem; color: var(--gold); letter-spacing: 0.15em; line-height: 1; }
+.astro-axis-glyphs { font-size: 1.8rem; color: var(--gold); letter-spacing: 0.15em; }
 .astro-axis-label { font-size: 15px; color: var(--text-secondary); letter-spacing: 0.07em; }
 .astro-axis-principle { font-size: 16px; font-style: italic; font-family: 'Cormorant Garamond', serif; color: var(--text-dim); line-height: 1.7; max-width: 560px; }
+
+/* ── Arc labels ── */
+.arc-label {
+  text-align: center; margin: 2rem 0 1rem;
+  opacity: 0; animation: fadeUp 0.9s ease forwards;
+}
+.arc-label-inner {
+  display: inline-flex; align-items: center; gap: 1rem;
+}
+.arc-rule { width: 60px; height: 1px; background: var(--border); }
+.arc-text {
+  font-size: 12px; font-weight: 400;
+  letter-spacing: 0.2em; color: var(--text-dim);
+  text-transform: uppercase;
+}
+.arc-glyph { font-size: 15px; color: var(--gold); opacity: 0.6; }
 
 /* ── Legend ── */
 .legend {
@@ -156,42 +174,47 @@ body.astro-view .astro-axis-note { max-height: 160px; opacity: 1; margin-top: 1.
   gap: 1.75rem; margin-bottom: 1.25rem; flex-wrap: wrap;
   opacity: 0; animation: fadeUp 0.9s ease 0.25s forwards;
 }
-.legend-item { display: flex; align-items: center; gap: 9px; font-size: 15px; color: var(--text-secondary); font-weight: 300; letter-spacing: 0.05em; }
+.legend-item { display: flex; align-items: center; gap: 9px; font-size: 15px; color: var(--text-secondary); font-weight: 300; }
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
 .legend-dot.m { background: var(--mythic); opacity: 0.85; }
 .legend-dot.c { background: var(--conceptual); opacity: 0.85; }
 .legend-dot.s { background: var(--somatic); opacity: 0.85; }
 
-/* ── Cluster grid ── */
-.cluster-grid {
+/* ── Grid ── */
+.field-grid {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 14px; margin-bottom: 14px;
 }
-.full-width-cluster { margin-bottom: 14px; }
+.field-grid-wide { margin-bottom: 14px; }
 
-/* ── Cards ── */
-.cluster-card, .lang-card, .full-width-card {
+/* ── Field cards ── */
+.field-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 16px; overflow: hidden; cursor: pointer;
   transition: border-color 0.25s, background 0.25s;
   opacity: 0; animation: fadeUp 0.9s ease forwards;
 }
-.cluster-card:nth-child(1) { animation-delay: 0.4s; }
-.cluster-card:nth-child(2) { animation-delay: 0.5s; }
-.cluster-card:nth-child(3) { animation-delay: 0.6s; }
-.cluster-card:nth-child(4) { animation-delay: 0.7s; }
-.full-width-cluster .full-width-card:nth-child(1) { animation-delay: 0.75s; }
-.full-width-cluster .full-width-card:nth-child(2) { animation-delay: 0.85s; }
-.full-width-cluster .full-width-card:nth-child(3) { animation-delay: 0.95s; }
-.full-width-cluster .lang-card { animation-delay: 1.0s; }
-.cluster-card:hover, .lang-card:hover, .full-width-card:hover { border-color: var(--border-hover); background: var(--surface-2); }
-.cluster-card.open, .lang-card.open, .full-width-card.open { border-color: var(--border-hover); background: var(--surface-2); }
-.lang-card { margin-bottom: 14px; }
-.card-art { width: 100%; height: 110px; display: block; border-bottom: 1px solid var(--border); }
-.card-art-wide { width: 100%; height: 90px; display: block; border-bottom: 1px solid var(--border); }
+.field-card:hover { border-color: var(--border-hover); background: var(--surface-2); }
+.field-card.open  { border-color: var(--border-hover); background: var(--surface-2); }
+
+/* Descent arc — faint violet tint on hover */
+.field-card.descent:hover { border-color: rgba(196,190,248,0.3); }
+.field-card.descent.open  { border-color: rgba(196,190,248,0.3); }
+/* Return arc — faint teal tint on hover */
+.field-card.return-arc:hover { border-color: rgba(109,216,178,0.3); }
+.field-card.return-arc.open  { border-color: rgba(109,216,178,0.3); }
+
+.card-art      { width: 100%; height: 110px; display: block; border-bottom: 1px solid var(--border); }
+.card-art-wide { width: 100%; height: 90px;  display: block; border-bottom: 1px solid var(--border); }
 .card-body { padding: 1.6rem 1.8rem; }
 .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
-.card-title { font-family: 'Cormorant Garamond', serif; font-size: 1.45rem; font-weight: 500; color: var(--text); line-height: 1.25; }
+.field-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem; font-weight: 300; font-style: italic;
+  color: var(--text-dim); margin-top: 4px; flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+.card-title { font-family: 'Cormorant Garamond', serif; font-size: 1.45rem; font-weight: 500; color: var(--text); line-height: 1.2; flex: 1; }
 .card-chevron { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border-hover); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 3px; transition: border-color 0.3s; }
 .card-chevron svg { width: 11px; height: 11px; stroke: var(--gold); fill: none; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
 .open .card-chevron svg { transform: rotate(180deg); }
@@ -200,10 +223,11 @@ body.astro-view .astro-axis-note { max-height: 160px; opacity: 1; margin-top: 1.
 
 /* ── Astro panel ── */
 .astro-panel { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.45s ease, opacity 0.4s ease; border-top: 1px solid var(--astro-gold); margin-top: 0; }
-body.astro-view .astro-panel { max-height: 220px; opacity: 1; margin-top: 1rem; }
+body.astro-view .astro-panel { max-height: 240px; opacity: 1; margin-top: 1rem; }
 .astro-panel-inner { padding: 1rem 0 0; }
-.astro-planets { font-size: 1.6rem; color: var(--gold); letter-spacing: 0.14em; line-height: 1; margin-bottom: 6px; }
-.astro-rulers { font-size: 15px; font-weight: 400; color: var(--text-dim); letter-spacing: 0.07em; margin-bottom: 8px; }
+.astro-sign { font-size: 15px; font-weight: 500; color: var(--gold); letter-spacing: 0.12em; margin-bottom: 4px; }
+.astro-planets { font-size: 1.5rem; color: var(--gold); letter-spacing: 0.14em; line-height: 1; margin-bottom: 5px; }
+.astro-rulers { font-size: 15px; font-weight: 400; color: var(--text-dim); letter-spacing: 0.06em; margin-bottom: 8px; }
 .astro-principle { font-size: 16px; font-style: italic; font-family: 'Cormorant Garamond', serif; color: var(--text-secondary); line-height: 1.75; }
 
 /* ── Registers ── */
@@ -222,7 +246,7 @@ body.astro-view .astro-panel { max-height: 220px; opacity: 1; margin-top: 1rem; 
 
 /* ── Aspects ── */
 .aspects-section { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.6s ease, opacity 0.5s ease; margin-bottom: 0; }
-body.astro-view .aspects-section { max-height: 4000px; opacity: 1; margin-bottom: 14px; }
+body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom: 14px; }
 .aspects-header { text-align: center; font-size: 15px; letter-spacing: 0.16em; color: var(--gold); text-transform: uppercase; margin-bottom: 16px; padding-top: 4px; }
 .aspect-thread { background: var(--surface); border: 1px solid rgba(212,168,76,0.1); border-radius: 14px; padding: 1.4rem 2rem; margin-bottom: 10px; }
 .aspect-row { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 0.85rem; flex-wrap: wrap; }
@@ -234,22 +258,24 @@ body.astro-view .aspects-section { max-height: 4000px; opacity: 1; margin-bottom
 .aspect-description { font-size: 16px; font-style: italic; font-family: 'Cormorant Garamond', serif; color: var(--text-secondary); line-height: 1.85; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 0.85rem; }
 
 /* ── Footer ── */
-.map-footer { text-align: center; margin-top: 3rem; opacity: 0; animation: fadeUp 0.9s ease 1.2s forwards; }
+.map-footer { text-align: center; margin-top: 3rem; opacity: 0; animation: fadeUp 0.9s ease 1.6s forwards; }
 .footer-rule { width: 36px; height: 1px; background: var(--border); margin: 0 auto 1.1rem; }
 .footer-note { font-size: 16px; color: var(--text-dim); font-style: italic; font-family: 'Cormorant Garamond', serif; letter-spacing: 0.03em; margin-bottom: 1rem; }
-.footer-weaving { font-size: 15px; color: var(--gold); text-decoration: none; letter-spacing: 0.08em; border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px; transition: color 0.2s; }
-.footer-weaving:hover { color: #dfc090; }
 
 @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 
-@media (max-width: 900px) {
-  .page { padding: 3rem 2rem 5rem; }
-  .cluster-grid { gap: 10px; }
-  .card-body { padding: 1.4rem 1.5rem; }
-}
-@media (max-width: 640px) {
+/* Animation delays by field position */
+.field-card:nth-child(1) { animation-delay: 0.35s; }
+.field-card:nth-child(2) { animation-delay: 0.42s; }
+.field-card:nth-child(3) { animation-delay: 0.49s; }
+.field-card:nth-child(4) { animation-delay: 0.56s; }
+.field-card:nth-child(5) { animation-delay: 0.63s; }
+.field-card:nth-child(6) { animation-delay: 0.70s; }
+
+@media (max-width: 900px)  { .page { padding: 3rem 2rem 5rem; } .field-grid { gap: 10px; } .card-body { padding: 1.4rem 1.5rem; } }
+@media (max-width: 640px)  {
   .page { padding: 2.5rem 1.25rem 4rem; }
-  .cluster-grid { grid-template-columns: 1fr; }
+  .field-grid { grid-template-columns: 1fr; }
   .birds { flex-direction: column; gap: 0.5rem; }
   .bird-divider { width: 40px; height: 1px; }
   .reg-item { flex-direction: column; gap: 0.5rem; }
@@ -267,8 +293,11 @@ body.astro-view .aspects-section { max-height: 4000px; opacity: 1; margin-bottom
   <div class="header-eyebrow">Christy Paxton Wade</div>
   <h1 class="header-title">The Navigation Map</h1>
   <div class="header-rule"></div>
-  <p class="header-sub">A living cartography of signal, threshold, and embodied knowing — three registers, eight clusters, one axis.</p>
-  <a href="ancestral-weaving.html" class="weaving-link">Enter the Ancestral Weaving →</a>
+  <p class="header-sub">Thirteen fields through the turning year. A complete initiatory arc — from pre-incarnation geometry to the sovereign return. Every field is an entry point. The map turns with the wheel.</p>
+  <div class="header-links">
+    <a href="fieldguide.html" class="header-link">The Fieldguide ↗</a>
+    <a href="ancestral-weaving.html" class="header-link">Ancestral Weaving ↗</a>
+  </div>
 </header>
 
 <div class="view-toggle">
@@ -291,14 +320,14 @@ body.astro-view .aspects-section { max-height: 4000px; opacity: 1; margin-bottom
       <path d="M 720 40 C 708 48 700 52 690 52 C 699 48 709 45 720 40 Z" fill="#f5aa88" fill-opacity="0.34"/>
       <line x1="720" y1="40" x2="738" y2="33" stroke="#f5aa88" stroke-width="0.9" stroke-opacity="0.45" stroke-linecap="round"/>
       <path d="M 188 52 Q 300 24 396 40 Q 520 60 680 32" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.18" stroke-dasharray="4 8"/>
-      <circle cx="62" cy="44" r="0.8" fill="#d4a84c" fill-opacity="0.18"/>
-      <circle cx="820" cy="54" r="1" fill="#f5aa88" fill-opacity="0.2"/>
+      <circle cx="62"  cy="44" r="0.8" fill="#d4a84c" fill-opacity="0.18"/>
+      <circle cx="820" cy="54" r="1"   fill="#f5aa88" fill-opacity="0.2"/>
     </svg>
   </div>
   <div class="axis-body">
     <div class="axis-eyebrow">Central axis</div>
     <div class="axis-title">Polarity held in a single body</div>
-    <p class="axis-sub">Omnidirectional perception anchored in somatic discernment.<br>Everything is a door — and the gatekeeper decides who enters when.</p>
+    <p class="axis-sub">Omnidirectional perception anchored in somatic discernment. Everything is a door — and the gatekeeper decides who enters when. Compassion is the quality of the whole axis — present in every field, belonging to none exclusively.</p>
     <div class="birds">
       <div class="bird-item"><span class="bird-name">Raven</span><span class="bird-quality">descent intelligence</span></div>
       <div class="bird-divider"></div>
@@ -310,7 +339,7 @@ body.astro-view .aspects-section { max-height: 4000px; opacity: 1; margin-bottom
       <div class="astro-axis-inner">
         <div class="astro-axis-glyphs">☉ ♊</div>
         <div class="astro-axis-label">Sun in Gemini</div>
-        <div class="astro-axis-principle">The structural fact of this map — polarity as the engine of omnidirectional perception. The twin nature that holds the entire system in productive tension without collapsing it into one.</div>
+        <div class="astro-axis-principle">The structural fact of this map — polarity as the engine of omnidirectional perception. The twin nature that holds the entire system in productive tension without collapsing it into one. The wheel turns around this axis.</div>
       </div>
     </div>
   </div>
@@ -322,11 +351,24 @@ body.astro-view .aspects-section { max-height: 4000px; opacity: 1; margin-bottom
   <div class="legend-item"><span class="legend-dot s"></span> Somatic register</div>
 </div>
 
-<!-- Cluster grid: four paired clusters -->
-<div class="cluster-grid">
+<!-- ═══════════════════════════════════ -->
+<!-- THE DESCENT: Fields I – VIII        -->
+<!-- ═══════════════════════════════════ -->
 
-<!-- Structural models -->
-<div class="cluster-card" onclick="toggle(this)">
+<div class="arc-label" style="animation-delay:0.3s">
+  <div class="arc-label-inner">
+    <div class="arc-rule"></div>
+    <span class="arc-text">The Descent</span>
+    <span class="arc-glyph">↓</span>
+    <span class="arc-text">Capricorn through Scorpio</span>
+    <div class="arc-rule"></div>
+  </div>
+</div>
+
+<div class="field-grid">
+
+<!-- I — Structural Models -->
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.38s">
   <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
     <polygon points="280,10 326,36 326,82 280,108 234,82 234,36" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.42" fill="none"/>
     <polygon points="280,32 304,45 304,73 280,86 256,73 256,45" stroke="#d4a84c" stroke-width="0.7" stroke-opacity="0.28" fill="none"/>
@@ -346,30 +388,30 @@ body.astro-view .aspects-section { max-height: 4000px; opacity: 1; margin-bottom
     <circle cx="280" cy="108" r="1.8" fill="#d4a84c" fill-opacity="0.38"/>
     <circle cx="234" cy="82" r="1.8" fill="#d4a84c" fill-opacity="0.38"/>
     <circle cx="234" cy="36" r="1.8" fill="#d4a84c" fill-opacity="0.38"/>
-    <circle cx="100" cy="55" r="1" fill="#d4a84c" fill-opacity="0.16"/>
-    <circle cx="460" cy="35" r="1" fill="#d4a84c" fill-opacity="0.16"/>
   </svg>
   <div class="card-body">
     <div class="card-header">
-      <span class="card-title">Structural models</span>
+      <span class="field-number">I</span>
+      <span class="card-title">Structural Models</span>
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
-    <div class="card-elements">Tesseract · Merkaba · Sacred geometry</div>
+    <div class="card-elements">Tesseract · Merkaba · Sacred geometry · Multidimensional awareness · Quantum leaping · Astrology</div>
     <div class="astro-panel"><div class="astro-panel-inner">
+      <div class="astro-sign">Capricorn · Aquarius</div>
       <div class="astro-planets">♄ ♅</div>
       <div class="astro-rulers">Saturn · Uranus</div>
-      <div class="astro-principle">The force that builds the container / the force that breaks it open. Form and the transcendence of form — the geometry of what contains and what exceeds.</div>
+      <div class="astro-principle">Pre-incarnation geometry. The architecture before the first breath. Saturn builds the container, Uranus ensures it cannot become a cage. The soul's coordinates before entry into matter.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">Sacred geometry as map of consciousness. The 4D object casting a distorted 3D shadow — what looks wrong from one dimension is accurate from the next.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">The current coordinate system is insufficient. The goal isn't orientation within the familiar grid — it's upgrading the dimensionality of the grid itself.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The felt sense of perceiving something true that has no available shape in ordinary language. Recognition that arrives before vocabulary does.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">Sacred geometry as the oldest language — the shapes that recur too precisely across all scales to be accidental. The tesseract: what looks wrong from one dimension is accurate from the next. Not human inventions. Recognitions.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">The current coordinate system is always insufficient. The goal is not orientation within the familiar grid — it is upgrading the dimensionality of the grid itself. Every framework both limits and liberates simultaneously.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The felt expansion behind the sternum when a pattern that seemed chaotic reveals its underlying structure. Recognition before vocabulary. The body knows the shape before the mind names it.</div></div>
     </div></div>
   </div>
 </div>
 
-<!-- Anomalous reception -->
-<div class="cluster-card" onclick="toggle(this)">
+<!-- II — Anomalous Reception -->
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.45s">
   <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
     <polyline points="20,76 90,76 104,73 118,76 142,76 168,76 180,74 192,76 210,76" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.32"/>
     <polyline points="210,76 221,69 229,52 234,32 237,18 240,10 243,8 247,8 250,11 253,20 256,36 259,54 264,70 274,76" stroke="#c4bef8" stroke-width="1.3" stroke-opacity="0.75"/>
@@ -377,31 +419,33 @@ body.astro-view .aspects-section { max-height: 4000px; opacity: 1; margin-bottom
     <polyline points="274,76 292,76 308,74 322,76 348,76 372,76 384,74 396,76 420,76 446,76 460,74 480,76 520,76 540,76" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.32"/>
     <path d="M 247 76 A 40 25 0 0 0 207 76" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.14" fill="none"/>
     <path d="M 247 76 A 72 46 0 0 0 175 76" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.09" fill="none"/>
-    <circle cx="247" cy="8" r="3.5" fill="#c4bef8" fill-opacity="0.32"/>
-    <circle cx="70" cy="38" r="1" fill="#c4bef8" fill-opacity="0.18"/>
+    <circle cx="247" cy="8"  r="3.5" fill="#c4bef8" fill-opacity="0.32"/>
+    <circle cx="70"  cy="38" r="1"   fill="#c4bef8" fill-opacity="0.18"/>
     <circle cx="420" cy="34" r="0.9" fill="#c4bef8" fill-opacity="0.18"/>
   </svg>
   <div class="card-body">
     <div class="card-header">
-      <span class="card-title">Anomalous reception</span>
+      <span class="field-number">II</span>
+      <span class="card-title">Anomalous Reception</span>
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
-    <div class="card-elements">WOW signal · Telepathic awareness · Akashic records</div>
+    <div class="card-elements">WOW signal · Telepathic awareness · Akashic records · Angels · Free will · The discernment layer</div>
     <div class="astro-panel"><div class="astro-panel-inner">
+      <div class="astro-sign">Pisces</div>
       <div class="astro-planets">♆ ☊</div>
       <div class="astro-rulers">Neptune · North Node</div>
-      <div class="astro-principle">The dissolving of personal boundaries into the larger field / the karmic record and direction of the soul. What arrives that you did not generate — and where it is calling you.</div>
+      <div class="astro-principle">Dissolution at the threshold of incarnation. The field pours in before the self has formed to filter it. The karmic direction is set. What arrives that you did not generate — and the rigorous practice of knowing the difference.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The 72-second signal that arrived once and was never repeated. The field that receives beyond the individual mind. Mystery held without resolution.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">What arrives that you did not generate? The question of genuine reception versus pattern-projection. The system that refuses to collapse the unknown into a named thing.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The body registering information before the mind names its source. The distinction between reception and invention located in physical sensation, not interpretation.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The 72-second signal that arrived once and was never repeated. The field that receives beyond the individual mind. Every tradition names the messengers differently. The function is consistent: something arrives from beyond the personal field with specific intelligence.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">What arrives that you did not generate? The central question. Genuine reception has a quality of givenness — it often arrives with content you would not have chosen, that surprises rather than confirms. The discernment layer: does this information expand understanding, or does it merely tell you what you want to hear?</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The body as antenna. A specific quality of arrival — something landing in the chest or solar plexus with completeness that does not feel self-generated. Genuine reception has stillness at its center. Projection has urgency. The body carries the discernment layer most reliably.</div></div>
     </div></div>
   </div>
 </div>
 
-<!-- Threshold events -->
-<div class="cluster-card" onclick="toggle(this)">
+<!-- III — Threshold Events -->
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.52s">
   <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
     <line x1="210" y1="106" x2="210" y2="56" stroke="#6dd8b2" stroke-width="1.1" stroke-opacity="0.58"/>
     <line x1="350" y1="106" x2="350" y2="56" stroke="#6dd8b2" stroke-width="1.1" stroke-opacity="0.58"/>
@@ -410,34 +454,34 @@ body.astro-view .aspects-section { max-height: 4000px; opacity: 1; margin-bottom
     <line x1="280" y1="56" x2="280" y2="18" stroke="#6dd8b2" stroke-width="0.7" stroke-opacity="0.32"/>
     <line x1="280" y1="56" x2="254" y2="28" stroke="#6dd8b2" stroke-width="0.55" stroke-opacity="0.2"/>
     <line x1="280" y1="56" x2="306" y2="28" stroke="#6dd8b2" stroke-width="0.55" stroke-opacity="0.2"/>
-    <circle cx="280" cy="18" r="3" fill="#6dd8b2" fill-opacity="0.45"/>
+    <circle cx="280" cy="18" r="3"   fill="#6dd8b2" fill-opacity="0.45"/>
     <circle cx="280" cy="56" r="2.5" fill="#6dd8b2" fill-opacity="0.58"/>
-    <line x1="80" y1="100" x2="210" y2="100" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.14"/>
+    <line x1="80"  y1="100" x2="210" y2="100" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.14"/>
     <line x1="350" y1="100" x2="480" y2="100" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.14"/>
-    <circle cx="108" cy="64" r="0.9" fill="#6dd8b2" fill-opacity="0.18"/>
-    <circle cx="452" cy="58" r="0.9" fill="#6dd8b2" fill-opacity="0.18"/>
   </svg>
   <div class="card-body">
     <div class="card-header">
-      <span class="card-title">Threshold events</span>
+      <span class="field-number">III</span>
+      <span class="card-title">Threshold Events</span>
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
-    <div class="card-elements">Astral travel · Portals · Ancestral visits · Dream state</div>
+    <div class="card-elements">Dream state · Astral travel · Breathwork visions · Portals · Time travel · Memory · Ancestral visits · Quantum leaping</div>
     <div class="astro-panel"><div class="astro-panel-inner">
-      <div class="astro-planets">♇ ☋</div>
-      <div class="astro-rulers">Pluto · South Node</div>
-      <div class="astro-principle">The underworld force of radical transformation / the karmic inheritance carried in from before. Inanna's descent is a Pluto transit. Every threshold crossing reorganizes the self at the root.</div>
+      <div class="astro-sign">Aries · Pisces</div>
+      <div class="astro-planets">♈ ♓</div>
+      <div class="astro-rulers">Aries erupts through · Pisces dissolves into</div>
+      <div class="astro-principle">Endings and beginnings as the same crossing. Birth and death as the same threshold. The portal lives between them — in the place where one thing has ended and another has not yet begun.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">Crossings — the self moved rather than information received. Inanna descending. The Royal Gatekeeper who is also the door. Sovereign descent. The dream as genuine threshold rather than mere processing.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">Who went, and from what self, and did that self return changed? Threshold as the diagnostic question. Not what was experienced — what was transformed.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The body as vehicle for crossing, not obstacle to it. Return registered in tissue first. The inward-and-downward move as the portal's actual location. The body knows it has been somewhere.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">Inanna descends through seven gates, surrendering one garment at each threshold. The Sovereign Descent as the mythic template — you go down because something essential is there, you cannot bring it back without going through the death of who you were. The Royal Gatekeeper who is also the door.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">Who went, and from what self, and did that self return changed? Not what was experienced — what was transformed. Memory as active threshold technology: each remembering is a new event in the present, not an accurate replay. The crossing that moves through time rather than space.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The body as the actual crossing vehicle — not the destination but the portal itself. Return registered in tissue first. The specific heaviness upon waking from a significant threshold dream. The body knows it has been somewhere before the mind reconstructs where.</div></div>
     </div></div>
   </div>
 </div>
 
-<!-- Embodied signal -->
-<div class="cluster-card" onclick="toggle(this)">
+<!-- IV — Embodied Signal -->
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.59s">
   <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M 90 80 Q 192 28 280 46 Q 380 68 470 34" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.18" stroke-dasharray="4 8"/>
     <path d="M 150 70 C 128 56 106 52 84 56 C 106 61 126 66 150 70 Z" fill="#d4a84c" fill-opacity="0.58"/>
@@ -452,291 +496,511 @@ body.astro-view .aspects-section { max-height: 4000px; opacity: 1; margin-bottom
   </svg>
   <div class="card-body">
     <div class="card-header">
-      <span class="card-title">Embodied signal</span>
+      <span class="field-number">IV</span>
+      <span class="card-title">Embodied Signal</span>
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
-    <div class="card-elements">Ravens · Goldfinches · Wren · Vibration · Saltwater · Crystals</div>
+    <div class="card-elements">Ravens · Goldfinch · Wren · Wings · Vibration · Saltwater · Minerals · Crystals · Wind currents · Ocean currents</div>
     <div class="astro-panel"><div class="astro-panel-inner">
-      <div class="astro-planets">☿ ☽</div>
-      <div class="astro-rulers">Mercury · Moon</div>
-      <div class="astro-principle">The swift liminal messenger who moves between worlds / the body's rhythmic, cyclical, pre-linguistic knowing. Birds are Mercury's creatures. The body's response is the Moon's domain.</div>
+      <div class="astro-sign">Taurus</div>
+      <div class="astro-planets">♀ ♁</div>
+      <div class="astro-rulers">Venus · Earth</div>
+      <div class="astro-principle">The body settling into earth after the first crossing. Taurus as the first stable ground — the senses awakening, learning to read what the physical world is actually transmitting. Beauty as information.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">Raven: Odin's eye, threshold intelligence. Goldfinch: soul-bird, the Passion held lightly. Wren: smallest bird, won by hiding in the eagle — cunning as the supreme form of strength.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">Three modes of knowing held simultaneously: descent intelligence, bright-soul metabolizing, positional cunning. Most frameworks choose one. Your system holds all three.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">Raven: weight, center, cold recognition. Goldfinch: light, high, fast brightness before naming. Wren: the still point before knowing where to place yourself in relation to the larger force.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The bird that appears at the significant moment is not symbol — it is presence. Ravens as Odin's messengers, threshold intelligences. The goldfinch that carries the soul lightly. The wren that won by hiding in the eagle's feathers. Each creature is a sovereign intelligence with its own frequency.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">Signal that arrives through the physical world rather than through altered states. The body as receiver of frequencies that the thinking mind filters out. Crystal structure as encoded frequency. Saltwater as the body's original medium. The mineral kingdom as the oldest library.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The body's involuntary recognition of signal — the skin that responds before the mind interprets, the chest that opens at a specific bird's call. Raven: weight, center, cold clarity. Goldfinch: light, fast, brightness before naming. Wren: the still point before knowing where to place yourself.</div></div>
     </div></div>
   </div>
 </div>
 
-<!-- Body as active practice -->
-<div class="cluster-card" onclick="toggle(this)">
+<!-- V — Resonance in Language -->
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.66s">
   <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Figure in motion - arms raised, dance posture -->
-    <circle cx="280" cy="22" r="10" stroke="#f5aa88" stroke-width="0.9" stroke-opacity="0.55" fill="none"/>
-    <!-- Arms raised and spread -->
-    <path d="M 280 32 C 278 40 276 48 278 56" stroke="#f5aa88" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" fill="none"/>
-    <line x1="278" y1="56" x2="274" y2="72" stroke="#f5aa88" stroke-width="0.9" stroke-opacity="0.45" stroke-linecap="round"/>
-    <line x1="278" y1="56" x2="284" y2="74" stroke="#f5aa88" stroke-width="0.9" stroke-opacity="0.45" stroke-linecap="round"/>
-    <!-- Left arm arc - sweep up and out -->
-    <path d="M 278 36 C 264 28 244 24 224 30" stroke="#f5aa88" stroke-width="1" stroke-opacity="0.5" fill="none"/>
-    <!-- Right arm arc -->
-    <path d="M 282 36 C 296 28 316 24 336 30" stroke="#f5aa88" stroke-width="1" stroke-opacity="0.5" fill="none"/>
-    <!-- Breath circles (expanding) -->
-    <circle cx="280" cy="50" r="28" stroke="#f5aa88" stroke-width="0.5" stroke-opacity="0.18" fill="none"/>
-    <circle cx="280" cy="50" r="48" stroke="#f5aa88" stroke-width="0.4" stroke-opacity="0.11" fill="none"/>
-    <circle cx="280" cy="50" r="68" stroke="#f5aa88" stroke-width="0.35" stroke-opacity="0.07" fill="none"/>
-    <!-- Mirror line -->
-    <line x1="100" y1="55" x2="460" y2="55" stroke="#f5aa88" stroke-width="0.4" stroke-opacity="0.15" stroke-dasharray="4 6"/>
-    <!-- Stars at fingertips -->
-    <circle cx="224" cy="30" r="1.5" fill="#f5aa88" fill-opacity="0.5"/>
-    <circle cx="336" cy="30" r="1.5" fill="#f5aa88" fill-opacity="0.5"/>
+    <path d="M 0,55 C 22,32 22,32 44,55 C 66,78 66,78 88,55 C 110,32 110,32 132,55 C 154,78 154,78 176,55 C 198,32 198,32 220,55 C 236,64 242,68 256,63" stroke="#c4bef8" stroke-width="1.1" stroke-opacity="0.45" stroke-linecap="round"/>
+    <path d="M 560,55 C 538,32 538,32 516,55 C 494,78 494,78 472,55 C 450,32 450,32 428,55 C 406,78 406,78 384,55 C 368,46 362,42 304,47" stroke="#f5aa88" stroke-width="1.1" stroke-opacity="0.45" stroke-linecap="round"/>
+    <path d="M 248,55 C 264,28 264,28 280,55 C 296,82 296,82 312,55" stroke="#d4a84c" stroke-width="2.2" stroke-opacity="0.88" stroke-linecap="round"/>
+    <circle cx="280" cy="55" r="4"  fill="#d4a84c" fill-opacity="0.42"/>
+    <circle cx="280" cy="55" r="10" fill="#d4a84c" fill-opacity="0.12"/>
+    <circle cx="280" cy="55" r="18" fill="#d4a84c" fill-opacity="0.05"/>
   </svg>
   <div class="card-body">
     <div class="card-header">
-      <span class="card-title">Body as active practice</span>
+      <span class="field-number">V</span>
+      <span class="card-title">Resonance in Language</span>
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
-    <div class="card-elements">Breathwork · Meditation · Movement · Dance · Laughter · Tears · Mirror work · Lymphatic drainage</div>
+    <div class="card-elements">The three registers · Signal, frequency, compression, descent, emergence, mirror, container, threshold · The word that creates the field it names</div>
     <div class="astro-panel"><div class="astro-panel-inner">
-      <div class="astro-planets">♂ ♀</div>
-      <div class="astro-rulers">Mars · Venus</div>
-      <div class="astro-principle">The force that moves the body with will and direction / the body as the site of beauty, pleasure, and sacred receptivity. Action and surrender held in the same practice.</div>
+      <div class="astro-sign">Gemini</div>
+      <div class="astro-planets">☿ ♊</div>
+      <div class="astro-rulers">Mercury · The Twin Registers</div>
+      <div class="astro-principle">The word arriving in the sign of duality and swift transmission. Language as the first tool the embodied self reaches for to make sense of the signals it is receiving. The three registers as the three ways Gemini moves.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The body as the original temple. Sacred dance as transmission. The ecstatic traditions — Sufi whirling, shamanic movement, ritual weeping — where the body becomes the instrument through which the divine moves. Laughter and tears as the same frequency at different speeds.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">The body not as vehicle for the work but as the work itself. What moves through you when you move. What releases when you breathe with intention. The mirror that shows what the mind cannot see — the body does not lie about what it is holding.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The felt distinction between performing movement and genuine somatic expression. The moment the body takes over from the instruction. The breath that unlocks something that was waiting. The specific sensation of the lymphatic system releasing, the fascia softening, the held pattern completing.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The word that creates the field it names. In the beginning was the word — not a metaphor but a structural description of how language operates at the level of frequency. A sentence can be a portal if it is true enough. The vocabulary of this map is load-bearing structure, not metaphor.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">The three registers are all portals into the same territory. Fluency means knowing which register a person or moment needs — and moving between them without losing the signal. Same territory, different doors. The language that works is the language that the specific body in front of you can actually receive.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">Resonance is felt before it is understood. The body knows a true sentence before the mind evaluates it. The specific physical sensation when a word lands in the right frequency — not intellectual agreement but cellular recognition. The sentence that makes the room change temperature.</div></div>
     </div></div>
   </div>
 </div>
 
-<!-- Animal and nature medicine -->
-<div class="cluster-card" onclick="toggle(this)">
+<!-- VI — Body as Active Practice (Cancer / Moon) -->
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.73s">
   <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Tree with roots and branches mirroring each other -->
+    <!-- Moon phases across the art -->
+    <!-- New moon -->
+    <circle cx="80"  cy="55" r="18" stroke="#f5aa88" stroke-width="0.8" stroke-opacity="0.4" fill="none"/>
+    <!-- Crescent -->
+    <path d="M 176 37 A 18 18 0 1 0 176 73 A 10 10 0 1 1 176 37 Z" fill="#f5aa88" fill-opacity="0.28"/>
+    <!-- Half -->
+    <circle cx="280" cy="55" r="18" stroke="#f5aa88" stroke-width="0.6" stroke-opacity="0.35" fill="none"/>
+    <path d="M 280 37 A 18 18 0 0 1 280 73 Z" fill="#f5aa88" fill-opacity="0.35"/>
+    <!-- Gibbous -->
+    <circle cx="384" cy="55" r="18" stroke="#f5aa88" stroke-width="0.6" stroke-opacity="0.3" fill="rgba(245,170,136,0.08)"/>
+    <path d="M 384 37 A 18 18 0 0 1 384 73 A 6 6 0 0 0 384 37 Z" fill="#f5aa88" fill-opacity="0.32"/>
+    <!-- Full moon -->
+    <circle cx="480" cy="55" r="18" fill="#f5aa88" fill-opacity="0.32"/>
+    <circle cx="480" cy="55" r="18" stroke="#f5aa88" stroke-width="0.8" stroke-opacity="0.5" fill="none"/>
+    <!-- Tidal flow line connecting moons -->
+    <path d="M 98 55 Q 137 40 158 55 Q 216 80 240 55 Q 296 20 320 55 Q 360 88 366 55 Q 402 30 420 55 Q 448 72 462 55" stroke="#f5aa88" stroke-width="0.5" stroke-opacity="0.2" fill="none"/>
+  </svg>
+  <div class="card-body">
+    <div class="card-header">
+      <span class="field-number">VI</span>
+      <span class="card-title">Body as Active Practice</span>
+      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="card-elements">Breathwork · Meditation · Movement · Dance · Laughter · Tears · Mirror work · Lymphatic drainage · Moon cycles · The body as sacred vessel · Compassion as the soothing balm</div>
+    <div class="astro-panel"><div class="astro-panel-inner">
+      <div class="astro-sign">Cancer</div>
+      <div class="astro-planets">☽ ♋</div>
+      <div class="astro-rulers">Moon · The tidal body</div>
+      <div class="astro-principle">The Moon's domain — the body's cyclic, tidal, rhythmic intelligence. What we need. What nurtures. The mother field. Received somatically first, before it becomes emotion, before it becomes thought. Compassion flows here as the soothing balm and the flowing water.</div>
+    </div></div>
+    <div class="registers"><div class="registers-inner">
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The body as the original temple. The moon as the oldest clock — marking the feminine cycle, the tidal pull, the rhythm beneath all rhythms. Sacred dance as transmission. The ecstatic traditions where the body becomes the instrument through which the divine moves. Tears and laughter as the same water moving at different speeds.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">The body not as vehicle for the work but as the work itself. Moon cycles as a navigation system — not symbol but functional timing instrument. What moves through you when you move with intention. The mirror that shows what the mind cannot see. The body does not lie about what it is holding.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">This entire field is somatic first. Reception experienced in the body before it becomes emotion or interpretation. The specific quality of the breath that unlocks something waiting. Lymphatic release as emotional completion. The moon phase in the body — the fullness before the release, the dark before the new. Compassion felt as warmth spreading through the chest.</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- VII — Animal and Nature Medicine -->
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.80s">
+  <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
     <line x1="280" y1="16" x2="280" y2="94" stroke="#6dd8b2" stroke-width="0.8" stroke-opacity="0.5"/>
-    <!-- Branches -->
     <path d="M 280 30 C 268 24 250 20 234 24" stroke="#6dd8b2" stroke-width="0.8" stroke-opacity="0.45" fill="none"/>
     <path d="M 280 30 C 292 24 310 20 326 24" stroke="#6dd8b2" stroke-width="0.8" stroke-opacity="0.45" fill="none"/>
     <path d="M 280 44 C 262 36 238 30 218 34" stroke="#6dd8b2" stroke-width="0.7" stroke-opacity="0.38" fill="none"/>
     <path d="M 280 44 C 298 36 322 30 342 34" stroke="#6dd8b2" stroke-width="0.7" stroke-opacity="0.38" fill="none"/>
-    <path d="M 280 20 C 274 12 268 8 260 8" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.3" fill="none"/>
-    <path d="M 280 20 C 286 12 292 8 300 8" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.3" fill="none"/>
-    <!-- Roots (mirror of branches below) -->
-    <path d="M 280 80 C 268 86 250 90 234 86" stroke="#6dd8b2" stroke-width="0.8" stroke-opacity="0.38" fill="none"/>
-    <path d="M 280 80 C 292 86 310 90 326 86" stroke="#6dd8b2" stroke-width="0.8" stroke-opacity="0.38" fill="none"/>
+    <path d="M 280 20 C 274 12 268 8 260 8"   stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.3" fill="none"/>
+    <path d="M 280 20 C 286 12 292 8 300 8"   stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.3" fill="none"/>
+    <path d="M 280 80 C 268 86 250 90 234 86"  stroke="#6dd8b2" stroke-width="0.8" stroke-opacity="0.38" fill="none"/>
+    <path d="M 280 80 C 292 86 310 90 326 86"  stroke="#6dd8b2" stroke-width="0.8" stroke-opacity="0.38" fill="none"/>
     <path d="M 280 90 C 262 98 238 104 218 100" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.28" fill="none"/>
     <path d="M 280 90 C 298 98 322 104 342 100" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.28" fill="none"/>
-    <!-- Animal marks: small creatures in the field -->
+    <path d="M 200 100 Q 240 108 280 102 Q 320 108 360 100" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.2" fill="none" stroke-dasharray="2 4"/>
+    <circle cx="280" cy="55" r="3" fill="#6dd8b2" fill-opacity="0.4"/>
     <circle cx="140" cy="40" r="4" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.35" fill="none"/>
     <circle cx="420" cy="40" r="4" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.35" fill="none"/>
-    <circle cx="140" cy="70" r="3" stroke="#6dd8b2" stroke-width="0.5" stroke-opacity="0.28" fill="none"/>
-    <circle cx="420" cy="70" r="3" stroke="#6dd8b2" stroke-width="0.5" stroke-opacity="0.28" fill="none"/>
-    <!-- Mycelium web below roots -->
-    <path d="M 200 100 Q 240 108 280 102 Q 320 108 360 100" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.2" fill="none" stroke-dasharray="2 4"/>
-    <!-- Center glow -->
-    <circle cx="280" cy="55" r="3" fill="#6dd8b2" fill-opacity="0.4"/>
   </svg>
   <div class="card-body">
     <div class="card-header">
-      <span class="card-title">Animal and nature medicine</span>
+      <span class="field-number">VII</span>
+      <span class="card-title">Animal and Nature Medicine</span>
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
-    <div class="card-elements">Lion · Owl · Butterfly · Dragon · Hummingbird · Snake · Bear · Turtle · Dolphin · Whale · Wolf · Plant medicine · Trees · Mushrooms</div>
+    <div class="card-elements">Lion · Owl · Butterfly · Dragon · Hummingbird · Snake · Bear · Turtle · Dolphin · Whale · Wolf · Cat · Dog · Fish · Plant medicine · Trees · Mushrooms · Gardens · Hiking · Bodies of water</div>
     <div class="astro-panel"><div class="astro-panel-inner">
-      <div class="astro-planets">☽ ♃</div>
-      <div class="astro-rulers">Moon · Jupiter</div>
-      <div class="astro-principle">The body's instinctual, pre-linguistic, cyclical knowing / the abundant intelligence of the natural world as teacher, messenger, and mirror. The non-human as sovereign wisdom system.</div>
+      <div class="astro-sign">Virgo</div>
+      <div class="astro-planets">☿ ♍</div>
+      <div class="astro-rulers">Mercury · The discerning healer</div>
+      <div class="astro-principle">Service, healing, and the precise intelligence of the plant and animal world. Virgo's exquisite discernment applied to the non-human — the midwife's hands, the herbalist's knowledge, the body in right relationship with all living things.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The non-human intelligence network — totem animals as ambassadors of specific frequencies, trees as the oldest library, the mycelium as the original internet, whale song as the earth's deepest memory. The animals in this lineage are not symbols. They are presences with their own sovereign intelligences.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">Intelligence that operates outside human language systems. The mushroom network communicating through chemical signal. The whale navigating by magnetic field. The tree communicating through root fungus. These are information systems that predate and exceed human cognition — and the body knows how to receive them.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The body's involuntary response to the presence of certain animals or plants — the unmistakable signal of encounter that bypasses interpretation. The lion that appears in a dream or at a significant moment. The specific quality of standing inside an ancient forest. The body knows it is in the presence of something before the mind names what.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The non-human intelligence network — totem animals as ambassadors of specific frequencies. Trees as the oldest library, speaking through root and mycelium. Whale song as the earth's deepest memory. Dragon at the border of this field and Structural Models: the prophetic fire that exceeds every container built to hold it.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">Intelligence systems that predate and exceed human cognition. The mushroom network communicating through chemical signal. The tree communicating water stress through volatile compounds to its neighbors. These are not metaphors for connection — they are actual information systems. The body knows how to receive them because it evolved inside them.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The body's involuntary response to the presence of certain animals or plants — the unmistakable signal of encounter that bypasses interpretation. The specific quality of standing inside an ancient forest. The lion that appears in a dream or at a significant moment. The body knows it is in the presence of something before the mind names what.</div></div>
     </div></div>
   </div>
 </div>
 
-</div><!-- end cluster-grid -->
-
-<!-- Full-width clusters -->
-<div class="full-width-cluster">
-
-<!-- Creative record -->
-<div class="full-width-card" onclick="toggle(this)" style="margin-bottom:14px;">
-  <svg class="card-art-wide" viewBox="0 0 1100 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Layered pages / journals stacking -->
-    <rect x="80"  y="20" width="180" height="50" rx="3" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.3" fill="rgba(196,190,248,0.04)"/>
-    <rect x="88"  y="16" width="180" height="50" rx="3" stroke="#c4bef8" stroke-width="0.6" stroke-opacity="0.22" fill="none"/>
-    <rect x="96"  y="12" width="180" height="50" rx="3" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.15" fill="none"/>
-    <!-- Writing lines on journal -->
-    <line x1="100" y1="36" x2="248" y2="36" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.2"/>
-    <line x1="100" y1="44" x2="248" y2="44" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.18"/>
-    <line x1="100" y1="52" x2="200" y2="52" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.14"/>
-    <!-- Musical staff (music as record) -->
-    <line x1="330" y1="30" x2="520" y2="30" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.25"/>
-    <line x1="330" y1="37" x2="520" y2="37" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.25"/>
-    <line x1="330" y1="44" x2="520" y2="44" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.25"/>
-    <line x1="330" y1="51" x2="520" y2="51" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.25"/>
-    <line x1="330" y1="58" x2="520" y2="58" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.25"/>
-    <!-- Notes -->
-    <circle cx="360" cy="44" r="4" fill="#c4bef8" fill-opacity="0.4"/>
-    <line x1="364" y1="44" x2="364" y2="26" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.5"/>
-    <circle cx="400" cy="37" r="4" fill="#c4bef8" fill-opacity="0.35"/>
-    <line x1="404" y1="37" x2="404" y2="20" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.45"/>
-    <circle cx="440" cy="51" r="4" fill="#c4bef8" fill-opacity="0.4"/>
-    <line x1="444" y1="51" x2="444" y2="33" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.45"/>
-    <circle cx="480" cy="30" r="4" fill="#c4bef8" fill-opacity="0.35"/>
-    <line x1="484" y1="30" x2="484" y2="12" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.4"/>
-    <!-- Photograph portal (camera frame) -->
-    <rect x="600" y="18" width="80" height="55" rx="4" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.35" fill="rgba(196,190,248,0.03)"/>
-    <circle cx="640" cy="45" r="16" stroke="#c4bef8" stroke-width="0.6" stroke-opacity="0.4" fill="none"/>
-    <circle cx="640" cy="45" r="6" fill="#c4bef8" fill-opacity="0.3"/>
-    <!-- Light rays from photograph -->
-    <line x1="640" y1="18" x2="640" y2="10" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.25"/>
-    <line x1="680" y1="45" x2="690" y2="45" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.25"/>
-    <line x1="600" y1="45" x2="590" y2="45" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.25"/>
-    <!-- Narrative spiral (story) -->
-    <path d="M 820 45 C 820 32 830 24 842 24 C 854 24 862 32 862 45 C 862 58 852 66 840 66 C 828 66 820 58 820 46" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.4" fill="none"/>
-    <path d="M 828 45 C 828 37 834 32 842 32 C 850 32 856 37 856 45 C 856 53 850 58 842 58" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.28" fill="none"/>
-    <circle cx="842" cy="45" r="2.5" fill="#c4bef8" fill-opacity="0.45"/>
-    <!-- Connecting flow between all four -->
-    <path d="M 260 45 Q 295 38 330 45" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.2" fill="none" stroke-dasharray="3 5"/>
-    <path d="M 520 45 Q 560 38 600 45" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.2" fill="none" stroke-dasharray="3 5"/>
-    <path d="M 680 45 Q 750 38 820 45" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.2" fill="none" stroke-dasharray="3 5"/>
+<!-- VIII — The Creative Record -->
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.87s">
+  <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Sun as creative fire — Leo -->
+    <circle cx="280" cy="55" r="22" stroke="#d4a84c" stroke-width="1" stroke-opacity="0.5" fill="rgba(212,168,76,0.08)"/>
+    <circle cx="280" cy="55" r="12" fill="#d4a84c" fill-opacity="0.28"/>
+    <!-- Rays -->
+    <line x1="280" y1="28" x2="280" y2="18" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.45"/>
+    <line x1="280" y1="82" x2="280" y2="92" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.45"/>
+    <line x1="253" y1="28" x2="246" y2="20" stroke="#d4a84c" stroke-width="0.8" stroke-opacity="0.38"/>
+    <line x1="307" y1="28" x2="314" y2="20" stroke="#d4a84c" stroke-width="0.8" stroke-opacity="0.38"/>
+    <line x1="253" y1="82" x2="246" y2="90" stroke="#d4a84c" stroke-width="0.8" stroke-opacity="0.38"/>
+    <line x1="307" y1="82" x2="314" y2="90" stroke="#d4a84c" stroke-width="0.8" stroke-opacity="0.38"/>
+    <line x1="235" y1="55" x2="225" y2="55" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.45"/>
+    <line x1="325" y1="55" x2="335" y2="55" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.45"/>
+    <!-- Art objects radiating from the sun -->
+    <!-- Journal left -->
+    <rect x="80" y="36" width="60" height="38" rx="2" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.4" fill="rgba(196,190,248,0.05)"/>
+    <line x1="92" y1="50" x2="128" y2="50" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.3"/>
+    <line x1="92" y1="58" x2="128" y2="58" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.25"/>
+    <!-- Musical note right -->
+    <circle cx="430" cy="62" r="6" fill="#f5aa88" fill-opacity="0.4"/>
+    <line x1="436" y1="62" x2="436" y2="38" stroke="#f5aa88" stroke-width="0.9" stroke-opacity="0.5"/>
+    <line x1="436" y1="38" x2="450" y2="42" stroke="#f5aa88" stroke-width="0.7" stroke-opacity="0.4"/>
+    <!-- Camera far right -->
+    <rect x="468" y="40" width="48" height="32" rx="3" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.35" fill="none"/>
+    <circle cx="492" cy="56" r="9" stroke="#6dd8b2" stroke-width="0.5" stroke-opacity="0.4" fill="none"/>
+    <circle cx="492" cy="56" r="4" fill="#6dd8b2" fill-opacity="0.3"/>
   </svg>
   <div class="card-body">
     <div class="card-header">
-      <span class="card-title">The creative record</span>
+      <span class="field-number">VIII</span>
+      <span class="card-title">The Creative Record</span>
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
-    <div class="card-elements">Art · Music · Dance · Journals · Narrative · Story · Photographs as portals · The artifact that outlasts the moment</div>
+    <div class="card-elements">Art · Music · Dance · Journals · Narrative · Story · Photographs as portals · The sovereign act of making</div>
     <div class="astro-panel"><div class="astro-panel-inner">
-      <div class="astro-planets">♀ ♆</div>
-      <div class="astro-rulers">Venus · Neptune</div>
-      <div class="astro-principle">The force that calls beauty into form / the imagination that dissolves the boundary between self and the made thing. Where Venus gives the artifact its shape, Neptune gives it the capacity to carry what cannot be said directly.</div>
+      <div class="astro-sign">Leo</div>
+      <div class="astro-planets">☉ ♌</div>
+      <div class="astro-rulers">Sun · The sovereign fire</div>
+      <div class="astro-principle">The sovereign creative force at the height of summer. What the self makes from its full power and offers as its signature. Leo's fire as the engine of creation — not the artifact as record but the act of making as sovereign expression. The sun at its zenith.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The alchemical transmutation of living experience into lasting form. The photograph as portal to the moment — and to the ancestor standing in it. The journal as the place where the self witnesses itself without the performance required by the social world. Story as the oldest technology for preserving what the body has lived.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">Making as a form of knowing that precedes understanding. The artifact carries frequencies that the maker cannot fully access consciously. The creative record is not documentation — it is transmission. What you make changes those who encounter it in ways you will never know, across time you will not live to see.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The alchemical transmutation of living experience into lasting form. The photograph as portal to the moment — and to the ancestor standing in it. Christina Young writing poems to Ann Paxman on the ship. Eleanor of Aquitaine's songs still circulating through every court in Europe from her prison at Sarum. The creative act as the form of sovereignty that cannot be imprisoned.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">Making as a form of knowing that precedes understanding. The artifact carries frequencies that the maker cannot fully access consciously. The creative record is not documentation — it is transmission. What you make changes those who encounter it in ways you will never fully know, across time you will not live to see.</div></div>
       <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The distinctive bodily state of creative flow — the hours that vanish, the hands that know before the mind does, the sensation of something moving through rather than being produced by. The specific tiredness after making something true. The body's recognition, before the critical mind engages, that the thing is finished.</div></div>
     </div></div>
   </div>
 </div>
 
-<!-- Resonance in language -->
-<div class="lang-card full-width-card" onclick="toggle(this)">
+</div><!-- end field-grid -->
+
+<!-- ═══════════════════════════════════ -->
+<!-- THE SHADOW: Field IX               -->
+<!-- ═══════════════════════════════════ -->
+
+<div class="arc-label" style="animation-delay:0.9s">
+  <div class="arc-label-inner">
+    <div class="arc-rule"></div>
+    <span class="arc-text">The Shadow</span>
+    <span class="arc-glyph">♇</span>
+    <span class="arc-text">Scorpio</span>
+    <div class="arc-rule"></div>
+  </div>
+</div>
+
+<div class="field-grid-wide">
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.94s">
   <svg class="card-art-wide" viewBox="0 0 1100 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M 0,45 C 30,22 30,22 60,45 C 90,68 90,68 120,45 C 150,22 150,22 180,45 C 210,68 210,68 240,45 C 270,22 270,22 300,45 C 330,68 330,68 360,45 C 390,22 390,22 420,45 C 440,56 448,62 468,57" stroke="#c4bef8" stroke-width="1.2" stroke-opacity="0.52" stroke-linecap="round"/>
-    <path d="M 1100,45 C 1070,22 1070,22 1040,45 C 1010,68 1010,68 980,45 C 950,22 950,22 920,45 C 890,68 890,68 860,45 C 830,22 830,22 800,45 C 770,68 770,68 740,45 C 710,22 710,22 680,45 C 660,56 652,62 632,57" stroke="#f5aa88" stroke-width="1.2" stroke-opacity="0.52" stroke-linecap="round"/>
-    <path d="M 440,45 C 462,20 462,20 550,45 C 638,70 638,70 660,45" stroke="#d4a84c" stroke-width="2.5" stroke-opacity="0.88" stroke-linecap="round"/>
-    <circle cx="550" cy="45" r="5" fill="#d4a84c" fill-opacity="0.42"/>
-    <circle cx="550" cy="45" r="12" fill="#d4a84c" fill-opacity="0.12"/>
-    <circle cx="550" cy="45" r="22" fill="#d4a84c" fill-opacity="0.05"/>
+    <!-- Underground layers — Scorpio depth -->
+    <line x1="0" y1="20" x2="1100" y2="20" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.15" stroke-dasharray="6 8"/>
+    <line x1="0" y1="40" x2="1100" y2="40" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.22" stroke-dasharray="4 6"/>
+    <line x1="0" y1="60" x2="1100" y2="60" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.28" stroke-dasharray="3 5"/>
+    <line x1="0" y1="78" x2="1100" y2="78" stroke="#c4bef8" stroke-width="0.6" stroke-opacity="0.35"/>
+    <!-- Scorpion tail arc -->
+    <path d="M 400 78 C 420 60 460 55 500 60 C 540 65 560 78 580 70 C 600 62 610 50 620 40" stroke="#c4bef8" stroke-width="1.2" stroke-opacity="0.55" fill="none"/>
+    <polygon points="620,40 614,52 626,48" fill="#c4bef8" fill-opacity="0.55"/>
+    <!-- Deep roots descending -->
+    <line x1="280" y1="78" x2="270" y2="90" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round"/>
+    <line x1="280" y1="78" x2="290" y2="90" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round"/>
+    <line x1="280" y1="78" x2="280" y2="92" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round"/>
+    <line x1="820" y1="78" x2="810" y2="90" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round"/>
+    <line x1="820" y1="78" x2="830" y2="90" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round"/>
+    <!-- Stars in the underground -->
+    <circle cx="150" cy="50" r="1"   fill="#c4bef8" fill-opacity="0.35"/>
+    <circle cx="700" cy="30" r="0.8" fill="#c4bef8" fill-opacity="0.28"/>
+    <circle cx="950" cy="55" r="1"   fill="#c4bef8" fill-opacity="0.3"/>
+    <circle cx="80"  cy="68" r="0.7" fill="#c4bef8" fill-opacity="0.25"/>
+    <!-- Phoenix ember center -->
+    <circle cx="550" cy="45" r="5" fill="#c4bef8" fill-opacity="0.25"/>
+    <circle cx="550" cy="45" r="2" fill="#c4bef8" fill-opacity="0.5"/>
   </svg>
   <div class="card-body">
     <div class="card-header">
-      <span class="card-title">Resonance in language</span>
+      <span class="field-number">IX</span>
+      <span class="card-title">The Shadow</span>
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
-    <div class="card-elements">The medium that connects all clusters · The three registers as entry portals · The word that creates the field it names</div>
+    <div class="card-elements">The underworld proper · Descent · What lies beneath · Death as intelligence · Ancestral patterns in the bloodline · The unresolved · Shadow work · The alchemical process</div>
     <div class="astro-panel"><div class="astro-panel-inner">
-      <div class="astro-planets">☿ ♀</div>
-      <div class="astro-rulers">Mercury · Venus</div>
-      <div class="astro-principle">The word that moves between worlds / the frequency that calls beauty into form. Language as living transmission — where Mercury's swiftness and Venus's resonance meet, a sentence becomes a portal.</div>
+      <div class="astro-sign">Scorpio</div>
+      <div class="astro-planets">♇ ♏</div>
+      <div class="astro-rulers">Pluto · The underworld intelligence</div>
+      <div class="astro-principle">The field that makes Sovereignty possible. You cannot claim the self you actually are until you have been in the underground of the self you were given. The Ancestral Weaving lives here astrologically — death, inheritance, what is passed through the bloodline, and what is waiting to be completed by the living.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The word that creates the field it names. Language as living transmission — frequency finding form in utterance. A sentence can be a portal if it is true enough.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">The three registers are all portals into the same territory. Fluency means knowing which register a person or moment needs — and moving between them without losing the signal. Same territory, different doors.</div></div>
-      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">Resonance is felt before it is understood. The body knows a true sentence before the mind evaluates it. Teaching, music, mentorship all operate here — at the frequency level beneath semantic content.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The underworld as a real territory with its own geography, its own queen, its own laws. The shadow is not the absence of light — it is the full intelligence of everything that has not yet been brought into conscious relationship. The alchemical nigredo: the matter must dissolve completely before it can reform into something that was not possible before. The phoenix does not rise from safety.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">The shadow as Jung named it: the sum of everything the psyche cannot admit into conscious identity. Not the evil self but the unlived life, the disowned capacity, the grief that was never permitted its full form. The ancestral shadow: the unresolved patterns passed through bloodlines, waiting in a living descendant's body for the generation finally equipped to complete them. Shadow work is not self-punishment. It is completion.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The shadow lives in the body as pattern — the recurring tension, the emotion with no clear present-day cause, the response that is disproportionate to the trigger. These are not character flaws. They are incomplete processes waiting for the conditions that allow them to finish. The body holds the shadow faithfully until the consciousness is ready. Then it offers the material. The work is to receive it without flinching.</div></div>
+    </div></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- THE RETURN: Fields X – XIII        -->
+<!-- ═══════════════════════════════════ -->
+
+<div class="arc-label" style="animation-delay:1.0s">
+  <div class="arc-label-inner">
+    <div class="arc-rule"></div>
+    <span class="arc-text">The Return</span>
+    <span class="arc-glyph">↑</span>
+    <span class="arc-text">Sagittarius through Pisces</span>
+    <div class="arc-rule"></div>
+  </div>
+</div>
+
+<div class="field-grid">
+
+<!-- X — The Mirror -->
+<div class="field-card return-arc" onclick="toggle(this)" style="animation-delay:1.04s">
+  <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Mirror frame -->
+    <ellipse cx="280" cy="55" rx="60" ry="46" stroke="#f5aa88" stroke-width="0.9" stroke-opacity="0.45" fill="rgba(245,170,136,0.04)"/>
+    <ellipse cx="280" cy="55" rx="52" ry="38" stroke="#f5aa88" stroke-width="0.5" stroke-opacity="0.28" fill="none"/>
+    <!-- Reflection axis -->
+    <line x1="280" y1="9"  x2="280" y2="101" stroke="#f5aa88" stroke-width="0.4" stroke-opacity="0.2" stroke-dasharray="3 5"/>
+    <!-- Two figures facing each other -->
+    <circle cx="240" cy="30" r="6"  stroke="#f5aa88" stroke-width="0.7" stroke-opacity="0.5" fill="none"/>
+    <path d="M 240 36 L 238 52 L 234 68" stroke="#f5aa88" stroke-width="0.7" stroke-opacity="0.45" fill="none" stroke-linecap="round"/>
+    <path d="M 240 36 L 242 52 L 246 68" stroke="#f5aa88" stroke-width="0.7" stroke-opacity="0.45" fill="none" stroke-linecap="round"/>
+    <line x1="232" y1="44" x2="226" y2="40" stroke="#f5aa88" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round"/>
+    <line x1="248" y1="44" x2="254" y2="40" stroke="#f5aa88" stroke-width="0.7" stroke-opacity="0.4" stroke-linecap="round"/>
+    <!-- Mirror figure -->
+    <circle cx="320" cy="30" r="6"  stroke="#f5aa88" stroke-width="0.7" stroke-opacity="0.35" fill="none"/>
+    <path d="M 320 36 L 322 52 L 326 68" stroke="#f5aa88" stroke-width="0.6" stroke-opacity="0.35" fill="none" stroke-linecap="round"/>
+    <path d="M 320 36 L 318 52 L 314 68" stroke="#f5aa88" stroke-width="0.6" stroke-opacity="0.35" fill="none" stroke-linecap="round"/>
+    <line x1="328" y1="44" x2="334" y2="40" stroke="#f5aa88" stroke-width="0.6" stroke-opacity="0.32" stroke-linecap="round"/>
+    <line x1="312" y1="44" x2="306" y2="40" stroke="#f5aa88" stroke-width="0.6" stroke-opacity="0.32" stroke-linecap="round"/>
+    <!-- Stars at periphery -->
+    <circle cx="100" cy="40" r="1" fill="#f5aa88" fill-opacity="0.3"/>
+    <circle cx="460" cy="40" r="1" fill="#f5aa88" fill-opacity="0.3"/>
+    <circle cx="160" cy="80" r="0.8" fill="#f5aa88" fill-opacity="0.25"/>
+    <circle cx="400" cy="80" r="0.8" fill="#f5aa88" fill-opacity="0.25"/>
+  </svg>
+  <div class="card-body">
+    <div class="card-header">
+      <span class="field-number">X</span>
+      <span class="card-title">The Mirror</span>
+      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="card-elements">Relationship · The other as teacher · Mirror work · Compassion in relationship · Beauty · The self meeting itself in another face</div>
+    <div class="astro-panel"><div class="astro-panel-inner">
+      <div class="astro-sign">Libra</div>
+      <div class="astro-planets">♀ ♎</div>
+      <div class="astro-rulers">Venus · The relational field</div>
+      <div class="astro-principle">The first field of the return arc — the self that has been through the shadow meets the other and finds itself reflected. Libra as the moment of first recognition after the descent: I am seen, therefore I exist differently than I did before the crossing.</div>
+    </div></div>
+    <div class="registers"><div class="registers-inner">
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The mirror as the oldest magical object — the surface that shows not what you look like but what you are. The beloved as the mirror in which the divine recognizes itself. Every significant relationship is a mirror in the mythic register: it shows you the face you cannot see from the inside, the pattern you cannot recognize from within it.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">The other as the necessary instrument of self-knowledge. You cannot see your own face without a reflective surface. The quality of your relationships is the most precise available measure of your own state — not because others are responsible for your experience but because the field between two people carries information that neither carries alone. What triggers you in another is always information about yourself.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The felt quality of genuine meeting — the specific body-state when two people are actually in contact rather than performing contact. The chest that opens in the presence of the right mirror. The contraction that signals a distorting mirror versus a true one. Tyler as truest mirror — the body that knows the difference between the reflection that flatters and the reflection that sees.</div></div>
     </div></div>
   </div>
 </div>
 
-</div><!-- end full-width-cluster -->
+<!-- XI — The Teaching -->
+<div class="field-card return-arc" onclick="toggle(this)" style="animation-delay:1.11s">
+  <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Archer's arrow aimed at horizon -->
+    <line x1="80" y1="70" x2="440" y2="28" stroke="#d4a84c" stroke-width="1" stroke-opacity="0.5"/>
+    <polygon points="440,28 426,30 432,40" fill="#d4a84c" fill-opacity="0.55"/>
+    <!-- Bow -->
+    <path d="M 80 70 C 70 55 70 40 80 28" stroke="#d4a84c" stroke-width="0.8" stroke-opacity="0.4" fill="none"/>
+    <line x1="80" y1="70" x2="80" y2="28" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.25"/>
+    <!-- Horizon line -->
+    <line x1="0" y1="85" x2="560" y2="85" stroke="#d4a84c" stroke-width="0.4" stroke-opacity="0.18"/>
+    <!-- Stars along arrow path (knowledge as light) -->
+    <circle cx="180" cy="57" r="1.2" fill="#d4a84c" fill-opacity="0.45"/>
+    <circle cx="260" cy="46" r="1"   fill="#d4a84c" fill-opacity="0.4"/>
+    <circle cx="340" cy="38" r="1.2" fill="#d4a84c" fill-opacity="0.45"/>
+    <!-- Flame at bow point — fire of transmission -->
+    <path d="M 80 70 C 72 62 74 54 80 50 C 76 56 78 64 80 70 Z" fill="#d4a84c" fill-opacity="0.4"/>
+    <!-- Students/receivers at horizon -->
+    <circle cx="460" cy="82" r="3" stroke="#d4a84c" stroke-width="0.6" stroke-opacity="0.4" fill="none"/>
+    <circle cx="490" cy="82" r="3" stroke="#d4a84c" stroke-width="0.6" stroke-opacity="0.4" fill="none"/>
+    <circle cx="520" cy="82" r="3" stroke="#d4a84c" stroke-width="0.6" stroke-opacity="0.4" fill="none"/>
+  </svg>
+  <div class="card-body">
+    <div class="card-header">
+      <span class="field-number">XI</span>
+      <span class="card-title">The Teaching</span>
+      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="card-elements">Transmission as sacred practice · The philosopher-archer · What was gathered in the descent now aimed at the horizon · The living contact between teacher and learner</div>
+    <div class="astro-panel"><div class="astro-panel-inner">
+      <div class="astro-sign">Sagittarius</div>
+      <div class="astro-planets">♃ ♐</div>
+      <div class="astro-rulers">Jupiter · The expanding flame</div>
+      <div class="astro-principle">The transmission at scale. What was gathered in the descent, witnessed in the shadow, and reflected in the mirror — now aimed at the horizon for others to find. Jupiter's abundance applied to the act of sharing what was hard-won.</div>
+    </div></div>
+    <div class="registers"><div class="registers-inner">
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">The teacher who has been through the territory — not the authority who has read the map but the one who has walked the ground and can say: this is what I found here, this is what helped, this is what the signpost actually means when you're standing in front of it rather than reading about it from a distance.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">Teaching as sacred practice proposes that genuine transmission is not the transfer of information but the creation of the conditions in which the student's own knowing can emerge. The Suzuki principle in its universal form — teacher, learner, and the living practice between them — applied to every field in this map. The teacher's authority comes from having made the crossing, not from having studied it.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The felt quality of genuine transmission: something moves between two bodies that is neither words nor information but frequency. The student who gets it in their body, not just their mind. The teacher who can feel the moment the landing occurs. The room that changes when the right thing is said at the right moment. This is the work — and the body knows when it is actually happening.</div></div>
+    </div></div>
+  </div>
+</div>
 
-<!-- Aspects section — astrological view -->
+<!-- XII — Sovereignty -->
+<div class="field-card return-arc" onclick="toggle(this)" style="animation-delay:1.18s">
+  <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Aquarius water bearer waves — but electrical, revolutionary -->
+    <!-- Water vessel -->
+    <path d="M 220 38 L 216 72 Q 216 78 240 78 Q 264 78 264 72 L 260 38 Z" stroke="#c4bef8" stroke-width="0.8" stroke-opacity="0.5" fill="rgba(196,190,248,0.06)"/>
+    <path d="M 220 38 Q 240 30 260 38" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.45" fill="none"/>
+    <!-- Water flowing from vessel -->
+    <path d="M 264 55 C 290 48 310 60 330 50 C 350 40 370 55 390 48 C 410 41 430 52 460 46" stroke="#c4bef8" stroke-width="1.1" stroke-opacity="0.55" fill="none"/>
+    <path d="M 264 65 C 290 58 310 70 330 62 C 350 54 370 66 390 60 C 410 52 430 62 460 56" stroke="#c4bef8" stroke-width="0.8" stroke-opacity="0.38" fill="none"/>
+    <!-- Electric stars — Uranus/Aquarius revolutionary quality -->
+    <circle cx="100" cy="40" r="1.5" fill="#c4bef8" fill-opacity="0.45"/>
+    <line x1="100" y1="36" x2="100" y2="44" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.35"/>
+    <line x1="96"  y1="40" x2="104" y2="40" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.35"/>
+    <circle cx="130" cy="65" r="1.2" fill="#c4bef8" fill-opacity="0.38"/>
+    <line x1="130" y1="61" x2="130" y2="69" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.3"/>
+    <line x1="126" y1="65" x2="134" y2="65" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.3"/>
+    <!-- Crown above vessel — sovereignty claimed -->
+    <path d="M 226 36 L 226 28 L 232 32 L 240 26 L 248 32 L 254 28 L 254 36" stroke="#c4bef8" stroke-width="0.8" stroke-opacity="0.5" fill="none"/>
+  </svg>
+  <div class="card-body">
+    <div class="card-header">
+      <span class="field-number">XII</span>
+      <span class="card-title">Sovereignty</span>
+      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="card-elements">The claimed self after the full descent · The Royal Gatekeeper fully inhabited · Structure now chosen not inherited · The Water Bearer · Moon cycles as navigation · The revolutionary self</div>
+    <div class="astro-panel"><div class="astro-panel-inner">
+      <div class="astro-sign">Capricorn · Aquarius</div>
+      <div class="astro-planets">♄ ♅</div>
+      <div class="astro-rulers">Saturn chosen · Uranus liberated</div>
+      <div class="astro-principle">The wheel returns to the opening signs — but at a higher octave. Field I was pre-incarnation geometry imposed from outside. Field XII is sovereignty: the same geometry, now chosen from within. Saturn appears at the beginning as the structure you are born into, and at the return as the structure you consciously build.</div>
+    </div></div>
+    <div class="registers"><div class="registers-inner">
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">Inanna returns from the underworld wearing her own garments — not the same garments she surrendered, but new ones, chosen. The Water Bearer in the Aquarian myth does not drink the water — she carries it for others. The sovereign who has been through the descent and the shadow and the mirror arrives here: the Royal Gatekeeper who knows from the inside what each door opens into.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">Sovereignty as the capacity to act from one's own center rather than in reaction to the field. Not independence — the sovereign is deeply embedded in relationship and community — but autonomy of signal. The Water Bearer carries what the journey gathered and offers it to the collective without losing the individual frequency that makes the offering distinctly useful. Structure chosen rather than inherited.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The body of sovereignty: grounded, vertical, spacious. Not defended — defended is the body of someone who is afraid. Sovereign is the body of someone who knows what they are and does not require external confirmation of it. The felt quality of acting from this place — decisions made without the anxious checking of the field, words spoken without the preceding calculation of effect. The body that has come home to itself.</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- XIII — The Return -->
+<div class="field-card return-arc" onclick="toggle(this)" style="animation-delay:1.25s">
+  <svg class="card-art" viewBox="0 0 560 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Pisces two fish, swimming in opposite directions but joined -->
+    <!-- Fish 1 (upper, swimming right) -->
+    <path d="M 200 40 C 220 30 260 28 290 38 C 310 44 320 50 310 58 C 290 68 250 66 220 56 C 200 48 196 44 200 40 Z" stroke="#c4bef8" stroke-width="0.8" stroke-opacity="0.45" fill="rgba(196,190,248,0.06)"/>
+    <path d="M 200 40 C 186 34 172 40 180 48 C 186 54 200 52 200 40 Z" fill="#c4bef8" fill-opacity="0.22"/>
+    <circle cx="225" cy="38" r="1.5" fill="#c4bef8" fill-opacity="0.5"/>
+    <!-- Fish 2 (lower, swimming left — mirrored) -->
+    <path d="M 360 70 C 340 80 300 82 270 72 C 250 66 240 60 250 52 C 270 42 310 44 340 54 C 360 62 364 66 360 70 Z" stroke="#c4bef8" stroke-width="0.8" stroke-opacity="0.38" fill="rgba(196,190,248,0.04)"/>
+    <path d="M 360 70 C 374 76 388 70 380 62 C 374 56 360 58 360 70 Z" fill="#c4bef8" fill-opacity="0.18"/>
+    <circle cx="335" cy="72" r="1.5" fill="#c4bef8" fill-opacity="0.42"/>
+    <!-- Connecting cord -->
+    <path d="M 255 49 Q 280 55 285 61" stroke="#c4bef8" stroke-width="0.6" stroke-opacity="0.35" fill="none" stroke-dasharray="2 3"/>
+    <!-- The dissolving into the field — outer rings expanding -->
+    <circle cx="280" cy="55" r="36" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.12" fill="none"/>
+    <circle cx="280" cy="55" r="50" stroke="#c4bef8" stroke-width="0.3" stroke-opacity="0.07" fill="none"/>
+    <!-- Stars in the deep water -->
+    <circle cx="100" cy="35" r="0.8" fill="#c4bef8" fill-opacity="0.3"/>
+    <circle cx="460" cy="35" r="0.8" fill="#c4bef8" fill-opacity="0.3"/>
+    <circle cx="80"  cy="70" r="0.6" fill="#c4bef8" fill-opacity="0.2"/>
+    <circle cx="480" cy="70" r="0.6" fill="#c4bef8" fill-opacity="0.2"/>
+  </svg>
+  <div class="card-body">
+    <div class="card-header">
+      <span class="field-number">XIII</span>
+      <span class="card-title">The Return</span>
+      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
+    </div>
+    <div class="card-elements">Dissolution back into the larger field · The cycle completing · The stowaway who has crossed the ocean and kneels on the shore · The spiral beginning again at a higher octave</div>
+    <div class="astro-panel"><div class="astro-panel-inner">
+      <div class="astro-sign">Pisces</div>
+      <div class="astro-planets">♆ ♓</div>
+      <div class="astro-rulers">Neptune · The completion</div>
+      <div class="astro-principle">Full circle to where Field II began — but now carrying everything the journey gathered. The wheel completes and begins again. The boundary between self and cosmos becomes permeable once more, but this time the self knows what it is before it dissolves — and so the dissolution is chosen, not undergone.</div>
+    </div></div>
+    <div class="registers"><div class="registers-inner">
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label m-label">Mythic</span></div><div class="reg-text">Christina Young kneeling on the shore of the Salt Lake Valley after crossing the ocean with three pence and the plains with the Danish Saints. Inanna fully returned, wearing new garments, having completed the crossing that her parents began. The cycle does not end — it becomes the foundation for the next beginning. The two fish of Pisces swim in opposite directions and are joined at the center: completion and beginning are the same moment.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label c-label">Conceptual</span></div><div class="reg-text">The return is not a regression to the beginning. It is arrival at the same coordinates transformed. The structure of Field I — pre-incarnation geometry — is still present in Field XIII, but now the geometry is inhabited rather than imposed. The map was always the territory. The territory was always the map. The distinction dissolves in the Piscean field, and what remains is the frequency itself, no longer needing a container because it has become its own container.</div></div>
+      <div class="reg-item"><div class="reg-label-col"><span class="reg-label s-label">Somatic</span></div><div class="reg-text">The specific bodily quality of genuine completion — not the exhaustion of depletion but the full-body settledness of something that has run its complete course. The breath that comes after. The moment when the nervous system stops scanning for what is still unfinished. The body that has arrived — not at a destination but at its own nature. The field does not require you to do anything else. It only asks you to be what you have become.</div></div>
+    </div></div>
+  </div>
+</div>
+
+</div><!-- end field-grid -->
+
+<!-- Aspects — astrological view -->
 <div class="aspects-section">
-  <div class="aspects-header">Connective threads · Aspect qualities</div>
+  <div class="aspects-header">Connective threads · The wheel turning</div>
 
   <div class="aspect-thread">
     <div class="aspect-row">
-      <span class="aspect-from">Structural models</span>
+      <span class="aspect-from">Field I — Structural Models</span>
       <span class="aspect-center"><span class="aspect-glyph">□</span><span class="aspect-name">Square · 90°</span></span>
-      <span class="aspect-to">Anomalous reception</span>
+      <span class="aspect-to">Field II — Anomalous Reception</span>
     </div>
-    <div class="aspect-description">Productive friction between knowing the shape and receiving what has no shape yet. The tension between Saturn's geometry and Neptune's dissolution doesn't resolve — it generates. A Wrinkle in Time lives here: the book that gave you the word before you had the experience.</div>
+    <div class="aspect-description">Productive friction between knowing the shape and receiving what has no shape yet. Saturn's geometry and Neptune's dissolution do not resolve — they generate. A Wrinkle in Time lives here: the book that gave you the word before you had the experience. Capricorn square Pisces — the structure that cannot hold the water, and the water that cannot hold the structure, and the necessity of both.</div>
   </div>
 
   <div class="aspect-thread">
     <div class="aspect-row">
-      <span class="aspect-from">Anomalous reception</span>
+      <span class="aspect-from">Field II — Anomalous Reception</span>
       <span class="aspect-center"><span class="aspect-glyph">⚹</span><span class="aspect-name">Sextile · 60°</span></span>
-      <span class="aspect-to">Threshold events</span>
+      <span class="aspect-to">Field III — Threshold Events</span>
     </div>
-    <div class="aspect-description">Opportunity at the edge of the signal. The received transmission that becomes an invitation to cross. The Akashic records belong here — not just reception, but the library at the threshold: the record of every crossing ever made by every self that ever dissolved into the field.</div>
+    <div class="aspect-description">Opportunity at the edge of the signal. The received transmission that becomes an invitation to cross. The Akashic records belong in the bridge between these two fields — not just reception but the library at the threshold: the record of every crossing ever made.</div>
   </div>
 
   <div class="aspect-thread">
     <div class="aspect-row">
-      <span class="aspect-from">Threshold events</span>
-      <span class="aspect-center"><span class="aspect-glyph">☌</span><span class="aspect-name">Conjunction · 0°</span></span>
-      <span class="aspect-to">Embodied signal</span>
-    </div>
-    <div class="aspect-description">Fusion. The body is not the vehicle for crossing — it is the crossing itself. Pluto and the Moon in the same degree: transformation registered in tissue, not concept. The threshold and the signal are not separate events — they happen in the same moment, in the same body.</div>
-  </div>
-
-  <div class="aspect-thread">
-    <div class="aspect-row">
-      <span class="aspect-from">Embodied signal</span>
+      <span class="aspect-from">Field IV — Embodied Signal</span>
       <span class="aspect-center"><span class="aspect-glyph">△</span><span class="aspect-name">Trine · 120°</span></span>
-      <span class="aspect-to">Resonance in language</span>
+      <span class="aspect-to">Field VI — Body as Active Practice</span>
     </div>
-    <div class="aspect-description">The most natural flow on the map. Body to word without effort or translation. Mercury rules both — the birds are pre-linguistic signal, and language is what happens when that signal finds its form. The Suzuki triangle lives here: teacher, parent, child as three-way resonance operating below semantic content.</div>
+    <div class="aspect-description">The most natural flow in the descent arc: receiving the signal and practicing with it are the same river moving in two directions. What the body receives involuntarily through embodied signal is activated and metabolized through intentional practice. Taurus and Cancer — earth and water — feeding each other.</div>
   </div>
 
   <div class="aspect-thread">
     <div class="aspect-row">
-      <span class="aspect-from">Resonance in language</span>
-      <span class="aspect-center"><span class="aspect-glyph">⚻</span><span class="aspect-name">Quincunx · 150°</span></span>
-      <span class="aspect-to">Structural models</span>
+      <span class="aspect-from">Field V — Resonance in Language</span>
+      <span class="aspect-center"><span class="aspect-glyph">☌</span><span class="aspect-name">Conjunction</span></span>
+      <span class="aspect-to">Field XI — The Teaching</span>
     </div>
-    <div class="aspect-description">The arc that closes the original map and never quite resolves. Naming creates structure across an unbridgeable gap — the word and the geometry are never fully congruent, which is why the work is generative rather than finished. Your vocabulary — signal, frequency, compression, descent, emergence, threshold — is load-bearing structure.</div>
+    <div class="aspect-description">Fusion across the wheel. Language and transmission are the same act at different stages of development. Mercury in Gemini and Jupiter in Sagittarius — the word and the wisdom that knows how to aim it. The conjunction that bridges the descent and the return: what you found the words for in Field V becomes what you teach in Field XI.</div>
   </div>
 
   <div class="aspect-thread">
     <div class="aspect-row">
-      <span class="aspect-from">Body as active practice</span>
-      <span class="aspect-center"><span class="aspect-glyph">△</span><span class="aspect-name">Trine · 120°</span></span>
-      <span class="aspect-to">Embodied signal</span>
-    </div>
-    <div class="aspect-description">The most natural new flow: active practice and receptive signal are the same river moving in two directions. Mars and the Moon — the body that moves with intention and the body that receives without effort — meet here. What you practice intentionally opens the channel through which the signal flows involuntarily. The dance that breaks open the reception.</div>
-  </div>
-
-  <div class="aspect-thread">
-    <div class="aspect-row">
-      <span class="aspect-from">Animal and nature medicine</span>
+      <span class="aspect-from">Field IX — The Shadow</span>
       <span class="aspect-center"><span class="aspect-glyph">□</span><span class="aspect-name">Square · 90°</span></span>
-      <span class="aspect-to">Structural models</span>
+      <span class="aspect-to">Field XII — Sovereignty</span>
     </div>
-    <div class="aspect-description">Productive friction between the intelligence of the non-human world and the human drive to build geometric frameworks. The tree does not use a tesseract. The whale does not navigate by merkaba. But both the tree and the tesseract are describing the same multidimensional reality through completely different systems. The tension between these knowing-modes generates the most fertile territory in the whole map.</div>
+    <div class="aspect-description">The most necessary friction in the return arc. You cannot arrive at Sovereignty without passing through the Shadow — the square insists on this. Scorpio and Aquarius: the underworld intelligence and the revolutionary self. The shadow work does not produce sovereignty as a reward. It removes the obstacles that were preventing the sovereign from knowing itself.</div>
   </div>
 
   <div class="aspect-thread">
     <div class="aspect-row">
-      <span class="aspect-from">Creative record</span>
-      <span class="aspect-center"><span class="aspect-glyph">☌</span><span class="aspect-name">Conjunction · 0°</span></span>
-      <span class="aspect-to">Resonance in language</span>
+      <span class="aspect-from">Field I — Structural Models</span>
+      <span class="aspect-center"><span class="aspect-glyph">↺</span><span class="aspect-name">The Spiral</span></span>
+      <span class="aspect-to">Field XII — Sovereignty</span>
     </div>
-    <div class="aspect-description">Fusion at the floor of the map. The made thing and the language that carries it are the same act at different stages of crystallization. Venus and Mercury together — beauty and transmission — are the frequency of the work itself. Christina Young writing poems to Ann Paxman on the ship. Eleanor of Aquitaine governing through the troubadour tradition from her prison at Sarum. The creative record is language made permanent, and language is the creative record still moving.</div>
+    <div class="aspect-description">Not an aspect but a return. Both fields sit in Capricorn/Aquarius. Field I is the geometry imposed from outside — the architecture of the soul's chosen curriculum before the first breath. Field XII is the same geometry, now chosen from within. The wheel does not close in a circle. It spirals. The coordinates are the same. The consciousness that inhabits them is transformed.</div>
   </div>
 
 </div>
 
 <div class="map-footer">
   <div class="footer-rule"></div>
-  <p class="footer-note">This map is a living document. It will grow as the territory does.</p>
-  <a href="ancestral-weaving.html" class="footer-weaving">Enter the Ancestral Weaving →</a>
+  <p class="footer-note">This map is a living document. It turns with the wheel. Enter wherever you are standing.</p>
+  <div class="header-links" style="margin-top:1rem">
+    <a href="fieldguide.html" class="header-link">The Fieldguide ↗</a>
+    <a href="ancestral-weaving.html" class="header-link">Ancestral Weaving ↗</a>
+  </div>
 </div>
 
 </div><!-- end page -->
