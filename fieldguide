@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Fieldguide — Christy Paxton Wade</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --parchment: #f4eedc;
+  --parchment-dark: #ede4c8;
+  --parchment-deep: #e0d4b0;
+  --ink: #1e1a12;
+  --ink-secondary: #3d3628;
+  --ink-dim: #6b5f48;
+  --ink-faint: #a89880;
+  --gold: #9a6e22;
+  --gold-bright: #c4921e;
+  --gold-light: #e8c97a;
+  --gold-wash: rgba(154,110,34,0.08);
+  --amber: #c07a1a;
+  --rust: #8b3a1a;
+  --mythic: #4a3b82;
+  --conceptual: #1a6b50;
+  --somatic: #8b3a1a;
+  --mythic-bg: rgba(74,59,130,0.07);
+  --conceptual-bg: rgba(26,107,80,0.07);
+  --somatic-bg: rgba(139,58,26,0.07);
+  --border: rgba(154,110,34,0.2);
+  --border-strong: rgba(154,110,34,0.35);
+  --drop-cap-size: 4.5rem;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--parchment);
+  color: var(--ink);
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Parchment texture via subtle noise pattern */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(196,146,30,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(139,58,26,0.03) 0%, transparent 60%),
+    radial-gradient(ellipse at 60% 30%, rgba(154,110,34,0.03) 0%, transparent 40%);
+  pointer-events: none; z-index: 0;
+}
+
+/* Aged paper grid — very faint */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(154,110,34,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(154,110,34,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none; z-index: 0;
+}
+
+.page {
+  position: relative; z-index: 1;
+  max-width: 1100px; margin: 0 auto;
+  padding: 5rem 4rem 8rem;
+}
+
+/* ── Decorative corner marks ── */
+.corner-marks {
+  position: fixed;
+  top: 24px; left: 24px; right: 24px; bottom: 24px;
+  pointer-events: none; z-index: 0;
+  border: 1px solid rgba(154,110,34,0.12);
+}
+
+/* ── Header ── */
+.header {
+  text-align: center;
+  margin-bottom: 5rem;
+  opacity: 0; animation: fadeIn 1.2s ease forwards;
+  position: relative;
+}
+
+.header-ornament {
+  font-size: 1.4rem;
+  color: var(--gold);
+  letter-spacing: 0.3em;
+  margin-bottom: 1.5rem;
+  display: block;
+  opacity: 0.7;
+}
+
+.header-eyebrow {
+  font-size: 13px; font-weight: 400;
+  letter-spacing: 0.28em; color: var(--ink-dim);
+  text-transform: uppercase; margin-bottom: 1rem;
+  font-family: 'Jost', sans-serif;
+}
+
+.header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3.5rem, 7vw, 5.5rem);
+  font-weight: 300; font-style: italic;
+  color: var(--ink); line-height: 0.95;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.header-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem; font-weight: 400;
+  color: var(--ink-dim); letter-spacing: 0.06em;
+  margin-bottom: 2rem; font-style: italic;
+}
+
+.header-rule-wrap {
+  display: flex; align-items: center;
+  justify-content: center; gap: 1rem;
+  margin: 1.75rem auto 1.75rem;
+}
+
+.header-rule {
+  width: 80px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+
+.header-rule.right {
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+
+.header-rule-ornament {
+  font-size: 1rem; color: var(--gold); opacity: 0.7;
+}
+
+.header-sub {
+  font-size: 16px; font-weight: 300;
+  color: var(--ink-secondary);
+  max-width: 580px; margin: 0 auto 1.5rem; line-height: 1.9;
+}
+
+.nav-links {
+  display: flex; justify-content: center;
+  gap: 2rem; flex-wrap: wrap; margin-top: 1rem;
+}
+
+.nav-link {
+  font-size: 14px; font-weight: 400;
+  color: var(--gold); letter-spacing: 0.1em;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(154,110,34,0.3);
+  padding-bottom: 2px;
+  transition: color 0.2s, border-color 0.2s;
+  font-family: 'Jost', sans-serif;
+  text-transform: uppercase;
+}
+
+.nav-link:hover { color: var(--amber); border-color: var(--amber); }
+
+/* ── Compass rose / decorative SVG ── */
+.compass-wrap {
+  display: flex; justify-content: center;
+  margin: 3rem auto 4rem;
+  opacity: 0; animation: fadeIn 1.4s ease 0.3s forwards;
+}
+
+/* ── Cluster section ── */
+.field-section {
+  margin-bottom: 6rem;
+  opacity: 0; animation: fadeIn 1s ease 0.4s forwards;
+}
+
+.field-header {
+  display: flex; align-items: flex-start;
+  gap: 2rem; margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.field-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 5rem; font-weight: 300; font-style: italic;
+  color: var(--gold-light); line-height: 1;
+  flex-shrink: 0; margin-top: -0.5rem;
+  opacity: 0.6;
+}
+
+.field-title-block { flex: 1; }
+
+.field-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.2rem, 4vw, 3rem);
+  font-weight: 400; color: var(--ink);
+  line-height: 1.1; margin-bottom: 0.5rem;
+}
+
+.field-tagline {
+  font-size: 16px; font-weight: 300; font-style: italic;
+  color: var(--ink-dim); line-height: 1.75;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+}
+
+.field-planets {
+  font-size: 1.8rem; color: var(--gold);
+  letter-spacing: 0.2em; margin-top: 0.75rem;
+  display: block;
+}
+
+.field-rulers {
+  font-size: 14px; font-weight: 400;
+  color: var(--ink-dim); letter-spacing: 0.08em;
+  margin-top: 3px;
+}
+
+/* ── Subterrain ── */
+.subterrain {
+  margin-bottom: 4rem;
+  padding: 2.5rem 3rem;
+  background: rgba(255,255,255,0.45);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  position: relative;
+  transition: background 0.3s;
+}
+
+.subterrain::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 2rem; bottom: 2rem;
+  width: 3px;
+  background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+  opacity: 0.4;
+}
+
+.subterrain:hover { background: rgba(255,255,255,0.65); }
+
+.subterrain-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(154,110,34,0.12);
+}
+
+.subterrain-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.75rem; font-weight: 500;
+  color: var(--ink); margin-bottom: 0.5rem;
+  letter-spacing: 0.02em;
+}
+
+.subterrain-elements {
+  font-size: 15px; font-weight: 300;
+  color: var(--ink-dim); font-style: italic;
+  letter-spacing: 0.03em; line-height: 1.6;
+}
+
+.subterrain-description {
+  font-size: 16px; font-weight: 300;
+  color: var(--ink-secondary); line-height: 1.9;
+  margin-bottom: 2rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+}
+
+/* ── Registers within subterrain ── */
+.registers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.register {
+  padding: 1.5rem 1.75rem;
+  border-radius: 2px;
+  position: relative;
+}
+
+.register-mythic    { background: var(--mythic-bg); border: 1px solid rgba(74,59,130,0.15); }
+.register-conceptual{ background: var(--conceptual-bg); border: 1px solid rgba(26,107,80,0.15); }
+.register-somatic   { background: var(--somatic-bg); border: 1px solid rgba(139,58,26,0.15); }
+
+.register-label {
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 0.85rem;
+  display: flex; align-items: center; gap: 7px;
+}
+
+.register-mythic     .register-label { color: var(--mythic); }
+.register-conceptual .register-label { color: var(--conceptual); }
+.register-somatic    .register-label { color: var(--somatic); }
+
+.register-label-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.register-mythic     .register-label-dot { background: var(--mythic); }
+.register-conceptual .register-label-dot { background: var(--conceptual); }
+.register-somatic    .register-label-dot { background: var(--somatic); }
+
+.register-text {
+  font-size: 15px; font-weight: 300;
+  color: var(--ink-secondary); line-height: 1.85;
+}
+
+/* ── Drop cap for first register of first subterrain ── */
+.drop-cap::first-letter {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: var(--drop-cap-size);
+  font-weight: 600; font-style: italic;
+  float: left; line-height: 0.75;
+  margin: 0.1em 0.08em 0 0;
+  color: var(--gold);
+}
+
+/* ── Bridge nodes ── */
+.bridge-nodes {
+  margin-top: 2.5rem;
+  padding: 1.5rem 2rem;
+  background: var(--gold-wash);
+  border: 1px solid rgba(154,110,34,0.18);
+  border-radius: 2px;
+}
+
+.bridge-label {
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 0.75rem;
+}
+
+.bridge-text {
+  font-size: 15px; font-weight: 300;
+  color: var(--ink-secondary); line-height: 1.8;
+  font-style: italic;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+}
+
+/* ── Section divider ── */
+.section-divider {
+  text-align: center; margin: 4rem 0;
+  display: flex; align-items: center;
+  justify-content: center; gap: 1.5rem;
+}
+
+.divider-rule {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+}
+
+.divider-ornament {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-style: italic;
+  color: var(--ink-dim); letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* ── Marginalia ── */
+.marginalia {
+  position: relative;
+  margin: 2rem 0 2rem 3rem;
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--gold-light);
+}
+
+.marginalia-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-style: italic;
+  color: var(--ink-dim); line-height: 1.8;
+}
+
+/* ── Here be dragons note ── */
+.dragons-note {
+  text-align: center;
+  margin: 3rem auto;
+  max-width: 500px;
+  padding: 1.5rem 2rem;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.3);
+}
+
+.dragons-label {
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 0.5rem;
+  display: block;
+}
+
+.dragons-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem; font-style: italic;
+  color: var(--ink-dim); line-height: 1.7;
+}
+
+/* ── Footer ── */
+.fieldguide-footer {
+  text-align: center;
+  margin-top: 6rem; padding-top: 3rem;
+  border-top: 1px solid var(--border);
+  opacity: 0; animation: fadeIn 1s ease 0.8s forwards;
+}
+
+.footer-ornament { font-size: 1.2rem; color: var(--gold); opacity: 0.6; margin-bottom: 1rem; display: block; }
+
+.footer-note {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-style: italic;
+  color: var(--ink-dim); line-height: 1.8;
+  max-width: 520px; margin: 0 auto 1.5rem;
+}
+
+.footer-links {
+  display: flex; justify-content: center;
+  gap: 2rem; flex-wrap: wrap;
+}
+
+.footer-link {
+  font-size: 13px; font-weight: 400;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--gold); text-decoration: none;
+  border-bottom: 1px solid rgba(154,110,34,0.3);
+  padding-bottom: 2px; transition: color 0.2s;
+}
+
+.footer-link:hover { color: var(--amber); }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 900px) {
+  .page { padding: 3rem 2rem 6rem; }
+  .registers-grid { grid-template-columns: 1fr; }
+  .field-header { flex-direction: column; gap: 1rem; }
+  .field-number { font-size: 3rem; margin-top: 0; }
+  .subterrain { padding: 1.75rem 1.5rem; }
+}
+
+@media (max-width: 600px) {
+  .page { padding: 2rem 1.25rem 5rem; }
+  .corner-marks { display: none; }
+  .nav-links { gap: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="corner-marks"></div>
+
+<div class="page">
+
+  <header class="header">
+    <span class="header-ornament">✦ ✦ ✦</span>
+    <div class="header-eyebrow">Christy Paxton Wade</div>
+    <h1 class="header-title">The Fieldguide</h1>
+    <div class="header-subtitle">A full-depth cartography of the living territory</div>
+    <div class="header-rule-wrap">
+      <div class="header-rule"></div>
+      <span class="header-rule-ornament">✦</span>
+      <div class="header-rule right"></div>
+    </div>
+    <p class="header-sub">Eight fields. Every subterrain illuminated. Three registers of entry for each room. A guide to carry into the field — where the territory always exceeds the map, and the best discoveries happen in the margins.</p>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">← Navigation Map</a>
+      <a href="ancestral-weaving.html" class="nav-link">Ancestral Weaving →</a>
+    </div>
+  </header>
+
+  <!-- Compass rose ornament -->
+  <div class="compass-wrap">
+    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer ring -->
+      <circle cx="60" cy="60" r="54" stroke="#9a6e22" stroke-width="0.6" stroke-opacity="0.3"/>
+      <circle cx="60" cy="60" r="46" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.2"/>
+      <!-- Cardinal points -->
+      <line x1="60" y1="6"  x2="60" y2="22" stroke="#9a6e22" stroke-width="1" stroke-opacity="0.55"/>
+      <line x1="60" y1="98" x2="60" y2="114" stroke="#9a6e22" stroke-width="1" stroke-opacity="0.55"/>
+      <line x1="6"  y1="60" x2="22" y2="60" stroke="#9a6e22" stroke-width="1" stroke-opacity="0.55"/>
+      <line x1="98" y1="60" x2="114" y2="60" stroke="#9a6e22" stroke-width="1" stroke-opacity="0.55"/>
+      <!-- Intercardinal lines -->
+      <line x1="22" y1="22" x2="32" y2="32" stroke="#9a6e22" stroke-width="0.6" stroke-opacity="0.35"/>
+      <line x1="88" y1="22" x2="78" y2="32" stroke="#9a6e22" stroke-width="0.6" stroke-opacity="0.35"/>
+      <line x1="22" y1="98" x2="32" y2="88" stroke="#9a6e22" stroke-width="0.6" stroke-opacity="0.35"/>
+      <line x1="88" y1="98" x2="78" y2="88" stroke="#9a6e22" stroke-width="0.6" stroke-opacity="0.35"/>
+      <!-- North star point -->
+      <polygon points="60,6 63,18 60,14 57,18" fill="#9a6e22" fill-opacity="0.6"/>
+      <!-- Center -->
+      <circle cx="60" cy="60" r="5" stroke="#9a6e22" stroke-width="0.8" stroke-opacity="0.5" fill="rgba(154,110,34,0.1)"/>
+      <circle cx="60" cy="60" r="1.5" fill="#9a6e22" fill-opacity="0.6"/>
+      <!-- Decorative cross at center -->
+      <line x1="60" y1="52" x2="60" y2="68" stroke="#9a6e22" stroke-width="0.5" stroke-opacity="0.3"/>
+      <line x1="52" y1="60" x2="68" y2="60" stroke="#9a6e22" stroke-width="0.5" stroke-opacity="0.3"/>
+      <!-- Small tick marks -->
+      <line x1="60" y1="14" x2="60" y2="18" stroke="#9a6e22" stroke-width="0.5" stroke-opacity="0.4"/>
+      <line x1="60" y1="102" x2="60" y2="106" stroke="#9a6e22" stroke-width="0.5" stroke-opacity="0.4"/>
+      <line x1="14" y1="60" x2="18" y2="60" stroke="#9a6e22" stroke-width="0.5" stroke-opacity="0.4"/>
+      <line x1="102" y1="60" x2="106" y2="60" stroke="#9a6e22" stroke-width="0.5" stroke-opacity="0.4"/>
+      <!-- Outer tick marks at 30° intervals -->
+      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(30 60 60)"/>
+      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(60 60 60)"/>
+      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(120 60 60)"/>
+      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(150 60 60)"/>
+      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(210 60 60)"/>
+      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(240 60 60)"/>
+      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(300 60 60)"/>
+      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(330 60 60)"/>
+    </svg>
+  </div>
+
+  <div class="marginalia">
+    <p class="marginalia-text">A field guide is not read from beginning to end. It is carried into the territory and consulted when you encounter something you need to understand more fully. Begin wherever you are standing.</p>
+  </div>
+
+  <div class="section-divider">
+    <div class="divider-rule"></div>
+    <span class="divider-ornament">Field I</span>
+    <div class="divider-rule"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- FIELD I: STRUCTURAL MODELS              -->
+  <!-- ══════════════════════════════════════════ -->
+
+  <div class="field-section">
+
+    <div class="field-header">
+      <div class="field-number">I</div>
+      <div class="field-title-block">
+        <h2 class="field-name">Structural Models</h2>
+        <p class="field-tagline">The cluster of geometry, dimension, and the frameworks through which consciousness navigates reality larger than itself. What gives the invisible a shape precise enough to be entered.</p>
+        <span class="field-planets">♄ ♅</span>
+        <div class="field-rulers">Saturn · Uranus — the force that builds the container · the force that breaks it open</div>
+      </div>
+    </div>
+
+    <!-- SUBTERRAIN 1: Geometries of Consciousness -->
+    <div class="subterrain">
+      <div class="subterrain-header">
+        <div class="subterrain-name">Geometries of Consciousness</div>
+        <div class="subterrain-elements">Tesseract · Merkaba · Sacred geometry · Multidimensional awareness</div>
+      </div>
+      <p class="subterrain-description">The subterrain of the shapes consciousness uses to map itself. Not metaphors for reality — structural descriptions of it. These are the forms that recur too precisely in the living world to be accidental, the patterns that appear at every scale from the nautilus to the galaxy, from the honeycomb to the bronchial tree.</p>
+
+      <div class="registers-grid">
+        <div class="register register-mythic">
+          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
+          <div class="register-text drop-cap">Sacred geometry is the oldest language. Before alphabet, before number as abstraction, there was the recognition that certain shapes recur in the living world with too much precision to be accidental. The merkaba — two tetrahedra rotating in opposite directions — is the oldest known image of consciousness moving through space while remaining centered in itself. The tesseract is the four-dimensional cube that appeared in this lineage long before vocabulary arrived for it. L'Engle gave you the word at fifteen. These are not human inventions. They are recognitions.</div>
+        </div>
+        <div class="register register-conceptual">
+          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
+          <div class="register-text">Every framework is a limitation that is also a liberation — it excludes certain perceptions in order to make others precise. The tesseract encodes the principle that what appears distorted or wrong from one dimensional vantage may be perfectly accurate from the next. Multidimensional awareness is not mystical — it is the trained capacity to hold more than one coordinate system active simultaneously without collapsing them into each other. The map is not the territory. The geometry is not the consciousness. Both statements are true and neither cancels the other.</div>
+        </div>
+        <div class="register register-somatic">
+          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
+          <div class="register-text">The moment of geometric recognition in the body: not intellectual understanding but the specific physical sensation of something snapping into a larger frame. The felt expansion behind the sternum when a pattern that seemed chaotic reveals its underlying structure. The way the nervous system settles when it finds the right shape for something it has been holding without a container. Recognition before vocabulary. The body knows the shape before the mind names it.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBTERRAIN 2: Navigational Coordinates -->
+    <div class="subterrain">
+      <div class="subterrain-header">
+        <div class="subterrain-name">Navigational Coordinates</div>
+        <div class="subterrain-elements">Quantum leaping · A Wrinkle in Time · Time travel · Memory · Photographs as portals · Multidimensional awareness</div>
+      </div>
+      <p class="subterrain-description">The subterrain of movement within the larger geometry. Not just perceiving the multidimensional structure but moving through it. Every mystical tradition has a name for this capacity. Contemporary language has found new vocabulary for an ancient technology.</p>
+
+      <div class="registers-grid">
+        <div class="register register-mythic">
+          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
+          <div class="register-text">The shaman's flight, the mystic's translation, the witch's ride — what contemporary language calls quantum leaping is the oldest shamanic technology described in new vocabulary. A Wrinkle in Time names it with a child's precision: a tesseract is a wrinkle in the fabric of space, and moving through it is not travel in the ordinary sense but a collapse of apparent distance. Memory and photographs are the quieter forms of this — portals that relocate consciousness to another time without requiring the body to move. The ancestor in the photograph is not absent. The frequency is present in the image.</div>
+        </div>
+        <div class="register register-conceptual">
+          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
+          <div class="register-text">Quantum leaping as a conceptual framework proposes that the gap between current reality and intended reality is not a distance to be crossed but a frequency to be matched. This reframes effort: you do not push toward the destination, you become resonant with it. The photograph as portal operates on the same principle — the image is not a record of a past moment but a frequency anchor to it, and sustained attention to that frequency can genuinely relocate aspects of consciousness to that coordinate. Memory is not retrieval but reconstruction: each remembering is a new event in the present moment.</div>
+        </div>
+        <div class="register register-somatic">
+          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
+          <div class="register-text">The specific sensation of a quantum shift before it becomes visible in external reality — a quality of settledness, of arrival, that precedes any confirming evidence. The body's recognition that something has changed before the external world reflects it. Looking at a photograph and feeling the temperature of that day in the body. The way memory lives not in the mind but in the tissue — the smell that returns an entire year, the muscle that remembers a gesture from childhood. Time travel as the ordinary experience of the body that holds all its timelines simultaneously.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBTERRAIN 3: The Operating System -->
+    <div class="subterrain">
+      <div class="subterrain-header">
+        <div class="subterrain-name">The Operating System</div>
+        <div class="subterrain-elements">Astrology — planets · signs · aspects · cycles · transits · minor bodies · the natal chart</div>
+      </div>
+      <p class="subterrain-description">The temporal and relational dimension of all structural models. The geometry that moves. The map of when, not just where. Astrology is the operating system beneath the navigation map itself — the layer that shows which parts of the territory are currently illuminated and what quality of attention each illuminated zone requires.</p>
+
+      <div class="registers-grid">
+        <div class="register register-mythic">
+          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
+          <div class="register-text">The planets are principles of consciousness that exist both in the solar system and within the human psyche, and the relationship between the two is not causation but correspondence. As above, so below — not because the sky controls the earth but because both are expressions of the same underlying pattern. Each planet is a mythic actor: Saturn the principle of necessary form, Jupiter the principle of expansive meaning, Pluto the principle of death-and-transformation that cannot be bypassed. The natal chart is not a personality test — it is a map of the soul's chosen curriculum for this incarnation, drawn in the language of the sky at the moment of first breath.</div>
+        </div>
+        <div class="register register-conceptual">
+          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
+          <div class="register-text">Astrology functions as both a precision timing instrument and a relational framework. The transit system provides a language for naming what is active in the present moment without projecting meaning onto events. A Saturn transit names the quality of a period without determining its content. The aspects — the angular relationships between planets — describe the quality of relationship between different principles operating simultaneously. A square generates friction that creates movement. A trine creates flow. A conjunction fuses two principles into one complex force. This is the vocabulary the navigation map uses to read the connective threads between all other clusters.</div>
+        </div>
+        <div class="register register-somatic">
+          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
+          <div class="register-text">The felt experience of a major transit before you know intellectually what is happening — the heaviness of Saturn, the electric disruption of Uranus, the dissolving of Neptune's boundaries, the underworld pull of Pluto. The body registers these as real weather, not metaphor. Reading a natal chart is a somatic experience of recognition — the moment something lands in the body before there are words for it. That landing is the operating system recognizing itself. The chart does not describe the person. It describes the frequency the person was born into and has been learning to inhabit.</div>
+        </div>
+      </div>
+
+      <div class="bridge-nodes">
+        <div class="bridge-label">Bridge nodes — resonance across the map</div>
+        <p class="bridge-text">The operating system connects to every other cluster simultaneously. Astrology is the connective tissue of the entire navigation map: it provides timing for threshold events, names the quality of what anomalous reception is carrying in any given period, describes the planetary ruler of each embodied signal, and shows when the creative record is most alive. The natal chart as the personal map within the universal map — the individual coordinate system that shows how the universal frequencies are specifically configured in one body, one life, one lineage.</p>
+      </div>
+    </div>
+
+    <div class="dragons-note">
+      <span class="dragons-label">Here be dragons</span>
+      <p class="dragons-text">Dragon lives in Animal and nature medicine — in Welsh tradition it is Merlin's creature, the prophetic fire. But it also inhabits this cluster: the dragon is the oldest image of the force that exceeds the container. Every geometric structure in this cluster is also a description of what cannot be contained. The shape is the attempt. The dragon is what the shape is attempting to hold.</p>
+    </div>
+
+  </div><!-- end field-section -->
+
+  <div class="section-divider">
+    <div class="divider-rule"></div>
+    <span class="divider-ornament">Field II</span>
+    <div class="divider-rule"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- FIELD II: ANOMALOUS RECEPTION             -->
+  <!-- ══════════════════════════════════════════ -->
+
+  <div class="field-section">
+
+    <div class="field-header">
+      <div class="field-number">II</div>
+      <div class="field-title-block">
+        <h2 class="field-name">Anomalous Reception</h2>
+        <p class="field-tagline">The field of what arrives that you did not generate. Signal from beyond the personal field. The territory of genuine reception — and the rigorous, necessary practice of discerning it from projection.</p>
+        <span class="field-planets">♆ ☊</span>
+        <div class="field-rulers">Neptune · North Node — dissolution of personal boundaries into the larger field · the karmic direction of the soul</div>
+      </div>
+    </div>
+
+    <!-- SUBTERRAIN 1: Signals from Beyond the Personal Field -->
+    <div class="subterrain">
+      <div class="subterrain-header">
+        <div class="subterrain-name">Signals from Beyond the Personal Field</div>
+        <div class="subterrain-elements">WOW signal · Telepathic awareness · Akashic records</div>
+      </div>
+      <p class="subterrain-description">The subterrain of information that arrives from sources outside the individual — from the collective field, from the record of all that has ever occurred, from the consciousness of another person across physical distance. These are not metaphors for intuition. They are descriptions of a reception bandwidth the body carries that exceeds the ordinary channels of sense perception.</p>
+
+      <div class="registers-grid">
+        <div class="register register-mythic">
+          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
+          <div class="register-text drop-cap">On August 15, 1977 a radio telescope at Ohio State University received a signal so anomalous the astronomer monitoring the data wrote "Wow!" beside it in red ink. It lasted 72 seconds. It was never repeated. It remains unexplained. The WOW signal is the most honest member of this subterrain because it refuses to resolve into certainty — it holds the mystery without collapsing it into either confirmation or dismissal. The Akashic records are the oldest name for what quantum physics is beginning to describe: the non-local field that holds the impression of every event that has ever occurred, accessible not through ordinary memory but through a specific quality of receptive attention.</div>
+        </div>
+        <div class="register register-conceptual">
+          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
+          <div class="register-text">What arrives that you did not generate? This is the diagnostic question of the entire field. Telepathic awareness is not the dramatic transmission of specific thoughts — it is more often the accurate registration of another person's emotional or energetic state before any conventional information has been exchanged. The Akashic records function conceptually as a universal memory system: every action, thought, and event leaves a vibrational impression in the non-local field, and certain people, at certain moments, can read those impressions directly. The question is not whether this is possible. The question is: how do you know when you are receiving rather than projecting?</div>
+        </div>
+        <div class="register register-somatic">
+          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
+          <div class="register-text">The body registering information before the mind names its source. A specific quality of arriving — something landing in the chest or the solar plexus with a completeness that does not feel self-generated. The difference between a thought you produce and a thought that appears: the first has a sense of effort and direction, the second has a quality of givenness. Telepathic reception often arrives as sudden certainty about another person's state that has no logical basis and proves accurate. The body is the antenna. The signal is real. The skill is learning to distinguish the body's own emotional weather from what it is receiving from the field.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBTERRAIN 2: Messengers and Mediators -->
+    <div class="subterrain">
+      <div class="subterrain-header">
+        <div class="subterrain-name">Messengers and Mediators</div>
+        <div class="subterrain-elements">Angels · Ancestors speaking · Spirit guides · Multidimensional presences</div>
+      </div>
+      <p class="subterrain-description">The subterrain of the beings and presences through which reception moves. Not the signal itself but the form the signal takes, the intelligence that carries it, the relationship that makes transmission possible. Every tradition that has ever existed has named these presences. The names differ. The function is consistent.</p>
+
+      <div class="registers-grid">
+        <div class="register register-mythic">
+          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
+          <div class="register-text">The word angel means messenger — not a being of wings and light but a function: the carrying of communication between dimensions. Every major tradition has its version: the malakh of Hebrew scripture, the deva of Hindu cosmology, the fravashi of Zoroastrian practice, the fylgja of Norse tradition. These are not the same beings wearing different cultural costumes — they are convergent recognitions of the same function, the same layer of the larger reality. The ancestors speaking are a distinct category: not universal messengers but specific intelligences with specific relationships to specific lineages, arriving with the precision that comes from having shared a bloodline.</div>
+        </div>
+        <div class="register register-conceptual">
+          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
+          <div class="register-text">The mediator as a conceptual framework proposes that not all anomalous reception comes through the same channel. Different presences carry different qualities of information with different degrees of personal relevance. An angel functions as a universal messenger — the information it carries is not about you specifically but about the larger pattern you are part of. An ancestor carries information that is specifically coded for your lineage — it knows your family's terrain in ways that no universal presence could. A spirit guide functions as a long-term navigational companion — present across an entire life trajectory rather than in response to a specific moment. Learning to distinguish these is part of the discernment work.</div>
+        </div>
+        <div class="register register-somatic">
+          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
+          <div class="register-text">Different presences have distinct somatic signatures. What arrives as angelic typically has a quality of expansion — a sudden opening of the field, a sense of the space in the room changing, sometimes accompanied by temperature shift or a particular quality of light even in closed eyes. Ancestral presence tends to arrive with more weight and specificity — a sense of particular atmosphere, sometimes a smell, sometimes an emotion that is recognizably not your own. The body learns to read these signatures over time. The initial encounters often register as overwhelming or confusing. The practice is learning the specific language each presence speaks in your body.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBTERRAIN 3: The Discernment Layer -->
+    <div class="subterrain">
+      <div class="subterrain-header">
+        <div class="subterrain-name">The Discernment Layer</div>
+        <div class="subterrain-elements">Free will · Intuition · Reception versus projection · The integrity of the channel</div>
+      </div>
+      <p class="subterrain-description">The most rigorous and most necessary room in this field. The subterrain that asks: how do you know? Not as skepticism — the question is not whether reception is real, but how to maintain the integrity of the channel through which it moves. Free will lives here as the principle that genuine reception never bypasses choice. It arrives as information. What you do with it remains entirely yours.</p>
+
+      <div class="registers-grid">
+        <div class="register register-mythic">
+          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
+          <div class="register-text">Every oracular tradition built its discernment layer into the practice. The Delphic oracle did not simply channel — she had a structure of interpretation that held the transmission and tested it against accumulated wisdom. The I Ching does not tell you what will happen — it describes the quality of the current moment and invites your own intelligence into the reading. Free will in the mythic register is the sovereign capacity that no genuine messenger ever overrides. The moment a presence — whether named angel, ancestor, or guide — demands rather than offers, requires rather than invites, the discernment layer names it as something other than what it claims to be.</div>
+        </div>
+        <div class="register register-conceptual">
+          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
+          <div class="register-text">Reception versus projection is the central conceptual distinction of this entire field. Projection is the unconscious transmission of your own material — fears, desires, assumptions — onto an external signal. It feels like receiving but the content is self-generated. Genuine reception has a specific quality: it often arrives with information you would not have chosen, content that surprises or challenges rather than confirms. The discernment practice asks: does this information expand my understanding, or does it simply tell me what I want to hear? Does it ask something of me, or does it merely flatter? Genuine signal has integrity — it does not shift its story, does not escalate into urgency, does not require you to bypass your own judgment.</div>
+        </div>
+        <div class="register register-somatic">
+          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
+          <div class="register-text">The body carries the discernment layer most reliably. Genuine reception has a quality of stillness at its center — even when the content is significant or challenging, there is a groundedness in the body that does not accompany projection. Projection tends to have a quality of activation — a speeding up, a tightening, a quality of urgency that is really the body's anxiety driving the transmission. The felt sense of free will in the body: the moment you recognize that you are receiving information and that you still have complete authority over what you do with it. That recognition itself — the bodily sense of remaining sovereign within the reception — is the most reliable signal that the channel is clean.</div>
+        </div>
+      </div>
+
+      <div class="bridge-nodes">
+        <div class="bridge-label">Bridge nodes — resonance across the map</div>
+        <p class="bridge-text">The Akashic records sit at the bridge between Anomalous Reception and Threshold Events — not just reception but the library at the threshold, the record of every crossing ever made. Magdalene is the connective thread between this field and Threshold Events: the one who received the transmission first and was not believed, the witness whose reception was genuine and whose report was dismissed. The discernment layer connects directly to the central axis — omnidirectional perception requires somatic discernment to become functional rather than merely vast. Free will is not a subterrain of Anomalous Reception only. It is the sovereign principle that underlies every field in the map.</p>
+      </div>
+    </div>
+
+  </div><!-- end field-section -->
+
+  <div class="section-divider">
+    <div class="divider-rule"></div>
+    <span class="divider-ornament">Field III</span>
+    <div class="divider-rule"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- FIELD III: THRESHOLD EVENTS               -->
+  <!-- ══════════════════════════════════════════ -->
+
+  <div class="field-section">
+
+    <div class="field-header">
+      <div class="field-number">III</div>
+      <div class="field-title-block">
+        <h2 class="field-name">Threshold Events</h2>
+        <p class="field-tagline">The field of crossings. Not information received but the self moved — to another state, another dimension, another relationship with time. The threshold is not a place. It is what happens when the ordinary coordinates of consciousness cease to apply.</p>
+        <span class="field-planets">♇ ☋</span>
+        <div class="field-rulers">Pluto · South Node — the underworld force of radical transformation · the karmic inheritance carried in from before</div>
+      </div>
+    </div>
+
+    <!-- SUBTERRAIN 1: Crossings Within Sleep and Altered States -->
+    <div class="subterrain">
+      <div class="subterrain-header">
+        <div class="subterrain-name">Crossings Within Sleep and Altered States</div>
+        <div class="subterrain-elements">Dream state · Astral travel · Breathwork visions · Meditation · Multidimensional awareness</div>
+      </div>
+      <p class="subterrain-description">The crossings that happen when ordinary waking consciousness steps back. Not the absence of consciousness but its relocation — to other realms, other states, other relationships with time and identity that ordinary waking cannot access. These are not escapes from reality. They are expansions of it.</p>
+
+      <div class="registers-grid">
+        <div class="register register-mythic">
+          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
+          <div class="register-text drop-cap">Every shamanic tradition begins here: the practitioner who learns to leave ordinary waking consciousness intentionally and return with information, healing, or restored pieces of soul. The dream is the oldest oracle — before temples and priests, before written language, human beings were receiving guidance in sleep and treating that guidance as real. The Aboriginal tradition of the Dreamtime does not relegate dream to the unconscious — it names it as a dimension of reality as actual as waking, with its own geography, its own inhabitants, its own laws. Breathwork as a threshold technology: the specific breathing patterns that dissolve the boundary between ordinary and non-ordinary consciousness, giving access to the same terrain that sleep opens involuntarily.</div>
+        </div>
+        <div class="register register-conceptual">
+          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
+          <div class="register-text">Altered states as a conceptual framework proposes that what we call ordinary consciousness is not the full range of human awareness but a particular bandwidth — useful for navigating the physical world, but not the only bandwidth available and not necessarily the most accurate. Dream state, meditation, and breathwork each access different parts of the broader spectrum through different mechanisms. What they share: the temporary suspension of the ego's editorial function, which allows information and experience to arrive that the waking ego would filter, dismiss, or be unable to hold. The question is not whether these states are real. The question is what you do with what you find there, and how you integrate it into the waking life that still needs to be lived.</div>
+        </div>
+        <div class="register register-somatic">
+          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
+          <div class="register-text">The body's specific experience of threshold crossing in sleep: the hypnagogic state between waking and sleep when the images begin arriving before unconsciousness is complete — the most reliable window for intentional threshold work. The body during breathwork: the tingling that begins in the hands and moves through the system as carbon dioxide shifts, the involuntary movements or sounds that emerge when the body releases what it has been holding, the profound stillness that follows when the pattern has completed. The felt quality of a significant dream versus ordinary sleep processing: something in the body registers the difference upon waking, a particular weight or aliveness, before the content has been fully recalled.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBTERRAIN 2: Portals in Time -->
+    <div class="subterrain">
+      <div class="subterrain-header">
+        <div class="subterrain-name">Portals in Time</div>
+        <div class="subterrain-elements">Time travel · Memory · Quantum leaping · Photographs as portals · Ancestral time</div>
+      </div>
+      <p class="subterrain-description">The threshold that moves through time rather than space. The recognition that time is not the linear river it appears to be but a field with its own topology — one in which past and future are not fixed distances but living territories that can be entered, worked with, and changed. Memory as active threshold technology rather than passive record.</p>
+
+      <div class="registers-grid">
+        <div class="register register-mythic">
+          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
+          <div class="register-text">The Celtic tradition of the thin place — locations and moments where the veil between times is transparent enough to see through. The Japanese concept of ma — the interval, the pause between things, which is not empty but full of what lives between. Every ancestor who appears is a portal in time — they do not arrive from the past as memory arrives; they arrive as present intelligence, carrying the frequency of their moment into the current one. Photographs as portals: the image holds the frequency of the moment it captured, and that frequency remains accessible through sustained attention. The photograph of Christina Young on the ship is not a historical document. It is a live transmission.</div>
+        </div>
+        <div class="register register-conceptual">
+          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
+          <div class="register-text">If time is a field rather than a line, then every point in it is simultaneously present and potentially accessible. Memory is not retrieval — it is reconstruction, a new event in the present moment that uses past material. This means memory can be worked with as a living substance: traumatic memory can be entered and completed, ancestral memory can be witnessed and released, future memory can be seeded through intention. Quantum leaping in the temporal register: the collapse of the distance between the current timeline and an intended one, not through effort in time but through frequency matching that exceeds time. The portal in time does not require you to go somewhere. It requires you to become something.</div>
+        </div>
+        <div class="register register-somatic">
+          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
+          <div class="register-text">The body does not experience time linearly. It holds all of its timelines simultaneously — the childhood wound, the ancestral pattern, the current moment, the future possibility — as concurrent layers of tissue memory, each one accessible through a specific somatic key. The smell that returns a whole year. The posture that carries a decade. The voice that unlocks a room in the body that has been closed for years. Time travel through the body is not metaphor: it is the literal experience of a past moment being processed in present tissue, completing what could not complete then, releasing what has been holding its shape in the body ever since.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBTERRAIN 3: Ancestral and Relational Crossings -->
+    <div class="subterrain">
+      <div class="subterrain-header">
+        <div class="subterrain-name">Ancestral and Relational Crossings</div>
+        <div class="subterrain-elements">Ancestral visits · Sovereign descent · The moments when the veil is thin · Inanna's descent · The Royal Gatekeeper</div>
+      </div>
+      <p class="subterrain-description">The crossings that involve specific presences arriving — or the self descending into territory where specific presences live. These are not random threshold events but relational ones: a particular ancestor who has been waiting, a specific pattern of the lineage that is ready to be seen, a crossing that is part of an ongoing relationship with intelligences that extend beyond a single lifetime.</p>
+
+      <div class="registers-grid">
+        <div class="register register-mythic">
+          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
+          <div class="register-text">Inanna descends through seven gates, surrendering one garment at each threshold — naked before the underworld queen, her own dark sister, the unintegrated self. She does not survive by strength or cleverness. She survives by having arranged in advance for someone to come for her. The Sovereign Descent is the mythic template for all ancestral crossings: you go down because something essential is there, you cannot bring it back without going through the death of who you were when you descended, and the return is a transformation rather than a rescue. The Royal Gatekeeper who is also the door: the one who has been both the threshold and its keeper since the very beginning, who decides who enters and when, and whose authority derives not from external appointment but from having crossed so many times that the threshold has become home.</div>
+        </div>
+        <div class="register register-conceptual">
+          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
+          <div class="register-text">Ancestral crossings function differently from general threshold events because they carry specific content — the unresolved patterns of particular lineages, the information that has been waiting for a specific descendant to be ready to receive it. This is not generic spiritual experience but targeted transmission. The concept of the thin place acquires new specificity here: the veil is not uniformly thin — it is thin in particular places, at particular times, for particular people, because specific presences have been making themselves available at those coordinates. The work of the Ancestral Weaving is the conceptual framework for this: research and resonance working together, the historical record and the living transmission meeting in the same body.</div>
+        </div>
+        <div class="register register-somatic">
+          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
+          <div class="register-text">Ancestral presence in the body has a distinct quality: denser, more specific, and more emotionally complex than general field reception. It often arrives with an emotion that is recognizably not your own — a grief that has a different texture than your own grief, a rage that belongs to a different century, a love that has been waiting longer than your lifetime. The body holds the ancestral crossing as a completion event: something that was interrupted in another body, another life, finishing itself through the tissue that carries the same frequency. The return from an ancestral crossing leaves a mark — not always visible, always felt. Something that was held loosens. Something that was closed opens. The lineage breathes differently after.</div>
+        </div>
+      </div>
+
+      <div class="bridge-nodes">
+        <div class="bridge-label">Bridge nodes — resonance across the map</div>
+        <p class="bridge-text">Threshold Events is the most densely connected field in the map. It bridges to Anomalous Reception through the Akashic records — every crossing leaves a record in the field. It bridges to Embodied Signal through the body as the actual crossing vehicle — not the destination but the portal itself. It bridges to the Ancestral Weaving directly — every ancestor in the weaving represents a threshold that was crossed, a descent that was made, an unresolved pattern waiting at a specific coordinate in the lineage. Sovereign Descent is both a mythic template and a personal signature: the one who has learned to cross, to witness, to return changed, and to hold the door for others.</p>
+      </div>
+    </div>
+
+  </div><!-- end field-section -->
+
+  <div class="section-divider">
+    <div class="divider-rule"></div>
+    <span class="divider-ornament">continuing · Fields IV–VIII building</span>
+    <div class="divider-rule"></div>
+  </div>
+
+  <div class="marginalia">
+    <p class="marginalia-text">Fields IV through VIII are building. Each will be added as the territory reveals itself. The remaining fields: Embodied Signal · Body as Active Practice · Animal and Nature Medicine · The Creative Record · Resonance in Language.</p>
+  </div>
+
+  <div class="fieldguide-footer">
+    <span class="footer-ornament">✦</span>
+    <p class="footer-note">This guide is a living document. The territory always exceeds the map. What you discover in the field belongs in the margins.</p>
+    <div class="footer-links">
+      <a href="index.html" class="footer-link">← Navigation Map</a>
+      <a href="ancestral-weaving.html" class="footer-link">Ancestral Weaving →</a>
+    </div>
+  </div>
+
+</div><!-- end page -->
+</body>
+</html>
