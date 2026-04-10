@@ -92,6 +92,12 @@ body::before {
 .catalog-card:hover { border-color: var(--border-hover); background: var(--surface-2); }
 .catalog-card.open { border-color: var(--border-hover); background: var(--surface-2); }
 .catalog-card.hidden { display: none; }
+.keynote-card { background: var(--surface); border: 1px solid rgba(196,190,248,0.2); border-radius: 14px; overflow: hidden; cursor: pointer; transition: border-color 0.25s, background 0.2s; opacity: 0; animation: fadeUp 0.7s ease forwards; }
+.keynote-card:hover { border-color: rgba(196,190,248,0.38); background: var(--surface-2); }
+.keynote-card.open { border-color: rgba(196,190,248,0.38); background: var(--surface-2); }
+.keynote-card.hidden { display: none; }
+.keynote-era-bar { height: 3px; width: 100%; background: linear-gradient(90deg, rgba(196,190,248,0.7), rgba(196,190,248,0.15)); }
+.keynote-label { display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(196,190,248,0.8); background: rgba(196,190,248,0.08); border: 1px solid rgba(196,190,248,0.18); border-radius: 10px; padding: 2px 8px; margin-bottom: 0.5rem; }
 
 /* Card header bar — era color coding */
 .card-era-bar { height: 3px; width: 100%; }
@@ -186,6 +192,7 @@ body::before {
 <button class="filter-btn" onclick="setFilter('early-modern', this)">Early Modern</button>
 <button class="filter-btn" onclick="setFilter('modern', this)">Modern</button>
 <button class="filter-btn" onclick="setFilter('weaving', this)">In Weaving</button>
+    <button class="filter-btn" onclick="setFilter('keynote', this)">Keynotes</button>
 </div>
 <div class="filter-group sort-group">
 <span style="font-size:11px;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;padding-top:8px;flex-shrink:0">Sort</span>
@@ -1181,6 +1188,96 @@ body::before {
   </div>
 
 
+  <!-- ═══ HISTORICAL KEYNOTE: THE DESPOSYNI TRADITION ═══ -->
+  <div class="keynote-card" data-era="ancient" data-weaving="false" data-sort-name="desposyni tradition" data-sort-year="100" data-sort-location="palestine rome frankish kingdoms" data-sort-fields="threshold events the shadow the teaching" data-search="desposyni jesus family relatives blood lineage eusebius julius africanus sylvester church history sacred genealogy" onclick="toggleCard(this)">
+    <div class="keynote-era-bar"></div>
+    <div class="card-body">
+      <div class="card-top">
+        <div class="card-name">
+          <span class="keynote-label">Historical Keynote</span><br>
+          The Desposyni Tradition
+        </div>
+        <div class="card-date">1st–4th century AD</div>
+      </div>
+      <div class="card-epithet">Belonging to the Lord · The Blood Relatives of Jesus · The Family the Church Erased</div>
+      <div class="card-meta">Palestine · Rome · Frankish Kingdoms · documented in Eusebius, Julius Africanus, Hegesippus · pertains to the lineage claim in the FamilySearch tree through Sarah-Damaris Bat Yeshoshua</div>
+      <div class="card-tags">
+        <span class="tag">Threshold Events</span>
+        <span class="tag">The Shadow</span>
+        <span class="tag">The Teaching</span>
+        <span class="tag">Anomalous Reception</span>
+      </div>
+      <div class="card-narrative-preview">The term Desposyni — from the Greek meaning "belonging to the Lord" — referred to the documented biological relatives of Jesus of Nazareth. It was coined by the historian Sextus Julius Africanus in the early 3rd century and preserved by Eusebius of Caesarea in his Ecclesiastical History. The Desposyni are historically real: they governed the early Jewish-Christian church for over a century, were called before Emperor Domitian for questioning, and sent representatives to Pope Sylvester I in 318 AD demanding recognition. The Roman Church refused. That refusal is the last documented contact between the institutional church and the family of Jesus.</div>
+      <div class="card-narrative-full">What the historical record actually shows is specific and documented. Julius Africanus writes that the blood relatives of Jesus — called Desposyni — came from Nazareth and Cochaba in Judea and preserved their genealogies from memory after Herod had burned the public genealogical archives to obscure his own ignoble origins. Eusebius quotes Hegesippus reporting that in the reign of Emperor Domitian (81–96 AD), the grandsons of Jude — named as the brother of Jesus — were brought before the Emperor, interrogated about their Davidic lineage and their property, found to be simple farmers, and released as politically harmless. This is documented Roman administrative history. What is also documented is the meeting of 318 AD, when Desposyni representatives came to Pope Sylvester I and asked that Jerusalem be restored as the mother church, that the Greek Christian bishops be replaced by bishops from Jesus's own bloodline, and that the church's money flow back to Jerusalem. Sylvester refused all three demands and declared Rome the mother church. The Desposyni disappear from the institutional record after this meeting. The gap between what is documented — that Jesus had a family, that the family governed the early church, that the family was recognized as legitimate for 150 years, and was then formally displaced in 318 — and what is claimed in certain genealogical traditions — that specific named individuals can be traced through Frankish kings to living descendants — is where honest uncertainty lives. The documented tradition is real and significant. The specific genealogical chains attaching individual named people to that tradition, including the FamilySearch entry for Sarah-Damaris Bat Yeshoshua, belong to a different category: constructed sacred genealogy, which is itself historically significant as a phenomenon but is not the same order of evidence as the early church sources. This Keynote holds both: the documented historical reality of a family whose existence, governance, and eventual displacement is recorded in primary sources, and the honest acknowledgment that the specific genealogical thread in this tree connecting that family to the living descendant is a tradition rather than a documented chain. Both things are true and worth holding.</div>
+      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
+    </div>
+  </div>
+
+
+  <!-- ═══ HISTORICAL KEYNOTE: THE MIGRATION PERIOD ═══ -->
+  <div class="keynote-card" data-era="ancient" data-weaving="false" data-sort-name="migration period völkerwanderung" data-sort-year="350" data-sort-location="europe frankish germanic lombard burgundian" data-sort-fields="threshold events structural models" data-search="migration period völkerwanderung franks lombards alemanni burgundians vandals huns germanic tribes rome collapse" onclick="toggleCard(this)">
+    <div class="keynote-era-bar"></div>
+    <div class="card-body">
+      <div class="card-top">
+        <div class="card-name"><span class="keynote-label">Historical Keynote</span><br>The Migration Period · Völkerwanderung</div>
+        <div class="card-date">c. 300 – 700 AD</div>
+      </div>
+      <div class="card-epithet">The Great Movement · When the Known World Reorganized Itself · The Ecosystem of the Germanic Kingdoms</div>
+      <div class="card-meta">Western Europe · Germanic tribal territories · Roman frontier zones · pertains to the Frankish, Lombard, Alemanni, and Burgundian figures visible in the lineage tree of this period</div>
+      <div class="card-tags">
+        <span class="tag">Threshold Events</span>
+        <span class="tag">Structural Models</span>
+        <span class="tag">The Shadow</span>
+      </div>
+      <div class="card-narrative-preview">Between approximately 300 and 700 AD, the Germanic and Hunnic peoples of central and eastern Europe moved westward and southward in massive waves, collapsing the Western Roman Empire and reshaping the political landscape of Europe into the kingdoms that would become medieval France, Germany, Italy, Spain, and England. The Franks, Lombards, Alemanni, Burgundians, and Vandals — all visible in this lineage's FamilySearch tree — were real historical peoples whose movements are documented in Roman, Byzantine, and early medieval sources. The specific genealogical figures named in the tree vary greatly in how well they can be documented as individuals.</div>
+      <div class="card-narrative-full">The Völkerwanderung — the Great Migration — is one of the most significant threshold events in Western history. What caused it is still debated: Hunnic pressure from the east, climate shifts, Roman internal instability, or all three simultaneously. What resulted is clear: the Western Roman Empire ceased to exist as a political entity in 476 AD, replaced by a patchwork of Germanic kingdoms that each claimed varying degrees of Roman legitimacy while organizing themselves around tribal kinship structures. The Franks — the most important tribal group for this lineage — are documented from the 3rd century onward in Roman sources. The Sicambri, one of the Frankish tribal groups appearing in the FamilySearch tree as the lineage of Sarah-Damaris, are mentioned in Julius Caesar's Gallic Wars and appear in Tacitus. Their specific royal genealogies, however, were written down centuries after the fact in documents shaped by the political needs of later Merovingian and Carolingian rulers who wanted to demonstrate ancient noble descent. What genealogical research in this period honestly shows: the tribal peoples were real, the migrations were real, the kingdoms they built were real. The specific named individuals and their lineage chains — the Antenors and Clodimirs and Marcomirs appearing in FamilySearch trees — are often drawn from texts like the Genealogy of the Frankish Kings, composed centuries after the events it describes, by scribes who had political reasons to construct impressive ancestral chains. The ecosystem of the Migration Period is documented and historically rich. The specific branches that grew through it are harder to trace with confidence. This Keynote holds the ecosystem — the human reality of peoples in motion, kingdoms forming and dissolving, the old Roman world becoming something entirely new — as the honest frame for the names that appear in the lineage tree of this era.</div>
+      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
+    </div>
+  </div>
+
+  <!-- ═══ HISTORICAL KEYNOTE: THE SICAMBRIAN AND EARLY FRANKISH WORLD ═══ -->
+  <div class="keynote-card" data-era="ancient" data-weaving="false" data-sort-name="sicambrian frankish world" data-sort-year="50" data-sort-location="gaul rhineland frankish territory" data-sort-fields="threshold events structural models sovereignty" data-search="sicambri franks merovingian clovis rhineland gaul caesar tacitus germanic tribes kingdom" onclick="toggleCard(this)">
+    <div class="keynote-era-bar"></div>
+    <div class="card-body">
+      <div class="card-top">
+        <div class="card-name"><span class="keynote-label">Historical Keynote</span><br>The Sicambrian and Early Frankish World</div>
+        <div class="card-date">c. 50 BC – 500 AD</div>
+      </div>
+      <div class="card-epithet">The Tribe at the Rhine · From Caesar's Frontier to Clovis's Kingdom · The World the Lineage Moved Through</div>
+      <div class="card-meta">Rhineland · Gaul · Toxandria · pertains to the Sicambrian and early Frankish figures in the lineage tree including Antenor, Ratherius, Richemir, Odomir, Marcomir, Clodomir</div>
+      <div class="card-tags">
+        <span class="tag">Threshold Events</span>
+        <span class="tag">Sovereignty</span>
+        <span class="tag">Structural Models</span>
+      </div>
+      <div class="card-narrative-preview">The Sicambri were a real Germanic tribal people documented by Julius Caesar, Tacitus, and Strabo — inhabiting the right bank of the Rhine where it bends westward, raiding into Gaul and clashing with Roman legions. Caesar crossed the Rhine specifically to intimidate them in 55 BC. Augustus eventually forced a large portion of the Sicambri to relocate west of the Rhine into Roman Gaul, where they were absorbed into the broader Frankish tribal confederation that would eventually produce the Merovingian dynasty. The names that appear in this lineage tree — Antenor, Ratherius, Richemir, Odomir, Marcomir, Clodomir — belong to a genealogical tradition that is historically contested but culturally significant.</div>
+      <div class="card-narrative-full">The documented historical picture: the Sicambri appear in Roman sources from the 1st century BC through the 1st century AD. They were one of several Germanic tribal groups that the Roman Empire repeatedly attempted to pacify, relocate, and absorb into frontier military service. Some Sicambrian warriors served in Roman auxiliary units. By the 2nd and 3rd centuries the Sicambri had largely merged into the broader Frankish confederation — the name Franci appearing in Roman sources around 260 AD as a collective term for the Germanic peoples along the lower and middle Rhine. The Merovingian dynasty, which unified the Frankish kingdoms under Clovis in the late 5th century, claimed descent from these Frankish tribal leaders. The specific genealogical chains — the kings named Antenor, Ratherius, Richemir — appear in medieval documents like the Liber Historiae Francorum (composed around 727 AD) and the later Genealogy of the Frankish Kings, which traced Merovingian ancestry back into antiquity, often with more concern for dynastic legitimacy than historical accuracy. Historians today treat these early Frankish genealogies with significant skepticism as biographical sources while acknowledging them as evidence of how the Franks understood their own origins and constructed their royal legitimacy. The lineage tree passes through this world. The ecosystem is documented. The specific branches are drawn partly from history and partly from medieval dynastic construction — which is itself an honest and interesting thing to know about the tradition you're carrying.</div>
+      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
+    </div>
+  </div>
+
+  <!-- ═══ HISTORICAL KEYNOTE: THE ROMAN-FRANKISH FRONTIER ═══ -->
+  <div class="keynote-card" data-era="ancient" data-weaving="false" data-sort-name="roman frankish frontier" data-sort-year="1" data-sort-location="rome gaul rhineland" data-sort-fields="threshold events structural models" data-search="roman senate gaul rhineland frontier gaius asinius quadratus roman historian germanic roman marriage elite" onclick="toggleCard(this)">
+    <div class="keynote-era-bar"></div>
+    <div class="card-body">
+      <div class="card-top">
+        <div class="card-name"><span class="keynote-label">Historical Keynote</span><br>The Roman–Frankish Frontier</div>
+        <div class="card-date">1st–3rd century AD</div>
+      </div>
+      <div class="card-epithet">Where Two Worlds Touched · Roman Senators and Germanic Kings · The Elite Who Crossed Both</div>
+      <div class="card-meta">Rome · Gaul · Rhine frontier · pertains to Roman senatorial figures in the lineage tree including Gaius Asinius Quadratus, Julia Charax, and Roman connections visible in the 1st–3rd century branches</div>
+      <div class="card-tags">
+        <span class="tag">Threshold Events</span>
+        <span class="tag">Structural Models</span>
+        <span class="tag">Anomalous Reception</span>
+      </div>
+      <div class="card-narrative-preview">Gaius Asinius Quadratus was a real Roman historian of the 3rd century AD — he wrote a history of Rome in fifteen books and a history of the Parthian wars, fragments of which survive. His name appearing in a lineage tree is not inherently implausible: Roman senatorial families did intermarry with frontier elites, and the blending of Roman and Germanic noble lines was common by the 2nd and 3rd centuries. What the Roman–Frankish frontier actually looked like, and why these crossings matter for understanding the ecosystem this lineage moved through, is the subject of this Keynote.</div>
+      <div class="card-narrative-full">The Rhine–Danube frontier was not a wall. It was a zone — a permeable boundary where Roman military officers, merchants, administrators, and local Germanic elites interacted continuously for centuries. Germanic tribal leaders sent their sons to be educated in Roman cities. Roman commanders married into local elite families to secure alliances. Germanic soldiers rose through Roman military ranks and some became Roman citizens and even senators. This two-way permeability means that by the 2nd and 3rd centuries, the distinction between "Roman" and "Germanic" among the elite classes of the frontier zone was often more political than ethnic. Gaius Asinius Quadratus is documented as a historian — his works are cited by later Byzantine authors. Whether the specific genealogical connection shown in the FamilySearch tree linking him to the Frankish lineage is documented is a separate question; the general phenomenon of Roman senatorial families connecting with Frankish frontier elites is historically real. Julia Charax, another name visible in this section of the tree, is harder to trace — charax means palisade in Greek, and the name appears in various Roman and Greek contexts without clear individual documentation for the specific person shown. The honest picture: the ecosystem of Roman-Frankish frontier interaction is documented and produced exactly the kind of mixed elite genealogies that later medieval scribes would draw on when constructing royal ancestry chains. Your lineage tree moves through this world. The world was real. The specific connections require source-by-source evaluation.</div>
+      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
+    </div>
+  </div>
+
+
 </div><!-- end grid -->
 <div class="catalog-footer">
 <div class="footer-rule"></div>
@@ -1225,9 +1322,11 @@ function applyAll() {
     const inWeaving = card.dataset.weaving === 'true';
 
     const matchesSearch = !query || searchText.includes(query);
+    const isKeynote = card.classList.contains('keynote-card');
     const matchesFilter =
       activeFilter === 'all' ||
       (activeFilter === 'weaving' && inWeaving) ||
+      (activeFilter === 'keynote' && isKeynote) ||
       activeFilter === era;
 
     if (matchesSearch && matchesFilter) {
