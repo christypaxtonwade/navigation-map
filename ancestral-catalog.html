@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Ancestral Catalog — Christy Paxton Wade</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&amp;family=Jost:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #09090f;
+  --surface: #11111c;
+  --surface-2: #181825;
+  --border: rgba(201,168,76,0.12);
+  --border-hover: rgba(201,168,76,0.26);
+  --gold: #d4a84c;
+  --gold-dim: rgba(212,168,76,0.4);
+  --gold-wash: rgba(212,168,76,0.06);
+  --text: #f2eedd;
+  --text-secondary: #ccc4b4;
+  --text-dim: #9a948e;
+  --tag-bg: rgba(212,168,76,0.1);
+  --tag-border: rgba(212,168,76,0.22);
+  --weaving-bg: rgba(109,216,178,0.08);
+  --weaving-border: rgba(109,216,178,0.22);
+  --weaving-color: #6dd8b2;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Jost', sans-serif; font-weight: 300;
+  font-size: 15px; min-height: 100vh;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(201,168,76,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.02) 1px, transparent 1px);
+  background-size: 52px 52px; pointer-events: none; z-index: 0;
+}
+.page { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 3rem 2.5rem 6rem; }
+
+/* Header */
+.header { text-align: center; margin-bottom: 2.5rem; opacity: 0; animation: fadeUp 0.9s ease forwards; }
+.header-eyebrow { font-size: 11px; font-weight: 400; letter-spacing: 0.22em; color: var(--gold); text-transform: uppercase; margin-bottom: 0.9rem; }
+.header-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem,5vw,3.6rem); font-weight: 300; font-style: italic; line-height: 1.05; }
+.header-rule { width: 40px; height: 1px; background: var(--gold-dim); margin: 1.2rem auto; }
+.header-sub { font-size: 15px; color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.8; }
+.header-links { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-top: 1rem; }
+.header-link { font-size: 14px; font-weight: 400; color: var(--gold); letter-spacing: 0.08em; text-decoration: none; border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px; transition: color 0.2s; }
+.header-link:hover { color: #dfc090; }
+
+/* Controls */
+.controls { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-bottom: 2rem; opacity: 0; animation: fadeUp 0.9s ease 0.1s forwards; }
+.search-wrap { flex: 1; min-width: 220px; position: relative; }
+.search-input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 16px 10px 38px;
+  color: var(--text); font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 300;
+  outline: none; transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--border-hover); }
+.search-input::placeholder { color: var(--text-dim); }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; stroke: var(--text-dim); fill: none; }
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-btn {
+  font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 400;
+  letter-spacing: 0.08em; padding: 7px 14px;
+  border: 1px solid var(--border); border-radius: 20px;
+  background: transparent; color: var(--text-dim); cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.filter-btn:hover { border-color: var(--border-hover); color: var(--text); }
+.filter-btn.active { background: var(--gold); color: #09090f; border-color: var(--gold); font-weight: 500; }
+.count-note { font-size: 13px; color: var(--text-dim); margin-left: auto; white-space: nowrap; }
+
+/* Grid */
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+/* Card */
+.catalog-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden; cursor: pointer;
+  transition: border-color 0.25s, background 0.2s;
+  opacity: 0; animation: fadeUp 0.7s ease forwards;
+}
+.catalog-card:hover { border-color: var(--border-hover); background: var(--surface-2); }
+.catalog-card.open { border-color: var(--border-hover); background: var(--surface-2); }
+.catalog-card.hidden { display: none; }
+
+/* Card header bar — era color coding */
+.card-era-bar { height: 3px; width: 100%; }
+.era-mythic    { background: linear-gradient(90deg, rgba(196,190,248,0.6), rgba(196,190,248,0.2)); }
+.era-ancient   { background: linear-gradient(90deg, rgba(245,170,136,0.6), rgba(245,170,136,0.2)); }
+.era-medieval  { background: linear-gradient(90deg, rgba(212,168,76,0.7), rgba(212,168,76,0.2)); }
+.era-early-modern { background: linear-gradient(90deg, rgba(109,216,178,0.6), rgba(109,216,178,0.2)); }
+.era-modern    { background: linear-gradient(90deg, rgba(212,168,76,0.5), rgba(196,190,248,0.3)); }
+
+.card-body { padding: 1.25rem 1.4rem 1.1rem; }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; gap: 0.75rem; }
+.card-name { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-weight: 500; color: var(--text); line-height: 1.2; flex: 1; }
+.card-date { font-size: 12px; color: var(--text-dim); letter-spacing: 0.06em; white-space: nowrap; padding-top: 3px; flex-shrink: 0; }
+.card-epithet { font-size: 13px; font-style: italic; font-family: 'Cormorant Garamond', serif; color: var(--text-dim); margin-bottom: 0.6rem; line-height: 1.5; }
+.card-meta { font-size: 12px; color: var(--text-dim); letter-spacing: 0.04em; margin-bottom: 0.9rem; }
+
+/* Tags */
+.card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 0.9rem; }
+.tag {
+  font-size: 11px; font-weight: 400; letter-spacing: 0.06em;
+  padding: 3px 9px; border-radius: 12px;
+  background: var(--tag-bg); border: 1px solid var(--tag-border);
+  color: var(--gold); white-space: nowrap;
+}
+.tag-weaving {
+  background: var(--weaving-bg); border-color: var(--weaving-border);
+  color: var(--weaving-color);
+}
+.tag-weaving a { color: inherit; text-decoration: none; }
+.tag-weaving a:hover { text-decoration: underline; }
+
+/* Narrative — collapsed by default */
+.card-narrative-preview { font-size: 14px; color: var(--text-secondary); line-height: 1.75; }
+.card-narrative-full {
+  font-size: 14px; color: var(--text-secondary); line-height: 1.75;
+  max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height 0.5s ease, opacity 0.4s ease;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  margin-top: 0; padding-top: 0;
+}
+.catalog-card.open .card-narrative-full { max-height: 600px; opacity: 1; margin-top: 0.75rem; padding-top: 0.75rem; }
+.card-chevron {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; color: var(--gold); margin-top: 0.6rem;
+  letter-spacing: 0.06em; cursor: pointer;
+}
+.card-chevron svg { width: 10px; height: 10px; stroke: var(--gold); fill: none; transition: transform 0.3s; }
+.catalog-card.open .card-chevron svg { transform: rotate(180deg); }
+
+/* Gap cards — ancestors not yet in weaving */
+.catalog-card.margin-ancestor { border-color: rgba(212,168,76,0.08); }
+
+/* Footer */
+.catalog-footer { text-align: center; margin-top: 3.5rem; opacity: 0; animation: fadeUp 0.9s ease 1.5s forwards; }
+.footer-rule { width: 32px; height: 1px; background: var(--border); margin: 0 auto 1rem; }
+.footer-note { font-size: 15px; color: var(--text-dim); font-style: italic; font-family: 'Cormorant Garamond', serif; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 768px) {
+  .page { padding: 2rem 1.25rem 4rem; }
+  .catalog-grid { grid-template-columns: 1fr; }
+  .controls { flex-direction: column; }
+  .count-note { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="header">
+<div class="header-eyebrow">Christy Paxton Wade</div>
+<h1 class="header-title">The Ancestral Catalog</h1>
+<div class="header-rule"></div>
+<p class="header-sub">A seed catalog of the lineage. Every researched ancestor held here — those in full flower in the Weaving and those still germinating in the margins. Sortable by era and place. Searchable by name. Each card holds what is known, what connects, and what remains open.</p>
+<div class="header-links">
+<a class="header-link" href="ancestral-weaving.html">The Ancestral Weaving ↗</a>
+<a class="header-link" href="index.html">Navigation Map ↗</a>
+<a class="header-link" href="fieldguide.html">The Fieldguide ↗</a>
+</div>
+</header>
+<div class="controls">
+<div class="search-wrap">
+<svg class="search-icon" stroke-linecap="round" stroke-width="1.5" viewbox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.5"></circle><line x1="10" x2="14" y1="10" y2="14"></line></svg>
+<input class="search-input" id="search" oninput="applyAll()" placeholder="Search by name, place, field, epithet…" type="text"/>
+</div>
+<div class="filter-group">
+<span style="font-size:11px;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;padding-top:8px;flex-shrink:0">Filter</span>
+<button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+<button class="filter-btn" onclick="setFilter('mythic', this)">Mythic</button>
+<button class="filter-btn" onclick="setFilter('ancient', this)">Ancient</button>
+<button class="filter-btn" onclick="setFilter('medieval', this)">Medieval</button>
+<button class="filter-btn" onclick="setFilter('early-modern', this)">Early Modern</button>
+<button class="filter-btn" onclick="setFilter('modern', this)">Modern</button>
+<button class="filter-btn" onclick="setFilter('weaving', this)">In Weaving</button>
+</div>
+<div class="filter-group sort-group">
+<span style="font-size:11px;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;padding-top:8px;flex-shrink:0">Sort</span>
+<button class="filter-btn active sort-btn" onclick="setSort('chronological', this)">Chronological</button>
+<button class="filter-btn sort-btn" onclick="setSort('name', this)">Name</button>
+<button class="filter-btn sort-btn" onclick="setSort('location', this)">Location</button>
+<button class="filter-btn sort-btn" onclick="setSort('field', this)">Field</button>
+</div>
+<span class="count-note" id="count-note">26 ancestors</span>
+</div>
+<div class="catalog-grid" id="catalog-grid">
+<!-- ═══ ANNA DON VERCH MATHONWY ═══ -->
+<div class="catalog-card" data-era="mythic" data-search="anna don verch mathonwy prophetess dôn danu celtic britain goddess" data-sort-fields="ii iii xii xiii" data-sort-location="celtic britain" data-sort-name="anna don" data-sort-year="-3000" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-mythic"></div>
+<div class="card-body">
+<div class="card-top">
+<div class="card-name">Anna Don verch Mathonwy</div>
+<div class="card-date">mythic · before the erasure</div>
+</div>
+<div class="card-epithet">The Prophetess · Dôn · Danu · The Mother Before the Name Was Changed</div>
+<div class="card-meta">Celtic Britain · grandmother of Bran Fendigaid · wife of Beli Mawr</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html#">In Weaving ✦</a></span>
+<span class="tag">Anomalous Reception</span>
+<span class="tag">Threshold Events</span>
+<span class="tag">Sovereignty</span>
+<span class="tag">The Return</span>
+<span class="tag">Terra Incognita</span>
+</div>
+<div class="card-narrative-preview">Welsh mother goddess, equivalent to the Irish Danu and Gaulish Belisama. Wife of Beli Mawr, grandmother of Bran Fendigaid through their daughter Penarddun. Her name and identity were absorbed through Christianization — the goddess becoming the prophetess, the source becoming the connection. Medieval Welsh annals name her a near kinswoman of the Virgin Mary. She is the root from which the weaving's genealogical record grows.</div>
+<div class="card-narrative-full">The erasure of Anna Don verch Mathonwy is the thesis of the entire weaving in miniature: the goddess Dôn, whose name carries the same frequency as the Irish Danu and the Gaulish Belisama, absorbed into genealogical Christianity and made into a near-kinswoman of the Holy Family. The Mabinogion names her sister of Math mab Mathonwy, King of Gwynedd — the magician-king who required the feminine body as his foundation of power. Her lineage runs to Bran Fendigaid through Penarddun verch Beli, making her the deepest genealogical root in this entire archive. The cauldron Bran carries is her inheritance — the generative vessel of the goddess tradition, passed one generation into human lineage before it enters the mythic record as a magical object.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ BRAN FENDIGAID ═══ -->
+<div class="catalog-card" data-era="mythic" data-search="bran fendigaid ap llyr blessed raven cauldron white hill celtic britain" data-sort-fields="iii iv x" data-sort-location="wales" data-sort-name="bran fendigaid" data-sort-year="-100" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-mythic"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Bran Fendigaid ap Llyr</div><div class="card-date">mythic · pre-Roman</div></div>
+<div class="card-epithet">Blessed Raven · King of Britain · Keeper of the Cauldron</div>
+<div class="card-meta">Island of the Mighty · Wales · Second Branch of the Mabinogion</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Threshold Events</span>
+<span class="tag">Embodied Signal</span>
+<span class="tag">The Shadow</span>
+<span class="tag">Totemic Presences</span>
+
+</div>
+<div class="card-narrative-preview">Son of Llyr, grandson of Anna Don verch Mathonwy. Possessor of the Cauldron of Rebirth. Led his army to Ireland when his sister Branwen was enslaved. Mortally wounded by a poisoned spear, he commanded his seven companions to sever his head and carry it to the White Hill in London to guard Britain from invasion. For eighty-seven years the head presided over feasting and fellowship, speaking and prophesying. Bran in Welsh means raven.</div>
+<div class="card-narrative-full">The weaving's first genealogical card and the mythic template for the lineage's central pattern: the sovereign who must be sacrificed so his people survive, whose consciousness persists after the body has fallen. The Cauldron of Rebirth — the dead placed within it emerged whole but silent — is the proto-Grail, inherited from his grandmother Dôn's goddess tradition. The White Hill burial connects to Christina Young Higginson, born at White Hill, Dalkeith — a two-thousand-year circuit completed in the lineage. The raven is his sacred bird and the central axis of the Navigation Map carries it forward as a living sigil.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ BOUDICCA ═══ -->
+<div class="catalog-card" data-era="ancient" data-search="boudicca iceni queen warrior roman britain east anglia" data-sort-fields="iii xii" data-sort-location="east anglia" data-sort-name="boudicca" data-sort-year="61" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-ancient"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Boudicca</div><div class="card-date">died c. 61 AD</div></div>
+<div class="card-epithet">Queen of the Iceni · Warrior of the Land</div>
+<div class="card-meta">East Anglia, Roman Britain · died c. 61 AD</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Threshold Events</span>
+<span class="tag">Sovereignty</span>
+
+
+</div>
+<div class="card-narrative-preview">Queen of the Iceni tribe of East Anglia. When her husband Prasutagus died, Rome seized his lands and flogged her daughters. She led the most significant revolt against Roman occupation Britain ever produced, burning Camulodunum, Londinium, and Verulamium. Defeated by Suetonius Paulinus in 61 AD. Died by her own hand rather than captivity. Her name means Victory.</div>
+<div class="card-narrative-full">Boudicca's revolt was not merely military — it was the last sustained assertion of the pre-Roman Celtic sovereignty of Britain before four centuries of Roman occupation reshaped the island's culture, religion, and political identity. The pattern she embodies in this lineage: the woman who acts when no conventional path remains available, who places her body in service of what the land requires, who chooses her own end rather than surrender. Her daughters were the stated cause of the revolt. She rose for them and took the whole country with her.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ MARY MAGDALENE ═══ -->
+<div class="catalog-card" data-era="ancient" data-search="mary magdalene galilee jerusalem provence apostle teaching threshold" data-sort-fields="iii vii xi" data-sort-location="galilee" data-sort-name="magdalene mary" data-sort-year="30" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-ancient"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Mary Magdalene</div><div class="card-date">1st century AD</div></div>
+<div class="card-epithet">Apostle to the Apostles · Keeper of the Teaching · Witness at the Threshold</div>
+<div class="card-meta">Galilee · Jerusalem · Provence · 1st century AD</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Threshold Events</span>
+<span class="tag">The Creative Record</span>
+<span class="tag">The Teaching</span>
+
+
+</div>
+<div class="card-narrative-preview">First witness of the resurrection, first to carry the teaching forward after the crucifixion — and the first to be disbelieved. Her testimony was dismissed by those she carried it to. Later tradition made her penitent, erasing her role as witness and teacher. The alabaster jar, the anointing, the empty tomb: the woman who went to the threshold alone and returned with news the world was not ready to receive.</div>
+<div class="card-narrative-full">The pattern of Magdalene's erasure is the template for every erasure in this weaving: the feminine spiritual authority absorbed, diminished, and redirected by institutional power. She was not penitent — she was Apostle to the Apostles, the title given her by the early Church before the later tradition rewrote her role. Her tradition survived in Provence, in the Grail legends, in the Cathar beliefs of the Languedoc, in the Merovingian lineage claims that kept surfacing throughout medieval Europe. She is the weaving's most documented erasure and the most alive presence in the current restoration.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ GRADLON MAWR ═══ -->
+<div class="catalog-card" data-era="ancient" data-search="gradlon mawr cornouaille brittany ys breton king threshold" data-sort-fields="iii viii x" data-sort-location="brittany" data-sort-name="gradlon mawr" data-sort-year="400" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-ancient"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Gradlon Mawr ap Cynan</div><div class="card-date">c. 4th–5th century</div></div>
+<div class="card-epithet">King of Cornouaille · Builder of Ys · The Father at the Threshold</div>
+<div class="card-meta">Cornouaille, Brittany · Bay of Douarnenez · c. 4th–5th century</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Threshold Events</span>
+<span class="tag">Animal &amp; Nature Medicine</span>
+<span class="tag">The Shadow</span>
+
+</div>
+<div class="card-narrative-preview">King of Cornouaille in Brittany, builder of the drowned city of Ys. His daughter Dahut opened the sea gates and the city was swallowed. Gradlon escaped on his horse Morvarc'h — the horse that runs on the waves — carrying the shadow of the daughter he could not save. The city of Ys is said to still lie beneath the Bay of Douarnenez, and in Breton tradition its bells can sometimes be heard ringing from below the water.</div>
+<div class="card-narrative-full">Gradlon belongs to the Breton branch of the lineage — the Armorican inheritance that eventually connects through Constance de Châteaubriant to the Stewart line. His story encodes the pattern of the Celtic sovereign who sacrifices what he loves most for survival, and the drowned city encodes the suppression of the druidic and pre-Christian feminine that the Christianization of Brittany required. Dahut, the daughter who opened the gate — the feminine intelligence pushed into the depths — is the recurring figure of this lineage's shadow. The horse that runs on water is the oldest image of navigation across the impossible threshold.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ KING ARTHUR ═══ -->
+<div class="catalog-card" data-era="mythic" data-search="king arthur camelot avalon once future sovereignty britain" data-sort-fields="iii xii x" data-sort-location="britain" data-sort-name="arthur king" data-sort-year="500" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-mythic"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">King Arthur</div><div class="card-date">c. 5th–6th century</div></div>
+<div class="card-epithet">Once and Future King · The Sovereignty Question · Rex Quondam Rexque Futurus</div>
+<div class="card-meta">Post-Roman Britain · Camelot · Avalon · c. 5th–6th century</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Threshold Events</span>
+<span class="tag">Sovereignty</span>
+
+<span class="tag">The Shadow</span>
+</div>
+<div class="card-narrative-preview">The mythic sovereign of post-Roman Britain, sleeping under the hill until the land needs him again. His story encodes the sovereignty question that runs through this entire lineage: what does it mean to carry a sovereign frequency in a world not yet ready for it? The Round Table as a structural model — no head, no hierarchy, all seats equal. The wound at Camlann. The return to Avalon. The promise that he will come again when Britain needs him.</div>
+<div class="card-narrative-full">Arthur is Bran Fendigaid's mythic heir — the once and future king is the direct echo of the head that waits under the White Hill, guarding Britain until needed. Robert de Bruce identified with Arthur in his darkest moments, hiding in caves, watching spiders rebuild. The sovereignty question Arthur embodies is the Navigation Map's central inquiry: the capacity to hold sovereign frequency in conditions of extreme adversity, without performing it, without abandoning it, without the kingdom yet being ready to receive it. He waited. He returned. The time returns.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ MERLIN ═══ -->
+<div class="catalog-card" data-era="mythic" data-search="merlin myrddin wyllt shapeshifter seer architect wales camelot" data-sort-fields="i viii xi" data-sort-location="wales" data-sort-name="merlin" data-sort-year="500" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-mythic"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Merlin</div><div class="card-date">c. 5th–6th century</div></div>
+<div class="card-epithet">Myrddin Wyllt · Architect of the Pattern · The Shapeshifter at the Edge</div>
+<div class="card-meta">Wales · Camelot · The Crystal Cave · c. 5th–6th century</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Structural Models</span>
+<span class="tag">Animal &amp; Nature Medicine</span>
+<span class="tag">The Teaching</span>
+
+
+</div>
+<div class="card-narrative-preview">The wild prophet who lived at the edge of the forest, who lost his mind at the Battle of Arderydd and fled into the wilderness to speak with animals and receive visions. Merlin Emrys — the court seer, architect of Camelot, mover of Stonehenge. Two figures merged into one: the wild man and the court magician, the madness and the precision. He built the conditions for Arthur's sovereignty without inhabiting the throne himself.</div>
+<div class="card-narrative-full">Merlin's dual nature — Myrddin Wyllt the wild prophet and Merlin Emrys the architect — encodes a frequency that runs through this lineage: the person who holds the larger vision and builds the structural conditions for sovereignty without being the sovereign themselves. The teacher, the cartographer, the one who prepares the ground. His forest exile as the descent that produced the teaching: he had to lose the court, lose his mind, lose the ordinary world, in order to receive what the ordinary world could not give him. The Navigation Map is, in one register, a Merlin project.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ BERTILA OF SPOLETO ═══ -->
+<div class="catalog-card" data-era="medieval" data-search="bertila spoleto holy roman empress consors regni friuli italy" data-sort-fields="vii x xii" data-sort-location="italy" data-sort-name="bertila" data-sort-year="860" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-medieval"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Bertila of Spoleto</div><div class="card-date">c. 860 – 915</div></div>
+<div class="card-epithet">Holy Roman Empress · Consors Regni · Partner in Rule</div>
+<div class="card-meta">Northern Italy · Spoleto · Friuli · c. 860–915</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">The Creative Record</span>
+<span class="tag">The Shadow</span>
+<span class="tag">Sovereignty</span>
+
+
+</div>
+<div class="card-narrative-preview">Empress of the Carolingian successor states, wife of Berengar I. Her title was Consors Regni — partner in rule — and she governed with genuine authority alongside her husband. She was poisoned, almost certainly on political orders, in 915 — the year she reached her greatest power. The peak and the stripping in the same year. The pattern that runs through the feminine line of this weaving with striking consistency.</div>
+<div class="card-narrative-full">Bertila's specific frequency in this lineage is the woman who arrives at the summit of her power in the same season she is removed from it. Not before — after arrival, as if the arrival itself is what triggers the response. This pattern recurs in Almodis, Eleanor, and Melusine — the weaving's persistent encoding of the feminine sovereign whose greatest moment coincides with her greatest vulnerability. Bertila's heraldic lion rampant passes through the lineage into the Bruce arms and forward into the Scottish royal tradition.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ HENRY THE FOWLER ═══ -->
+<div class="catalog-card" data-era="medieval" data-search="henry fowler saxony east francia ottonian dynasty germany" data-sort-fields="i xi" data-sort-location="saxony" data-sort-name="henry fowler" data-sort-year="876" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-medieval"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Henry the Fowler</div><div class="card-date">876 – 936</div></div>
+<div class="card-epithet">King of East Francia · Founder of the Ottonian Dynasty</div>
+<div class="card-meta">Saxony · East Francia · 876–936</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Structural Models</span>
+<span class="tag">The Teaching</span>
+
+
+</div>
+<div class="card-narrative-preview">King of East Francia, founder of the Ottonian dynasty that produced the Holy Roman Emperors. Named the Fowler because he was reportedly hunting birds when informed of his election as king. Built the conditions for German imperial sovereignty without living to see its full expression — his son Otto I became the first Holy Roman Emperor. The builder who prepares the ground for what comes after him.</div>
+<div class="card-narrative-full">Henry belongs in this lineage primarily as a structural figure — his significance is architectural rather than personal. He built the administrative, military, and political conditions that allowed the Ottonian imperial project to become possible. His connection to Bertila of Spoleto through the Carolingian successor lineages makes him part of the same network of 9th-10th century European sovereignty that produced this weaving's earliest documented historical ancestors. His frequency: the one who builds what others will inhabit, the architect of the conditions rather than the inhabitant of them.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ PRÉSINE OF AVALON ═══ -->
+<div class="catalog-card" data-era="mythic" data-search="présine avalon fairy fountain scotland melusine mélior palestine mother" data-sort-fields="iii ix x xii" data-sort-location="avalon" data-sort-name="présine" data-sort-year="750" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-mythic"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Présine of Avalon</div><div class="card-date">mythic · before the beginning</div></div>
+<div class="card-epithet">The Fairy at the Fountain · She Who Set the Condition · Mother of the Three</div>
+<div class="card-meta">Avalon · Scotland · the Well of Thirst · daughter of Moronoe of Avalon</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Threshold Events</span>
+<span class="tag">The Mirror</span>
+<span class="tag">The Shadow</span>
+<span class="tag">Sovereignty</span>
+
+
+</div>
+<div class="card-narrative-preview">Daughter of Moronoe, one of the nine sisters of Avalon. Met Elinas, King of Scotland, at the Font de Sé — the Fountain of Thirst — where she danced among fairies. She agreed to marry him on one condition: he must never see her during childbirth or the bathing of their daughters. He forgot his promise. She took their three daughters to the Isle of Avalon and raised them in the old knowledge. When they imprisoned their father in retaliation, she punished them — encoding each daughter into the permanence of the natural world.</div>
+<div class="card-narrative-full">Présine is the origin of this branch's defining pattern: the woman who names the sacred condition before entering the marriage, watches it violated, retreats to preservation rather than collapse, and then must navigate daughters who respond to the same wound differently than she did. Her spell over her daughters was not a curse but a preservation — as long as there are woods and rivers and white mists above the streams, there will be fairies. They are the beauty of the world. That is why they will never perish. Her mother Moronoe was one of the nine sisters of Avalon who tended the wounded — placing Présine in direct descent from the Avalon sisterhood.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ MELUSINE ═══ -->
+<div class="catalog-card" data-era="mythic" data-search="melusine lusignan serpent fairy poitou architect la rochelle" data-sort-fields="iii vii x" data-sort-location="poitou" data-sort-name="melusine" data-sort-year="900" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-mythic"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Melusine</div><div class="card-date">mythic · 10th–12th c.</div></div>
+<div class="card-epithet">Fairy Serpent of Lusignan · Founding Architect · She Who Flies Rather Than Submit</div>
+<div class="card-meta">Poitou · Lusignan · Forest Spring · sister of Mélior · direct ancestor through Mélior's line</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Threshold Events</span>
+<span class="tag">The Creative Record</span>
+<span class="tag">The Shadow</span>
+
+
+</div>
+<div class="card-narrative-preview">Eldest daughter of Présine and Elinas. Architect of Vouvant, Mervent, Parthenay, La Rochelle, Niort, Châtelaillon, and said to have contributed to Mont Saint-Michel. Married Raymond of Lusignan on the condition he never see her on Saturdays. He watched. She flew. She returns to the castle of Lusignan each time one of her descendants is about to die, wailing. Her name means melodious, or Mother of Lusignan, or mist of the sea.</div>
+<div class="card-narrative-full">Melusine's story is the weaving's most complete encoding of the pattern of betrayal and transformation: the woman who built a kingdom and lost it to a husband who could not hold the vow he made. The Saturday transformation — serpent from the waist down — is not the curse but the truth he was not permitted to see. Her buildings outlasted her marriage: the towns and castles she built in a single night still stand. She did not disappear when she flew from the tower. She became the ancestral guardian of the lineage, returning at threshold moments. She is present in this weaving through her sister Mélior's direct line.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ MÉLIOR LA FÉE ═══ -->
+<div class="catalog-card" data-era="mythic" data-search="mélior la fée flateuse hawk castle avalon brittany nominoë direct ancestor" data-sort-fields="vi ix xi" data-sort-location="brittany" data-sort-name="mélior" data-sort-year="800" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-mythic"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Mélior la Fée</div><div class="card-date">mythic · 8th–9th century</div></div>
+<div class="card-epithet">La Flateuse · Princess of the Hawk's Castle · The Soother · Direct Ancestor</div>
+<div class="card-meta">Avalon · Brittany · daughter of Présine and Elinas · mother of Nominoë, first King of Brittany · Sosa 56,111,444,209</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Body as Active Practice</span>
+<span class="tag">The Mirror</span>
+<span class="tag">The Teaching</span>
+
+
+</div>
+<div class="card-narrative-preview">Middle daughter of Présine and Elinas, direct genealogical ancestor — Sosa number 56,111,444,209 in the documented family tree. La flateuse: the soother, the one who heals through gentle touch. Sealed inside the Hawk's Castle as her mother's punishment. Married Érispoë of Poher, Count of Poher in Brittany. Her son Nominoë became the first king of unified Brittany, successfully holding Breton sovereignty against the Carolingian Franks.</div>
+<div class="card-narrative-full">Mélior is the sister who did not become the famous legend — Melusine took the serpent tail and the architectural dynasty, while Mélior took the Breton marriage and the healing gift and the quiet continuance of the direct line. La flateuse does not mean flatterer in the modern pejorative sense — it means the one who soothes, who strokes gently, who heals through touch. From the older French meaning: to caress, to smooth, to ease. The soother produced the sovereign: her son Nominoë founded unified Brittany. French was always going to be the language of this branch of the lineage. Seven years of study for a reason.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ CONSTANCE DE CHÂTEAUBRIANT ═══ -->
+<div class="catalog-card" data-era="medieval" data-search="constance châteaubriant brittany flaad stewart threshold breton bridge" data-sort-fields="iii i" data-sort-location="brittany" data-sort-name="constance" data-sort-year="980" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-medieval"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Constance de Châteaubriant</div><div class="card-date">c. 980</div></div>
+<div class="card-epithet">The Breton Bridge · Lady of the Threshold Between Worlds</div>
+<div class="card-meta">Brittany · c. 980 · married Flaad, progenitor of the Stewart line</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Threshold Events</span>
+<span class="tag">Structural Models</span>
+
+
+</div>
+<div class="card-narrative-preview">Breton noblewoman of the House of Châteaubriant, at the eastern edge of Brittany where the Breton world meets the Frankish world. Married Flaad, progenitor of the Stewart line that would eventually produce the Scottish royal dynasty. She is the threshold between the Breton Celtic world and the Norman-Scottish lineage — carrying the Atlantic Celtic memory into the line that connects to Robert de Bruce and beyond.</div>
+<div class="card-narrative-full">Constance's significance is structural and genealogical — she is the hinge point where the Breton tradition enters the Stewart line. Her documentation is thin, which is itself information: she exists in the record primarily as the point where two lines meet, the woman whose significance is encoded in the genealogy that follows her rather than in any document that names her directly. This is the specific unresolved of women at the junction point. The ermine field of Brittany, the threshold line, the Atlantic shore where the Celtic saints arrived in their coracles — all of this she carries across into the Scottish line through her marriage.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ ALMODIS DE LA MARCHE ═══ -->
+<div class="catalog-card" data-era="medieval" data-search="almodis marche barcelona countess law written toulouse limousin" data-sort-fields="vii xii x" data-sort-location="barcelona" data-sort-name="almodis" data-sort-year="1020" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-medieval"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Almodis de la Marche</div><div class="card-date">c. 1020 – 1071</div></div>
+<div class="card-epithet">Countess of Barcelona · Consors et Auctrix · She Who Wrote the Law</div>
+<div class="card-meta">Limousin · Toulouse · Barcelona · c. 1020–1071</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">The Creative Record</span>
+<span class="tag">Sovereignty</span>
+<span class="tag">The Shadow</span>
+<span class="tag">Creative Record</span>
+
+</div>
+<div class="card-narrative-preview">Countess of Barcelona by right of marriage to Ramon Berenguer I. Known as Consors et Auctrix — partner and author. She co-authored the Usatges de Barcelona, the first written legal code of Catalonia. Married three times, twice divorced. Murdered by her stepson in 1071 — the same year she and her husband had completed the code of laws she helped write. Killed by the structure she helped build.</div>
+<div class="card-narrative-full">Almodis is the legal architect of this lineage — the woman who wrote the foundational law of a civilization and was killed by its heir in the same year. The Usatges de Barcelona governed Catalonia for centuries. Her frequency is the creative record at its most consequential: the document that outlives the maker by seven hundred years. Married twice and divorced, she was a woman who moved through the political structures of 11th century Europe with unusual autonomy and unusual risk. The pattern that follows Bertila recurs here: the woman at the height of her creative and political power, removed in the same season she arrives.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ LADY GODIVA ═══ -->
+<div class="catalog-card" data-era="medieval" data-search="lady godiva coventry mercia sovereign ride countess england" data-sort-fields="iii xii" data-sort-location="england" data-sort-name="godiva" data-sort-year="1040" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-medieval"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Lady Godiva</div><div class="card-date">c. 1040 – 1080</div></div>
+<div class="card-epithet">Countess of Mercia · The Sovereign Ride</div>
+<div class="card-meta">Coventry · Mercia · England · c. 1040–1080</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Threshold Events</span>
+<span class="tag">Sovereignty</span>
+
+
+</div>
+<div class="card-narrative-preview">Countess of Mercia, wife of Leofric. She petitioned her husband to reduce the oppressive taxation on Coventry's people. He agreed on the condition she ride naked through the town. She rode. The town averted their eyes except for one — Peeping Tom, whose later interpolation into the story tells more about the culture that added him than about the act she performed. The sovereign ride was a real act, documented. It performed vulnerability as power.</div>
+<div class="card-narrative-full">Godiva's ride is one of the most precise images in this lineage of the sovereign act performed under impossible conditions: the body placed in service of the people's need, the personal exposed for the collective benefit, the condition honored in full even when honoring it requires what should not be required. Her husband set the condition expecting she would refuse. She did not refuse. The condition was met and the taxes were lowered. This is the pattern of Présine at the fountain: the condition named, the vow kept, the sacred contract honored — but this time by the woman rather than violated by the man.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ ELEANOR OF AQUITAINE ═══ -->
+<div class="catalog-card" data-era="medieval" data-search="eleanor aquitaine queen france england troubadour imprisoned sarum" data-sort-fields="vii xi xii" data-sort-location="aquitaine" data-sort-name="eleanor" data-sort-year="1122" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-medieval"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Eleanor of Aquitaine</div><div class="card-date">1122 – 1204</div></div>
+<div class="card-epithet">Queen of France and England · Duchess in Her Own Right · The Long Endurance</div>
+<div class="card-meta">Aquitaine · Paris · London · Sarum · 1122–1204</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">The Creative Record</span>
+<span class="tag">The Teaching</span>
+<span class="tag">Sovereignty</span>
+<span class="tag">Creative Record</span>
+
+
+</div>
+<div class="card-narrative-preview">Queen of France, then Queen of England. Crusader. Patron of the troubadour tradition that became the foundation of European courtly literature. Imprisoned by Henry II at Sarum for sixteen years. Released at age sixty-seven and immediately resumed governing. Died at eighty-two having outlasted everyone who tried to contain her. She governed through the creative record when the political was denied her.</div>
+<div class="card-narrative-full">Eleanor is the lineage's most fully documented historical sovereign — and the most fully documented example of its central pattern. She held genuine sovereign power, was imprisoned by the man whose territory she brought to the marriage, and governed for sixteen years from captivity through the troubadour tradition she had cultivated. The creative record as the form of sovereignty that cannot be imprisoned. She is the direct ancestor of multiple lines in this weaving — Robert de Bruce descends from her Plantagenet line, and her frequency runs through the entire medieval branch.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ BRIGID SIGURDSDOTTIR ═══ -->
+<div class="catalog-card" data-era="medieval" data-search="brigid sigurdsdottir norse mother somerled western isles sacred name" data-sort-fields="ii iv iii" data-sort-location="western isles" data-sort-name="brigid" data-sort-year="1090" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-medieval"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Brigid Sigurdsdottir</div><div class="card-date">c. 1090 – unknown</div></div>
+<div class="card-epithet">The Named One · Norse Blood, Sacred Name · Mother of Somerled</div>
+<div class="card-meta">Norse · Western Isles · c. 1090 · wife of Gillebride mac Gille Adomnain</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Anomalous Reception</span>
+<span class="tag">Embodied Signal</span>
+<span class="tag">Threshold Events</span>
+
+
+</div>
+<div class="card-narrative-preview">Norse woman, daughter of Sigurd, who carried the name of the Celtic saint of the Bride's Isles. Married Gillebride mac Gille Adomnain — whose name meant servant of Brigid — so the devotion to Brigid and the embodiment of Brigid were married in the same union. Mother of Somerled. She is the Norse frequency entering this lineage quietly, through the mother, before Ragnhilda enters it explicitly through marriage. She is almost entirely invisible in the record beyond her name and her son.</div>
+<div class="card-narrative-full">Brigid Sigurdsdottir is the most important silent ancestor in the immediate Norse lineage — the one whose significance is carried in the name she bore rather than in any documented act. A Norse woman named for the Celtic patron saint of the isles where she lived: the paradox encoded in her name is the paradox her son would spend his life enacting at political and military scale. She was the threshold before Somerled was the threshold. The flame-keeper whose patronymic carries the navigational stars of her father's people and the sacred fire of her adopted tradition. She passed both to her son. He became a kingdom.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ SOMERLED ═══ -->
+<div class="catalog-card" data-era="medieval" data-search="somerled macgillebride king isles argyll norse gaelic summer traveler renfrew" data-sort-fields="i iii viii" data-sort-location="argyll" data-sort-name="somerled" data-sort-year="1113" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-medieval"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Somerled MacGillebride</div><div class="card-date">c. 1113 – 1164</div></div>
+<div class="card-epithet">Somerle Mòr · Rex Insularum · The Summer Traveler · King of the Isles</div>
+<div class="card-meta">Morven · Argyll · Western Isles · killed at Renfrew 1164</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Structural Models</span>
+<span class="tag">Threshold Events</span>
+<span class="tag">Animal &amp; Nature Medicine</span>
+
+
+</div>
+<div class="card-narrative-preview">Son of Gillebride and Brigid Sigurdsdottir — Gaelic by paternal lineage, Norse by maternal blood. First non-Norwegian king of the Isles, his kingdom independent of both Norway and Scotland simultaneously. Innovated the stern rudder — giving his galleys superior maneuverability over Norse steering-oar vessels. Died at Renfrew fighting Walter FitzAlan, the first High Steward of Scotland — the progenitor of the same family his great-granddaughter Jean MacRory would marry into.</div>
+<div class="card-narrative-full">Somerled is the amplified resonance point of the Norse-Gaelic synthesis in this lineage — the man who was made of two bloods and governed the exact threshold between them. His father was named servant of Brigid; his mother was named Brigid. His son Angus's line becomes the MacRuari clan, from which Jean MacRory descends. He died fighting the family that would become his own descendants' family within fifty years. The structural innovation of the stern rudder is the Navigation Map's most literal ancestor — the upgrade that changes the geometry of every journey taken afterward.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ RAGNHILDA OLAFSDOTTIR ═══ -->
+<div class="catalog-card" data-era="medieval" data-search="ragnhilda olafsdottir crovan dynasty isle man norse crossing legitimacy" data-sort-fields="iii xii i" data-sort-location="isle of man" data-sort-name="ragnhilda" data-sort-year="1117" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-medieval"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Ragnhilda Olafsdottir</div><div class="card-date">c. 1117 – unknown</div></div>
+<div class="card-epithet">The Legitimizing Queen · Daughter of the Crovan Dynasty · The Norse Crossing</div>
+<div class="card-meta">Isle of Man · Kingdom of the Isles · married Somerled c. 1140</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Threshold Events</span>
+<span class="tag">Sovereignty</span>
+
+
+<span class="tag">Structural Models</span>
+</div>
+<div class="card-narrative-preview">Daughter of Olaf the Red, King of Man and the Isles. Her marriage to Somerled c. 1140 carried the Norse Crovan dynasty's claim to the Kingdom of the Isles into his line — the kingdom was claimed through her blood, not his military conquest alone. She was the deed to the isles. Her son Angus's descendants became the clan MacRuari, from which Jean MacRory descends. The Norse royal frequency enters this lineage through her as explicit political inheritance.</div>
+<div class="card-narrative-full">Ragnhilda is the Norse royal line entering this lineage at full force — not as the quiet frequency of a mother's name but as the explicit political inheritance of a dynasty. The Crovan dynasty her grandfather founded had held the western seaways since the 9th century. She carried that claim to Somerled, who needed it to legitimize his kingship. Together they produced the sons whose descendants became the great Highland clans: MacDougall, MacDonald, MacRuari. She arrives through her own branch, from her own direction, as one of many rivers meeting at the delta of the living descendant who holds this weaving.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ JEAN MACRORY ═══ -->
+<div class="catalog-card" data-era="medieval" data-search="jean macrory bute arran stewart scotland heiress claimed name lineage" data-sort-fields="ii iii i" data-sort-location="western isles" data-sort-name="jean macrory" data-sort-year="1210" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-medieval"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Jean MacRory</div><div class="card-date">c. 1210 – c. 1267</div></div>
+<div class="card-epithet">Lady of Bute and Arran · The Claimed Name · Heiress of the Isles</div>
+<div class="card-meta">Western Isles of Scotland · married Alexander Stewart, 4th High Steward of Scotland, c. 1242</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Anomalous Reception</span>
+<span class="tag">Threshold Events</span>
+<span class="tag">Structural Models</span>
+
+
+
+</div>
+<div class="card-narrative-preview">Traditionally named daughter of James MacRory, granddaughter of Angus, great-granddaughter of Somerled. Heiress of Bute and Arran after her father and grandfather were killed in 1210 — she was likely an infant or unborn when her entire male line was destroyed. Married Alexander Stewart, 4th High Steward of Scotland, c. 1242. Her son James became 5th High Steward and his grandson Walter married Marjorie Bruce, producing Robert II — first Stewart king of Scotland.</div>
+<div class="card-narrative-full">The genealogical documentation of Jean MacRory is contested — modern scholars note no primary source confirms her parentage, suggesting it may have been constructed to legitimize the Stewart seizure of the islands she brought to the marriage. The same act of genealogical claiming performed for power in the 13th century is performed again by descendants searching for belonging in the 21st. The need to claim lineage — whatever need that meets — runs as a pattern through this ancestor's story in both directions. The open knot: not unfinished, but available to be taken up again by whoever comes with whatever need.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ ROBERT DE BRUCE ═══ -->
+<div class="catalog-card" data-era="medieval" data-search="robert bruce king scots bannockburn spider sovereignty scotland independence" data-sort-fields="xii iii x" data-sort-location="scotland" data-sort-name="robert bruce" data-sort-year="1274" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-medieval"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Robert de Bruce</div><div class="card-date">1274 – 1329</div></div>
+<div class="card-epithet">King of Scots · The Spider's Lesson · The Rebuilt Sovereignty</div>
+<div class="card-meta">Ayrshire · Scotland · 1274–1329</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Sovereignty</span>
+<span class="tag">Threshold Events</span>
+<span class="tag">The Shadow</span>
+
+
+
+</div>
+<div class="card-narrative-preview">King of Scots, victor of Bannockburn 1314, author of the Declaration of Arbroath. Excommunicated, hunted, hiding in caves watching spiders. He identified himself with the Arthur legend — the once and future king, the sovereignty that cannot be permanently extinguished, only temporarily driven underground. His heraldic lion rampant descends from Bertila of Spoleto through the lineage. He established Scottish independence for three centuries.</div>
+<div class="card-narrative-full">The Bruce's sovereignty was not won through continuous strength — it was rebuilt after complete collapse. At his lowest point he was a fugitive, excommunicated, with no kingdom, watching a spider attempt its web again and again until it succeeded. That story, which he reportedly told to his followers, is the sovereignty lesson in its most distilled form: not the one who was never defeated but the one who rebuilt from the ground after defeat. His connection to Jean MacRory through the Stewart marriage that united their lines makes him the pivot of the Scottish branch of this weaving.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ SIR JOHN BROCAS ═══ -->
+<div class="catalog-card" data-era="medieval" data-search="sir john brocas knight windsor master king horse gascony england" data-sort-fields="i xi" data-sort-location="england" data-sort-name="brocas john" data-sort-year="1298" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-medieval"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Sir John Brocas</div><div class="card-date">c. 1298 – 1365</div></div>
+<div class="card-epithet">Knight of Windsor · Master of the King's Horse · The Insider-Outsider</div>
+<div class="card-meta">Gascony · Windsor · Berkshire · c. 1298–1365</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Structural Models</span>
+<span class="tag">The Teaching</span>
+
+
+</div>
+<div class="card-narrative-preview">Gascon knight who rose to become Master of the King's Horse under Edward III and one of the original Knights of Windsor — the forerunner of the Order of the Garter. Born in Gascony, the duchy Eleanor of Aquitaine brought to the English crown, he arrived in England speaking the language of the court she had built. His heraldic arms — a moor's head — encode the Crusade era and the complex cultural traffic of 14th century Europe. He built his English seat at Beaurepaire in Berkshire.</div>
+<div class="card-narrative-full">Sir John Brocas represents the transition in this lineage from continental European nobility to English settlement — the Gascon who became English, the outsider who became the insider, the one who navigated the court culture Eleanor of Aquitaine's Aquitaine had helped create. His position as Master of the King's Horse is both practical and symbolic in this lineage of threshold figures: the one who manages the animal that crosses terrain, who tends the means of movement. Between him and Benoni Patten lies nearly four centuries of undocumented ancestors — the gap in the record that the silent voices speak through.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ BENONI PATTEN & EDITH COLE ═══ -->
+<div class="catalog-card" data-era="early-modern" data-search="benoni patten edith cole revolutionary war prison ship bunker hill vermont new hampshire" data-sort-fields="iii i vi" data-sort-location="new hampshire" data-sort-name="patten benoni" data-sort-year="1757" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-early-modern"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Benoni Patten &amp; Edith Cole</div><div class="card-date">1757–1832 · 1760–1843</div></div>
+<div class="card-epithet">The Soldier and the Deacon's Daughter · Survivors of the Prison Ships · Parents of an Apostle</div>
+<div class="card-meta">Vermont · New Hampshire · New York · married 1779 · parents of David Wyman Patten, LDS Apostle</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Threshold Events</span>
+<span class="tag">Structural Models</span>
+<span class="tag">Body as Active Practice</span>
+
+
+</div>
+<div class="card-narrative-preview">Benoni enlisted within two weeks of Lexington in 1775. He was likely present at Bunker Hill, fought at Valcour Island on Lake Champlain, and was captured by HMS Apollo in September 1777, held on British prison ships for six months at a 50% death rate. Released and hospitalized for a month. Married Edith Cole in 1779. Edith was the daughter of a church deacon who built a blockhouse at Canoe Meadow, NH. Their son David Wyman Patten became an LDS Apostle, killed at the Battle of Crooked River in 1838.</div>
+<div class="card-narrative-full">Benoni is one of several documented Revolutionary War ancestors in this lineage. His service record is detailed and sobering: the prison ship was not a brief captivity but six months in conditions where half the men died, bodies passed through hatches each morning. He was twenty-one. The Battle of Valcour Island — fought to lose well rather than lose decisively, buying one year that proved pivotal — encodes the lineage's recurring pattern of acting before the outcome is certain. Edith's pension application, filed as his widow, is her voice entering the record. Practical. Attesting to the marriage, the years at Canoe Meadow. The record she was permitted to make when the record-keeping finally needed something only she could provide.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ DIANTHA MORLEY BILLINGS ═══ -->
+<div class="catalog-card" data-era="modern" data-search="diantha morley billings midwife temple apron manti relief society kirtland nauvoo utah" data-sort-fields="vi vii iii" data-sort-location="utah" data-sort-name="diantha" data-sort-year="1796" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-modern"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Diantha Morley Billings</div><div class="card-date">1796 – 1879</div></div>
+<div class="card-epithet">Midwife · Temple Maker · The One Who Held the Lantern · First Relief Society President, Manti</div>
+<div class="card-meta">Montague MA · Kirtland OH · Missouri · Nauvoo · Manti Utah · great-great-great-grandmother</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Body as Active Practice</span>
+<span class="tag">The Creative Record</span>
+<span class="tag">Threshold Events</span>
+
+<span class="tag">Creative Record</span>
+
+</div>
+<div class="card-narrative-preview">First convert-generation LDS, baptized 1830 at Kirtland. Set apart by Joseph Smith as midwife; attended nine births the night of February 4, 1845, when the Saints were driven across the Mississippi River in winter. Delegated by Joseph Smith to design and embroider the first temple apron — the pattern used in every subsequent endowment ceremony. First Relief Society president in Manti. Only doctor and midwife in Manti for years. Adopted a Native American child she named Rose Billings.</div>
+<div class="card-narrative-full">Diantha's daughter Eunice gave testimony at age seventy — in 1902 — of the night in Missouri when the women fled separately through the briars in the dark, children holding their mothers' skirts, no sound permitted. Diantha led the way with a lantern half-concealed under her apron. At the crossroads a man stepped from behind a tree and flashed a sword in her face. She jumped back and screamed. He was a brother guarding the crossing. All the women arrived safely. That image — the lantern under the apron, the light present but concealed, guidance operating in concealment — is the frequency that runs from her to the living descendant who holds this weaving.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ CHRISTINA YOUNG HIGGINSON ═══ -->
+<div class="catalog-card" data-era="modern" data-search="christina young higginson stowaway midwife poetess white hill dalkeith scotland utah" data-sort-fields="vi vii xi xiii" data-sort-location="scotland" data-sort-name="christina" data-sort-year="1844" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-modern"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Christina Young Higginson</div><div class="card-date">1844 – 1910</div></div>
+<div class="card-epithet">The Stowaway · Midwife · Poetess · Born at White Hill</div>
+<div class="card-meta">Dalkeith, Scotland · Liverpool · Salt Lake Valley · Hatch, Idaho · direct ancestor · name carrier</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Body as Active Practice</span>
+<span class="tag">The Creative Record</span>
+<span class="tag">The Teaching</span>
+<span class="tag">The Return</span>
+
+<span class="tag">Creative Record</span>
+<span class="tag">The Spiral</span>
+</div>
+<div class="card-narrative-preview">Born July 31, 1844 at White Hill, Dalkeith, Scotland. Father drowned at sea before reaching New Orleans. Mother died 1855. Stowed away on the ship John G. Boyd in 1863 with three pence and a borrowed Danish phrase. Wrote a poem to Ann Paxman on the ship — Paxman becoming Paxton in the lineage she founded. Four hundred births as midwife. Relief Society President twenty-five years. Died 1910 writing a last poem to her son who would not arrive in time.</div>
+<div class="card-narrative-full">Christina Young Higginson closes the genealogical arc of this weaving before Inanna opens the mythic gateway. She was born at White Hill — the same name as the hill in London where Bran Fendigaid commanded his head to be buried. The weaving completes a two-thousand-year circuit. She wrote her ship poem to Ann Paxman, and the name Paxman lives in the lineage as Paxton — the name carried in this work today. She is the Sovereign Descent made body: the conditions were impossible, and she crossed the ocean anyway, and brought four hundred lives into the world with her hands, and wrote poems to the end.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+<!-- ═══ INANNA ═══ -->
+<div class="catalog-card" data-era="mythic" data-search="inanna sumer queen heaven earth descent underworld gates sovereignty return" data-sort-fields="iii x xii xiii" data-sort-location="sumer" data-sort-name="inanna" data-sort-year="-3500" data-weaving="true" onclick="toggleCard(this)">
+<div class="card-era-bar era-mythic"></div>
+<div class="card-body">
+<div class="card-top"><div class="card-name">Inanna</div><div class="card-date">before time was counted</div></div>
+<div class="card-epithet">Queen of Heaven and Earth · Lady of the Great Below · The First Descent · Gateway to the Mythic Tapestry</div>
+<div class="card-meta">Sumer · the oldest written myth · after Christina Young in the Weaving · opening the Mythic Tapestry</div>
+<div class="card-tags">
+<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
+<span class="tag">Threshold Events</span>
+<span class="tag">The Shadow</span>
+<span class="tag">Sovereignty</span>
+<span class="tag">The Return</span>
+
+
+
+<span class="tag">The Spiral</span>
+</div>
+<div class="card-narrative-preview">The oldest written myth. Sumerian queen of heaven and earth who descended through seven gates to the underworld, surrendering one garment at each — crown, rod and line of lapis lazuli, lapis beads, breastplate, gold ring, measuring rod, royal robe. Stood naked before Ereshkigal, her dark sister. Was killed and hung on a peg. Restored and returned, wearing new garments, chosen. She is the structural template of the entire Sovereign Descent.</div>
+<div class="card-narrative-full">Inanna sits at the end of the genealogical record and at the gateway to the Mythic Tapestry — the room that holds the archetypal figures who belong to the work through resonance and cosmology rather than bloodline. Her descent is the mythic template for every descent in this weaving: Bertila, Almodis, Eleanor, Melusine, Mélior, Christina Young. Each of them lived some version of the seven gates. Inanna's unresolved is not hers — it is the open door the entire weaving stands before. The seven gates are not historical. They are structural. She is still descending, in every woman who must lose everything in order to find what cannot be found any other way.</div>
+<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
+</div>
+</div>
+</div><!-- end grid -->
+<div class="catalog-footer">
+<div class="footer-rule"></div>
+<p class="footer-note">The catalog holds what is known. The gaps hold what is still arriving. Both are part of the archive.</p>
+</div>
+</div><!-- end page -->
+<script>
+let activeFilter = 'all';
+let activeSort = 'chronological';
+
+function toggleCard(card) {
+  card.classList.toggle('open');
+}
+
+function setFilter(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-btn:not(.sort-btn)').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyAll();
+}
+
+function setSort(sort, btn) {
+  activeSort = sort;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyAll();
+}
+
+function applyAll() {
+  const query = document.getElementById('search').value.toLowerCase();
+  const grid = document.getElementById('catalog-grid');
+  const cards = Array.from(document.querySelectorAll('.catalog-card'));
+  let visible = 0;
+
+  // Filter
+  cards.forEach(card => {
+    const searchText = (card.dataset.search || '') + ' ' +
+      card.querySelector('.card-name').textContent.toLowerCase() + ' ' +
+      (card.dataset.sortLocation || '') + ' ' +
+      (card.dataset.sortFields || '');
+    const era = card.dataset.era || '';
+    const inWeaving = card.dataset.weaving === 'true';
+
+    const matchesSearch = !query || searchText.includes(query);
+    const matchesFilter =
+      activeFilter === 'all' ||
+      (activeFilter === 'weaving' && inWeaving) ||
+      activeFilter === era;
+
+    if (matchesSearch && matchesFilter) {
+      card.classList.remove('hidden');
+      visible++;
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+
+  // Sort visible cards
+  const visibleCards = cards.filter(c => !c.classList.contains('hidden'));
+
+  visibleCards.sort((a, b) => {
+    if (activeSort === 'name') {
+      return (a.dataset.sortName || '').localeCompare(b.dataset.sortName || '');
+    } else if (activeSort === 'chronological') {
+      return parseInt(a.dataset.sortYear || 0) - parseInt(b.dataset.sortYear || 0);
+    } else if (activeSort === 'location') {
+      return (a.dataset.sortLocation || '').localeCompare(b.dataset.sortLocation || '');
+    } else if (activeSort === 'field') {
+      return (a.dataset.sortFields || '').localeCompare(b.dataset.sortFields || '');
+    }
+    return 0;
+  });
+
+  // Re-append in sorted order
+  visibleCards.forEach(card => grid.appendChild(card));
+
+  document.getElementById('count-note').textContent =
+    visible === 1 ? '1 ancestor' : visible + ' ancestors';
+}
+
+// Stagger card animations on load
+document.querySelectorAll('.catalog-card').forEach((card, i) => {
+  card.style.animationDelay = (0.04 * i) + 's';
+});
+</script>
+</body>
+</html>
