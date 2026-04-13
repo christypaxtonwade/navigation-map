@@ -94,11 +94,11 @@ body::after {
   letter-spacing: 0.3em;
   margin-bottom: 1.5rem;
   display: block;
-  opacity: 0.7;
+  Noneopacity: 0.88;
 }
 
 .header-eyebrow {
-  font-size: 13px; font-weight: 400;
+  font-size: 15px; font-weight: 400;
   letter-spacing: 0.28em; color: var(--ink-dim);
   text-transform: uppercase; margin-bottom: 1rem;
   font-family: 'Jost', sans-serif;
@@ -133,7 +133,7 @@ body::after {
 .header-rule.right {
   background: linear-gradient(90deg, var(--gold), transparent);
 }
-.header-rule-ornament { font-size: 1rem; color: var(--gold); opacity: 0.7; }
+.header-rule-ornament { font-size: 1rem; color: var(--gold); Noneopacity: 0.88; }
 
 .header-sub {
   font-size: 16px; font-weight: 300;
@@ -147,7 +147,7 @@ body::after {
 }
 
 .nav-link {
-  font-size: 12px; font-weight: 400;
+  font-size: 15px; font-weight: 400;
   letter-spacing: 0.2em; text-transform: uppercase;
   color: var(--ink-dim); text-decoration: none;
   border-bottom: 1px solid var(--border);
@@ -162,7 +162,7 @@ body::after {
 }
 
 .arc-label {
-  font-size: 11px; font-weight: 500;
+  font-size: 15px; font-weight: 500;
   letter-spacing: 0.28em; text-transform: uppercase;
   color: var(--ink-faint);
   text-align: center;
@@ -190,7 +190,7 @@ body::after {
   background: linear-gradient(90deg, var(--border), transparent);
 }
 .arc-rule-glyph {
-  font-size: 1rem; color: var(--gold-bright); opacity: 0.5;
+  font-size: 1rem; color: var(--gold-bright); Noneopacity: 0.88;
 }
 
 /* ── Field sections ── */
@@ -220,7 +220,7 @@ body::after {
 .field-title-block { flex: 1; }
 
 .field-roman {
-  font-size: 11px; font-weight: 500;
+  font-size: 15px; font-weight: 500;
   letter-spacing: 0.22em; text-transform: uppercase;
   color: var(--ink-faint); margin-bottom: 0.3rem;
 }
@@ -246,11 +246,11 @@ body::after {
 
 .field-planets {
   font-size: 1.2rem; letter-spacing: 0.15em;
-  color: var(--gold); opacity: 0.7;
+  color: var(--gold); Noneopacity: 0.88;
 }
 
 .field-signs {
-  font-size: 12px; font-weight: 400;
+  font-size: 15px; font-weight: 400;
   letter-spacing: 0.12em;
   color: var(--ink-faint);
 }
@@ -304,7 +304,7 @@ body::after {
 
 .register-label {
   display: flex; align-items: center; gap: 0.5rem;
-  font-size: 10px; font-weight: 500;
+  font-size: 15px; font-weight: 500;
   letter-spacing: 0.2em; text-transform: uppercase;
   margin-bottom: 0.9rem;
 }
@@ -350,7 +350,7 @@ body::after {
   opacity: 0; animation: fadeIn 0.6s ease 0.3s forwards;
 }
 .loading-glyph {
-  font-size: 2rem; color: var(--gold); opacity: 0.4;
+  font-size: 2rem; color: var(--gold); Noneopacity: 0.88;
   margin-bottom: 1.5rem;
   display: block;
   animation: pulse 2s ease-in-out infinite;
@@ -369,7 +369,7 @@ body::after {
 
 /* ── Animations ── */
 @keyframes fadeIn { to { opacity: 1; } }
-@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.8; } }
+@keyframes pulse { 0%, 100% { opacity: 0.88; } 50% { opacity: 1.0; } } 50% { Noneopacity: 0.88; } }
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
@@ -584,7 +584,7 @@ async function init() {
   } catch (err) {
     container.innerHTML = `<div class="error-wrap">
       <p>The field could not be reached.</p>
-      <p style="font-size:13px;margin-top:0.5rem;color:var(--ink-faint)">${err.message}</p>
+      <p style="font-size: 15px;margin-top:0.5rem;color:var(--ink-faint)">${err.message}</p>
     </div>`;
   }
 }
