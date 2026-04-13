@@ -101,6 +101,7 @@ body.astro-view .astro-axis-note { max-height: 160px; opacity: 1; margin-top: 1.
 .legend-dot.m { background: var(--mythic); opacity: 0.85; }
 .legend-dot.c { background: var(--conceptual); opacity: 0.85; }
 .legend-dot.s { background: var(--somatic); opacity: 0.85; }
+.legend-dot.u { background: #9a6e22; opacity: 0.85; }
 
 /* ── Arc dividers ── */
 .arc-label { text-align: center; margin: 2.5rem 0 1.5rem; opacity: 0; animation: fadeUp 0.9s ease forwards; }
@@ -338,6 +339,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
   <div class="legend-item"><span class="legend-dot m"></span> Mythic register</div>
   <div class="legend-item"><span class="legend-dot c"></span> Conceptual register</div>
   <div class="legend-item"><span class="legend-dot s"></span> Somatic register</div>
+  <div class="legend-item"><span class="legend-dot u"></span> The Unreceived</div>
 </div>
 
 <!-- ═══════════ THE DESCENT ═══════════ -->
@@ -346,13 +348,13 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
     <div class="arc-rule"></div>
     <span class="arc-text">The Descent</span>
     <span class="arc-glyph">↓</span>
-    <span class="arc-text">Capricorn through Leo · Fields I – VIII</span>
+    <span class="arc-text">Capricorn through Leo · Fields I – VII</span>
     <div class="arc-rule"></div>
   </div>
 </div>
 
 <!-- FIELD I -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.35s">
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.35s" data-field="1">
   <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <polygon points="550,10 616,48 616,104 550,120 484,104 484,48" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.42" fill="none"/>
     <polygon points="550,36 580,53 580,87 550,104 520,87 520,53" stroke="#d4a84c" stroke-width="0.7" stroke-opacity="0.28" fill="none"/>
@@ -390,26 +392,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">Tesseract · Merkaba · Sacred geometry · Multidimensional awareness · Quantum leaping · A Wrinkle in Time · Time travel · Memory · Astrology in full</div>
-    <div class="subterrains">
-      <a href="fieldguide.html#i-geometries" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 1</span>
-        <span class="subterrain-chip-name">Geometries of Consciousness</span>
-        <span class="subterrain-chip-elements">Tesseract · Merkaba · Sacred geometry · Multidimensional awareness</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#i-coordinates" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 2</span>
-        <span class="subterrain-chip-name">Navigational Coordinates</span>
-        <span class="subterrain-chip-elements">Quantum leaping · A Wrinkle in Time · Time travel · Memory · Photographs as portals</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#i-operating-system" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 3</span>
-        <span class="subterrain-chip-name">The Operating System</span>
-        <span class="subterrain-chip-elements">Astrology — planets · signs · aspects · cycles · transits · natal chart</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-    </div>
+    <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
       <div class="astro-glyphs-block">
         <div class="astro-sign">Capricorn · Aquarius</div>
@@ -429,7 +412,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
 </div>
 
 <!-- FIELD II -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.42s">
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.42s" data-field="2">
   <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <polyline points="20,82 100,82 118,78 136,82 164,82 196,82 212,80 228,82 252,82" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.32"/>
     <polyline points="252,82 267,72 277,52 282,30 285,16 288,8 291,6 295,6 299,10 302,20 306,38 310,58 316,74 330,82" stroke="#c4bef8" stroke-width="1.4" stroke-opacity="0.75"/>
@@ -453,26 +436,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">WOW signal · Telepathic awareness · Akashic records · Angels · Ancestors speaking · Spirit guides · Free will · Intuition · The discernment layer</div>
-    <div class="subterrains">
-      <a href="fieldguide.html#ii-signals" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 1</span>
-        <span class="subterrain-chip-name">Signals from Beyond the Personal Field</span>
-        <span class="subterrain-chip-elements">WOW signal · Telepathic awareness · Akashic records</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#ii-messengers" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 2</span>
-        <span class="subterrain-chip-name">Messengers and Mediators</span>
-        <span class="subterrain-chip-elements">Angels · Ancestors speaking · Spirit guides · Multidimensional presences</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#ii-discernment" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 3</span>
-        <span class="subterrain-chip-name">The Discernment Layer</span>
-        <span class="subterrain-chip-elements">Free will · Intuition · Reception versus projection · Integrity of the channel</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-    </div>
+    <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
       <div class="astro-glyphs-block"><div class="astro-sign">Pisces</div><div class="astro-planets">♆ ☊</div><div class="astro-rulers">Neptune · North Node</div></div>
       <div class="astro-principle">Neptune's dissolution. The karmic direction set at the moment of arrival. What arrives that you did not generate — and the rigorous practice of knowing the difference between reception and projection.</div>
@@ -488,7 +452,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
 </div>
 
 <!-- FIELD III -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.49s">
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.49s" data-field="3">
   <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <line x1="380" y1="116" x2="380" y2="60" stroke="#6dd8b2" stroke-width="1.2" stroke-opacity="0.58"/>
     <line x1="720" y1="116" x2="720" y2="60" stroke="#6dd8b2" stroke-width="1.2" stroke-opacity="0.58"/>
@@ -516,26 +480,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">Dream state · Astral travel · Breathwork visions · Meditation · Time travel · Memory · Photographs as portals · Ancestral visits · Portals · Quantum leaping · Sovereign descent · Inanna's descent</div>
-    <div class="subterrains">
-      <a href="fieldguide.html#iii-sleep" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 1</span>
-        <span class="subterrain-chip-name">Crossings Within Sleep and Altered States</span>
-        <span class="subterrain-chip-elements">Dream state · Astral travel · Breathwork visions · Meditation</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#iii-time" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 2</span>
-        <span class="subterrain-chip-name">Portals in Time</span>
-        <span class="subterrain-chip-elements">Time travel · Memory · Quantum leaping · Photographs as portals · Ancestral time</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#iii-ancestral" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 3</span>
-        <span class="subterrain-chip-name">Ancestral and Relational Crossings</span>
-        <span class="subterrain-chip-elements">Ancestral visits · Sovereign descent · Inanna · The Royal Gatekeeper</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-    </div>
+    <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
       <div class="astro-glyphs-block"><div class="astro-sign">Aries · Pisces</div><div class="astro-planets">♈ ♓</div><div class="astro-rulers">Mars erupts · Neptune dissolves</div></div>
       <div class="astro-principle">Birth and death as the same threshold. The portal lives between the eruption and the dissolution — in the place where one thing has ended and another has not yet begun.</div>
@@ -551,7 +496,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
 </div>
 
 <!-- FIELD IV -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.56s">
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.56s" data-field="4">
   <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M 160 90 Q 340 30 550 52 Q 760 74 940 38" stroke="#d4a84c" stroke-width="0.6" stroke-opacity="0.18" stroke-dasharray="4 8"/>
     <path d="M 230 80 C 196 62 164 58 132 62 C 164 68 194 74 230 80 Z" fill="#d4a84c" fill-opacity="0.58"/>
@@ -576,26 +521,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">Ravens · Goldfinch · Wren · Wings · Saltwater · Minerals · Crystals · Wind currents · Ocean currents · Vibration · Resonance</div>
-    <div class="subterrains">
-      <a href="fieldguide.html#iv-bird-field" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 1</span>
-        <span class="subterrain-chip-name">The Bird Field</span>
-        <span class="subterrain-chip-elements">Ravens · Goldfinch · Wren · Wings · Birds as sovereign intelligences</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#iv-elemental" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 2</span>
-        <span class="subterrain-chip-name">Elemental Resonance</span>
-        <span class="subterrain-chip-elements">Saltwater · Minerals · Crystals · Wind currents · Ocean currents</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#iv-vibrational" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 3</span>
-        <span class="subterrain-chip-name">Vibrational Frequency</span>
-        <span class="subterrain-chip-elements">Vibration · Resonance · The body as tuning instrument · Frequency as language beneath language</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-    </div>
+    <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
       <div class="astro-glyphs-block"><div class="astro-sign">Taurus</div><div class="astro-planets">♀ ♁</div><div class="astro-rulers">Venus · Earth</div></div>
       <div class="astro-principle">The first stable ground after the descent. The senses awakening, learning what the physical world is actually transmitting. Beauty and signal as the same phenomenon.</div>
@@ -611,7 +537,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
 </div>
 
 <!-- FIELD V -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.63s">
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.63s" data-field="5">
   <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M 0,60 C 30,34 30,34 60,60 C 90,86 90,86 120,60 C 150,34 150,34 180,60 C 210,86 210,86 240,60 C 270,34 270,34 300,60 C 330,86 330,86 360,60 C 390,34 390,34 420,60 C 444,74 452,80 474,74" stroke="#c4bef8" stroke-width="1.2" stroke-opacity="0.45" stroke-linecap="round"/>
     <path d="M 1100,60 C 1070,34 1070,34 1040,60 C 1010,86 1010,86 980,60 C 950,34 950,34 920,60 C 890,86 890,86 860,60 C 830,34 830,34 800,60 C 770,86 770,86 740,60 C 710,34 710,34 680,60 C 656,74 648,80 626,74" stroke="#f5aa88" stroke-width="1.2" stroke-opacity="0.45" stroke-linecap="round"/>
@@ -630,26 +556,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">The three registers · Signal · Frequency · Compression · Descent · Emergence · Mirror · Container · Threshold · Teaching · Mentorship · Writing · Conversation</div>
-    <div class="subterrains">
-      <a href="fieldguide.html#v-registers" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 1</span>
-        <span class="subterrain-chip-name">The Three Registers</span>
-        <span class="subterrain-chip-elements">Mythic · Conceptual · Somatic — the three doors into any territory</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#v-vocabulary" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 2</span>
-        <span class="subterrain-chip-name">Vocabulary as Structure</span>
-        <span class="subterrain-chip-elements">Signal · Frequency · Compression · Descent · Emergence · Mirror · Container · Threshold</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#v-transmission" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 3</span>
-        <span class="subterrain-chip-name">Transmission Modes</span>
-        <span class="subterrain-chip-elements">Teaching · Mentorship · Writing · Conversation · Astrology as language</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-    </div>
+    <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
       <div class="astro-glyphs-block"><div class="astro-sign">Gemini</div><div class="astro-planets">☿ ♊</div><div class="astro-rulers">Mercury · The Twin Registers</div></div>
       <div class="astro-principle">The word arriving in the sign of duality and swift transmission. Language as the first tool the embodied self reaches for to make sense of the signals it is receiving.</div>
@@ -665,7 +572,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
 </div>
 
 <!-- FIELD VI -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.70s">
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.70s" data-field="6">
   <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="110" cy="60" r="28" stroke="#f5aa88" stroke-width="0.8" stroke-opacity="0.4" fill="none"/>
     <path d="M 282 38 A 22 22 0 1 0 282 82 A 12 12 0 1 1 282 38 Z" fill="#f5aa88" fill-opacity="0.28"/>
@@ -688,26 +595,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">Breathwork · Meditation · Movement · Dance · Laughter · Tears · Mirror work · Lymphatic drainage · Moon cycles · Compassion as the soothing balm · The body as sacred vessel</div>
-    <div class="subterrains">
-      <a href="fieldguide.html#vi-stillness" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 1</span>
-        <span class="subterrain-chip-name">Breathwork and Stillness</span>
-        <span class="subterrain-chip-elements">Breathwork · Meditation · Stillness practices · The body slowed to receive</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#vi-movement" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 2</span>
-        <span class="subterrain-chip-name">Movement and Expression</span>
-        <span class="subterrain-chip-elements">Dance · Movement · Laughter · Tears · The body activated to release and transmit</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#vi-healing" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 3</span>
-        <span class="subterrain-chip-name">Mirror and Healing Practices</span>
-        <span class="subterrain-chip-elements">Mirror work · Lymphatic drainage · Moon cycles · Compassion as the soothing balm</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-    </div>
+    <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
       <div class="astro-glyphs-block"><div class="astro-sign">Cancer</div><div class="astro-planets">☽ ♋</div><div class="astro-rulers">Moon · The tidal body</div></div>
       <div class="astro-principle">The Moon's domain — the body's cyclic, rhythmic intelligence. What we need. What nurtures. Compassion flows here as the soothing balm and the flowing water. Received somatically before it becomes emotion or thought.</div>
@@ -723,7 +611,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
 </div>
 
 <!-- FIELD VII -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.77s">
+<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.77s" data-field="7">
   <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="550" cy="60" r="36" stroke="#d4a84c" stroke-width="1.1" stroke-opacity="0.5" fill="rgba(212,168,76,0.07)"/>
     <circle cx="550" cy="60" r="20" fill="#d4a84c" fill-opacity="0.24"/>
@@ -760,26 +648,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">Art · Music · Dance as creative fire · Journals · Photographs as portals · Visual art · Story · Myth · Narrative · The Ancestral Weaving</div>
-    <div class="subterrains">
-      <a href="fieldguide.html#vii-sovereign-act" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 1</span>
-        <span class="subterrain-chip-name">The Sovereign Act of Making</span>
-        <span class="subterrain-chip-elements">Art · Music · Dance as creative fire · The act of making as sovereign expression</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#vii-artifact" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 2</span>
-        <span class="subterrain-chip-name">The Living Artifact</span>
-        <span class="subterrain-chip-elements">Journals · Photographs as portals · Visual art · Music as record · The thing that remains</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#vii-narrative" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 3</span>
-        <span class="subterrain-chip-name">Narrative and Story</span>
-        <span class="subterrain-chip-elements">Story · Myth · Narrative · The Ancestral Weaving itself as living creative record</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-    </div>
+    <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
       <div class="astro-glyphs-block"><div class="astro-sign">Leo</div><div class="astro-planets">☉ ♌</div><div class="astro-rulers">Sun · The sovereign fire</div></div>
       <div class="astro-principle">The sovereign creative force at the height of summer. Not the artifact as record but the act of making as sovereign expression. Christina Young writing poems on the ship. Eleanor governing through the troubadour tradition from her prison.</div>
@@ -794,8 +663,20 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
   </div>
 </div>
 
+<!-- ═══════════ THE MIRROR · THE SHADOW ═══════════ -->
+<div class="arc-label" style="animation-delay:0.9s">
+  <div class="arc-label-inner">
+    <div class="arc-rule"></div>
+    <span class="arc-text">The Underworld</span>
+    <span class="arc-glyph">♎ ♏</span>
+    <span class="arc-text">Scorpio · Virgo · Fields VIII – X</span>
+    <div class="arc-rule"></div>
+  </div>
+</div>
+
+
 <!-- FIELD VIII -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.84s">
+<div class="field-card underworld" onclick="toggle(this)" style="animation-delay:0.84s" data-field="8">
   <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <line x1="550" y1="10" x2="550" y2="110" stroke="#6dd8b2" stroke-width="0.9" stroke-opacity="0.5"/>
     <path d="M 550 28 C 530 20 506 16 484 20" stroke="#6dd8b2" stroke-width="0.9" stroke-opacity="0.45" fill="none"/>
@@ -825,26 +706,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">Lion · Owl · Butterfly · Dragon · Hummingbird · Snake · Bear · Turtle · Dolphin · Whale · Wolf · Cat · Dog · Fish · Plant medicine · Trees · Mushrooms · Gardens · Hiking · Bodies of water · Travel</div>
-    <div class="subterrains">
-      <a href="fieldguide.html#viii-totemic" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 1</span>
-        <span class="subterrain-chip-name">Totemic Presences</span>
-        <span class="subterrain-chip-elements">Lion · Owl · Butterfly · Dragon · Snake · Bear · Whale · Wolf · all animal allies</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#viii-plant" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 2</span>
-        <span class="subterrain-chip-name">Plant and Fungal Intelligence</span>
-        <span class="subterrain-chip-elements">Plant medicine · Trees and their language · Mushrooms · Gardens · Mycelium network</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#viii-terrain" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 3</span>
-        <span class="subterrain-chip-name">Terrain and Water</span>
-        <span class="subterrain-chip-elements">Bodies of water · Hiking · Travel · Ocean currents · The landscapes as medicine</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-    </div>
+    <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
       <div class="astro-glyphs-block"><div class="astro-sign">Virgo</div><div class="astro-planets">☿ ♍</div><div class="astro-rulers">Mercury · The discerning healer</div></div>
       <div class="astro-principle">Service, healing, and the precise intelligence of the plant and animal world. Virgo's exquisite discernment applied to the non-human — the midwife's hands, the herbalist's knowledge, the body in right relationship with all living things.</div>
@@ -859,19 +721,8 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
   </div>
 </div>
 
-<!-- ═══════════ THE MIRROR · THE SHADOW ═══════════ -->
-<div class="arc-label" style="animation-delay:0.9s">
-  <div class="arc-label-inner">
-    <div class="arc-rule"></div>
-    <span class="arc-text">The Mirror · The Shadow</span>
-    <span class="arc-glyph">♎ ♏</span>
-    <span class="arc-text">Libra · Scorpio · Fields IX – X</span>
-    <div class="arc-rule"></div>
-  </div>
-</div>
-
 <!-- FIELD IX -->
-<div class="field-card pivot" onclick="toggle(this)" style="animation-delay:0.94s">
+<div class="field-card pivot" onclick="toggle(this)" style="animation-delay:0.94s" data-field="9">
   <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <ellipse cx="550" cy="60" rx="100" ry="52" stroke="#f5aa88" stroke-width="1" stroke-opacity="0.45" fill="rgba(245,170,136,0.04)"/>
     <ellipse cx="550" cy="60" rx="84"  ry="42" stroke="#f5aa88" stroke-width="0.5" stroke-opacity="0.25" fill="none"/>
@@ -901,26 +752,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">Relationship · The other as teacher · Mirror work · Witnessing · Compassion in relationship · Beauty as information · The self meeting itself in another face</div>
-    <div class="subterrains">
-      <a href="fieldguide.html#ix-other" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 1</span>
-        <span class="subterrain-chip-name">The Other as Teacher</span>
-        <span class="subterrain-chip-elements">Relationship · The beloved as mirror · Significant encounters · The face that shows you what you cannot see from inside</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#ix-reflection" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 2</span>
-        <span class="subterrain-chip-name">The Practice of Reflection</span>
-        <span class="subterrain-chip-elements">Mirror work as conscious practice · Witnessing · Capacity to be seen · Compassion as what makes true reflection possible</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#ix-beauty" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 3</span>
-        <span class="subterrain-chip-name">Beauty as Information</span>
-        <span class="subterrain-chip-elements">Venus as the intelligence of beauty · Aesthetic resonance · Art as the mirror between maker and receiver</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-    </div>
+    <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
       <div class="astro-glyphs-block"><div class="astro-sign">Libra</div><div class="astro-planets">♀ ♎</div><div class="astro-rulers">Venus · The relational field</div></div>
       <div class="astro-principle">The self that has been through the shadow meets the other and finds itself reflected. Libra as the moment of first recognition: I am seen, therefore I exist differently than I did before the crossing.</div>
@@ -936,7 +768,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
 </div>
 
 <!-- FIELD X -->
-<div class="field-card pivot" onclick="toggle(this)" style="animation-delay:1.01s">
+<div class="field-card pivot" onclick="toggle(this)" style="animation-delay:1.01s" data-field="10">
   <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <line x1="0"    y1="22" x2="1100" y2="22" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.15" stroke-dasharray="6 8"/>
     <line x1="0"    y1="44" x2="1100" y2="44" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.22" stroke-dasharray="4 6"/>
@@ -964,26 +796,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">The unconscious · The disowned self · Unlived life · Bloodline patterns · The unresolved · Ancestral underground · Death as intelligence · The alchemical process · Shadow work</div>
-    <div class="subterrains">
-      <a href="fieldguide.html#x-beneath" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 1</span>
-        <span class="subterrain-chip-name">What Lies Beneath</span>
-        <span class="subterrain-chip-elements">The unconscious · The disowned self · The unlived life · Unresolved patterns held in the body</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#x-ancestral" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 2</span>
-        <span class="subterrain-chip-name">The Ancestral Underground</span>
-        <span class="subterrain-chip-elements">Bloodline patterns · The unresolved moving through generations · Material waiting in a living descendant's body</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#x-alchemical" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 3</span>
-        <span class="subterrain-chip-name">The Alchemical Process</span>
-        <span class="subterrain-chip-elements">Death as intelligence · The nigredo · Transformation requiring dissolution · The phoenix principle</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-    </div>
+    <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
       <div class="astro-glyphs-block"><div class="astro-sign">Scorpio</div><div class="astro-planets">♇ ♏</div><div class="astro-rulers">Pluto · The underworld intelligence</div></div>
       <div class="astro-principle">The Ancestral Weaving lives here astrologically — death, inheritance, what is passed through the bloodline. The shadow work does not produce sovereignty as a reward. It removes the obstacles preventing the sovereign from knowing itself.</div>
@@ -1010,7 +823,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
 </div>
 
 <!-- FIELD XI -->
-<div class="field-card return-arc" onclick="toggle(this)" style="animation-delay:1.09s">
+<div class="field-card return-arc" onclick="toggle(this)" style="animation-delay:1.09s" data-field="11">
   <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <line x1="120" y1="90" x2="840" y2="30" stroke="#d4a84c" stroke-width="1.1" stroke-opacity="0.5"/>
     <polygon points="840,30 820,36 828,48" fill="#d4a84c" fill-opacity="0.55"/>
@@ -1035,26 +848,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">Transmission as sacred practice · The teacher who has been through the territory · Astrology as offering · Ancestral weaving as offering · Coaching · Mentorship · The expanding flame</div>
-    <div class="subterrains">
-      <a href="fieldguide.html#xi-transmission" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 1</span>
-        <span class="subterrain-chip-name">Transmission as Sacred Practice</span>
-        <span class="subterrain-chip-elements">The teacher who has been through the territory · Authority from crossing · Living contact between teacher and learner</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#xi-offerings" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 2</span>
-        <span class="subterrain-chip-name">The Offerings</span>
-        <span class="subterrain-chip-elements">Astrology · Ancestral weaving · The Navigation Map · Fieldguide · Coaching as applied transmission</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#xi-flame" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 3</span>
-        <span class="subterrain-chip-name">The Expanding Flame</span>
-        <span class="subterrain-chip-elements">Jupiter's abundance · What grows when given away · Knowledge as a living thing that multiplies in transmission</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-    </div>
+    <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
       <div class="astro-glyphs-block"><div class="astro-sign">Sagittarius</div><div class="astro-planets">♃ ♐</div><div class="astro-rulers">Jupiter · The expanding flame</div></div>
       <div class="astro-principle">The transmission at scale. What was gathered in the descent, witnessed in the shadow, and reflected in the mirror — now aimed at the horizon for others to find. The teaching that transforms both teacher and student.</div>
@@ -1070,7 +864,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
 </div>
 
 <!-- FIELD XII -->
-<div class="field-card return-arc" onclick="toggle(this)" style="animation-delay:1.16s">
+<div class="field-card return-arc" onclick="toggle(this)" style="animation-delay:1.16s" data-field="12">
   <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M 380 50 L 376 90 Q 376 100 420 100 Q 464 100 464 90 L 460 50 Z" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.5" fill="rgba(196,190,248,0.05)"/>
     <path d="M 380 50 Q 420 38 460 50" stroke="#c4bef8" stroke-width="0.8" stroke-opacity="0.45" fill="none"/>
@@ -1094,26 +888,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">The claimed self · The Royal Gatekeeper fully inhabited · The Water Bearer · Moon cycles as navigation · Structure chosen not inherited · The sovereign cycle · The revolutionary self</div>
-    <div class="subterrains">
-      <a href="fieldguide.html#xii-claimed" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 1</span>
-        <span class="subterrain-chip-name">The Claimed Self</span>
-        <span class="subterrain-chip-elements">The self after full descent · The Royal Gatekeeper fully inhabited · Identity not requiring external confirmation</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#xii-water-bearer" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 2</span>
-        <span class="subterrain-chip-name">The Water Bearer</span>
-        <span class="subterrain-chip-elements">Carrying what the journey gathered · Service without self-abandonment · The revolutionary who works within form</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#xii-sovereign-cycle" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 3</span>
-        <span class="subterrain-chip-name">The Sovereign Cycle</span>
-        <span class="subterrain-chip-elements">Moon cycles as navigation · Full presence and necessary withdrawal · Conscious practice rather than collapse and recovery</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-    </div>
+    <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
       <div class="astro-glyphs-block"><div class="astro-sign">Capricorn · Aquarius</div><div class="astro-planets">♄ ♅</div><div class="astro-rulers">Saturn chosen · Uranus liberated</div></div>
       <div class="astro-principle">The wheel returns to the opening signs at a higher octave. Field I was geometry imposed from outside. Field XII is the same geometry, now chosen from within. The spiral completes — same coordinates, transformed consciousness.</div>
@@ -1129,7 +904,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
 </div>
 
 <!-- FIELD XIII -->
-<div class="field-card return-arc" onclick="toggle(this)" style="animation-delay:1.23s">
+<div class="field-card return-arc" onclick="toggle(this)" style="animation-delay:1.23s" data-field="13">
   <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M 320 52 C 360 36 440 34 500 48 C 540 56 560 68 548 78 C 528 92 444 88 380 72 C 336 60 316 56 320 52 Z" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.45" fill="rgba(196,190,248,0.06)"/>
     <path d="M 320 52 C 298 44 276 52 286 62 C 294 70 320 68 320 52 Z" fill="#c4bef8" fill-opacity="0.22"/>
@@ -1155,26 +930,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">Dissolution back into the larger field · Integration · The cycle completing · The stowaway who has crossed the ocean and kneels on the shore · The spiral beginning again at a higher octave</div>
-    <div class="subterrains">
-      <a href="fieldguide.html#xiii-dissolution" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 1</span>
-        <span class="subterrain-chip-name">Dissolution and Integration</span>
-        <span class="subterrain-chip-elements">The boundary between self and cosmos becoming permeable · Integration as bringing the whole journey into relationship with the whole life</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#xiii-spiral" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 2</span>
-        <span class="subterrain-chip-name">The Spiral</span>
-        <span class="subterrain-chip-elements">The wheel completing and beginning again at a higher octave · The same coordinates transformed · Christina Young kneeling on the shore</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-      <a href="fieldguide.html#xiii-terra-incognita" class="subterrain-chip">
-        <span class="subterrain-chip-number">Subterrain 3</span>
-        <span class="subterrain-chip-name">Terra Incognita</span>
-        <span class="subterrain-chip-elements">The blank space at the edge of the map · What has not yet been named · Here be dragons — not as warning but as invitation</span>
-        <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-      </a>
-    </div>
+    <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
       <div class="astro-glyphs-block"><div class="astro-sign">Pisces</div><div class="astro-planets">♆ ♓</div><div class="astro-rulers">Neptune · The completion</div></div>
       <div class="astro-principle">Full circle to where Field II began — but now carrying everything the journey gathered. The boundary between self and cosmos becomes permeable once more, but this time the self knows what it is before it dissolves. The dissolution is chosen.</div>
@@ -1272,6 +1028,63 @@ function toggle(card) {
   regs.classList.toggle('open', !isOpen);
   card.classList.toggle('open', !isOpen);
 }
+
+// ── Supabase subterrain population ──────────────────────────────
+const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+
+async function loadSubterrains() {
+  try {
+    // Fetch fields (for id→number mapping) and all subterrains
+    const [fields, subterrains] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/fields?select=id,number`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      }).then(r => r.json()),
+      fetch(`${SUPABASE_URL}/rest/v1/subterrains?select=*&order=sort_order.asc`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      }).then(r => r.json())
+    ]);
+
+    // Map field id → field number
+    const fieldNumById = {};
+    fields.forEach(f => { fieldNumById[f.id] = f.number; });
+
+    // Group subterrains by field number
+    const subtsByFieldNum = {};
+    subterrains.forEach(st => {
+      const num = fieldNumById[st.field_id];
+      if (!num) return;
+      if (!subtsByFieldNum[num]) subtsByFieldNum[num] = [];
+      subtsByFieldNum[num].push(st);
+    });
+
+    // For each field card on the page, inject chips
+    document.querySelectorAll('.field-card[data-field]').forEach(card => {
+      const fieldNum = parseInt(card.dataset.field);
+      const subs = subtsByFieldNum[fieldNum] || [];
+      const container = card.querySelector('.subterrains');
+      if (!container) return;
+
+      if (subs.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = subs.map((st, i) => `
+        <a href="fieldguide.html#field-${fieldNum}" class="subterrain-chip">
+          <span class="subterrain-chip-number">Subterrain ${i + 1}</span>
+          <span class="subterrain-chip-name">${st.name}</span>
+          <span class="subterrain-chip-link">Explore in Fieldguide →</span>
+        </a>`).join('');
+    });
+
+  } catch (err) {
+    console.warn('Subterrain fetch failed:', err.message);
+    // Cards remain without chip content — graceful fallback
+  }
+}
+
+loadSubterrains();
 </script>
 </body>
 </html>
