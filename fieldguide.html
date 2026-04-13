@@ -25,9 +25,11 @@
   --mythic: #4a3b82;
   --conceptual: #1a6b50;
   --somatic: #8b3a1a;
+  --unreceived: #9a6e22;
   --mythic-bg: rgba(74,59,130,0.07);
   --conceptual-bg: rgba(26,107,80,0.07);
   --somatic-bg: rgba(139,58,26,0.07);
+  --unreceived-bg: rgba(154,110,34,0.08);
   --border: rgba(154,110,34,0.2);
   --border-strong: rgba(154,110,34,0.35);
   --drop-cap-size: 4.5rem;
@@ -45,7 +47,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Parchment texture via subtle noise pattern */
 body::before {
   content: '';
   position: fixed; inset: 0;
@@ -56,7 +57,6 @@ body::before {
   pointer-events: none; z-index: 0;
 }
 
-/* Aged paper grid — very faint */
 body::after {
   content: '';
   position: fixed; inset: 0;
@@ -73,7 +73,6 @@ body::after {
   padding: 5rem 4rem 8rem;
 }
 
-/* ── Decorative corner marks ── */
 .corner-marks {
   position: fixed;
   top: 24px; left: 24px; right: 24px; bottom: 24px;
@@ -131,14 +130,10 @@ body::after {
   width: 80px; height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold));
 }
-
 .header-rule.right {
   background: linear-gradient(90deg, var(--gold), transparent);
 }
-
-.header-rule-ornament {
-  font-size: 1rem; color: var(--gold); opacity: 0.7;
-}
+.header-rule-ornament { font-size: 1rem; color: var(--gold); opacity: 0.7; }
 
 .header-sub {
   font-size: 16px; font-weight: 300;
@@ -148,1548 +143,453 @@ body::after {
 
 .nav-links {
   display: flex; justify-content: center;
-  gap: 2rem; flex-wrap: wrap; margin-top: 1rem;
+  gap: 2rem; margin-top: 1.5rem;
 }
 
 .nav-link {
-  font-size: 14px; font-weight: 400;
-  color: var(--gold); letter-spacing: 0.1em;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(154,110,34,0.3);
+  font-size: 12px; font-weight: 400;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-dim); text-decoration: none;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 2px;
   transition: color 0.2s, border-color 0.2s;
-  font-family: 'Jost', sans-serif;
-  text-transform: uppercase;
 }
+.nav-link:hover { color: var(--gold); border-color: var(--gold); }
 
-.nav-link:hover { color: var(--amber); border-color: var(--amber); }
-
-/* ── Compass rose / decorative SVG ── */
-.compass-wrap {
-  display: flex; justify-content: center;
-  margin: 3rem auto 4rem;
-  opacity: 0; animation: fadeIn 1.4s ease 0.3s forwards;
-}
-
-/* ── Cluster section ── */
-.field-section {
+/* ── Arc dividers ── */
+.arc-block {
   margin-bottom: 6rem;
-  opacity: 0; animation: fadeIn 1s ease 0.4s forwards;
 }
+
+.arc-label {
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--ink-faint);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.arc-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight: 300; font-style: italic;
+  color: var(--ink-dim);
+  text-align: center;
+  margin-bottom: 0.6rem;
+}
+
+.arc-rule {
+  display: flex; align-items: center;
+  gap: 1.25rem; margin: 1.25rem auto 3rem;
+  max-width: 400px;
+}
+.arc-rule-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border));
+}
+.arc-rule-line.right {
+  background: linear-gradient(90deg, var(--border), transparent);
+}
+.arc-rule-glyph {
+  font-size: 1rem; color: var(--gold-bright); opacity: 0.5;
+}
+
+/* ── Field sections ── */
+.field-section {
+  margin-bottom: 5rem;
+  padding-bottom: 4rem;
+  border-bottom: 1px solid var(--border);
+}
+.field-section:last-child { border-bottom: none; }
 
 .field-header {
   display: flex; align-items: flex-start;
-  gap: 2rem; margin-bottom: 3rem;
-  padding-bottom: 2rem;
+  gap: 1.5rem; margin-bottom: 2.5rem;
+  padding-bottom: 1.75rem;
   border-bottom: 1px solid var(--border);
-  position: relative;
 }
 
 .field-number {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 5rem; font-weight: 300; font-style: italic;
-  color: var(--gold-light); line-height: 1;
-  flex-shrink: 0; margin-top: -0.5rem;
-  opacity: 0.6;
+  font-size: clamp(3rem, 5vw, 4rem);
+  font-weight: 300; font-style: italic;
+  color: var(--gold-light);
+  line-height: 1; flex-shrink: 0;
+  width: 3rem; text-align: right;
 }
 
 .field-title-block { flex: 1; }
 
+.field-roman {
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 0.3rem;
+}
+
 .field-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(2.2rem, 4vw, 3rem);
-  font-weight: 400; color: var(--ink);
-  line-height: 1.1; margin-bottom: 0.5rem;
+  font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+  font-weight: 400; font-style: italic;
+  color: var(--ink); line-height: 1.15;
+  margin-bottom: 0.6rem;
 }
 
 .field-tagline {
-  font-size: 16px; font-weight: 300; font-style: italic;
+  font-size: 15px; font-weight: 300;
   color: var(--ink-dim); line-height: 1.75;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1rem;
+  font-style: italic; margin-bottom: 0.75rem;
+}
+
+.field-astro {
+  display: flex; align-items: center; gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .field-planets {
-  font-size: 1.8rem; color: var(--gold);
-  letter-spacing: 0.2em; margin-top: 0.75rem;
-  display: block;
+  font-size: 1.2rem; letter-spacing: 0.15em;
+  color: var(--gold); opacity: 0.7;
 }
 
-.field-rulers {
-  font-size: 14px; font-weight: 400;
-  color: var(--ink-dim); letter-spacing: 0.08em;
-  margin-top: 3px;
+.field-signs {
+  font-size: 12px; font-weight: 400;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
 }
 
-/* ── Subterrain ── */
+/* ── Subterrains ── */
 .subterrain {
-  margin-bottom: 4rem;
+  margin-bottom: 3.5rem;
   padding: 2.5rem 3rem;
   background: rgba(255,255,255,0.45);
   border: 1px solid var(--border);
-  border-radius: 2px;
-  position: relative;
-  transition: background 0.3s;
+  border-radius: 4px;
+  transition: background 0.25s;
 }
-
-.subterrain::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 2rem; bottom: 2rem;
-  width: 3px;
-  background: linear-gradient(to bottom, transparent, var(--gold), transparent);
-  opacity: 0.4;
-}
-
 .subterrain:hover { background: rgba(255,255,255,0.65); }
 
 .subterrain-header {
-  margin-bottom: 2rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(154,110,34,0.12);
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .subterrain-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.75rem; font-weight: 500;
-  color: var(--ink); margin-bottom: 0.5rem;
-  letter-spacing: 0.02em;
-}
-
-.subterrain-elements {
-  font-size: 15px; font-weight: 300;
-  color: var(--ink-dim); font-style: italic;
-  letter-spacing: 0.03em; line-height: 1.6;
+  font-size: 1.5rem; font-weight: 500;
+  color: var(--ink); margin-bottom: 0.35rem;
 }
 
 .subterrain-description {
-  font-size: 16px; font-weight: 300;
-  color: var(--ink-secondary); line-height: 1.9;
-  margin-bottom: 2rem;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.05rem;
+  font-size: 14.5px; font-weight: 300;
+  color: var(--ink-dim); line-height: 1.85;
+  margin-top: 0.75rem; font-style: italic;
 }
 
-/* ── Registers within subterrain ── */
+/* ── Registers ── */
 .registers-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
 }
 
 .register {
   padding: 1.5rem 1.75rem;
-  border-radius: 2px;
-  position: relative;
+  border-radius: 3px;
 }
 
-.register-mythic    { background: var(--mythic-bg); border: 1px solid rgba(74,59,130,0.15); }
-.register-conceptual{ background: var(--conceptual-bg); border: 1px solid rgba(26,107,80,0.15); }
-.register-somatic   { background: var(--somatic-bg); border: 1px solid rgba(139,58,26,0.15); }
+.register-mythic     { background: var(--mythic-bg);     border: 1px solid rgba(74,59,130,0.15); }
+.register-conceptual { background: var(--conceptual-bg); border: 1px solid rgba(26,107,80,0.15); }
+.register-somatic    { background: var(--somatic-bg);    border: 1px solid rgba(139,58,26,0.15); }
+.register-unreceived { background: var(--unreceived-bg); border: 1px solid rgba(154,110,34,0.25); }
 
 .register-label {
-  font-size: 11px; font-weight: 500;
-  letter-spacing: 0.18em; text-transform: uppercase;
-  margin-bottom: 0.85rem;
-  display: flex; align-items: center; gap: 7px;
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  margin-bottom: 0.9rem;
 }
-
 .register-mythic     .register-label { color: var(--mythic); }
 .register-conceptual .register-label { color: var(--conceptual); }
 .register-somatic    .register-label { color: var(--somatic); }
+.register-unreceived .register-label { color: var(--unreceived); }
 
 .register-label-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  flex-shrink: 0;
+  width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
 }
-
 .register-mythic     .register-label-dot { background: var(--mythic); }
 .register-conceptual .register-label-dot { background: var(--conceptual); }
 .register-somatic    .register-label-dot { background: var(--somatic); }
+.register-unreceived .register-label-dot { background: var(--unreceived); }
 
 .register-text {
-  font-size: 15px; font-weight: 300;
-  color: var(--ink-secondary); line-height: 1.85;
+  font-size: 14.5px; font-weight: 300;
+  color: var(--ink-secondary); line-height: 1.9;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
 }
 
-/* ── Drop cap for first register of first subterrain ── */
+/* Drop cap — first register of first subterrain of first field */
 .drop-cap::first-letter {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'IM Fell English', serif;
   font-size: var(--drop-cap-size);
-  font-weight: 600; font-style: italic;
   float: left; line-height: 0.75;
-  margin: 0.1em 0.08em 0 0;
+  margin: 0.05em 0.12em 0 0;
   color: var(--gold);
 }
 
-/* ── Bridge nodes ── */
-.bridge-nodes {
-  margin-top: 2.5rem;
-  padding: 1.5rem 2rem;
-  background: var(--gold-wash);
-  border: 1px solid rgba(154,110,34,0.18);
-  border-radius: 2px;
+/* Unreceived gets full-width treatment */
+.register-unreceived {
+  grid-column: 1 / -1;
+  border-style: dashed;
 }
 
-.bridge-label {
-  font-size: 11px; font-weight: 500;
-  letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--gold); margin-bottom: 0.75rem;
-}
-
-.bridge-text {
-  font-size: 15px; font-weight: 300;
-  color: var(--ink-secondary); line-height: 1.8;
-  font-style: italic;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1rem;
-}
-
-/* ── Section divider ── */
-.section-divider {
-  text-align: center; margin: 4rem 0;
-  display: flex; align-items: center;
-  justify-content: center; gap: 1.5rem;
-}
-
-.divider-rule {
-  flex: 1; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
-}
-
-.divider-ornament {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1rem; font-style: italic;
-  color: var(--ink-dim); letter-spacing: 0.08em;
-  white-space: nowrap;
-}
-
-/* ── Marginalia ── */
-.marginalia {
-  position: relative;
-  margin: 2rem 0 2rem 3rem;
-  padding-left: 1.5rem;
-  border-left: 2px solid var(--gold-light);
-}
-
-.marginalia-text {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1rem; font-style: italic;
-  color: var(--ink-dim); line-height: 1.8;
-}
-
-/* ── Here be dragons note ── */
-.dragons-note {
+/* ── Loading state ── */
+.loading-wrap {
   text-align: center;
-  margin: 3rem auto;
-  max-width: 500px;
-  padding: 1.5rem 2rem;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.3);
+  padding: 8rem 2rem;
+  opacity: 0; animation: fadeIn 0.6s ease 0.3s forwards;
 }
-
-.dragons-label {
-  font-size: 11px; font-weight: 500;
-  letter-spacing: 0.22em; text-transform: uppercase;
-  color: var(--ink-faint); margin-bottom: 0.5rem;
+.loading-glyph {
+  font-size: 2rem; color: var(--gold); opacity: 0.4;
+  margin-bottom: 1.5rem;
   display: block;
+  animation: pulse 2s ease-in-out infinite;
 }
-
-.dragons-text {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.05rem; font-style: italic;
-  color: var(--ink-dim); line-height: 1.7;
-}
-
-/* ── Footer ── */
-.fieldguide-footer {
-  text-align: center;
-  margin-top: 6rem; padding-top: 3rem;
-  border-top: 1px solid var(--border);
-  opacity: 0; animation: fadeIn 1s ease 0.8s forwards;
-}
-
-.footer-ornament { font-size: 1.2rem; color: var(--gold); opacity: 0.6; margin-bottom: 1rem; display: block; }
-
-.footer-note {
+.loading-text {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.1rem; font-style: italic;
-  color: var(--ink-dim); line-height: 1.8;
-  max-width: 520px; margin: 0 auto 1.5rem;
+  color: var(--ink-faint);
 }
 
-.footer-links {
-  display: flex; justify-content: center;
-  gap: 2rem; flex-wrap: wrap;
+.error-wrap {
+  text-align: center; padding: 4rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; color: var(--rust);
 }
 
-.footer-link {
-  font-size: 13px; font-weight: 400;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--gold); text-decoration: none;
-  border-bottom: 1px solid rgba(154,110,34,0.3);
-  padding-bottom: 2px; transition: color 0.2s;
-}
+/* ── Animations ── */
+@keyframes fadeIn { to { opacity: 1; } }
+@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.8; } }
 
-.footer-link:hover { color: var(--amber); }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
+/* ── Responsive ── */
 @media (max-width: 900px) {
   .page { padding: 3rem 2rem 6rem; }
   .registers-grid { grid-template-columns: 1fr; }
-  .field-header { flex-direction: column; gap: 1rem; }
-  .field-number { font-size: 3rem; margin-top: 0; }
+  .register-unreceived { grid-column: 1; }
   .subterrain { padding: 1.75rem 1.5rem; }
+  .field-header { gap: 1rem; }
 }
-
 @media (max-width: 600px) {
   .page { padding: 2rem 1.25rem 5rem; }
-  .corner-marks { display: none; }
-  .nav-links { gap: 1rem; }
+  .nav-links { flex-wrap: wrap; gap: 1rem; }
 }
 </style>
 </head>
 <body>
-
 <div class="corner-marks"></div>
 
 <div class="page">
-
-  <header class="header">
+  <div class="header">
     <span class="header-ornament">✦ ✦ ✦</span>
     <div class="header-eyebrow">Christy Paxton Wade</div>
     <h1 class="header-title">The Fieldguide</h1>
-    <div class="header-subtitle">A full-depth cartography of the living territory</div>
+    <div class="header-subtitle">A map of the territory, written from inside it</div>
     <div class="header-rule-wrap">
       <div class="header-rule"></div>
-      <span class="header-rule-ornament">✦</span>
+      <span class="header-rule-ornament">⬡</span>
       <div class="header-rule right"></div>
     </div>
-    <p class="header-sub">Eight fields. Every subterrain illuminated. Three registers of entry for each room. A guide to carry into the field — where the territory always exceeds the map, and the best discoveries happen in the margins.</p>
+    <p class="header-sub">Thirteen fields. Every subterrain illuminated across four registers of entry. A guide to carry into the field — where the territory always exceeds the map, and the best discoveries happen in the margins.</p>
     <div class="nav-links">
-      <a href="index.html" class="nav-link">← Navigation Map</a>
-      <a href="ancestral-weaving.html" class="nav-link">Ancestral Weaving →</a>
-    </div>
-  </header>
-
-  <!-- Compass rose ornament -->
-  <div class="compass-wrap">
-    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Outer ring -->
-      <circle cx="60" cy="60" r="54" stroke="#9a6e22" stroke-width="0.6" stroke-opacity="0.3"/>
-      <circle cx="60" cy="60" r="46" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.2"/>
-      <!-- Cardinal points -->
-      <line x1="60" y1="6"  x2="60" y2="22" stroke="#9a6e22" stroke-width="1" stroke-opacity="0.55"/>
-      <line x1="60" y1="98" x2="60" y2="114" stroke="#9a6e22" stroke-width="1" stroke-opacity="0.55"/>
-      <line x1="6"  y1="60" x2="22" y2="60" stroke="#9a6e22" stroke-width="1" stroke-opacity="0.55"/>
-      <line x1="98" y1="60" x2="114" y2="60" stroke="#9a6e22" stroke-width="1" stroke-opacity="0.55"/>
-      <!-- Intercardinal lines -->
-      <line x1="22" y1="22" x2="32" y2="32" stroke="#9a6e22" stroke-width="0.6" stroke-opacity="0.35"/>
-      <line x1="88" y1="22" x2="78" y2="32" stroke="#9a6e22" stroke-width="0.6" stroke-opacity="0.35"/>
-      <line x1="22" y1="98" x2="32" y2="88" stroke="#9a6e22" stroke-width="0.6" stroke-opacity="0.35"/>
-      <line x1="88" y1="98" x2="78" y2="88" stroke="#9a6e22" stroke-width="0.6" stroke-opacity="0.35"/>
-      <!-- North star point -->
-      <polygon points="60,6 63,18 60,14 57,18" fill="#9a6e22" fill-opacity="0.6"/>
-      <!-- Center -->
-      <circle cx="60" cy="60" r="5" stroke="#9a6e22" stroke-width="0.8" stroke-opacity="0.5" fill="rgba(154,110,34,0.1)"/>
-      <circle cx="60" cy="60" r="1.5" fill="#9a6e22" fill-opacity="0.6"/>
-      <!-- Decorative cross at center -->
-      <line x1="60" y1="52" x2="60" y2="68" stroke="#9a6e22" stroke-width="0.5" stroke-opacity="0.3"/>
-      <line x1="52" y1="60" x2="68" y2="60" stroke="#9a6e22" stroke-width="0.5" stroke-opacity="0.3"/>
-      <!-- Small tick marks -->
-      <line x1="60" y1="14" x2="60" y2="18" stroke="#9a6e22" stroke-width="0.5" stroke-opacity="0.4"/>
-      <line x1="60" y1="102" x2="60" y2="106" stroke="#9a6e22" stroke-width="0.5" stroke-opacity="0.4"/>
-      <line x1="14" y1="60" x2="18" y2="60" stroke="#9a6e22" stroke-width="0.5" stroke-opacity="0.4"/>
-      <line x1="102" y1="60" x2="106" y2="60" stroke="#9a6e22" stroke-width="0.5" stroke-opacity="0.4"/>
-      <!-- Outer tick marks at 30° intervals -->
-      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(30 60 60)"/>
-      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(60 60 60)"/>
-      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(120 60 60)"/>
-      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(150 60 60)"/>
-      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(210 60 60)"/>
-      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(240 60 60)"/>
-      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(300 60 60)"/>
-      <line x1="60" y1="6"  x2="60" y2="10" stroke="#9a6e22" stroke-width="0.4" stroke-opacity="0.3" transform="rotate(330 60 60)"/>
-    </svg>
-  </div>
-
-  <div class="marginalia">
-    <p class="marginalia-text">A field guide is not read from beginning to end. It is carried into the territory and consulted when you encounter something you need to understand more fully. Begin wherever you are standing.</p>
-  </div>
-
-  <div class="section-divider">
-    <div class="divider-rule"></div>
-    <span class="divider-ornament">Field I</span>
-    <div class="divider-rule"></div>
-  </div>
-
-  <!-- ══════════════════════════════════════════ -->
-  <!-- FIELD I: STRUCTURAL MODELS              -->
-  <!-- ══════════════════════════════════════════ -->
-
-  <div class="field-section" id="field-i">
-
-    <div class="field-header">
-      <div class="field-number">I</div>
-      <div class="field-title-block">
-        <h2 class="field-name">Structural Models</h2>
-        <p class="field-tagline">The cluster of geometry, dimension, and the frameworks through which consciousness navigates reality larger than itself. What gives the invisible a shape precise enough to be entered.</p>
-        <span class="field-planets">♄ ♅</span>
-        <div class="field-rulers">Saturn · Uranus — the force that builds the container · the force that breaks it open</div>
-      </div>
-    </div>
-
-    <!-- SUBTERRAIN 1: Geometries of Consciousness -->
-    <div class="subterrain">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Geometries of Consciousness</div>
-        <div class="subterrain-elements">Tesseract · Merkaba · Sacred geometry · Multidimensional awareness</div>
-      </div>
-      <p class="subterrain-description">The subterrain of the shapes consciousness uses to map itself. Not metaphors for reality — structural descriptions of it. These are the forms that recur too precisely in the living world to be accidental, the patterns that appear at every scale from the nautilus to the galaxy, from the honeycomb to the bronchial tree.</p>
-
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text drop-cap">Sacred geometry is the oldest language. Before alphabet, before number as abstraction, there was the recognition that certain shapes recur in the living world with too much precision to be accidental. The merkaba — two tetrahedra rotating in opposite directions — is the oldest known image of consciousness moving through space while remaining centered in itself. The tesseract is the four-dimensional cube that appeared in this lineage long before vocabulary arrived for it. L'Engle gave you the word at fifteen. These are not human inventions. They are recognitions.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Every framework is a limitation that is also a liberation — it excludes certain perceptions in order to make others precise. The tesseract encodes the principle that what appears distorted or wrong from one dimensional vantage may be perfectly accurate from the next. Multidimensional awareness is not mystical — it is the trained capacity to hold more than one coordinate system active simultaneously without collapsing them into each other. The map is not the territory. The geometry is not the consciousness. Both statements are true and neither cancels the other.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The moment of geometric recognition in the body: not intellectual understanding but the specific physical sensation of something snapping into a larger frame. The felt expansion behind the sternum when a pattern that seemed chaotic reveals its underlying structure. The way the nervous system settles when it finds the right shape for something it has been holding without a container. Recognition before vocabulary. The body knows the shape before the mind names it.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUBTERRAIN 2: Navigational Coordinates -->
-    <div class="subterrain">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Navigational Coordinates</div>
-        <div class="subterrain-elements">Quantum leaping · A Wrinkle in Time · Time travel · Memory · Photographs as portals · Multidimensional awareness</div>
-      </div>
-      <p class="subterrain-description">The subterrain of movement within the larger geometry. Not just perceiving the multidimensional structure but moving through it. Every mystical tradition has a name for this capacity. Contemporary language has found new vocabulary for an ancient technology.</p>
-
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The shaman's flight, the mystic's translation, the witch's ride — what contemporary language calls quantum leaping is the oldest shamanic technology described in new vocabulary. A Wrinkle in Time names it with a child's precision: a tesseract is a wrinkle in the fabric of space, and moving through it is not travel in the ordinary sense but a collapse of apparent distance. Memory and photographs are the quieter forms of this — portals that relocate consciousness to another time without requiring the body to move. The ancestor in the photograph is not absent. The frequency is present in the image.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Quantum leaping as a conceptual framework proposes that the gap between current reality and intended reality is not a distance to be crossed but a frequency to be matched. This reframes effort: you do not push toward the destination, you become resonant with it. The photograph as portal operates on the same principle — the image is not a record of a past moment but a frequency anchor to it, and sustained attention to that frequency can genuinely relocate aspects of consciousness to that coordinate. Memory is not retrieval but reconstruction: each remembering is a new event in the present moment.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The specific sensation of a quantum shift before it becomes visible in external reality — a quality of settledness, of arrival, that precedes any confirming evidence. The body's recognition that something has changed before the external world reflects it. Looking at a photograph and feeling the temperature of that day in the body. The way memory lives not in the mind but in the tissue — the smell that returns an entire year, the muscle that remembers a gesture from childhood. Time travel as the ordinary experience of the body that holds all its timelines simultaneously.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUBTERRAIN 3: The Operating System -->
-    <div class="subterrain">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Operating System</div>
-        <div class="subterrain-elements">Astrology — planets · signs · aspects · cycles · transits · minor bodies · the natal chart</div>
-      </div>
-      <p class="subterrain-description">The temporal and relational dimension of all structural models. The geometry that moves. The map of when, not just where. Astrology is the operating system beneath the navigation map itself — the layer that shows which parts of the territory are currently illuminated and what quality of attention each illuminated zone requires.</p>
-
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The planets are principles of consciousness that exist both in the solar system and within the human psyche, and the relationship between the two is not causation but correspondence. As above, so below — not because the sky controls the earth but because both are expressions of the same underlying pattern. Each planet is a mythic actor: Saturn the principle of necessary form, Jupiter the principle of expansive meaning, Pluto the principle of death-and-transformation that cannot be bypassed. The natal chart is not a personality test — it is a map of the soul's chosen curriculum for this incarnation, drawn in the language of the sky at the moment of first breath.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Astrology functions as both a precision timing instrument and a relational framework. The transit system provides a language for naming what is active in the present moment without projecting meaning onto events. A Saturn transit names the quality of a period without determining its content. The aspects — the angular relationships between planets — describe the quality of relationship between different principles operating simultaneously. A square generates friction that creates movement. A trine creates flow. A conjunction fuses two principles into one complex force. This is the vocabulary the navigation map uses to read the connective threads between all other clusters.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The felt experience of a major transit before you know intellectually what is happening — the heaviness of Saturn, the electric disruption of Uranus, the dissolving of Neptune's boundaries, the underworld pull of Pluto. The body registers these as real weather, not metaphor. Reading a natal chart is a somatic experience of recognition — the moment something lands in the body before there are words for it. That landing is the operating system recognizing itself. The chart does not describe the person. It describes the frequency the person was born into and has been learning to inhabit.</div>
-        </div>
-      </div>
-
-      <div class="bridge-nodes">
-        <div class="bridge-label">Bridge nodes — resonance across the map</div>
-        <p class="bridge-text">The operating system connects to every other cluster simultaneously. Astrology is the connective tissue of the entire navigation map: it provides timing for threshold events, names the quality of what anomalous reception is carrying in any given period, describes the planetary ruler of each embodied signal, and shows when the creative record is most alive. The natal chart as the personal map within the universal map — the individual coordinate system that shows how the universal frequencies are specifically configured in one body, one life, one lineage.</p>
-      </div>
-    </div>
-
-    <div class="dragons-note">
-      <span class="dragons-label">Here be dragons</span>
-      <p class="dragons-text">Dragon lives in Animal and nature medicine — in Welsh tradition it is Merlin's creature, the prophetic fire. But it also inhabits this cluster: the dragon is the oldest image of the force that exceeds the container. Every geometric structure in this cluster is also a description of what cannot be contained. The shape is the attempt. The dragon is what the shape is attempting to hold.</p>
-    </div>
-
-  </div><!-- end field-section -->
-
-  <div class="section-divider">
-    <div class="divider-rule"></div>
-    <span class="divider-ornament">Field II</span>
-    <div class="divider-rule"></div>
-  </div>
-
-  <!-- ══════════════════════════════════════════ -->
-  <!-- FIELD II: ANOMALOUS RECEPTION             -->
-  <!-- ══════════════════════════════════════════ -->
-
-  <div class="field-section" id="field-ii">
-
-    <div class="field-header">
-      <div class="field-number">II</div>
-      <div class="field-title-block">
-        <h2 class="field-name">Anomalous Reception</h2>
-        <p class="field-tagline">The field of what arrives that you did not generate. Signal from beyond the personal field. The territory of genuine reception — and the rigorous, necessary practice of discerning it from projection.</p>
-        <span class="field-planets">♆ ☊</span>
-        <div class="field-rulers">Neptune · North Node — dissolution of personal boundaries into the larger field · the karmic direction of the soul</div>
-      </div>
-    </div>
-
-    <!-- SUBTERRAIN 1: Signals from Beyond the Personal Field -->
-    <div class="subterrain">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Signals from Beyond the Personal Field</div>
-        <div class="subterrain-elements">WOW signal · Telepathic awareness · Akashic records</div>
-      </div>
-      <p class="subterrain-description">The subterrain of information that arrives from sources outside the individual — from the collective field, from the record of all that has ever occurred, from the consciousness of another person across physical distance. These are not metaphors for intuition. They are descriptions of a reception bandwidth the body carries that exceeds the ordinary channels of sense perception.</p>
-
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text drop-cap">On August 15, 1977 a radio telescope at Ohio State University received a signal so anomalous the astronomer monitoring the data wrote "Wow!" beside it in red ink. It lasted 72 seconds. It was never repeated. It remains unexplained. The WOW signal is the most honest member of this subterrain because it refuses to resolve into certainty — it holds the mystery without collapsing it into either confirmation or dismissal. The Akashic records are the oldest name for what quantum physics is beginning to describe: the non-local field that holds the impression of every event that has ever occurred, accessible not through ordinary memory but through a specific quality of receptive attention.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">What arrives that you did not generate? This is the diagnostic question of the entire field. Telepathic awareness is not the dramatic transmission of specific thoughts — it is more often the accurate registration of another person's emotional or energetic state before any conventional information has been exchanged. The Akashic records function conceptually as a universal memory system: every action, thought, and event leaves a vibrational impression in the non-local field, and certain people, at certain moments, can read those impressions directly. The question is not whether this is possible. The question is: how do you know when you are receiving rather than projecting?</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body registering information before the mind names its source. A specific quality of arriving — something landing in the chest or the solar plexus with a completeness that does not feel self-generated. The difference between a thought you produce and a thought that appears: the first has a sense of effort and direction, the second has a quality of givenness. Telepathic reception often arrives as sudden certainty about another person's state that has no logical basis and proves accurate. The body is the antenna. The signal is real. The skill is learning to distinguish the body's own emotional weather from what it is receiving from the field.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUBTERRAIN 2: Messengers and Mediators -->
-    <div class="subterrain">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Messengers and Mediators</div>
-        <div class="subterrain-elements">Angels · Ancestors speaking · Spirit guides · Multidimensional presences</div>
-      </div>
-      <p class="subterrain-description">The subterrain of the beings and presences through which reception moves. Not the signal itself but the form the signal takes, the intelligence that carries it, the relationship that makes transmission possible. Every tradition that has ever existed has named these presences. The names differ. The function is consistent.</p>
-
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The word angel means messenger — not a being of wings and light but a function: the carrying of communication between dimensions. Every major tradition has its version: the malakh of Hebrew scripture, the deva of Hindu cosmology, the fravashi of Zoroastrian practice, the fylgja of Norse tradition. These are not the same beings wearing different cultural costumes — they are convergent recognitions of the same function, the same layer of the larger reality. The ancestors speaking are a distinct category: not universal messengers but specific intelligences with specific relationships to specific lineages, arriving with the precision that comes from having shared a bloodline.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">The mediator as a conceptual framework proposes that not all anomalous reception comes through the same channel. Different presences carry different qualities of information with different degrees of personal relevance. An angel functions as a universal messenger — the information it carries is not about you specifically but about the larger pattern you are part of. An ancestor carries information that is specifically coded for your lineage — it knows your family's terrain in ways that no universal presence could. A spirit guide functions as a long-term navigational companion — present across an entire life trajectory rather than in response to a specific moment. Learning to distinguish these is part of the discernment work.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">Different presences have distinct somatic signatures. What arrives as angelic typically has a quality of expansion — a sudden opening of the field, a sense of the space in the room changing, sometimes accompanied by temperature shift or a particular quality of light even in closed eyes. Ancestral presence tends to arrive with more weight and specificity — a sense of particular atmosphere, sometimes a smell, sometimes an emotion that is recognizably not your own. The body learns to read these signatures over time. The initial encounters often register as overwhelming or confusing. The practice is learning the specific language each presence speaks in your body.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUBTERRAIN 3: The Discernment Layer -->
-    <div class="subterrain">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Discernment Layer</div>
-        <div class="subterrain-elements">Free will · Intuition · Reception versus projection · The integrity of the channel</div>
-      </div>
-      <p class="subterrain-description">The most rigorous and most necessary room in this field. The subterrain that asks: how do you know? Not as skepticism — the question is not whether reception is real, but how to maintain the integrity of the channel through which it moves. Free will lives here as the principle that genuine reception never bypasses choice. It arrives as information. What you do with it remains entirely yours.</p>
-
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">Every oracular tradition built its discernment layer into the practice. The Delphic oracle did not simply channel — she had a structure of interpretation that held the transmission and tested it against accumulated wisdom. The I Ching does not tell you what will happen — it describes the quality of the current moment and invites your own intelligence into the reading. Free will in the mythic register is the sovereign capacity that no genuine messenger ever overrides. The moment a presence — whether named angel, ancestor, or guide — demands rather than offers, requires rather than invites, the discernment layer names it as something other than what it claims to be.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Reception versus projection is the central conceptual distinction of this entire field. Projection is the unconscious transmission of your own material — fears, desires, assumptions — onto an external signal. It feels like receiving but the content is self-generated. Genuine reception has a specific quality: it often arrives with information you would not have chosen, content that surprises or challenges rather than confirms. The discernment practice asks: does this information expand my understanding, or does it simply tell me what I want to hear? Does it ask something of me, or does it merely flatter? Genuine signal has integrity — it does not shift its story, does not escalate into urgency, does not require you to bypass your own judgment.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body carries the discernment layer most reliably. Genuine reception has a quality of stillness at its center — even when the content is significant or challenging, there is a groundedness in the body that does not accompany projection. Projection tends to have a quality of activation — a speeding up, a tightening, a quality of urgency that is really the body's anxiety driving the transmission. The felt sense of free will in the body: the moment you recognize that you are receiving information and that you still have complete authority over what you do with it. That recognition itself — the bodily sense of remaining sovereign within the reception — is the most reliable signal that the channel is clean.</div>
-        </div>
-      </div>
-
-      <div class="bridge-nodes">
-        <div class="bridge-label">Bridge nodes — resonance across the map</div>
-        <p class="bridge-text">The Akashic records sit at the bridge between Anomalous Reception and Threshold Events — not just reception but the library at the threshold, the record of every crossing ever made. Magdalene is the connective thread between this field and Threshold Events: the one who received the transmission first and was not believed, the witness whose reception was genuine and whose report was dismissed. The discernment layer connects directly to the central axis — omnidirectional perception requires somatic discernment to become functional rather than merely vast. Free will is not a subterrain of Anomalous Reception only. It is the sovereign principle that underlies every field in the map.</p>
-      </div>
-    </div>
-
-  </div><!-- end field-section -->
-
-  <div class="section-divider">
-    <div class="divider-rule"></div>
-    <span class="divider-ornament">Field III</span>
-    <div class="divider-rule"></div>
-  </div>
-
-  <!-- ══════════════════════════════════════════ -->
-  <!-- FIELD III: THRESHOLD EVENTS               -->
-  <!-- ══════════════════════════════════════════ -->
-
-  <div class="field-section" id="field-iii">
-
-    <div class="field-header">
-      <div class="field-number">III</div>
-      <div class="field-title-block">
-        <h2 class="field-name">Threshold Events</h2>
-        <p class="field-tagline">The field of crossings. Not information received but the self moved — to another state, another dimension, another relationship with time. The threshold is not a place. It is what happens when the ordinary coordinates of consciousness cease to apply.</p>
-        <span class="field-planets">♇ ☋</span>
-        <div class="field-rulers">Pluto · South Node — the underworld force of radical transformation · the karmic inheritance carried in from before</div>
-      </div>
-    </div>
-
-    <!-- SUBTERRAIN 1: Crossings Within Sleep and Altered States -->
-    <div class="subterrain">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Crossings Within Sleep and Altered States</div>
-        <div class="subterrain-elements">Dream state · Astral travel · Breathwork visions · Meditation · Multidimensional awareness</div>
-      </div>
-      <p class="subterrain-description">The crossings that happen when ordinary waking consciousness steps back. Not the absence of consciousness but its relocation — to other realms, other states, other relationships with time and identity that ordinary waking cannot access. These are not escapes from reality. They are expansions of it.</p>
-
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text drop-cap">Every shamanic tradition begins here: the practitioner who learns to leave ordinary waking consciousness intentionally and return with information, healing, or restored pieces of soul. The dream is the oldest oracle — before temples and priests, before written language, human beings were receiving guidance in sleep and treating that guidance as real. The Aboriginal tradition of the Dreamtime does not relegate dream to the unconscious — it names it as a dimension of reality as actual as waking, with its own geography, its own inhabitants, its own laws. Breathwork as a threshold technology: the specific breathing patterns that dissolve the boundary between ordinary and non-ordinary consciousness, giving access to the same terrain that sleep opens involuntarily.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Altered states as a conceptual framework proposes that what we call ordinary consciousness is not the full range of human awareness but a particular bandwidth — useful for navigating the physical world, but not the only bandwidth available and not necessarily the most accurate. Dream state, meditation, and breathwork each access different parts of the broader spectrum through different mechanisms. What they share: the temporary suspension of the ego's editorial function, which allows information and experience to arrive that the waking ego would filter, dismiss, or be unable to hold. The question is not whether these states are real. The question is what you do with what you find there, and how you integrate it into the waking life that still needs to be lived.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body's specific experience of threshold crossing in sleep: the hypnagogic state between waking and sleep when the images begin arriving before unconsciousness is complete — the most reliable window for intentional threshold work. The body during breathwork: the tingling that begins in the hands and moves through the system as carbon dioxide shifts, the involuntary movements or sounds that emerge when the body releases what it has been holding, the profound stillness that follows when the pattern has completed. The felt quality of a significant dream versus ordinary sleep processing: something in the body registers the difference upon waking, a particular weight or aliveness, before the content has been fully recalled.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUBTERRAIN 2: Portals in Time -->
-    <div class="subterrain">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Portals in Time</div>
-        <div class="subterrain-elements">Time travel · Memory · Quantum leaping · Photographs as portals · Ancestral time</div>
-      </div>
-      <p class="subterrain-description">The threshold that moves through time rather than space. The recognition that time is not the linear river it appears to be but a field with its own topology — one in which past and future are not fixed distances but living territories that can be entered, worked with, and changed. Memory as active threshold technology rather than passive record.</p>
-
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The Celtic tradition of the thin place — locations and moments where the veil between times is transparent enough to see through. The Japanese concept of ma — the interval, the pause between things, which is not empty but full of what lives between. Every ancestor who appears is a portal in time — they do not arrive from the past as memory arrives; they arrive as present intelligence, carrying the frequency of their moment into the current one. Photographs as portals: the image holds the frequency of the moment it captured, and that frequency remains accessible through sustained attention. The photograph of Christina Young on the ship is not a historical document. It is a live transmission.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">If time is a field rather than a line, then every point in it is simultaneously present and potentially accessible. Memory is not retrieval — it is reconstruction, a new event in the present moment that uses past material. This means memory can be worked with as a living substance: traumatic memory can be entered and completed, ancestral memory can be witnessed and released, future memory can be seeded through intention. Quantum leaping in the temporal register: the collapse of the distance between the current timeline and an intended one, not through effort in time but through frequency matching that exceeds time. The portal in time does not require you to go somewhere. It requires you to become something.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body does not experience time linearly. It holds all of its timelines simultaneously — the childhood wound, the ancestral pattern, the current moment, the future possibility — as concurrent layers of tissue memory, each one accessible through a specific somatic key. The smell that returns a whole year. The posture that carries a decade. The voice that unlocks a room in the body that has been closed for years. Time travel through the body is not metaphor: it is the literal experience of a past moment being processed in present tissue, completing what could not complete then, releasing what has been holding its shape in the body ever since.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUBTERRAIN 3: Ancestral and Relational Crossings -->
-    <div class="subterrain">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Ancestral and Relational Crossings</div>
-        <div class="subterrain-elements">Ancestral visits · Sovereign descent · The moments when the veil is thin · Inanna's descent · The Royal Gatekeeper</div>
-      </div>
-      <p class="subterrain-description">The crossings that involve specific presences arriving — or the self descending into territory where specific presences live. These are not random threshold events but relational ones: a particular ancestor who has been waiting, a specific pattern of the lineage that is ready to be seen, a crossing that is part of an ongoing relationship with intelligences that extend beyond a single lifetime.</p>
-
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">Inanna descends through seven gates, surrendering one garment at each threshold — naked before the underworld queen, her own dark sister, the unintegrated self. She does not survive by strength or cleverness. She survives by having arranged in advance for someone to come for her. The Sovereign Descent is the mythic template for all ancestral crossings: you go down because something essential is there, you cannot bring it back without going through the death of who you were when you descended, and the return is a transformation rather than a rescue. The Royal Gatekeeper who is also the door: the one who has been both the threshold and its keeper since the very beginning, who decides who enters and when, and whose authority derives not from external appointment but from having crossed so many times that the threshold has become home.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Ancestral crossings function differently from general threshold events because they carry specific content — the unresolved patterns of particular lineages, the information that has been waiting for a specific descendant to be ready to receive it. This is not generic spiritual experience but targeted transmission. The concept of the thin place acquires new specificity here: the veil is not uniformly thin — it is thin in particular places, at particular times, for particular people, because specific presences have been making themselves available at those coordinates. The work of the Ancestral Weaving is the conceptual framework for this: research and resonance working together, the historical record and the living transmission meeting in the same body.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">Ancestral presence in the body has a distinct quality: denser, more specific, and more emotionally complex than general field reception. It often arrives with an emotion that is recognizably not your own — a grief that has a different texture than your own grief, a rage that belongs to a different century, a love that has been waiting longer than your lifetime. The body holds the ancestral crossing as a completion event: something that was interrupted in another body, another life, finishing itself through the tissue that carries the same frequency. The return from an ancestral crossing leaves a mark — not always visible, always felt. Something that was held loosens. Something that was closed opens. The lineage breathes differently after.</div>
-        </div>
-      </div>
-
-      <div class="bridge-nodes">
-        <div class="bridge-label">Bridge nodes — resonance across the map</div>
-        <p class="bridge-text">Threshold Events is the most densely connected field in the map. It bridges to Anomalous Reception through the Akashic records — every crossing leaves a record in the field. It bridges to Embodied Signal through the body as the actual crossing vehicle — not the destination but the portal itself. It bridges to the Ancestral Weaving directly — every ancestor in the weaving represents a threshold that was crossed, a descent that was made, an unresolved pattern waiting at a specific coordinate in the lineage. Sovereign Descent is both a mythic template and a personal signature: the one who has learned to cross, to witness, to return changed, and to hold the door for others.</p>
-      </div>
-    </div>
-
-  </div><!-- end field-section -->
-
-  <div class="section-divider">
-    <div class="divider-rule"></div>
-    <span class="divider-ornament">continuing · Fields IV–VIII building</span>
-    <div class="divider-rule"></div>
-  </div>
-
-  <div class="section-divider"><div class="divider-rule"></div><span class="divider-ornament">Field IV</span><div class="divider-rule"></div></div>
-
-  <div class="field-section" id="field-iv">
-    <div class="field-header">
-      <div class="field-number">IV</div>
-      <div class="field-title-block">
-        <h2 class="field-name">Embodied Signal</h2>
-        <p class="field-tagline">The body settling into earth after the first crossing. The senses awakening, learning to read what the physical world is actually transmitting. Beauty and signal as the same phenomenon.</p>
-        <span class="field-planets">♀ ♁</span>
-        <div class="field-rulers">Venus · Earth — beauty as information · the body rooted in living ground</div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="iv-bird-field">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Bird Field</div>
-        <div class="subterrain-elements">Ravens · Goldfinch · Wren · Wings · Birds as sovereign intelligences</div>
-      </div>
-      <p class="subterrain-description">The creatures whose presence is recognized signal. Not symbols of something else — presences in their own right, with their own sovereign intelligences and their own relationships to the threshold between worlds. The bird that appears at the significant moment is not metaphor. It is an ambassador.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text drop-cap">Odin sacrificed an eye for wisdom and was given two ravens in return — Huginn and Muninn, Thought and Memory, who flew the nine worlds each day and returned to whisper what they had seen. The raven is the threshold intelligence, moving between living and dead without harm from either. The goldfinch in Renaissance iconography is the soul-bird held by the Christ child — the small bright creature that knows what is coming and remains present anyway. The wren in Celtic tradition won the contest to be King of Birds not by strength or speed but by hiding in the eagle's feathers and flying higher at the last moment. These are three precise descriptions of three modes of intelligence: the witness who sees across the threshold, the soul that metabolizes suffering into brightness, the cunning that wins by knowing where to place itself.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Birds function as signal because they occupy the liminal zone between earth and sky — grounded and aerial simultaneously, making them natural ambassadors of information that crosses registers. The specific bird matters: different species carry different frequencies. The raven arrives when the threshold is active. The goldfinch when the soul needs to be reminded of its own brightness. The wren when positional intelligence is what the moment requires. Three modes held simultaneously rather than choosing one — this is the central axis carried into the bird field.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body's recognition of bird-signal is involuntary and precise. Raven: weight in the chest, cold clarity, something important arriving from a direction you were not watching. Goldfinch: a fast brightness moving upward through the sternum before you have named the bird. Wren: the specific stillness of knowing you are exactly where you need to be without knowing why yet. These are not interpretations applied after a sighting. They are what the body reports before the mind engages. The skill is learning to trust that report.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="iv-elemental">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Elemental Resonance</div>
-        <div class="subterrain-elements">Saltwater · Minerals · Crystals · Wind currents · Ocean currents</div>
-      </div>
-      <p class="subterrain-description">The non-living natural world as signal carrier. The elements that predate biological life and will outlast it — the crystalline structures of the mineral kingdom, the vast circulatory systems of ocean and atmosphere. The body was built from these elements and has never forgotten how to read them.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The mineral kingdom is the oldest library. Crystals are frozen time — geological processes compressed into geometric perfection, each one a record of the conditions under which it formed. Saltwater is the body's original medium: human blood and ocean water share the same mineral ratio, a memory of the evolutionary moment when life first emerged from the sea. Wind is the breath of the earth — in indigenous traditions worldwide, wind carries prayers, delivers messages, marks the presence of the sacred. The ocean current that carried Christina Young's ship was the same current that has carried human beings across every ocean since the first voyages — an invisible road older than any civilization.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Crystals encode frequency in their geometric structure — the precise angles and lattice arrangements that make quartz piezoelectric are not accidental. They are expressions of the same mathematical relationships that appear in sacred geometry. Minerals carry the signature frequencies of the elements they are composed of. Saltwater conducts electrical signal — the body uses this property in its nervous system. Wind currents and ocean currents are planetary-scale circulatory systems, moving heat, nutrients, and information around the earth continuously. The body that learns to read these systems is reading the earth's own physiology.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The felt quality of being near the ocean versus inland — a specific opening, a release of held tension, a sensation of being remembered by something vast. The hand that warms around a crystal and registers a shift in temperature or vibration that is not produced by the hand alone. Wind on skin as information: direction, temperature, the specific quality of the air carrying something. These readings precede all interpretation. The practice of elemental awareness is learning to take the body's reports seriously before the mind has time to rationalize or override them.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="iv-vibrational">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Vibrational Frequency</div>
-        <div class="subterrain-elements">Vibration · Resonance · The body as tuning instrument · Frequency as the language beneath language</div>
-      </div>
-      <p class="subterrain-description">The abstract dimension of embodied knowing — what the body registers as frequency before it registers as meaning. The subterrain where signal moves from the physical into the energetic without losing its bodily grounding.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">In the beginning was the Word — the vibration that preceded and produced all form. The Sanskrit concept of Nada Brahma: the universe as sound, all matter as vibration at different frequencies. The Aboriginal tradition of the songlines: the entire continent of Australia mapped not in geography but in song, the land navigable only by those who know the correct vibrational sequences. The Tibetan singing bowl as a technology for entraining the nervous system to specific frequencies through sound. These traditions are not separate from physics — they are descriptions of what physics has confirmed: matter is vibrating energy all the way down.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Resonance is what happens when two systems share a frequency and begin to influence each other. The body is a resonating instrument — it naturally entrains to the dominant frequencies of its environment, which is why certain spaces, certain people, and certain natural settings produce specific and reliable bodily states. Frequency as the language beneath language proposes that the information content of any encounter is carried primarily in its vibrational signature, and that language is a secondary encoding of something the body registers first. To work at the frequency level is to work upstream of words.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body as tuning instrument: the specific physical sensation of encountering a frequency consonant with your own — an opening, a settling, a sense of being in the right place. The equally specific sensation of dissonance — a tightening, a vague discomfort with no clear object, a desire to leave before you know why. These readings precede all interpretation. The practice is taking the body's frequency reports seriously before the mind has had time to rationalize or replace them with a more socially acceptable interpretation.</div>
-        </div>
-      </div>
-      <div class="bridge-nodes">
-        <div class="bridge-label">Bridge nodes — resonance across the map</div>
-        <p class="bridge-text">Embodied Signal connects to Field V (Resonance in Language) through the body that registers frequency before language names it — the sensation is the signal, the word comes after. It connects to Field II (Anomalous Reception) through the discernment question: the body's vibrational reading is one of the most reliable tools for distinguishing genuine reception from self-generated projection. The three birds of this field — Raven, Wren, Goldfinch — are the central axis's living representatives in the physical world, the three modes of intelligence made visible in feathered form.</p>
-      </div>
+      <a class="nav-link" href="index.html">Navigation Map</a>
+      <a class="nav-link" href="ancestral-weaving.html">Ancestral Weaving</a>
+      <a class="nav-link" href="ancestral-catalog.html">Ancestral Catalog</a>
     </div>
   </div>
 
-  <div class="section-divider"><div class="divider-rule"></div><span class="divider-ornament">Field V</span><div class="divider-rule"></div></div>
-
-  <div class="field-section" id="field-v">
-    <div class="field-header">
-      <div class="field-number">V</div>
-      <div class="field-title-block">
-        <h2 class="field-name">Resonance in Language</h2>
-        <p class="field-tagline">Mercury's swift transmission in the sign of duality. The word arriving as the first tool the embodied self reaches for to make sense of the signals it is receiving. Language not as description but as creation — the word that makes the field it names.</p>
-        <span class="field-planets">☿ ♊</span>
-        <div class="field-rulers">Mercury · Gemini — the messenger between worlds · the twin registers held simultaneously</div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="v-registers">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Three Registers</div>
-        <div class="subterrain-elements">Mythic · Conceptual · Somatic — the three doors into any territory</div>
-      </div>
-      <p class="subterrain-description">The access architecture of the entire map. Every field, every subterrain, every element in this system can be entered through three different doors — and the door that works for any given person in any given moment depends on where they are currently able to receive. The three registers are not a hierarchy. They are three equally valid routes into the same truth.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text drop-cap">The mythic register is the language of the dreaming mind, which operates through resonance rather than argument. When something lands in the mythic register it lands as recognition: this is the oldest true thing. The mythic register bypasses the analytical mind's need for evidence because it speaks in a language older than evidence — the language of pattern, of recurrence, of the story that keeps being told because it keeps being true. Gemini in its mythic dimension is Castor and Pollux — one mortal, one divine, inseparable, each giving half their immortality to the other. The twin who holds both registers simultaneously without fusing them is the structural image of the entire Navigation Map's central axis.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">The conceptual register is the language of the structured mind that needs to understand how something works before it can trust it. When something lands in the conceptual register it lands as comprehension: now I understand the mechanism. A well-built conceptual framework creates the container that makes deeper mystery possible — it is not the enemy of the mythic but its necessary complement. The three registers as a system are themselves a conceptual framework: they provide a map of how different minds receive the same information, and a practical tool for adapting transmission to the receiver rather than demanding the receiver adapt to the transmission.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The somatic register is the register of the body's direct knowing — before interpretation, before framework, before story. When something lands in the somatic register it lands as sensation before it lands as meaning. The somatic register is the most reliable and the most frequently dismissed. It is also the register that never lies — the body's report is always honest even when the mind is not. The practice of working in the somatic register is learning to trust the body's reading before the mind has had time to explain it away, rationalize it, or replace it with a more socially acceptable interpretation.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="v-vocabulary">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Vocabulary as Structure</div>
-        <div class="subterrain-elements">Signal · Frequency · Compression · Descent · Emergence · Mirror · Container · Threshold</div>
-      </div>
-      <p class="subterrain-description">The load-bearing words of this system. These are not metaphors applied to experience — they are structural descriptions of actual phenomena. Each word names something that is true at every scale — from the personal to the cosmic, from the somatic to the mythic. The vocabulary of this map was not chosen for resonance alone. It was chosen because it is accurate.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">In the mythology of language, certain words carry the frequency of what they name — not just pointing toward it but instantiating it. The Hebraic concept of the dabar: the word that does not merely describe reality but participates in creating it. When you use the word threshold in this system you are not describing a doorway — you are calling into presence the quality of the liminal moment, with all the weight that threshold carries in every culture that has ever named it. Signal, frequency, compression, descent, emergence, mirror, container: each one creates the field it names. The vocabulary of this map is sacred in this sense.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Each word in this vocabulary is a compression — a single term encoding a complex system of relationships. Signal encodes the distinction between information arriving from outside the self and noise that is self-generated. Frequency encodes the understanding that all phenomena have a vibrational signature recognizable before analysis. Container encodes the principle that the capacity to hold something determines whether it can be received. Threshold encodes the understanding that the most significant transformations happen at the edge where the familiar ends and the unknown begins. These compressions are tools. The practice is learning to use them with precision.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">Each of these words produces a different somatic response in a body that has learned to listen. Signal: a quality of attention sharpening. Descent: weight, a downward pull, the body orienting toward ground. Emergence: something lightening, an upward movement. Mirror: a reflexive turning of attention, a quality of being seen. Container: a sense of being held, tension releasing into structure. Threshold: a slight pause in the breath, the body registering that something important is at the edge of happening. The vocabulary is a somatic instrument as much as a conceptual one.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="v-transmission">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Transmission Modes</div>
-        <div class="subterrain-elements">Teaching · Mentorship · Writing · Conversation · Astrology as language</div>
-      </div>
-      <p class="subterrain-description">The relational forms through which language moves from one field into another. Not the content of transmission but the vessel — the specific form that makes it possible for what one person knows to become genuinely available to another.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">Hermes — Mercury's Greek face — is not merely the messenger. He is the one who makes transmission possible: the god of boundaries, of crossing, of the in-between. He invented the lyre and gave it to Apollo. He guided souls to the underworld. He carried messages between divine and human realms that neither could carry for themselves. Every genuine act of teaching is a Hermetic act: the teacher crosses into the student's world to meet them where they are, and in that crossing something moves that would not have moved if both had stayed in place. Astrology as language: the natal chart as the most precise available vocabulary for the specific quality of a particular consciousness.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Different transmission modes activate different aspects of the receiver. Teaching creates conditions for the student's own knowing to emerge. Mentorship creates a sustained relational container for development over time. Writing creates transmission that persists without the transmitter's presence — the text continues to work after the writer has left the room, the century, or the life. Conversation is the most alive and unstable mode — it can go anywhere, reach depths no structured mode can access. Astrology as language: precise enough to name the specific configuration of a particular consciousness, giving both practitioner and client words for things that previously had no available vocabulary.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">Each transmission mode has a distinctive somatic signature. Teaching: the particular quality of full-body engagement when both teacher and student are genuinely present — a warmth, the room changing. Mentorship: the felt sense of being accompanied rather than instructed, a safety that allows risk. Writing: the body in flow — hours vanishing, something moving through rather than being produced by. Conversation: the specific sensation of genuine meeting, where something is created between two people that neither brought alone. Astrology as language: the somatic response when a chart placement names something the person has always known in their body but has never had words for.</div>
-        </div>
-      </div>
-      <div class="bridge-nodes">
-        <div class="bridge-label">Bridge nodes — resonance across the map</div>
-        <p class="bridge-text">Resonance in Language is the floor the entire map stands on — it resurfaces in every field as the medium through which each field becomes communicable. It connects directly to Field XI (The Teaching) across the full width of the wheel: what you find the words for in Gemini becomes what you transmit in Sagittarius. It connects to Field I (Structural Models) through vocabulary as structure — the load-bearing words are the tesseract's shadow in language, dimensional structure expressed in sound. The Gemini Sun that holds the whole map makes three-register fluency not just possible but native: Gemini moves between worlds without effort because that is its home terrain.</p>
-      </div>
+  <div id="fieldguide-content">
+    <div class="loading-wrap" id="loading">
+      <span class="loading-glyph">✦</span>
+      <div class="loading-text">Drawing from the field…</div>
     </div>
   </div>
+</div>
 
-  <div class="section-divider"><div class="divider-rule"></div><span class="divider-ornament">Field VI</span><div class="divider-rule"></div></div>
+<script>
+const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
 
-  <div class="field-section" id="field-vi">
-    <div class="field-header">
-      <div class="field-number">VI</div>
-      <div class="field-title-block">
-        <h2 class="field-name">Body as Active Practice</h2>
-        <p class="field-tagline">The Moon's domain. The body's tidal, cyclic, rhythmic intelligence. What we need. What nurtures. The mother field — received somatically first, before it becomes emotion, before it becomes thought.</p>
-        <span class="field-planets">☽ ♋</span>
-        <div class="field-rulers">Moon · Cancer — the tidal body · the cyclic feminine · the soothing balm · the flowing water</div>
+const REGISTER_ORDER = ['mythic', 'conceptual', 'somatic', 'unreceived'];
+const REGISTER_LABELS = {
+  mythic: 'Mythic',
+  conceptual: 'Conceptual',
+  somatic: 'Somatic',
+  unreceived: 'The Unreceived'
+};
+
+const ARC_META = {
+  descent: {
+    label: 'Arc I',
+    title: 'The Descent',
+    glyph: '↓'
+  },
+  underworld: {
+    label: 'Arc II',
+    title: 'The Underworld',
+    glyph: '◉'
+  },
+  return: {
+    label: 'Arc III',
+    title: 'The Return',
+    glyph: '↑'
+  }
+};
+
+async function supabaseFetch(path) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  if (!res.ok) throw new Error(`Supabase error: ${res.status}`);
+  return res.json();
+}
+
+async function loadAll() {
+  // Fetch fields, subterrains, and passages in parallel
+  const [fields, subterrains, passages] = await Promise.all([
+    supabaseFetch('fields?select=*&order=number.asc'),
+    supabaseFetch('subterrains?select=*&order=sort_order.asc'),
+    supabaseFetch('passages?select=*')
+  ]);
+
+  // Index subterrains by field_id
+  const subtByField = {};
+  subterrains.forEach(st => {
+    if (!subtByField[st.field_id]) subtByField[st.field_id] = [];
+    subtByField[st.field_id].push(st);
+  });
+
+  // Index passages by subterrain_id
+  const passBySubt = {};
+  passages.forEach(p => {
+    if (!passBySubt[p.subterrain_id]) passBySubt[p.subterrain_id] = [];
+    passBySubt[p.subterrain_id].push(p);
+  });
+
+  return { fields, subtByField, passBySubt };
+}
+
+function renderRegister(passage, isFirst) {
+  const r = passage.register;
+  const dropClass = isFirst && r === 'mythic' ? ' drop-cap' : '';
+  return `
+    <div class="register register-${r}">
+      <div class="register-label">
+        <span class="register-label-dot"></span>
+        ${REGISTER_LABELS[r] || r}
       </div>
-    </div>
+      <div class="register-text${dropClass}">${passage.content}</div>
+    </div>`;
+}
 
-    <div class="subterrain" id="vi-stillness">
+function renderSubterrain(st, passages, isFirstSt) {
+  const sorted = (passages || []).slice().sort((a, b) =>
+    REGISTER_ORDER.indexOf(a.register) - REGISTER_ORDER.indexOf(b.register)
+  );
+
+  const registersHtml = sorted.map((p, i) =>
+    renderRegister(p, isFirstSt && i === 0)
+  ).join('');
+
+  const descHtml = st.description
+    ? `<p class="subterrain-description">${st.description}</p>`
+    : '';
+
+  return `
+    <div class="subterrain" id="st-${st.slug || st.id}">
       <div class="subterrain-header">
-        <div class="subterrain-name">Breathwork and Stillness</div>
-        <div class="subterrain-elements">Breathwork · Meditation · Stillness practices · The body slowed to receive</div>
+        <div class="subterrain-name">${st.name}</div>
       </div>
-      <p class="subterrain-description">The body slowed deliberately until it can receive what is always already present but unavailable to ordinary waking speed. These are technologies for changing the state of the nervous system such that a different quality of information becomes accessible. Stillness is not passive. It is the most active form of receptivity.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text drop-cap">Every contemplative tradition that has ever existed knows this subterrain. The Desert Fathers in their caves, the Zen master in the zendo, the yogini in her practice, the Sufi in the dhikr, the shaman in the dark — what they are all doing, beneath the forms that differ, is the same: slowing the nervous system until the veil between ordinary and non-ordinary consciousness becomes thin enough to see through. The Hesychast tradition of the Christian East calls this state hesychia — deep interior stillness — and describes it as the condition in which divine light becomes visible. Breathwork as a modern entry to this ancient territory: the specific breathing patterns that shift the body's chemistry and open access to states otherwise available only in sleep or extremity.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">The nervous system has two primary modes — sympathetic (activation) and parasympathetic (rest, digest, integrate). Most people in contemporary life spend the majority of their waking hours in low-grade sympathetic activation. Meditation and breathwork shift the nervous system toward parasympathetic dominance, which has measurable effects: reduced cortisol, increased heart rate variability, improved immune function, and — crucially — access to information-processing modes unavailable in sympathetic activation. The body in stillness is not doing less. It is doing something different that requires the absence of urgency to occur.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The specific progression of physical sensation in genuine stillness: the initial restlessness as the nervous system resists slowing, the gradual deepening of breath, the moment when the shoulders drop and the jaw unclenches without deliberate instruction, the spaciousness that opens behind the sternum when the body has fully released. And then — if the practice goes deep enough — the specific sensation of receiving: something arriving that was not there before the stillness created the conditions for its arrival. This is the body proving its own thesis.</div>
-        </div>
-      </div>
-    </div>
+      ${descHtml}
+      <div class="registers-grid">${registersHtml}</div>
+    </div>`;
+}
 
-    <div class="subterrain" id="vi-movement">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Movement and Expression</div>
-        <div class="subterrain-elements">Dance · Movement · Laughter · Tears · The body activated to release and transmit</div>
-      </div>
-      <p class="subterrain-description">The body activated — not in response to external demand but in service of its own intelligence. Dance and movement as the body's natural language for what cannot be spoken. Laughter and tears as the same physiological process at different emotional temperatures: the body's capacity to complete an experience, to metabolize what has been held, to release what has accumulated beyond what the system can continue to carry.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The Maenads of Dionysus did not dance because they felt joyful. They danced until joy — or its shadow, ecstatic grief — moved through them. Sacred dance in every tradition is understood not as the expression of a pre-existing emotion but as the technology by which the emotion is completed, the blockage released, the spirit moved through the body rather than stored in it. Laughter in the mystical traditions is one of the markers of genuine illumination — the full-body release of a consciousness that has stopped taking its own constructions so seriously. Tears are their mirror: the same release at a different frequency, the body completing what the mind could not allow itself to complete in ordinary consciousness.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Movement and expression are completion technologies — they complete the physiological cycles initiated by emotional experience but that modern life rarely allows to finish. Peter Levine's work on somatic experiencing demonstrates that animals in the wild complete stress responses through spontaneous movement (shaking, running, vocalizing) and are rarely traumatized as a result. Humans are constantly interrupted before completion can occur. Dance, authentic movement, and genuine laughter and crying are ways of restoring the body's capacity to complete what has been initiated — to close the loops that otherwise accumulate as chronic tension or numbing.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The felt quality of a body truly moving rather than performing movement: the moment when the instruction stops and the body takes over, when the arms know where to go before the mind has decided, when movement is arriving through rather than being produced by. Laughter and tears felt in their full-body form: not the polite social versions but the genuine physiological events — the convulsive release of laughter that takes over the whole system, the tears that come from the belly rather than the eyes. These are completion events. The body knows when something has finished.</div>
-        </div>
-      </div>
-    </div>
+function renderField(field, subterrains, passBySubt, isFirst) {
+  const subs = subterrains || [];
+  const subHtml = subs.map((st, i) =>
+    renderSubterrain(st, passBySubt[st.id], isFirst && i === 0)
+  ).join('');
 
-    <div class="subterrain" id="vi-healing">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Mirror and Healing Practices</div>
-        <div class="subterrain-elements">Mirror work · Lymphatic drainage · Moon cycles as navigation · Compassion as the soothing balm</div>
-      </div>
-      <p class="subterrain-description">The body as the object of conscious tending — the practices that attend to what the body is holding and what it needs in order to release it. These are healing practices in the deepest sense: they restore the body to its own intelligence and return the system to a state in which it can receive and transmit without distortion.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The Moon as keeper of the body's cyclic intelligence. Every tradition that honors the feminine principle honors the Moon — as the regulating intelligence of all biological cycles, the timekeeper of the body's natural rhythms of fullness and release, expansion and withdrawal. Compassion in the mythic register is Kuan Yin — the bodhisattva who turns back from enlightenment to remain present with all suffering beings, whose tears are the rain. Mirror work as initiated by Louise Hay: meeting your own eyes in the mirror and saying what the self most needs to hear — a radical act of compassion directed inward, becoming your own witness rather than your own critic.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Lymphatic drainage as framework for the body's self-cleansing intelligence: the lymphatic system moves cellular waste and immune cells through a network that has no pump of its own — it depends on movement, breath, and manual stimulation. When sluggish, the body accumulates what it cannot clear. This is a precise image of emotional and energetic accumulation as well. Moon cycles as a navigation system: the lunar month as a container for intention, the new moon for planting, the full moon for illuminating, the waning moon for releasing. The body as its own healer when given the conditions — time, attention, compassion — that allow its intelligence to operate.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">Compassion felt in the body before the word arrives: a specific warmth spreading through the chest, a softening around the heart, a release of chronic tension in the upper shoulders. This is the somatic signature of the Cancer field at its most essential — the felt quality of genuine nurturance. The specific sensation of lymphatic release: a lightness, a clarity, the body's sense of having been heard and responded to at a level beneath ordinary consciousness. Moon cycle awareness in the body: the different quality of energy at the new moon versus the full, the body's natural inclination toward expansion or withdrawal that the cycle maps.</div>
-        </div>
-      </div>
-      <div class="bridge-nodes">
-        <div class="bridge-label">Bridge nodes — resonance across the map</div>
-        <p class="bridge-text">Body as Active Practice is the most somatic field in the entire map — received somatically first, before any other register activates. It connects to Field IV (Embodied Signal) through the shared language of the body as receiver — Field IV receives involuntarily, Field VI practices intentionally. Compassion flows from this field into every other field in the map — it is the quality that makes Anomalous Reception possible, Shadow work bearable, the Mirror non-threatening. Moon cycles connect this field to Field XII (Sovereignty) — the sovereign cycle in the return arc is the direct maturation of the lunar intelligence cultivated here in the descent.</p>
-      </div>
-    </div>
-  </div>
+  const astroHtml = field.astro_planets || field.astro_signs ? `
+    <div class="field-astro">
+      ${field.astro_planets ? `<span class="field-planets">${field.astro_planets}</span>` : ''}
+      ${field.astro_signs ? `<span class="field-signs">${field.astro_signs}</span>` : ''}
+    </div>` : '';
 
-  <div class="section-divider"><div class="divider-rule"></div><span class="divider-ornament">Field VII</span><div class="divider-rule"></div></div>
+  return `
+    <div class="field-section" id="field-${field.number}">
+      <div class="field-header">
+        <div class="field-number">${field.number}</div>
+        <div class="field-title-block">
+          <div class="field-roman">${field.roman || ''}</div>
+          <h2 class="field-name">${field.name}</h2>
+          ${field.tagline ? `<p class="field-tagline">${field.tagline}</p>` : ''}
+          ${astroHtml}
+        </div>
+      </div>
+      ${subHtml}
+    </div>`;
+}
 
-  <div class="field-section" id="field-vii">
-    <div class="field-header">
-      <div class="field-number">VII</div>
-      <div class="field-title-block">
-        <h2 class="field-name">The Creative Record</h2>
-        <p class="field-tagline">The sovereign creative force at the height of summer. Leo's fire as the engine of creation — not the artifact as record but the act of making as sovereign expression. Christina Young writing poems on the ship. Eleanor governing through the troubadour tradition from her prison at Sarum.</p>
-        <span class="field-planets">☉ ♌</span>
-        <div class="field-rulers">Sun · Leo — the sovereign fire · the act of making as the fullest expression of the self</div>
-      </div>
-    </div>
+function renderArc(arcKey, fields, subtByField, passBySubt, isFirst) {
+  const meta = ARC_META[arcKey] || { label: arcKey, title: arcKey, glyph: '·' };
+  const fieldsHtml = fields.map((f, i) =>
+    renderField(f, subtByField[f.id], passBySubt, isFirst && i === 0)
+  ).join('');
 
-    <div class="subterrain" id="vii-sovereign-act">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Sovereign Act of Making</div>
-        <div class="subterrain-elements">Art · Music · Dance as creative fire · The act of making as sovereign expression</div>
+  return `
+    <div class="arc-block" id="arc-${arcKey}">
+      <div class="arc-label">${meta.label}</div>
+      <div class="arc-title">${meta.title}</div>
+      <div class="arc-rule">
+        <div class="arc-rule-line"></div>
+        <span class="arc-rule-glyph">${meta.glyph}</span>
+        <div class="arc-rule-line right"></div>
       </div>
-      <p class="subterrain-description">Not the artifact but the moment of creation itself — the state in which the self is most fully itself, generating, expressing, bringing into form what did not previously exist. The creative act as the form of sovereignty that cannot be taken, imprisoned, or appropriated.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text drop-cap">The sun at Leo is the sun at maximum power — the height of summer, the moment of fullest creative output before the harvest begins its slow turn. Apollo sings, the world is made beautiful. Orpheus plays, stones weep and trees uproot themselves to follow. The creative act in Leo's register is not personal expression — it is a cosmic function being channeled through a particular body. Christina Young writing poems on the ship with three pence in her pocket and not a friend on board: this is the sovereign creative act in its most elemental form. The conditions are impossible. She makes something anyway. That is the Leo fire.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">The sovereign act of making differs from productive making in one crucial respect: it is not made for a purpose external to the act itself. The artist who creates because they must, because something demands to come through them, because not making is a form of self-betrayal — this is sovereign making. It may serve purposes, find audiences, generate income, but these are secondary to the primary fact: something that did not exist before has been brought into existence through the particular intelligence of this particular person. No one else could have made this exact thing. The sovereign act of making is therefore also an act of identity.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body in sovereign creative flow: the specific heat in the chest, the hands that know before the mind decides, the loss of ordinary time sense. The sensation of something moving through rather than being produced by — the difference between laboring over a creation and being its conduit. Dancers describe the moment the body takes over from the choreography. Musicians describe the moment the music plays itself. The body in this state is fully sovereign and fully surrendered simultaneously — the two qualities that in ordinary consciousness seem mutually exclusive.</div>
-        </div>
-      </div>
-    </div>
+      ${fieldsHtml}
+    </div>`;
+}
 
-    <div class="subterrain" id="vii-artifact">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Living Artifact</div>
-        <div class="subterrain-elements">Journals · Photographs as portals · Visual art · Music as record · The thing that remains</div>
-      </div>
-      <p class="subterrain-description">What is left after the making — the artifact that carries the frequency of its moment of creation forward in time. Not merely documentation but transmission: the journal that holds what the writer needed to say and what future readers need to find, the photograph that remains a portal long after everyone present has died.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The Vedic concept of akasha — the primordial space that records every event, every word, every vibration that has ever occurred — is also the principle of the living artifact. Nothing truly made is ever fully gone. The artifact is the akashic record made physical: the vibration of the creative moment, compressed into an object, available to resonate in response to anyone who encounters it with sufficient attention. The photograph of Christina Young is not a historical document. It is a live transmission — her frequency, preserved, still speaking across a century and a half to the lineage she founded.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">The living artifact differs from the dead artifact in one essential way: it continues to work. A dead artifact is a record of something that once happened. A living artifact generates new meaning in each encounter — not fixed but responsive, not a statement but an ongoing conversation between what the maker embedded and what the receiver brings. The test of a living artifact is not its age but its aliveness in the present moment: does it still produce something in the person who encounters it? Does the encounter change the receiver in a way that persists?</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body's response to a living artifact is distinct from its response to a merely interesting or aesthetically pleasing object. A living artifact produces a specific quality of recognition — not pleasure or admiration but a deeper resonance, a sense of having encountered something that knows something about you, something that was waiting for you specifically. The photograph as portal: the body that looks at an ancestor's photograph with genuine attention sometimes reports sensations, emotions, or information that cannot be explained by the visual content alone. This is the living artifact functioning as it was always meant to.</div>
-        </div>
-      </div>
-    </div>
+async function init() {
+  const container = document.getElementById('fieldguide-content');
+  try {
+    const { fields, subtByField, passBySubt } = await loadAll();
 
-    <div class="subterrain" id="vii-narrative">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Narrative and Story</div>
-        <div class="subterrain-elements">Story · Myth · Narrative · The Ancestral Weaving itself as living creative record</div>
-      </div>
-      <p class="subterrain-description">Language-based forms that transmit across time and become the container of the lineage. Story is the oldest preservation technology. The myth is the story that keeps being told because it keeps being true. The Ancestral Weaving is this field's living example: the creative record of a lineage, made in the present, extending backward to the beginning of recorded history and forward into whatever comes next.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The myth is not fiction — it is the story that encodes the deepest available truth about a recurring human experience in the most memorable and transmissible form possible. Inanna does not descend once in Sumer and never again. She descends every time a woman must lose everything to find what cannot be found any other way. Arthur does not sleep under a hill in 6th-century Britain and nowhere else. He sleeps under every hill where the sovereignty question has been deferred. The myth is alive as long as the pattern it encodes continues to occur — which means these stories are not history but present tense.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Narrative is the cognitive technology by which human beings organize experience into meaning. The story structure — beginning, complication, resolution — is not merely a literary convention. It is the shape of how the human nervous system processes events. Trauma is, in part, a narrative that could not complete — the body stuck in the complication phase, unable to find the resolution that would allow integration. The Ancestral Weaving performs this completion function: it gives each ancestor's life a narrative shape, identifies what could not complete, and holds it in conscious relationship with the lives that followed.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body responds to story in measurable ways: heart rate changes, skin conductance changes, neurological activity shifts. We are wired for narrative — it is one of the fundamental organizing principles of human consciousness. When a story is genuinely true — when it names something the body has been holding without available language — the response is specific and unmistakable: a quality of relief, of recognition, of something that had been tight finally releasing. The Ancestral Weaving produces this response because it takes what was formless and overwhelming and gives it a shape precise enough to be held, witnessed, and eventually completed.</div>
-        </div>
-      </div>
-      <div class="bridge-nodes">
-        <div class="bridge-label">Bridge nodes — resonance across the map</div>
-        <p class="bridge-text">The Creative Record is where the Ancestral Weaving and the Navigation Map most directly touch — both are themselves creative records, both living examples of what this field names. The Creative Record connects to Field X (The Shadow) through the principle that the most significant creative works often emerge from shadow material — what cannot be said in ordinary life finds form in art, in story, in the journal written at 2am. It connects to Field XI (The Teaching) as the thing that is transmitted: what you have made is what you teach, and what you teach is what you have lived enough to make.</p>
-      </div>
-    </div>
-  </div>
+    // Group fields by arc
+    const arcs = { descent: [], underworld: [], return: [] };
+    fields.forEach(f => {
+      if (arcs[f.arc]) arcs[f.arc].push(f);
+    });
 
-  <div class="section-divider"><div class="divider-rule"></div><span class="divider-ornament">Field VIII</span><div class="divider-rule"></div></div>
+    const html = Object.entries(arcs).map(([arcKey, arcFields], i) =>
+      renderArc(arcKey, arcFields, subtByField, passBySubt, i === 0)
+    ).join('');
 
-  <div class="field-section" id="field-viii">
-    <div class="field-header">
-      <div class="field-number">VIII</div>
-      <div class="field-title-block">
-        <h2 class="field-name">Animal and Nature Medicine</h2>
-        <p class="field-tagline">Precise healing intelligence. Service and the body in right relationship with all living things. Virgo's exquisite discernment applied to the non-human — the midwife's hands, the herbalist's knowledge, the body that evolved inside these systems and has never forgotten how to receive them.</p>
-        <span class="field-planets">☿ ♍</span>
-        <div class="field-rulers">Mercury · Virgo — discernment · service · the intelligence of living systems · the healer's hands</div>
-      </div>
-    </div>
+    container.innerHTML = `<div style="opacity:0;animation:fadeIn 0.8s ease forwards">${html}</div>`;
 
-    <div class="subterrain" id="viii-totemic">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Totemic Presences</div>
-        <div class="subterrain-elements">Lion · Owl · Butterfly · Dragon · Hummingbird · Snake · Bear · Turtle · Dolphin · Whale · Wolf · Cat · Dog · Fish</div>
-      </div>
-      <p class="subterrain-description">Each animal as a sovereign intelligence carrying a distinct frequency signature. The totem animal is not a symbol chosen by the human — it chooses, through repeated appearance or through the quality of recognition the body registers in its presence. The animal kingdom as a council of intelligences, each a specialist in a particular quality of being that the human may need to access or develop.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text drop-cap">The lion: sovereignty in the body, the regal presence that does not need to announce itself. In this lineage the lion appears in the heraldic arms of the Bruce, the Brocas, Bertila of Spoleto, Eleanor — the dominant charge of the weaving, the frequency of sovereign embodiment carried through bloodlines. The snake: transformation through shedding, the creature that renews itself entirely by releasing the skin it has outgrown — the medicine of Melusine and of the caduceus. The whale: the earth's deepest memory carrier, whose songs navigate oceanic distances, whose intelligence operates at a scale and depth that makes the human nervous system register awe before the mind categorizes. Dragon at the border of this field and Field I: the prophetic fire that exceeds every container, present in Merlin's arms and in the Terra Incognita of Field XIII.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Each totem animal is a specialist in a quality of intelligence also available to human beings but that humans tend to access inconsistently. The bear teaches conscious hibernation — withdrawal into darkness that produces renewal rather than depletion. The turtle teaches carrying one's home — being at home in oneself regardless of external circumstance. The dolphin teaches the integration of play and precision — joy-saturated intelligence that solves complex problems without losing its delight. The butterfly teaches complete willingness to dissolve — the caterpillar in the chrysalis does not reform, it liquefies entirely before reorganizing into an entirely different form. These are not metaphors. They are field reports from intelligences that have mastered what they teach.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body's involuntary response to the presence of a totem animal bypasses interpretation entirely. The specific quality differs by animal: the lion produces a settling, the spine straightening, something coming into alignment. The snake produces a particular alertness — full-body attention that is neither fear nor excitement. The whale produces overwhelm of a specific kind — the nervous system registering something too large for ordinary processing, registering it as vastness rather than threat. Learning the body's specific language for each animal is part of the work of this field.</div>
-        </div>
-      </div>
-    </div>
+  } catch (err) {
+    container.innerHTML = `<div class="error-wrap">
+      <p>The field could not be reached.</p>
+      <p style="font-size:13px;margin-top:0.5rem;color:var(--ink-faint)">${err.message}</p>
+    </div>`;
+  }
+}
 
-    <div class="subterrain" id="viii-plant">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Plant and Fungal Intelligence</div>
-        <div class="subterrain-elements">Plant medicine · Trees and their language · Mushrooms · Gardens · The mycelium network</div>
-      </div>
-      <p class="subterrain-description">The rooted intelligences — the systems that communicate, respond, and organize without moving through space. The mycelium network as the original internet: a planetary-scale information system that predates human consciousness by hundreds of millions of years, still operating beneath every forest floor, transferring nutrients and chemical signals between organisms that appear separate but are continuously in contact.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The World Tree — Yggdrasil in Norse cosmology, the Bodhi tree in Buddhist tradition, the Tree of Life in Kabbalah — is not a symbol of the plant kingdom. It is a description of the actual structure of plant intelligence: root systems descending into the underworld of soil and mycorrhizal network, trunk holding the middle world, branches reaching into the sky world of vision and transcendence. The tree holds all three worlds simultaneously and is the primary structural metaphor of this entire map. Plant medicine in the shamanic traditions: the plant as teacher, the healing compound as the plant's gift to the human nervous system, the ceremony as the container that allows the teaching to be received safely.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Recent research in plant neurobiology has confirmed what indigenous traditions have always known: plants perceive, respond, communicate, and make something that looks very much like decisions. Trees in a forest communicate through mycorrhizal fungal networks — the mother tree transfers carbon and nutrients to seedlings, prioritizing its own offspring but also supporting neighboring trees of different species when stressed. When attacked by insects a tree releases volatile organic compounds that neighboring trees detect and use to upregulate their own defenses. These are information systems that predate and exceed human cognition — and the body knows how to receive them because it evolved inside them.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body in genuine contact with an old tree: a specific quality of being received, the nervous system registering that it is in the presence of something that has been listening for much longer than any human has been alive. The hands on bark as information transfer in both directions. The garden as somatic medicine: the specific quality of the nervous system after time spent in genuine contact with growing things — lower cortisol, measurable improvement in immune function, the particular clarity that comes from attention directed at something that does not require any particular response from you.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="viii-terrain">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Terrain and Water</div>
-        <div class="subterrain-elements">Bodies of water · Hiking · Travel · Ocean currents · The landscapes as medicine in themselves</div>
-      </div>
-      <p class="subterrain-description">The landscapes themselves as healing intelligences. Movement through terrain as a form of medicine — not exercise but genuine encounter with the specific intelligence of a particular place. The body that moves through old-growth forest, along a coast, up a mountain is not the same body at the end of the journey as it was at the beginning. Something has been exchanged.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The pilgrimage as the oldest intentional healing technology involving terrain: the journey to a specific place that carries specific medicine. Lourdes, Santiago de Compostela, Glastonbury, the Ganges — not arbitrary locations but places where the intersection of geography, human attention over millennia, and whatever intelligence lives in particular configurations of land and water has created something reliably larger than what the pilgrim arrives with. The tree-lined driveway as a threshold space — both sides of the approach held by living intelligence, the destination not yet visible, the arrival prepared by the beauty of the passage itself. The approach as its own medicine.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">The concept of terroir — borrowed from wine but applicable to all living systems — proposes that the specific quality of a place (its soil chemistry, its water, its microclimate, its history) is encoded in everything that grows in it. The human body moving through a landscape is in continuous chemical dialogue with it: breathing its specific volatile organic compounds, drinking its water, absorbing its electromagnetic field through skin contact with the ground. The specific combination of terrain elements in a particular landscape produces specific, measurable effects in the human nervous system. The practice of terrain medicine is choosing landscapes with intention and receiving what they are actually offering.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body at the edge of a body of water: a specific opening, a release of held tension, a sensation of being remembered by something vast. The body on a mountain: clarity, a sense of perspective that is also a physical experience of altitude, the horizon visible in all directions. The body in forest: an enclosure that is not constriction, a quality of being held on all sides by living things attending to something other than the human presence and therefore completely safe. Each terrain produces its specific medicine. The practice is learning the body's precise reporting of what each landscape is offering.</div>
-        </div>
-      </div>
-      <div class="bridge-nodes">
-        <div class="bridge-label">Bridge nodes — resonance across the map</div>
-        <p class="bridge-text">Animal and Nature Medicine is where the Ancestral Weaving makes its deepest contact with the living world — the totemic animals in the heraldry of the ancestors are the same animals that appear as signal in Field IV. Dragon moves between this field and Field I — the prophetic fire exceeds every geometric container. The mycelium network is the structural model of the Navigation Map itself: a web of interconnection with no central hub, every node in contact with every other, information moving in all directions simultaneously. Christina Young's four hundred births are the most precise available image of this field's healing service: the body as instrument of bringing life into the world, the midwife's hands as the meeting point of animal intelligence and human skill.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-divider"><div class="divider-rule"></div><span class="divider-ornament">Field IX · The Mirror</span><div class="divider-rule"></div></div>
-
-  <div class="field-section" id="field-ix">
-    <div class="field-header">
-      <div class="field-number">IX</div>
-      <div class="field-title-block">
-        <h2 class="field-name">The Mirror</h2>
-        <p class="field-tagline">The first field of the return arc. The self that has been through the descent meets the other and finds itself reflected. Libra as the moment of first recognition after the crossing — I am seen, therefore I exist differently than I did before.</p>
-        <span class="field-planets">♀ ♎</span>
-        <div class="field-rulers">Venus · Libra — the relational field · beauty as information · the other as necessary instrument of self-knowledge</div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="ix-other">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Other as Teacher</div>
-        <div class="subterrain-elements">Relationship · The beloved as mirror · Significant encounters · The face that shows you what you cannot see from inside</div>
-      </div>
-      <p class="subterrain-description">Every significant relationship is a mirror — it shows you the face you cannot see from the inside, the pattern you cannot recognize from within it. The other person is one of the most precise instruments available for the work of self-knowledge — more precise, in some ways, than any internal practice, because they cannot lie in the specific way that internal reflection can.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text drop-cap">The Sufi tradition of the beloved as the face of the divine — the other person as the specific form in which the infinite chooses to make itself visible to you. Not because that person is perfect or divine but because something in their specific frequency and your specific frequency produces a resonance that makes visible what neither could see alone. Tyler as truest mirror — the specific phrase in this lineage for the relationship that performs the highest possible mirroring function: not the comfortable reflection that confirms what you already believe about yourself but the one that shows you what you are becoming, what you are still not seeing, what the world sees in you that you cannot see from the inside.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">The other as teacher operates through several mechanisms simultaneously. Projection: what you cannot accept in yourself you will see and react to in others — the strong negative reaction to someone else's quality is reliable information about your own relationship to that quality. Modeling: the other demonstrates that something you believed was impossible for you is possible for a person. Mirroring: the other reflects your frequency back to you at a pitch you can actually hear. Complementarity: the other holds what you have not yet developed, creating in the encounter a wholeness that neither holds alone. All four mechanisms are always operating. The practice is learning to read which one is most active.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The felt quality of genuine meeting — the specific body-state when two people are actually in contact rather than performing contact. A warmth in the chest, a quality of the space between the two people becoming palpable, the sense that something is being created in the encounter that neither brought to it. Versus the equally specific quality of non-meeting: the flatness, the slight sense of speaking into a void. The body knows the difference before the mind has formulated any assessment. The practice is trusting that reading.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="ix-reflection">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Practice of Reflection</div>
-        <div class="subterrain-elements">Mirror work as conscious practice · Witnessing · Capacity to be seen · Compassion as what makes true reflection possible</div>
-      </div>
-      <p class="subterrain-description">The intentional practice of meeting oneself — in the literal mirror, in the journal, in the relational field — with the quality of attention that genuine reflection requires. Not observation that judges, not analysis that explains away, but the pure witnessing function: I see this, I acknowledge it, I am here with it.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">Perseus could not look directly at the Medusa or be turned to stone. He used his shield as a mirror — allowing him to approach what would have destroyed him if faced directly. The mirror in the mythic register is the technology that makes it possible to encounter what cannot be faced directly. Mirror work: the practice of meeting your own eyes in the mirror and saying what the self most needs to hear — a radical act of compassion directed inward, a practice of becoming your own witness rather than your own critic. The capacity to be seen without flinching is as important as the capacity to see without distortion.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Witnessing as a distinct capacity from judging, analyzing, or problem-solving: the pure acknowledgment of what is present, without the impulse to fix, explain, or change it. In the therapeutic traditions this is called unconditional positive regard — the quality of attention that creates the conditions in which genuine change becomes possible precisely because nothing is being demanded. Compassion as what makes true reflection possible: without compassion, the mirror becomes an instrument of criticism and the person being reflected closes rather than opens.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body's response to genuine witnessing: a softening, a quality of being held that allows the shoulders to release, the jaw to unclench, the breath to deepen. This is the somatic signature of safety — not safety from external threat but from internal judgment. Mirror work somatically: the discomfort of meeting your own eyes and staying — the quality of being witnessed by yourself, which for most people produces more discomfort than being witnessed by another. What becomes available after the discomfort passes is the specific somatic experience of compassion directed at the self.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="ix-beauty">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Beauty as Information</div>
-        <div class="subterrain-elements">Venus as the intelligence of beauty · Aesthetic resonance · Art as the mirror between maker and receiver</div>
-      </div>
-      <p class="subterrain-description">Beauty is not decoration. It is data. The aesthetic response — the specific quality of recognition that something produces — is one of the most reliable available signals about the frequency of the thing being encountered and the state of the person encountering it.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">Venus — the planet, the goddess, the principle — is not the ruler of superficial beauty. She is the intelligence that perceives and creates beauty as a function of cosmic order: the recognition that this thing is in right relationship with its own nature and with its surroundings. In the Platonic tradition beauty is one of the three faces of the good — alongside truth and justice — and beauty is understood as the face of the good most immediately accessible, the one the soul recognizes before it can articulate why. The beautiful thing is the thing that is fully itself. The aesthetic response is the soul's recognition of full aliveness in another form.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Aesthetic resonance proposes that what moves us as beautiful does so because it shares a frequency with something in our own nature seeking expression or recognition. The piece of music that makes you weep is not making you sad — it is making you recognize yourself. Art as the mirror between maker and receiver: the maker encodes their frequency in the made thing, and the receiver who is moved by it is recognizing that frequency as resonant with their own. The encounter between artwork and receiver is a relational event — it is Field IX in its most refined form.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The aesthetic response in the body: a quality of stilling, the ordinary background noise of thought quieting briefly. Sometimes a chill along the spine or arms — what researchers call aesthetic chills — produced by music, visual art, or language that lands at exactly the right frequency. The breath held involuntarily before releasing into a sigh. The sensation behind the eyes that precedes tears not of sadness but of recognition. These are the body's reports of genuine aesthetic encounter. They are as reliable as any other bodily signal.</div>
-        </div>
-      </div>
-      <div class="bridge-nodes">
-        <div class="bridge-label">Bridge nodes — resonance across the map</div>
-        <p class="bridge-text">The Mirror is the pivot point of the entire map — the first field of the return arc, where the descent's discoveries are reflected back to the descending self by another. It connects to Field VII (Creative Record) through Beauty as Information: the creative record is the mirror offered to the culture, the artifact that reflects back what the maker has seen. It connects to Field X (Shadow) as direct preparation: the mirror reveals what the shadow work will take you into — you see it in the other before you can face it directly in yourself. The Mirror connects to Field XII (Sovereignty) through the principle that genuine sovereignty requires having been genuinely seen.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-divider"><div class="divider-rule"></div><span class="divider-ornament">Field X · The Shadow</span><div class="divider-rule"></div></div>
-
-  <div class="field-section" id="field-x">
-    <div class="field-header">
-      <div class="field-number">X</div>
-      <div class="field-title-block">
-        <h2 class="field-name">The Shadow</h2>
-        <p class="field-tagline">The underworld proper. What lies beneath. The field that makes Sovereignty possible — you cannot claim the self you actually are until you have been in the underground of the self you were given.</p>
-        <span class="field-planets">♇ ♏</span>
-        <div class="field-rulers">Pluto · Scorpio — the underworld intelligence · death as a living teacher · the alchemical fire that transforms rather than destroys</div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="x-beneath">
-      <div class="subterrain-header">
-        <div class="subterrain-name">What Lies Beneath</div>
-        <div class="subterrain-elements">The unconscious · The disowned self · The unlived life · Unresolved patterns held in the body</div>
-      </div>
-      <p class="subterrain-description">The shadow is not the evil self. It is the full self — the sum of everything that could not be integrated into the conscious identity. Not the darkness in opposition to the light but the fullness that has been waiting for a consciousness large enough to hold it.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text drop-cap">The underworld in every tradition is not merely the place of the dead — it is the place of the not-yet-living, the potential that has not yet found its form, the seed waiting in the dark for conditions that will allow it to germinate. Persephone descends as a girl and returns as a queen — not because she was educated in the underworld but because she ate from it, was changed by it, and could no longer be entirely contained by the world that had only known her as Demeter's daughter. The shadow in the mythic register is always a descent followed by a return that is also a transformation. The shadow is not what is wrong with you. It is what has not yet been given permission to exist.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Jung's concept of the shadow describes it as the repository of everything the ego has rejected in constructing its identity. This rejection occurs through the natural developmental process by which a person learns what is acceptable in their family, culture, and relational environment, and unconsciously suppresses what is not. The shadow is therefore a map to the person's most distinctive gifts: the fury that could not be expressed becomes, when integrated, the capacity for fierce protection. The vulnerability that had to be hidden becomes, when reclaimed, the capacity for genuine intimacy. The shadow does not contain what you are not. It contains what you are that has not yet been permitted.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The shadow lives in the body as pattern — recurring areas of chronic tension that have no current structural cause, emotional responses disproportionate to their triggers, qualities in others that produce reliably strong reactions. These are the body's faithful holding of what the consciousness could not integrate. The body does not forget. It does not tire of holding what it has been asked to hold. But it will report, consistently and precisely, through symptom and recurring pattern. The practice of shadow work somatically is learning to follow the body's report back to its source — to stay with the sensation rather than explaining it, until the sensation can complete.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="x-ancestral">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Ancestral Underground</div>
-        <div class="subterrain-elements">Bloodline patterns · The unresolved moving through generations · Material waiting in a living descendant's body</div>
-      </div>
-      <p class="subterrain-description">The shadow does not begin with the individual. It arrives through the bloodline — through the epigenetic inheritance of ancestral experience, through the family system's unconscious transmission of its unresolved material. The Ancestral Weaving is this subterrain's primary tool.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The Greek concept of the miasma — the pollution that passes through bloodlines from a founding act of violence or transgression, affecting subsequent generations until consciously confronted and cleansed. The Oresteia as mythic template: the cycle of violence in the house of Atreus, each generation inheriting the unresolved act of the previous one, until Orestes is tried and the cycle is finally broken not by more violence but by a new form of holding. The ancestral underground in this lineage: Bertila poisoned in the year of her greatest triumph. Almodis murdered by the structure she built. Eleanor imprisoned by the man she married. The pattern that keeps recurring until a descendant has both the tools and consciousness to name it, witness it, and complete it.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Epigenetic research has confirmed what family systems therapy has always proposed: traumatic experience produces measurable changes in gene expression that can be transmitted to subsequent generations. The children and grandchildren of survivors of famine, war, and persecution show different stress response patterns — not because they were told about the trauma but because the body carries it. This is the biological substrate of what the Ancestral Weaving works with: the living inheritance of the unresolved. When you witness and complete an ancestral pattern, you are potentially changing the inherited stress response of your descendants. The healing moves in both directions through time.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The ancestral underground in the body: the emotion that arrives with a history behind it that cannot be the current life's history. The grief that has no present object. The rage that is too large for its apparent cause. These are the body's report of ancestral material — the inherited unresolved, held in tissue and nervous system, available to a descendant willing to receive it. The somatic experience of ancestral completion: when the material has been genuinely witnessed and held with compassion, the body registers a specific quality of release — a lightening, something very old finally setting down what it has been carrying. The lineage breathes differently after. You breathe differently after.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="x-alchemical">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Alchemical Process</div>
-        <div class="subterrain-elements">Death as intelligence · The nigredo · Transformation requiring dissolution · The phoenix principle</div>
-      </div>
-      <p class="subterrain-description">The shadow's deepest teaching: that genuine transformation is not incremental improvement but complete dissolution followed by reconstitution into something that was not possible before. The nigredo is not a failure of the process. It is the process.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The phoenix does not rise from safety. It rises from ash — from the complete combustion of the previous form. The alchemical tradition describes the work in four stages: nigredo (blackening — dissolution, the confrontation with the shadow), albedo (whitening — purification, emergence of the purified self), citrinitas (yellowing — integration, wisdom), rubedo (reddening — full realization, the philosopher's stone). The shadow work is specifically the nigredo — and it cannot be bypassed. Every attempt to skip from the first stage directly to the rubedo produces a false gold: the performance of sovereignty without its substance.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Death as intelligence proposes that endings carry information available in no other way. The end of a relationship, a career, an identity, a way of being — these are not merely losses. They are the completion of one phase and the precondition for the next. The intelligence of the ending is the information it carries about what was not working, what was not true, what was being held past its natural lifespan. To receive this intelligence requires the willingness to be in the death without rushing to the resurrection — to stay in the nigredo long enough for it to complete its work. This is the hardest requirement of Scorpio's field.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body in the nigredo: a heaviness that cannot be lifted by effort, a quality of being pressed down from above and held from below, a dissolution of the ordinary sense of self that produces both terror and a strange deep stillness. The body in the alchemical process knows something the mind resists: the dissolution is not the same as the destruction. The practice is learning to trust the body's knowledge here — to stay with the felt sense of dissolution without the mind's compulsion to resolve it prematurely. The phoenix does not decide when it rises. The fire decides when it has finished.</div>
-        </div>
-      </div>
-      <div class="bridge-nodes">
-        <div class="bridge-label">Bridge nodes — resonance across the map</div>
-        <p class="bridge-text">The Shadow field is the Ancestral Weaving's astrological home — everything the weaving holds is Scorpionic material: death, inheritance, the unresolved that passes through bloodlines. The Shadow connects to Field III (Threshold Events) through the Inanna myth — the sovereign descent is the original shadow work, the threshold of Field III entered with greater preparation. It connects to Field XII (Sovereignty) through the most necessary truth in the return arc: the shadow work does not produce sovereignty as a reward. It removes the obstacles that were preventing the sovereign from knowing itself was already present.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-divider"><div class="divider-rule"></div><span class="divider-ornament">Field XI · The Teaching</span><div class="divider-rule"></div></div>
-
-  <div class="field-section" id="field-xi">
-    <div class="field-header">
-      <div class="field-number">XI</div>
-      <div class="field-title-block">
-        <h2 class="field-name">The Teaching</h2>
-        <p class="field-tagline">The philosopher-archer. What was gathered in the descent, witnessed in the shadow, and reflected in the mirror — now aimed at the horizon for others to find. Jupiter's abundance applied to the act of sharing what was hard-won.</p>
-        <span class="field-planets">♃ ♐</span>
-        <div class="field-rulers">Jupiter · Sagittarius — the expanding flame · the transmission at scale · the teaching that transforms both teacher and student</div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="xi-transmission">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Transmission as Sacred Practice</div>
-        <div class="subterrain-elements">The teacher who has been through the territory · Authority from crossing · Living contact between teacher and learner</div>
-      </div>
-      <p class="subterrain-description">Not the transfer of information but the creation of conditions in which the student's own knowing can emerge. The teacher who has been through the territory carries an authority that cannot be manufactured by any amount of reading. Something moves between two bodies that is neither curriculum nor technique but frequency.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text drop-cap">Chiron — the wounded healer of Greek mythology — was not merely a teacher of medicine. He was the one who had been wounded by what he taught, who had lived the material in his own body, and whose teaching therefore carried a quality of truth the unwounded teacher cannot access. The great teachers in every tradition are understood to have been through something: the Buddha under the Bodhi tree, the Christ in the desert, the shaman in the initiatory death, the mystic in the dark night of the soul. The passage through the difficulty is not incidental to the teaching — it is the source of the teaching's authority. The teacher does not give the student what the teacher has. The teacher becomes a condition in which the student finds what they already carry.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">The distinction between instruction and transmission is crucial. Instruction delivers content: here is the information, the technique, what you need to know. Transmission creates conditions: here is the field in which your own knowing can emerge, here is the living example of what is possible. Instruction can be done remotely, asynchronously, at scale. Transmission requires presence — the specific quality of contact that makes one person genuinely available to another. The teacher's authority in the transmission model comes not from knowledge accumulated but from the integrity of having lived what is being taught. The gap between what a teacher knows and what a teacher has lived is always felt by the student.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The felt quality of genuine transmission: a specific warmth, the room changing, something present that was not present before the teacher arrived. Students report it as the feeling of being seen accurately for the first time — the specific relief of being in the presence of someone who knows the terrain well enough to recognize where you are in it without needing you to explain. Teachers report it as the specific sensation of the teaching moving through rather than being delivered — words ahead of the thought, something being said that the teacher is also hearing for the first time.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="xi-offerings">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Offerings</div>
-        <div class="subterrain-elements">Astrology · Ancestral weaving · The Navigation Map · The Fieldguide · Coaching as applied transmission</div>
-      </div>
-      <p class="subterrain-description">The specific forms through which the teaching moves into the world. Each offering is a different form of the same essential transmission — a different door into the same territory, designed for different entry points and different stages of the journey.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The Water Bearer of Aquarius pours the water she has carried from the depths of the well. The water is what she gathered in the descent. The pouring is the offering. What she pours does not diminish what she carries — Jupiter's abundance is precisely this: what is given away multiplies rather than depletes. Each offering in this subterrain is a form of water being poured: the astrology reading that names what the client has always known but never had precise language for. The ancestral weaving that completes what the client's lineage could not complete alone. The Navigation Map that gives the client a language for their own terrain. The Fieldguide that provides the depth treatment of that terrain.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">The offerings are applications of the Navigation Map's architecture to specific client needs. Astrology as language gives the client a vocabulary for their own nature that is precise enough to be actually useful — not a generic personality type but the specific configuration of a particular consciousness. Ancestral weaving gives a practice for completing what their lineage could not complete — turning inherited pattern from unconscious burden into conscious inheritance. The Navigation Map gives a spatial sense of where they are in the larger journey. Coaching creates the sustained relational container in which all of these tools can be applied to the specific terrain of a specific life. Together they form a coherent system of transmission that serves the client at every stage of the journey.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The somatic experience of receiving a genuine offering — one specifically calibrated to your particular terrain — is distinct from receiving generic wisdom or general insight. It produces the cellular recognition described in Field V: the body's report that this is accurate, this is for me, this lands rather than passes through. The specific quality of a client receiving their ancestral weaving for the first time: the breath that changes, the weight releasing from the shoulders, the tears that are not grief but completion. The body confirming that genuine transmission has occurred.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="xi-flame">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Expanding Flame</div>
-        <div class="subterrain-elements">Jupiter's abundance · What grows when given away · Knowledge as a living thing that multiplies in transmission</div>
-      </div>
-      <p class="subterrain-description">The specific quality of Jupiter's intelligence applied to teaching: the discovery that what is genuinely shared does not diminish the sharer but expands the field. The flame that lights another candle is not diminished — it creates more light.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">Prometheus stole fire from the gods and gave it to humanity: the fire of the gods was not diminished by being given. The humans who received it were transformed. The gift of fire is the gift of consciousness — the capacity to think, create, warm oneself, see in the dark. Every genuine act of teaching participates in this mythic structure: something available only to the few becomes available to the many, and the universe is enlarged by the distribution. The expanding flame is Jupiter's gift to the Sagittarian teacher: the discovery that teaching is not depletion but generation.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Knowledge as a living thing that multiplies in transmission: the teacher who teaches well comes to understand the material more deeply through the act of teaching it. The student's questions reveal dimensions of the material that the teacher's own solitary encounter could not have produced. The creative friction of genuine encounter between teacher and student is generative for both — the great teachers often describe their students as among their most important teachers. The transmission runs in both directions. This is Jupiter's abundance: not the abundance of having much but of being in a relationship with knowledge that expands rather than depletes.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The specific bodily quality of teaching from genuine abundance versus teaching from depletion: the teacher in flow experiences a quality of energy that increases rather than decreases through the session. The students feel this in their own bodies: the class that leaves them energized versus the one that leaves them drained, the session with a practitioner genuinely present versus one going through the motions. The expanding flame is a somatic experience first — the teacher who has moved into their Sagittarian field fully will feel Jupiter's abundance: the more they give, the more they have to give, and the horizon of what they know expands with every genuine encounter.</div>
-        </div>
-      </div>
-      <div class="bridge-nodes">
-        <div class="bridge-label">Bridge nodes — resonance across the map</div>
-        <p class="bridge-text">The Teaching is where the entire Navigation Map becomes an offering rather than a private map — where everything gathered in the descent is made available to others. It connects to Field V (Resonance in Language) across the full width of the wheel: the language found in Gemini becomes the transmission delivered in Sagittarius. It connects to Field XII (Sovereignty) as the penultimate step before the full claiming of the self — the teacher who teaches from their own crossed terrain is already inhabiting sovereignty, even before it has been fully named. The Offerings subterrain names the work concretely: the astrology practice, the ancestral weaving, the navigation map and fieldguide as tools for clients — all the Teaching made available.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-divider"><div class="divider-rule"></div><span class="divider-ornament">Field XII · Sovereignty</span><div class="divider-rule"></div></div>
-
-  <div class="field-section" id="field-xii">
-    <div class="field-header">
-      <div class="field-number">XII</div>
-      <div class="field-title-block">
-        <h2 class="field-name">Sovereignty</h2>
-        <p class="field-tagline">The higher octave of Field I. The same coordinates — Capricorn and Aquarius — but now inhabited from within. Structure chosen rather than inherited. The Royal Gatekeeper fully known. Saturn returns not as the structure you were born into but as the structure you consciously build.</p>
-        <span class="field-planets">♄ ♅</span>
-        <div class="field-rulers">Saturn chosen · Uranus liberated — the geometry inhabited from within · the revolutionary self after integration</div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="xii-claimed">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Claimed Self</div>
-        <div class="subterrain-elements">The self after full descent · The Royal Gatekeeper fully inhabited · Identity not requiring external confirmation</div>
-      </div>
-      <p class="subterrain-description">The self that has traveled the full arc and arrived at a quality of self-knowledge that does not depend on the external world for its confirmation. Not the absence of need but the radical shift in what is needed: not validation but accuracy.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text drop-cap">Inanna returns from the underworld wearing new garments — not the same garments she surrendered at each gate, but new ones, chosen. She is still recognizably herself, but the self has been reorganized around a new center of gravity: not the inherited identity but the earned one. The Royal Gatekeeper — the figure who is also the door — inhabits this field in its fullest form: the one who has crossed so many thresholds that she knows from the inside what each door opens into, whose authority as gatekeeper comes not from external appointment but from that knowledge. The claimed self is not the triumphant self. It is the self that has stopped needing to be. The sovereign does not need to announce her sovereignty. Her presence is its own announcement.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">The claimed self is distinguished from the constructed self by one essential quality: it does not require maintenance. The constructed identity — built from accumulated roles, achievements, and the reflected regard of others — requires constant tending: it needs to be defended, updated, validated, protected from challenges that might reveal its contingency. The claimed self requires none of this. It simply is what it is, and the world's agreement or disagreement with that is interesting but not determinative. This is not indifference to relationship. But the relational field is no longer the source of the self's reality. It is the field in which the self meets what is genuinely other, in genuine encounter, without needing the encounter to confirm that the self exists.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body of sovereignty: grounded, vertical, spacious, unhurried. Not the body of confidence — confidence is conditional, it depends on a track record of successes. The sovereign body is unconditional: it holds its ground not because it has never been defeated but because defeat has been metabolized into understanding. The specific sensation of acting from sovereign ground: decisions made without the anxious scanning of the field, words spoken without the preceding calculation of effect. The freedom in the body when the need for external validation has genuinely released — not suppressed but actually released — is one of the most distinctive somatic experiences available to human consciousness.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="xii-water-bearer">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Water Bearer</div>
-        <div class="subterrain-elements">Carrying what the journey gathered · Service without self-abandonment · The revolutionary who works within form</div>
-      </div>
-      <p class="subterrain-description">The sovereign self after the full descent has gathered something that is not just personally useful: something the collective needs. The Water Bearer's task is to carry what she has gathered without spilling it, to pour it for those who are thirsty without depleting herself, and to remain in service to the larger field without losing the individual frequency that makes the service distinctly valuable.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The Aquarian Water Bearer in its highest expression is neither the servant who gives everything until there is nothing left, nor the withholding sovereign who keeps the water for herself. She is the one who has learned the specific art of carrying and pouring: how much to offer, to whom, when, at what temperature. Uranus rules Aquarius — the revolutionary intelligence that understands genuine change does not come from destroying the existing structure but from introducing into it a frequency it cannot metabolize without transforming. The Water Bearer works within form. The individual frequency is what makes the service useful — the moment she loses it in order to serve, the water she carries loses its specific medicine.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Service without self-abandonment is one of the most difficult practices in the entire map — particularly for those whose lineage has included generations of women who gave until there was nothing left. The distinction between genuine service (giving from sovereign fullness) and self-abandonment (giving from the anxious need to be needed) is not always immediately apparent, but the body knows the difference: one produces expansion even in the giving, the other produces depletion that accelerates with each offering. The Water Bearer's practice is learning to give only from what is genuinely in the vessel — and to tend the vessel with the same quality of care she brings to the pouring.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body in service-without-self-abandonment: a quality of giving that does not hollow the chest, does not leave the hands trembling, does not require recovery. The specific somatic signature of giving from fullness: a warmth that persists rather than depletes, the sense that the source is replenishing as the pouring occurs. Versus the body in self-abandonment: the specific fatigue that arrives not in the muscles but in the core, the hollowness behind the sternum. Learning to distinguish these somatic signatures is part of the sovereign practice — not as a reason to withhold but as a navigation system for when to pour and when to return to the well.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="xii-sovereign-cycle">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Sovereign Cycle</div>
-        <div class="subterrain-elements">Moon cycles as navigation · Full presence and necessary withdrawal · Conscious practice rather than collapse and recovery</div>
-      </div>
-      <p class="subterrain-description">The sovereign self is not static — it cycles. Full presence and necessary withdrawal are not failure and recovery but the natural rhythm of a sovereign consciousness. The cycle is not a problem to be solved. It is the intelligence of the system expressing itself through time.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">The moon does not apologize for waning. It does not treat the dark phase as a failure of the full phase. The entire cycle — new, waxing, full, waning, dark — is one complete intelligence, each phase with its own specific function, none of them optional. The sovereign cycle in the mythic register is the conscious embodiment of this lunar wisdom: the full moon of maximum presence and offering, the waning as intentional withdrawal into integration, the dark moon as genuine rest that makes the next beginning possible. Christina Young's life — the late hours, the early rising, the accumulated exhaustion — is the mythic failure mode of this subterrain: a lifetime of full moon without permission for the dark.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">The sovereign cycle proposes that full presence and necessary withdrawal are equally important phases of the same intelligent system. The withdrawal phase is not rest in the sense of emptiness. It is active integration: the period in which what was received in the full-presence phase is processed, metabolized, and woven into the self. Without this phase, the full-presence phase produces material that accumulates rather than integrating, eventually producing exactly the depletion that withdrawal was designed to prevent. The sovereign cycle is therefore a sustainability practice as much as a spiritual one: building adequate restoration into the rhythm of the work as the structural condition that makes depth of service possible over time.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body's natural sovereign cycle: the quality of energy at the new moon (quiet, oriented inward, not yet available for full output), the waxing (building, something gathering), the full moon (maximum availability, the body at its most outward-facing), the waning (the gradual deepening inward, the increasing need for integration time, tiredness that is completion rather than depletion), the dark moon (genuine emptiness that is genuine rest, the nervous system available only to itself). This is not a system to impose on the body. It is a system to recognize in the body — to honor the body's own reporting of where it is in the cycle rather than demanding it remain at full moon regardless of where it actually is.</div>
-        </div>
-      </div>
-      <div class="bridge-nodes">
-        <div class="bridge-label">Bridge nodes — resonance across the map</div>
-        <p class="bridge-text">Sovereignty is the spiral completion of Field I — both fields hold Capricorn and Aquarius, and the distance between them is the entire journey of the map. What was imposed structure in Field I becomes chosen structure in Field XII. The Sovereign Cycle connects to Field VI (Body as Active Practice) through the lunar intelligence that governs both — the Moon's cyclic wisdom seeded in Field VI and brought to full maturation here. The Water Bearer connects to every ancestor in the weaving who gave without adequate vessel-tending — Bertila, Almodis, Eleanor, Christina Young — and names the healing of that pattern: not the suppression of generosity but its sustainable expression. Sovereignty is the field in which the whole lineage breathes differently.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-divider"><div class="divider-rule"></div><span class="divider-ornament">Field XIII · The Return</span><div class="divider-rule"></div></div>
-
-  <div class="field-section" id="field-xiii">
-    <div class="field-header">
-      <div class="field-number">XIII</div>
-      <div class="field-title-block">
-        <h2 class="field-name">The Return</h2>
-        <p class="field-tagline">Full circle to where Field II began — but now carrying everything. The same coordinates, transformed. The dissolution that is chosen rather than undergone. The spiral beginning again at a higher octave. The stowaway who has crossed the ocean and kneels on the shore.</p>
-        <span class="field-planets">♆ ♓</span>
-        <div class="field-rulers">Neptune · Pisces — the chosen dissolution · the completion that is also a new beginning · the consciousness that knows itself before it dissolves</div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="xiii-dissolution">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Dissolution and Integration</div>
-        <div class="subterrain-elements">The boundary between self and cosmos becoming permeable · Integration as bringing the whole journey into relationship with the whole life</div>
-      </div>
-      <p class="subterrain-description">The dissolution of Field XIII differs fundamentally from the dissolution of Field II. In Field II, Neptune's water poured in before the self had formed to meet it — the dissolution was undergone, not chosen. In Field XIII, the self that has traveled the full arc chooses to release back into the larger field. The boundary becomes permeable from the inside.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text drop-cap">The two fish of Pisces swim in opposite directions and are joined at the center. The one swimming forward represents the soul that continues — the return cycle, the new beginning at a higher octave. The one swimming backward represents the completion — the release of what has been gathered back into the source from which it came. Both motions are simultaneous, and neither is the truth alone. Christina Young writing her last poem to her son Robert who was hurrying home to her bedside and would not arrive in time — this is Field XIII. Not defeat, not incompleteness, but the specific quality of a life that ran its complete course and was still moving toward love at the moment it ended.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">Integration as a conceptual practice: the ongoing work of bringing the whole journey into conscious relationship with the whole life. Not the resolution of all tensions — many tensions are generative and should not be resolved. Not the completion of all unfinished business — some of what is unfinished is meant to be carried forward into the next cycle. Integration is more precisely the practice of holding the full arc simultaneously: the pre-incarnation geometry of Field I and the sovereign self of Field XII, the dissolution of Field II and the chosen release of Field XIII. The consciousness that has integrated is not the consciousness that has finished. It is the consciousness that can hold the incompleteness without it being a problem.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The specific bodily quality of genuine integration — distinct from resignation, from exhaustion, from having given up: a settledness that is not stillness but depth. The nervous system that has metabolized what it has been through produces a specific quality of presence immediately palpable to others. The body that has been to the underworld and returned is not the same body that descended. It carries more. It holds more. It is more available to what is present because it is less haunted by what is unresolved. The somatic signature of completion: the breath that is deeper than it was before, the quality of being fully inhabitable, the specific sensation of a consciousness at home in the body it is living in.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="xiii-spiral">
-      <div class="subterrain-header">
-        <div class="subterrain-name">The Spiral</div>
-        <div class="subterrain-elements">The wheel completing and beginning again at a higher octave · The same coordinates transformed · Christina Young kneeling on the shore</div>
-      </div>
-      <p class="subterrain-description">The return is not circular — it does not arrive back at the point of departure. It arrives at the same coordinates at a different altitude. The geometry of the spiral: the same angular relationships as the circle, but moving upward or inward through each revolution.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">Christina Young, born at White Hill — the same White Hill where Bran Fendigaid commanded his severed head to be buried, to guard Britain from invasion. The mythic beginning of this entire weaving and its most recent documented ancestor share a name. The spiral: a lineage that began in pre-Roman Celtic Britain with the head that continued to speak after the body had fallen, and completed a circuit two thousand years later in a Scottish girl who stowed away on a ship with three pence and built four hundred new lives with her hands and wrote poems to her friends and grandchildren until the last week of her life. Bran's head spoke. Christina's pen moved. The same intelligence, the same frequency, carried through two thousand years of blood and geography and faith until it arrives here, in this work, in this body.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">The spiral as a structural model: each revolution of the wheel covers the same angular territory as the previous one but at a different radius. What was overwhelming in the first encounter becomes manageable in the second, not because it has changed but because the container has expanded. The second time through the shadow is not the same as the first — the same material is encountered but with greater capacity to hold it. The spiral structure of development means that apparent regression is often advancement: the same terrain revisited from a more expanded perspective, the same challenge encountered with greater capacity, the same frequency heard at a higher octave.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body's recognition of the spiral: the moment of recognizing that you have been here before — but not identically. The same quality of challenge, the same flavor of territory, but from a body that has more experience, more capacity, more resources. This recognition — I have been here before and I know what this is — is not resignation but accumulation. The body that has spiraled through the map once carries the learning of that passage in its tissue. When the second cycle begins, the nervous system does not have to relearn from scratch. It knows the terrain. The mistakes are different now. They are the mistakes of a more developed consciousness encountering a more demanding version of the same fundamental questions.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="subterrain" id="xiii-terra-incognita">
-      <div class="subterrain-header">
-        <div class="subterrain-name">Terra Incognita</div>
-        <div class="subterrain-elements">The blank space at the edge of the map · What has not yet been named · Here be dragons — not as warning but as invitation</div>
-      </div>
-      <p class="subterrain-description">Every honest map has a blank space. The Fieldguide is a living document — it will grow as the territory reveals itself, and what it cannot yet name is as important as what it can. Terra incognita is not the failure of the cartographer. It is the honest acknowledgment that the survey is never finished.</p>
-      <div class="registers-grid">
-        <div class="register register-mythic">
-          <div class="register-label"><span class="register-label-dot"></span> Mythic</div>
-          <div class="register-text">Here be dragons — the inscription on the edges of medieval maps where the known world ended and the unknown began. In the Hereford Mappa Mundi, the edges of the world are populated with creatures that cannot be named by the same symbols that serve for the familiar terrain. Dragon in this subterrain is not a warning. It is an acknowledgment: here the map runs out. Here something genuinely larger than what has been charted is present. Here be dragons means here the adventure begins that the map cannot prepare you for. The territory continues to generate. The field does not stop producing because the guide has been written.</div>
-        </div>
-        <div class="register register-conceptual">
-          <div class="register-label"><span class="register-label-dot"></span> Conceptual</div>
-          <div class="register-text">The terra incognita is the structurally necessary incompleteness of any map, including this one. There is material currently arriving in this lineage that has not yet been named — ancestors whose stories have not yet been told, fields that have not yet crystallized into form, connections between fields not yet traced, subterrains within the named fields not yet fully explored. The Navigation Map itself acknowledged this in the conversation that produced it: there is something that hasn't shown up yet, something about this map that hasn't revealed itself. That unknown is honored here not as a gap to be filled but as a living presence — the field still generating, the territory still arriving, the signal still coming in. It will clarify in its own time.</div>
-        </div>
-        <div class="register register-somatic">
-          <div class="register-label"><span class="register-label-dot"></span> Somatic</div>
-          <div class="register-text">The body's relationship to what has not yet been named: a quality of spacious alertness, of attending without grasping, of being available to receive what has not yet arrived without projecting a shape onto the empty space. This is the somatic practice of the field guide carried into unmapped territory — the specific quality of attention that allows genuine discovery rather than the confirmation of what was already expected. The blank space at the edge of the map is not anxiety-producing when the cartographer knows the difference between unknown and nonexistent. The unknown is full. It is simply not yet legible. When it arrives, the body will be the first to know.</div>
-        </div>
-      </div>
-      <div class="bridge-nodes">
-        <div class="bridge-label">A final note from the field</div>
-        <p class="bridge-text">The Return connects to every field simultaneously — it is the field in which the whole map is held at once. Field XIII's dissolution connects to Field II's dissolution as the chosen version of the undergone: Pisces at the beginning and Pisces at the end, the consciousness inhabiting them utterly different. The spiral connects to the Ancestral Weaving as the structural principle of the entire lineage project: the wheel of ancestral experience turns and returns, each generation encountering the same fundamental patterns at a different altitude, each one carrying what the previous gathered forward into a new octave of resolution. Terra Incognita connects to the central axis — omnidirectional perception anchored in somatic discernment is also the navigational capacity that makes the unknown habitable. Everything is a door. The gatekeeper decides who enters when. And the gate at the edge of the map opens into something larger than the map has yet been able to hold.</p>
-      </div>
-
-      <div class="dragons-note">
-        <span class="dragons-label">Here be dragons</span>
-        <p class="dragons-text">What has been named here is what was visible at the time of the naming. The territory continues to reveal itself. What you discover in the field belongs in the margins — and the margins of this guide are wide, because the cartographer who built it understood that the best discoveries always happen at the edges of the known world. The field does not stop generating because the guide has been written. The guide stops only so the field can continue.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="fieldguide-footer">
-    <span class="footer-ornament">✦</span>
-    <p class="footer-note">This guide is a living document. The territory always exceeds the map. What you discover in the field belongs in the margins.</p>
-    <div class="footer-links">
-      <a href="index.html" class="footer-link">← Navigation Map</a>
-      <a href="ancestral-weaving.html" class="footer-link">Ancestral Weaving →</a>
-      <a href="ancestral-catalog.html" class="footer-link">Ancestral Catalog →</a>
-    </div>
-  </div>
-
-</div><!-- end page -->
+init();
+</script>
 </body>
 </html>
