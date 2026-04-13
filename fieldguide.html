@@ -11,7 +11,6 @@
 :root {
   --parchment: #f4eedc;
   --parchment-dark: #ede4c8;
-  --parchment-deep: #e0d4b0;
   --ink: #1e1a12;
   --ink-secondary: #3d3628;
   --ink-dim: #6b5f48;
@@ -20,19 +19,20 @@
   --gold-bright: #c4921e;
   --gold-light: #e8c97a;
   --gold-wash: rgba(154,110,34,0.08);
-  --amber: #c07a1a;
   --rust: #8b3a1a;
   --mythic: #4a3b82;
   --conceptual: #1a6b50;
   --somatic: #8b3a1a;
   --unreceived: #9a6e22;
-  --mythic-bg: rgba(74,59,130,0.07);
-  --conceptual-bg: rgba(26,107,80,0.07);
-  --somatic-bg: rgba(139,58,26,0.07);
-  --unreceived-bg: rgba(154,110,34,0.08);
-  --border: rgba(154,110,34,0.2);
-  --border-strong: rgba(154,110,34,0.35);
-  --drop-cap-size: 4.5rem;
+  --mythic-bg: rgba(74,59,130,0.06);
+  --conceptual-bg: rgba(26,107,80,0.06);
+  --somatic-bg: rgba(139,58,26,0.06);
+  --unreceived-bg: rgba(154,110,34,0.07);
+  --border: rgba(154,110,34,0.18);
+  --border-strong: rgba(154,110,34,0.32);
+  --nav-h: 52px;
+  --page-max: 1440px;
+  --page-pad: 4rem;
 }
 
 html { scroll-behavior: smooth; }
@@ -51,62 +51,114 @@ body::before {
   content: '';
   position: fixed; inset: 0;
   background-image:
-    radial-gradient(ellipse at 20% 20%, rgba(196,146,30,0.04) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 80%, rgba(139,58,26,0.03) 0%, transparent 60%),
-    radial-gradient(ellipse at 60% 30%, rgba(154,110,34,0.03) 0%, transparent 40%);
+    radial-gradient(ellipse at 15% 15%, rgba(196,146,30,0.04) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 85%, rgba(139,58,26,0.03) 0%, transparent 55%);
   pointer-events: none; z-index: 0;
 }
 
-body::after {
-  content: '';
-  position: fixed; inset: 0;
-  background-image:
-    linear-gradient(rgba(154,110,34,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(154,110,34,0.04) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none; z-index: 0;
+/* ══════════════════════════════════════════════════
+   STICKY NAV
+══════════════════════════════════════════════════ */
+
+.sticky-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(244,238,220,0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  height: var(--nav-h);
+  display: flex; align-items: stretch;
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
+.sticky-nav.visible { opacity: 1; }
+
+.nav-inner {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--page-pad);
+  display: flex; align-items: center;
+  gap: 0; width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+
+.nav-site-links {
+  display: flex; align-items: center;
+  gap: 1.5rem; flex-shrink: 0;
+  padding-right: 1.5rem;
+  border-right: 1px solid var(--border);
+  margin-right: 1.5rem;
+}
+.nav-site-link {
+  font-size: 15px; font-weight: 400;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-faint); text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+.nav-site-link:hover { color: var(--gold); }
+
+.nav-arc-group {
+  display: flex; align-items: center;
+  gap: 0.25rem; flex-shrink: 0;
+}
+.nav-arc-label {
+  font-size: 15px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-dim);
+  padding: 0 0.75rem 0 0.25rem;
+  white-space: nowrap;
+}
+.nav-field-btn {
+  font-family: 'Jost', sans-serif;
+  font-size: 15px; font-weight: 300;
+  color: var(--ink-dim);
+  background: none; border: none;
+  padding: 0 0.6rem;
+  cursor: pointer; white-space: nowrap;
+  height: var(--nav-h);
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  display: inline-flex; align-items: center;
+}
+.nav-field-btn:hover { color: var(--gold); border-bottom-color: var(--gold-light); }
+.nav-field-btn.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 400; }
+
+.nav-arc-divider {
+  width: 1px; height: 20px;
+  background: var(--border);
+  margin: 0 0.5rem; flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════
+   PAGE & HEADER
+══════════════════════════════════════════════════ */
 
 .page {
   position: relative; z-index: 1;
-  max-width: 1100px; margin: 0 auto;
-  padding: 5rem 4rem 8rem;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 5rem var(--page-pad) 8rem;
 }
 
-.corner-marks {
-  position: fixed;
-  top: 24px; left: 24px; right: 24px; bottom: 24px;
-  pointer-events: none; z-index: 0;
-  border: 1px solid rgba(154,110,34,0.12);
-}
-
-/* ── Header ── */
 .header {
   text-align: center;
   margin-bottom: 5rem;
   opacity: 0; animation: fadeIn 1.2s ease forwards;
-  position: relative;
-}
-
-.header-ornament {
-  font-size: 1.4rem;
-  color: var(--gold);
-  letter-spacing: 0.3em;
-  margin-bottom: 1.5rem;
-  display: block;
-  Noneopacity: 0.88;
 }
 
 .header-eyebrow {
   font-size: 15px; font-weight: 400;
   letter-spacing: 0.28em; color: var(--ink-dim);
   text-transform: uppercase; margin-bottom: 1rem;
-  font-family: 'Jost', sans-serif;
 }
 
 .header-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(3.5rem, 7vw, 5.5rem);
+  font-size: clamp(3.5rem, 6vw, 5.5rem);
   font-weight: 300; font-style: italic;
   color: var(--ink); line-height: 0.95;
   letter-spacing: -0.02em;
@@ -115,7 +167,7 @@ body::after {
 
 .header-subtitle {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.25rem; font-weight: 400;
+  font-size: 1.2rem; font-weight: 400;
   color: var(--ink-dim); letter-spacing: 0.06em;
   margin-bottom: 2rem; font-style: italic;
 }
@@ -125,188 +177,252 @@ body::after {
   justify-content: center; gap: 1rem;
   margin: 1.75rem auto 1.75rem;
 }
-
-.header-rule {
-  width: 80px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold));
-}
-.header-rule.right {
-  background: linear-gradient(90deg, var(--gold), transparent);
-}
-.header-rule-ornament { font-size: 1rem; color: var(--gold); Noneopacity: 0.88; }
+.header-rule { width: 80px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+.header-rule.right { background: linear-gradient(90deg, var(--gold), transparent); }
+.header-rule-ornament { font-size: 1rem; color: var(--gold); }
 
 .header-sub {
   font-size: 16px; font-weight: 300;
   color: var(--ink-secondary);
-  max-width: 580px; margin: 0 auto 1.5rem; line-height: 1.9;
+  max-width: 560px; margin: 0 auto 2rem; line-height: 1.9;
 }
 
-.nav-links {
+.header-nav-links {
   display: flex; justify-content: center;
-  gap: 2rem; margin-top: 1.5rem;
+  gap: 2rem; flex-wrap: wrap;
 }
-
-.nav-link {
+.header-nav-link {
   font-size: 15px; font-weight: 400;
-  letter-spacing: 0.2em; text-transform: uppercase;
+  letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--ink-dim); text-decoration: none;
   border-bottom: 1px solid var(--border);
   padding-bottom: 2px;
   transition: color 0.2s, border-color 0.2s;
 }
-.nav-link:hover { color: var(--gold); border-color: var(--gold); }
+.header-nav-link:hover { color: var(--gold); border-color: var(--gold); }
 
-/* ── Arc dividers ── */
-.arc-block {
-  margin-bottom: 6rem;
+/* ══════════════════════════════════════════════════
+   JUMP NAV (page-level, above content)
+══════════════════════════════════════════════════ */
+
+.jump-nav {
+  margin-bottom: 4rem;
+  opacity: 0; animation: fadeIn 1s ease 0.3s forwards;
 }
 
-.arc-label {
+.jump-arc {
+  margin-bottom: 1.5rem;
+}
+
+.jump-arc-label {
   font-size: 15px; font-weight: 500;
-  letter-spacing: 0.28em; text-transform: uppercase;
+  letter-spacing: 0.22em; text-transform: uppercase;
   color: var(--ink-faint);
-  text-align: center;
-  margin-bottom: 0.5rem;
-}
-
-.arc-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.6rem; font-weight: 300; font-style: italic;
-  color: var(--ink-dim);
-  text-align: center;
   margin-bottom: 0.6rem;
 }
 
-.arc-rule {
-  display: flex; align-items: center;
-  gap: 1.25rem; margin: 1.25rem auto 3rem;
-  max-width: 400px;
-}
-.arc-rule-line {
-  flex: 1; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border));
-}
-.arc-rule-line.right {
-  background: linear-gradient(90deg, var(--border), transparent);
-}
-.arc-rule-glyph {
-  font-size: 1rem; color: var(--gold-bright); Noneopacity: 0.88;
+.jump-field-row {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
 }
 
-/* ── Field sections ── */
+.jump-btn {
+  font-family: 'Jost', sans-serif;
+  font-size: 15px; font-weight: 300;
+  color: var(--ink-secondary);
+  background: rgba(255,255,255,0.5);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer; text-decoration: none;
+  display: inline-block;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.jump-btn:hover {
+  background: rgba(255,255,255,0.9);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.jump-btn strong {
+  font-weight: 500;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  margin-right: 0.35rem;
+  color: var(--gold-bright);
+}
+
+/* ══════════════════════════════════════════════════
+   ARC BLOCKS
+══════════════════════════════════════════════════ */
+
+.arc-block { margin-bottom: 7rem; }
+
+.arc-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+  scroll-margin-top: calc(var(--nav-h) + 2rem);
+}
+.arc-label {
+  font-size: 15px; font-weight: 500;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 0.4rem;
+}
+.arc-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem; font-weight: 300; font-style: italic;
+  color: var(--ink-dim); margin-bottom: 1rem;
+}
+.arc-rule {
+  display: flex; align-items: center;
+  gap: 1.25rem; max-width: 360px; margin: 0 auto;
+}
+.arc-rule-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--border)); }
+.arc-rule-line.right { background: linear-gradient(90deg, var(--border), transparent); }
+.arc-rule-glyph { font-size: 1rem; color: var(--gold-bright); }
+
+/* ══════════════════════════════════════════════════
+   FIELD SECTIONS
+══════════════════════════════════════════════════ */
+
 .field-section {
   margin-bottom: 5rem;
   padding-bottom: 4rem;
   border-bottom: 1px solid var(--border);
+  scroll-margin-top: calc(var(--nav-h) + 1.5rem);
 }
 .field-section:last-child { border-bottom: none; }
 
 .field-header {
-  display: flex; align-items: flex-start;
-  gap: 1.5rem; margin-bottom: 2.5rem;
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  margin-bottom: 2.5rem;
   padding-bottom: 1.75rem;
   border-bottom: 1px solid var(--border);
 }
 
-.field-number {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(3rem, 5vw, 4rem);
-  font-weight: 300; font-style: italic;
-  color: var(--gold-light);
-  line-height: 1; flex-shrink: 0;
-  width: 3rem; text-align: right;
+.field-number-col {
+  text-align: right;
+  padding-top: 0.2rem;
 }
 
-.field-title-block { flex: 1; }
+.field-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.8rem, 4vw, 3.8rem);
+  font-weight: 300; font-style: italic;
+  color: var(--gold-light);
+  line-height: 1;
+  display: block;
+}
 
 .field-roman {
   font-size: 15px; font-weight: 500;
   letter-spacing: 0.22em; text-transform: uppercase;
-  color: var(--ink-faint); margin-bottom: 0.3rem;
+  color: var(--ink-faint); margin-bottom: 0.4rem;
+  display: block;
 }
 
 .field-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
   font-weight: 400; font-style: italic;
   color: var(--ink); line-height: 1.15;
   margin-bottom: 0.6rem;
 }
 
 .field-tagline {
-  font-size: 15px; font-weight: 300;
-  color: var(--ink-dim); line-height: 1.75;
+  font-size: 16px; font-weight: 300;
+  color: var(--ink-dim); line-height: 1.8;
   font-style: italic; margin-bottom: 0.75rem;
+  max-width: 72ch;
+}
+
+.field-rulers {
+  font-size: 15px; font-weight: 300;
+  color: var(--ink-faint); letter-spacing: 0.04em;
+  font-style: italic; margin-top: 0.4rem;
 }
 
 .field-astro {
-  display: flex; align-items: center; gap: 0.75rem;
-  flex-wrap: wrap;
+  display: flex; align-items: center;
+  gap: 0.75rem; flex-wrap: wrap;
+  margin-top: 0.5rem;
 }
+.field-planets { font-size: 1.2rem; letter-spacing: 0.15em; color: var(--gold); }
+.field-signs { font-size: 15px; font-weight: 400; letter-spacing: 0.12em; color: var(--ink-faint); }
 
-.field-planets {
-  font-size: 1.2rem; letter-spacing: 0.15em;
-  color: var(--gold); Noneopacity: 0.88;
-}
+/* ══════════════════════════════════════════════════
+   SUBTERRAINS
+══════════════════════════════════════════════════ */
 
-.field-signs {
-  font-size: 15px; font-weight: 400;
-  letter-spacing: 0.12em;
-  color: var(--ink-faint);
-}
-
-/* ── Subterrains ── */
 .subterrain {
-  margin-bottom: 3.5rem;
-  padding: 2.5rem 3rem;
-  background: rgba(255,255,255,0.45);
+  margin-bottom: 3rem;
+  padding: 2rem 2.5rem 2.5rem;
+  background: rgba(255,255,255,0.42);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 3px;
   transition: background 0.25s;
 }
-.subterrain:hover { background: rgba(255,255,255,0.65); }
+.subterrain:hover { background: rgba(255,255,255,0.62); }
 
 .subterrain-header {
-  margin-bottom: 1.25rem;
-  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.9rem;
   border-bottom: 1px solid var(--border);
 }
 
 .subterrain-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.5rem; font-weight: 500;
-  color: var(--ink); margin-bottom: 0.35rem;
+  font-size: 1.45rem; font-weight: 500;
+  color: var(--ink); margin-bottom: 0.3rem;
+}
+
+.subterrain-elements {
+  font-size: 15px; font-weight: 300;
+  color: var(--ink-faint); letter-spacing: 0.03em;
+  line-height: 1.6;
 }
 
 .subterrain-description {
-  font-size: 14.5px; font-weight: 300;
+  font-size: 16px; font-weight: 300;
   color: var(--ink-dim); line-height: 1.85;
-  margin-top: 0.75rem; font-style: italic;
+  font-style: italic;
+  margin-bottom: 1.5rem;
+  max-width: 90ch;
 }
 
-/* ── Registers ── */
+/* ══════════════════════════════════════════════════
+   REGISTERS — 3 columns + unreceived full-width
+══════════════════════════════════════════════════ */
+
 .registers-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
-  margin-top: 1.5rem;
 }
 
 .register {
-  padding: 1.5rem 1.75rem;
-  border-radius: 3px;
+  padding: 1.4rem 1.6rem;
+  border-radius: 2px;
 }
 
-.register-mythic     { background: var(--mythic-bg);     border: 1px solid rgba(74,59,130,0.15); }
-.register-conceptual { background: var(--conceptual-bg); border: 1px solid rgba(26,107,80,0.15); }
-.register-somatic    { background: var(--somatic-bg);    border: 1px solid rgba(139,58,26,0.15); }
-.register-unreceived { background: var(--unreceived-bg); border: 1px solid rgba(154,110,34,0.25); }
+.register-mythic     { background: var(--mythic-bg);     border: 1px solid rgba(74,59,130,0.14); }
+.register-conceptual { background: var(--conceptual-bg); border: 1px solid rgba(26,107,80,0.14); }
+.register-somatic    { background: var(--somatic-bg);    border: 1px solid rgba(139,58,26,0.14); }
+.register-unreceived {
+  background: var(--unreceived-bg);
+  border: 1px dashed rgba(154,110,34,0.28);
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+}
 
 .register-label {
   display: flex; align-items: center; gap: 0.5rem;
   font-size: 15px; font-weight: 500;
-  letter-spacing: 0.2em; text-transform: uppercase;
-  margin-bottom: 0.9rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 0.85rem;
 }
 .register-mythic     .register-label { color: var(--mythic); }
 .register-conceptual .register-label { color: var(--conceptual); }
@@ -322,48 +438,29 @@ body::after {
 .register-unreceived .register-label-dot { background: var(--unreceived); }
 
 .register-text {
-  font-size: 14.5px; font-weight: 300;
+  font-size: 16px; font-weight: 300;
   color: var(--ink-secondary); line-height: 1.9;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 16px;
 }
 
-/* Drop cap — first register of first subterrain of first field */
+/* Drop cap */
 .drop-cap::first-letter {
   font-family: 'IM Fell English', serif;
-  font-size: var(--drop-cap-size);
+  font-size: 4.2rem;
   float: left; line-height: 0.75;
   margin: 0.05em 0.12em 0 0;
   color: var(--gold);
 }
 
-/* Unreceived gets full-width treatment */
-.register-unreceived {
-  grid-column: 1 / -1;
-  border-style: dashed;
-}
+/* ══════════════════════════════════════════════════
+   BRIDGE NODES + FIELD NOTE
+══════════════════════════════════════════════════ */
 
-/* ── Field rulers ── */
-.field-rulers {
-  font-size: 15px; font-weight: 300;
-  color: var(--ink-faint); letter-spacing: 0.04em;
-  font-style: italic; margin-top: 0.5rem;
-}
-
-/* ── Subterrain elements ── */
-.subterrain-elements {
-  font-size: 15px; font-weight: 300;
-  color: var(--ink-dim); letter-spacing: 0.04em;
-  margin-top: 0.3rem; line-height: 1.6;
-}
-
-/* ── Bridge nodes ── */
 .bridge-nodes {
   margin-top: 2rem;
-  padding: 1.25rem 1.5rem;
+  padding: 1.25rem 1.75rem;
   background: rgba(154,110,34,0.04);
   border-left: 2px solid var(--gold);
-  border-radius: 0 4px 4px 0;
 }
 .bridge-label {
   font-size: 15px; font-weight: 500;
@@ -371,19 +468,17 @@ body::after {
   color: var(--gold); margin-bottom: 0.6rem;
 }
 .bridge-text {
-  font-size: 15px; font-weight: 300;
+  font-size: 16px; font-weight: 300;
   color: var(--ink-secondary); line-height: 1.85;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 16px;
 }
 
-/* ── Field note (dragons-note) ── */
 .field-note {
   margin-top: 1.5rem;
   padding: 1rem 1.5rem;
   background: rgba(139,58,26,0.04);
-  border: 1px dashed rgba(139,58,26,0.25);
-  border-radius: 4px;
+  border: 1px dashed rgba(139,58,26,0.22);
+  border-radius: 2px;
 }
 .field-note-label {
   font-size: 15px; font-weight: 500;
@@ -391,60 +486,84 @@ body::after {
   color: var(--rust); margin-bottom: 0.5rem;
 }
 .field-note-text {
-  font-size: 15px; font-weight: 300;
+  font-size: 16px; font-weight: 300;
   color: var(--ink-secondary); line-height: 1.85;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 16px;
 }
 
-/* ── Loading state ── */
+/* ══════════════════════════════════════════════════
+   LOADING / ERROR
+══════════════════════════════════════════════════ */
+
 .loading-wrap {
-  text-align: center;
-  padding: 8rem 2rem;
+  text-align: center; padding: 8rem 2rem;
   opacity: 0; animation: fadeIn 0.6s ease 0.3s forwards;
 }
 .loading-glyph {
-  font-size: 2rem; color: var(--gold); Noneopacity: 0.88;
-  margin-bottom: 1.5rem;
-  display: block;
+  font-size: 2rem; color: var(--gold);
+  margin-bottom: 1.5rem; display: block;
   animation: pulse 2s ease-in-out infinite;
 }
 .loading-text {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1rem; font-style: italic;
-  color: var(--ink-faint);
+  font-size: 1.1rem; font-style: italic; color: var(--ink-faint);
 }
-
 .error-wrap {
   text-align: center; padding: 4rem;
   font-family: 'Cormorant Garamond', serif;
   font-style: italic; color: var(--rust);
 }
 
-/* ── Animations ── */
-@keyframes fadeIn { to { opacity: 1; } }
-@keyframes pulse { 0%, 100% { opacity: 0.88; } 50% { opacity: 1.0; } } 50% { Noneopacity: 0.88; } }
+/* ══════════════════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════════════════ */
 
-/* ── Responsive ── */
-@media (max-width: 900px) {
-  .page { padding: 3rem 2rem 6rem; }
-  .registers-grid { grid-template-columns: 1fr; }
-  .register-unreceived { grid-column: 1; }
-  .subterrain { padding: 1.75rem 1.5rem; }
-  .field-header { gap: 1rem; }
+@keyframes fadeIn { to { opacity: 1; } }
+@keyframes pulse { 0%, 100% { opacity: 0.88; } 50% { opacity: 1; } }
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════ */
+
+@media (max-width: 1100px) {
+  :root { --page-pad: 2.5rem; }
+  .registers-grid { grid-template-columns: 1fr 1fr; }
+  .register-unreceived { grid-column: 1 / -1; }
 }
-@media (max-width: 600px) {
-  .page { padding: 2rem 1.25rem 5rem; }
-  .nav-links { flex-wrap: wrap; gap: 1rem; }
+
+@media (max-width: 760px) {
+  :root { --page-pad: 1.5rem; }
+  .registers-grid { grid-template-columns: 1fr; }
+  .register-unreceived { grid-column: 1; margin-top: 0; }
+  .field-header { grid-template-columns: 3rem 1fr; gap: 1rem; }
+  .sticky-nav { display: none; }
+  .subterrain { padding: 1.5rem; }
+}
+
+@media (max-width: 480px) {
+  :root { --page-pad: 1.25rem; }
+  .jump-btn { font-size: 15px; padding: 0.35rem 0.7rem; }
 }
 </style>
 </head>
 <body>
-<div class="corner-marks"></div>
+
+<!-- ── Sticky navigation ── -->
+<nav class="sticky-nav" id="sticky-nav" aria-label="Field navigation">
+  <div class="nav-inner" id="nav-inner">
+    <div class="nav-site-links">
+      <a class="nav-site-link" href="index.html">Map</a>
+      <a class="nav-site-link" href="ancestral-weaving.html">Weaving</a>
+      <a class="nav-site-link" href="ancestral-catalog.html">Catalog</a>
+    </div>
+    <!-- Field buttons injected by JS after data loads -->
+  </div>
+</nav>
 
 <div class="page">
-  <div class="header">
-    <span class="header-ornament">✦ ✦ ✦</span>
+
+  <!-- ── Header ── -->
+  <div class="header" id="top">
     <div class="header-eyebrow">Christy Paxton Wade</div>
     <h1 class="header-title">The Fieldguide</h1>
     <div class="header-subtitle">A map of the territory, written from inside it</div>
@@ -453,189 +572,136 @@ body::after {
       <span class="header-rule-ornament">⬡</span>
       <div class="header-rule right"></div>
     </div>
-    <p class="header-sub">Thirteen fields. Every subterrain illuminated across four registers of entry. A guide to carry into the field — where the territory always exceeds the map, and the best discoveries happen in the margins.</p>
-    <div class="nav-links">
-      <a class="nav-link" href="index.html">Navigation Map</a>
-      <a class="nav-link" href="ancestral-weaving.html">Ancestral Weaving</a>
-      <a class="nav-link" href="ancestral-catalog.html">Ancestral Catalog</a>
+    <p class="header-sub">Thirteen fields. Every subterrain illuminated across four registers. A guide to carry into the territory — where the map always exceeds itself, and the best discoveries happen in the margins.</p>
+    <div class="header-nav-links">
+      <a class="header-nav-link" href="index.html">Navigation Map</a>
+      <a class="header-nav-link" href="ancestral-weaving.html">Ancestral Weaving</a>
+      <a class="header-nav-link" href="ancestral-catalog.html">Ancestral Catalog</a>
     </div>
   </div>
 
-  <div id="fieldguide-content">
-    <div class="loading-wrap" id="loading">
+  <!-- ── Jump nav ── -->
+  <div class="jump-nav" id="jump-nav">
+    <div class="loading-wrap">
       <span class="loading-glyph">✦</span>
       <div class="loading-text">Drawing from the field…</div>
     </div>
   </div>
+
+  <!-- ── Main content ── -->
+  <div id="fieldguide-content"></div>
+
 </div>
 
 <script>
 const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
 
-const REGISTER_ORDER = ['mythic', 'conceptual', 'somatic', 'unreceived'];
-const REGISTER_LABELS = {
-  mythic: 'Mythic',
-  conceptual: 'Conceptual',
-  somatic: 'Somatic',
-  unreceived: 'The Unreceived'
-};
+const REGISTER_ORDER = ['mythic','conceptual','somatic','unreceived'];
+const REGISTER_LABELS = { mythic:'Mythic', conceptual:'Conceptual', somatic:'Somatic', unreceived:'The Unreceived' };
 
 const ARC_META = {
-  descent: {
-    label: 'Arc I',
-    title: 'The Descent',
-    glyph: '↓'
-  },
-  underworld: {
-    label: 'Arc II',
-    title: 'The Underworld',
-    glyph: '◉'
-  },
-  return: {
-    label: 'Arc III',
-    title: 'The Return',
-    glyph: '↑'
-  }
+  descent:    { label:'Arc I',   title:'The Descent',    glyph:'↓', fields:[] },
+  underworld: { label:'Arc II',  title:'The Underworld', glyph:'◉', fields:[] },
+  return:     { label:'Arc III', title:'The Return',     glyph:'↑', fields:[] }
 };
 
 async function supabaseFetch(path) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json'
-    }
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
   });
-  if (!res.ok) throw new Error(`Supabase error: ${res.status}`);
+  if (!res.ok) throw new Error(`Supabase ${res.status}`);
   return res.json();
-}
-
-async function loadAll() {
-  // Fetch fields, subterrains, and passages in parallel
-  const [fields, subterrains, passages] = await Promise.all([
-    supabaseFetch('fields?select=*&order=number.asc'),
-    supabaseFetch('subterrains?select=*&order=sort_order.asc'),
-    supabaseFetch('passages?select=*')
-  ]);
-
-  // Index subterrains by field_id
-  const subtByField = {};
-  subterrains.forEach(st => {
-    if (!subtByField[st.field_id]) subtByField[st.field_id] = [];
-    subtByField[st.field_id].push(st);
-  });
-
-  // Index passages by subterrain_id
-  const passBySubt = {};
-  passages.forEach(p => {
-    if (!passBySubt[p.subterrain_id]) passBySubt[p.subterrain_id] = [];
-    passBySubt[p.subterrain_id].push(p);
-  });
-
-  return { fields, subtByField, passBySubt };
 }
 
 function renderRegister(passage, isFirst) {
   const r = passage.register;
-  const dropClass = isFirst && r === 'mythic' ? ' drop-cap' : '';
-  return `
-    <div class="register register-${r}">
-      <div class="register-label">
-        <span class="register-label-dot"></span>
-        ${REGISTER_LABELS[r] || r}
-      </div>
-      <div class="register-text${dropClass}">${passage.content}</div>
-    </div>`;
+  const dropClass = (isFirst && r === 'mythic') ? ' drop-cap' : '';
+  return `<div class="register register-${r}">
+    <div class="register-label"><span class="register-label-dot"></span>${REGISTER_LABELS[r] || r}</div>
+    <div class="register-text${dropClass}">${passage.content || ''}</div>
+  </div>`;
 }
 
 function renderSubterrain(st, passages, isFirstSt) {
-  const sorted = (passages || []).slice().sort((a, b) =>
-    REGISTER_ORDER.indexOf(a.register) - REGISTER_ORDER.indexOf(b.register)
-  );
+  const sorted = (passages || []).slice().sort((a,b) =>
+    REGISTER_ORDER.indexOf(a.register) - REGISTER_ORDER.indexOf(b.register));
+  const core = sorted.filter(p => p.register !== 'unreceived');
+  const unrec = sorted.find(p => p.register === 'unreceived');
 
-  // Separate unreceived from the three core registers
-  const corePassages = sorted.filter(p => p.register !== 'unreceived');
-  const unreceived   = sorted.find(p => p.register === 'unreceived');
-
-  const coreHtml = corePassages.map((p, i) =>
-    renderRegister(p, isFirstSt && i === 0)
-  ).join('');
-  const unreceivedHtml = unreceived ? renderRegister(unreceived, false) : '';
+  const coreHtml = core.map((p,i) => renderRegister(p, isFirstSt && i === 0)).join('');
+  const unrecHtml = unrec ? `
+    <div class="registers-grid" style="margin-top:1.25rem">
+      ${renderRegister(unrec, false)}
+    </div>` : '';
 
   const elemHtml = st.elements
-    ? `<div class="subterrain-elements">${st.elements}</div>`
-    : '';
+    ? `<div class="subterrain-elements">${st.elements}</div>` : '';
   const descHtml = st.description
-    ? `<p class="subterrain-description">${st.description}</p>`
-    : '';
+    ? `<p class="subterrain-description">${st.description}</p>` : '';
 
-  return `
-    <div class="subterrain" id="st-${st.slug || st.id}">
-      <div class="subterrain-header">
-        <div class="subterrain-name">${st.name}</div>
-        ${elemHtml}
-      </div>
-      ${descHtml}
-      <div class="registers-grid">${coreHtml}</div>
-      ${unreceivedHtml ? `<div class="registers-grid" style="margin-top:1rem">${unreceivedHtml}</div>` : ''}
-    </div>`;
+  return `<div class="subterrain" id="st-${st.slug || st.id}">
+    <div class="subterrain-header">
+      <div class="subterrain-name">${st.name}</div>
+      ${elemHtml}
+    </div>
+    ${descHtml}
+    <div class="registers-grid">${coreHtml}</div>
+    ${unrecHtml}
+  </div>`;
 }
 
 function renderField(field, subterrains, passBySubt, isFirst) {
-  const subs = subterrains || [];
-  const subHtml = subs.map((st, i) =>
+  const subHtml = (subterrains || []).map((st,i) =>
     renderSubterrain(st, passBySubt[st.id], isFirst && i === 0)
   ).join('');
 
-  const astroHtml = field.astro_planets || field.astro_signs ? `
+  const astroHtml = (field.astro_planets || field.astro_signs) ? `
     <div class="field-astro">
       ${field.astro_planets ? `<span class="field-planets">${field.astro_planets}</span>` : ''}
-      ${field.astro_signs ? `<span class="field-signs">${field.astro_signs}</span>` : ''}
+      ${field.astro_signs   ? `<span class="field-signs">${field.astro_signs}</span>` : ''}
     </div>` : '';
 
   const rulersHtml = field.field_rulers
-    ? `<div class="field-rulers">${field.field_rulers}</div>`
-    : '';
-
+    ? `<div class="field-rulers">${field.field_rulers}</div>` : '';
   const bridgeHtml = field.bridge_nodes ? `
     <div class="bridge-nodes">
       <div class="bridge-label">Bridge nodes — resonance across the map</div>
       <p class="bridge-text">${field.bridge_nodes}</p>
     </div>` : '';
-
   const noteHtml = field.field_note ? `
     <div class="field-note">
       <div class="field-note-label">Here be dragons</div>
       <p class="field-note-text">${field.field_note}</p>
     </div>` : '';
 
-  return `
-    <div class="field-section" id="field-${field.number}">
-      <div class="field-header">
-        <div class="field-number">${field.number}</div>
-        <div class="field-title-block">
-          <div class="field-roman">${field.roman || ''}</div>
-          <h2 class="field-name">${field.name}</h2>
-          ${field.tagline ? `<p class="field-tagline">${field.tagline}</p>` : ''}
-          ${rulersHtml}
-          ${astroHtml}
-        </div>
+  return `<div class="field-section" id="field-${field.number}">
+    <div class="field-header">
+      <div class="field-number-col">
+        <span class="field-number">${field.number}</span>
       </div>
-      ${subHtml}
-      ${bridgeHtml}
-      ${noteHtml}
-    </div>`;
+      <div class="field-title-block">
+        <span class="field-roman">${field.roman || ''}</span>
+        <h2 class="field-name">${field.name}</h2>
+        ${field.tagline ? `<p class="field-tagline">${field.tagline}</p>` : ''}
+        ${rulersHtml}
+        ${astroHtml}
+      </div>
+    </div>
+    ${subHtml}
+    ${bridgeHtml}
+    ${noteHtml}
+  </div>`;
 }
 
 function renderArc(arcKey, fields, subtByField, passBySubt, isFirst) {
-  const meta = ARC_META[arcKey] || { label: arcKey, title: arcKey, glyph: '·' };
-  const fieldsHtml = fields.map((f, i) =>
+  const meta = ARC_META[arcKey] || { label:arcKey, title:arcKey, glyph:'·' };
+  const fieldsHtml = fields.map((f,i) =>
     renderField(f, subtByField[f.id], passBySubt, isFirst && i === 0)
   ).join('');
 
-  return `
-    <div class="arc-block" id="arc-${arcKey}">
+  return `<div class="arc-block" id="arc-${arcKey}">
+    <div class="arc-header">
       <div class="arc-label">${meta.label}</div>
       <div class="arc-title">${meta.title}</div>
       <div class="arc-rule">
@@ -643,32 +709,134 @@ function renderArc(arcKey, fields, subtByField, passBySubt, isFirst) {
         <span class="arc-rule-glyph">${meta.glyph}</span>
         <div class="arc-rule-line right"></div>
       </div>
-      ${fieldsHtml}
+    </div>
+    ${fieldsHtml}
+  </div>`;
+}
+
+function buildJumpNav(arcs) {
+  const arcOrder = ['descent','underworld','return'];
+  const html = arcOrder.map(key => {
+    const meta = ARC_META[key];
+    const fields = arcs[key] || [];
+    if (!fields.length) return '';
+    const btnHtml = fields.map(f =>
+      `<a class="jump-btn" href="#field-${f.number}">
+        <strong>${f.roman || f.number}</strong>${f.name}
+      </a>`
+    ).join('');
+    return `<div class="jump-arc">
+      <div class="jump-arc-label">${meta.label} · ${meta.title}</div>
+      <div class="jump-field-row">${btnHtml}</div>
     </div>`;
+  }).join('');
+
+  document.getElementById('jump-nav').innerHTML = html;
+}
+
+function buildStickyNav(arcs) {
+  const arcOrder = ['descent','underworld','return'];
+  const nav = document.getElementById('nav-inner');
+  // Keep site links, append field buttons
+  const existing = nav.querySelector('.nav-site-links');
+
+  arcOrder.forEach((key, ai) => {
+    const meta = ARC_META[key];
+    const fields = arcs[key] || [];
+    if (!fields.length) return;
+
+    if (ai > 0) {
+      const div = document.createElement('div');
+      div.className = 'nav-arc-divider';
+      nav.appendChild(div);
+    }
+
+    const label = document.createElement('span');
+    label.className = 'nav-arc-label';
+    label.textContent = meta.title;
+    nav.appendChild(label);
+
+    fields.forEach(f => {
+      const btn = document.createElement('a');
+      btn.className = 'nav-field-btn';
+      btn.href = `#field-${f.number}`;
+      btn.textContent = f.roman || f.name;
+      btn.title = f.name;
+      nav.appendChild(btn);
+    });
+  });
+}
+
+// Sticky nav visibility + active field tracking
+function initScrollBehavior(fields) {
+  const nav = document.getElementById('sticky-nav');
+  const header = document.getElementById('top');
+  const fieldEls = fields.map(f => ({
+    id: `field-${f.number}`,
+    roman: f.roman,
+    el: document.getElementById(`field-${f.number}`)
+  })).filter(f => f.el);
+
+  const navH = parseInt(getComputedStyle(document.documentElement)
+    .getPropertyValue('--nav-h'));
+
+  const obs = new IntersectionObserver(([entry]) => {
+    nav.classList.toggle('visible', !entry.isIntersecting);
+  }, { threshold: 0, rootMargin: `-${navH}px 0px 0px 0px` });
+  obs.observe(header);
+
+  // Active field highlight
+  const fieldObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const btn = document.querySelector(`.nav-field-btn[href="#${entry.target.id}"]`);
+      if (btn) btn.classList.toggle('active', entry.isIntersecting);
+    });
+  }, { threshold: 0, rootMargin: `-${navH + 20}px 0px -60% 0px` });
+
+  fieldEls.forEach(f => fieldObs.observe(f.el));
 }
 
 async function init() {
   const container = document.getElementById('fieldguide-content');
   try {
-    const { fields, subtByField, passBySubt } = await loadAll();
+    const [fields, subterrains, passages] = await Promise.all([
+      supabaseFetch('fields?select=*&order=number.asc'),
+      supabaseFetch('subterrains?select=*&order=sort_order.asc'),
+      supabaseFetch('passages?select=*')
+    ]);
 
-    // Group fields by arc
-    const arcs = { descent: [], underworld: [], return: [] };
-    fields.forEach(f => {
-      if (arcs[f.arc]) arcs[f.arc].push(f);
+    const subtByField = {};
+    subterrains.forEach(st => {
+      if (!subtByField[st.field_id]) subtByField[st.field_id] = [];
+      subtByField[st.field_id].push(st);
     });
 
-    const html = Object.entries(arcs).map(([arcKey, arcFields], i) =>
-      renderArc(arcKey, arcFields, subtByField, passBySubt, i === 0)
-    ).join('');
+    const passBySubt = {};
+    passages.forEach(p => {
+      if (!passBySubt[p.subterrain_id]) passBySubt[p.subterrain_id] = [];
+      passBySubt[p.subterrain_id].push(p);
+    });
 
+    const arcs = { descent:[], underworld:[], return:[] };
+    fields.forEach(f => { if (arcs[f.arc]) arcs[f.arc].push(f); });
+
+    // Render main content
+    const html = ['descent','underworld','return'].map((k,i) =>
+      renderArc(k, arcs[k], subtByField, passBySubt, i === 0)
+    ).join('');
     container.innerHTML = `<div style="opacity:0;animation:fadeIn 0.8s ease forwards">${html}</div>`;
 
-  } catch (err) {
+    // Build navigation
+    buildJumpNav(arcs);
+    buildStickyNav(arcs);
+    initScrollBehavior(fields);
+
+  } catch(err) {
     container.innerHTML = `<div class="error-wrap">
       <p>The field could not be reached.</p>
-      <p style="font-size: 15px;margin-top:0.5rem;color:var(--ink-faint)">${err.message}</p>
+      <p style="font-size:15px;margin-top:0.5rem;color:var(--ink-faint)">${err.message}</p>
     </div>`;
+    document.getElementById('jump-nav').innerHTML = '';
   }
 }
 
