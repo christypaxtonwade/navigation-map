@@ -436,7 +436,7 @@ async function generateConvergence(clientData) {
   const [conv] = await sbPost('convergences', {
     client_id: client.id,
     title: `The Convergence — ${new Date().toLocaleDateString('en-US', {month:'long', year:'numeric'})}`,
-    status: 'generating',
+    status: 'draft',
     dominant_frequencies: topFreqs.map(([name]) => name),
     version: 1
   });
@@ -601,7 +601,7 @@ Write two paragraphs (total 250-300 words):
   setProgress('living', 'done');
 
   // Update convergence status
-  await sbPatch('convergences', conv.id, { status: 'complete' });
+  await sbPatch('convergences', conv.id, { status: 'published' });
 
   return {
     ...conv,
