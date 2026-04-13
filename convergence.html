@@ -365,7 +365,7 @@ body::before {
     animation: none !important;
     transition: none !important;
   }
-  body { background: #fff !important; color: #000 !important; font-size: 14px !important; }
+  body { background: #fff !important; color: #000 !important; font-size: 15px !important; }
   body::before, body::after { display: none !important; }
 
   .pdf-bar, .btn-generate, .generate-panel, .progress-wrap,
@@ -401,19 +401,20 @@ body::before {
   .convergence-output { opacity: 1 !important; }
   .convergence-section {
     background: #fff !important; border: 1px solid #d4c8b0 !important;
-    margin-bottom: 0.6rem !important; break-inside: avoid !important; page-break-inside: avoid !important;
+    margin-bottom: 0.6rem !important;
   }
   .section-title-bar {
     background: #f8f4ec !important; border-bottom: 1px solid #d4c8b0 !important;
     padding: 0.5rem 0.9rem !important;
+    break-after: avoid !important; page-break-after: avoid !important;
   }
   .section-glyph { color: #9a6e22 !important; font-size: 0.9rem !important; }
   .section-type-label { color: #9a6e22 !important; font-size: 8px !important; margin-bottom: 0.1rem !important; }
   .section-title { color: #000 !important; font-size: 1.1rem !important; line-height: 1.2 !important; }
   .section-fieldguide-note { color: #333 !important; font-size: 11px !important; margin-top: 0.1rem !important; line-height: 1.4 !important; }
   .section-body { padding: 0.6rem 0.9rem !important; }
-  .section-text { color: #000 !important; font-size: 12px !important; line-height: 1.55 !important; }
-  .section-text p { color: #000 !important; margin-bottom: 0.45rem !important; }
+  .section-text { color: #000 !important; font-size: 13.5px !important; line-height: 1.65 !important; }
+  .section-text p { color: #000 !important; margin-bottom: 0.5rem !important; }
 
   /* Hide evidence chips — they expand the document significantly */
   .ancestor-evidence { display: none !important; }
