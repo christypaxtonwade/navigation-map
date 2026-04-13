@@ -473,7 +473,7 @@ Write a single paragraph (150-180 words) that opens the document. Name the scope
   const snapshotText = await callClaude(SYSTEM, snapshotPrompt);
   const [snapSection] = await sbPost('convergence_sections', {
     convergence_id: conv.id,
-    section_type: 'snapshot',
+    section_type: 'pattern',
     title: 'The Lineage',
     ai_draft: snapshotText,
     final_text: snapshotText,
@@ -597,7 +597,7 @@ Write two paragraphs (total 250-300 words):
   const livingText = await callClaude(SYSTEM, livingPrompt);
   const [livingSection] = await sbPost('convergence_sections', {
     convergence_id: conv.id,
-    section_type: 'living_thread',
+    section_type: 'closing',
     title: 'The Living Thread',
     ai_draft: livingText,
     final_text: livingText,
@@ -666,7 +666,7 @@ function renderSnapshot(conv) {
 
 function renderSection(sec, freqAncestors) {
   const glyphs = {
-    snapshot: '✦', frequency: '◈', unresolved: '◌', living_thread: '↑'
+    pattern: '✦', frequency: '◈', unresolved: '◌', closing: '↑'
   };
   const glyph = glyphs[sec.section_type] || '·';
 
@@ -691,10 +691,10 @@ function renderSection(sec, freqAncestors) {
   }
 
   const typeLabels = {
-    snapshot: 'The Lineage',
+    pattern: 'The Lineage',
     frequency: 'Frequency Pattern',
     unresolved: 'Unresolved Thread',
-    living_thread: 'The Living Thread'
+    closing: 'The Living Thread'
   };
 
   const bodyText = (sec.final_text || sec.ai_draft || '')
