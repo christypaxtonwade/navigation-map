@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Convergence — Christy Paxton Wade</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #09090f;
+  --surface: #0f1018;
+  --surface-2: #161722;
+  --border: rgba(180,155,100,0.14);
+  --border-hover: rgba(180,155,100,0.28);
+  --gold: #c9a87c;
+  --gold-bright: #dfc090;
+  --gold-dim: rgba(201,168,124,0.35);
+  --text: #ede8dc;
+  --text-secondary: #c8c0b0;
+  --text-dim: #8a8478;
+  --text-faint: #4e4c46;
+  --mythic: #c4bef8;
+  --conceptual: #6dd8b2;
+  --somatic: #f5aa88;
+  --unreceived: #c9a87c;
+  --accent: rgba(201,168,124,0.08);
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Jost', sans-serif; font-weight: 300;
+  font-size: 16px; min-height: 100vh;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(180,155,100,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(180,155,100,0.018) 1px, transparent 1px);
+  background-size: 52px 52px; pointer-events: none; z-index: 0;
+}
+.page {
+  position: relative; z-index: 1;
+  max-width: 1100px; margin: 0 auto;
+  padding: 4rem 3rem 8rem;
+}
+
+/* ── Header ── */
+.header {
+  text-align: center; margin-bottom: 4rem;
+  opacity: 0; animation: fadeUp 1s ease forwards;
+}
+.header-eyebrow {
+  font-size: 15px; font-weight: 400; letter-spacing: 0.22em;
+  color: var(--gold); text-transform: uppercase; margin-bottom: 1rem;
+}
+.header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.8rem,5vw,4.5rem); font-weight: 300; font-style: italic;
+  color: var(--text); line-height: 1; letter-spacing: -0.01em; margin-bottom: 0.75rem;
+}
+.header-sub {
+  font-size: 16px; color: var(--text-dim); max-width: 540px;
+  margin: 0 auto 1.5rem; line-height: 1.85;
+}
+.header-rule {
+  width: 40px; height: 1px;
+  background: var(--gold-dim); margin: 1.25rem auto;
+}
+.nav-links { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+.nav-link {
+  font-size: 15px; font-weight: 400; letter-spacing: 0.1em;
+  color: var(--gold); text-decoration: none;
+  border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px;
+  transition: color 0.2s;
+}
+.nav-link:hover { color: var(--gold-bright); }
+
+/* ── Generate panel ── */
+.generate-panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 2.5rem 3rem;
+  margin-bottom: 3rem; text-align: center;
+  opacity: 0; animation: fadeUp 1s ease 0.2s forwards;
+}
+.generate-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem; font-style: italic;
+  color: var(--text); margin-bottom: 0.75rem;
+}
+.generate-sub {
+  font-size: 15px; color: var(--text-dim); line-height: 1.75;
+  max-width: 480px; margin: 0 auto 1.75rem;
+}
+.btn-generate {
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--bg); background: var(--gold);
+  border: none; border-radius: 6px; padding: 14px 32px;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn-generate:hover { background: var(--gold-bright); }
+.btn-generate:disabled { background: rgba(201,168,124,0.3); cursor: not-allowed; }
+
+/* ── Progress ── */
+.progress-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 1.5rem 2rem;
+  margin-bottom: 2rem; display: none;
+}
+.progress-step {
+  font-size: 15px; color: var(--text-dim);
+  margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem;
+}
+.progress-step.active { color: var(--gold); }
+.progress-step.done { color: var(--conceptual); }
+.progress-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text-faint); flex-shrink: 0;
+}
+.progress-step.active .progress-dot { background: var(--gold); animation: pulse 1.2s ease infinite; }
+.progress-step.done .progress-dot { background: var(--conceptual); animation: none; }
+
+/* ── Convergence output ── */
+.convergence-output {
+  opacity: 0; animation: fadeUp 0.8s ease forwards;
+}
+
+.snapshot-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 2rem 2.5rem;
+  margin-bottom: 3rem;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+.snapshot-item {}
+.snapshot-label {
+  font-size: 15px; font-weight: 500; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 0.4rem;
+}
+.snapshot-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; color: var(--text-secondary); line-height: 1.5;
+}
+
+.dominant-frequencies {
+  margin-bottom: 3rem;
+}
+.section-header {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 2rem;
+}
+.section-header-line { flex: 1; height: 1px; background: var(--border); }
+.section-header-label {
+  font-size: 15px; font-weight: 500; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--text-faint); white-space: nowrap;
+}
+
+.frequency-bar-row {
+  display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;
+}
+.freq-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; color: var(--text); width: 220px; flex-shrink: 0;
+}
+.freq-bar-wrap { flex: 1; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; }
+.freq-bar { height: 100%; background: var(--gold); border-radius: 2px; transition: width 1s ease; }
+.freq-count {
+  font-size: 15px; color: var(--text-dim); width: 40px; text-align: right; flex-shrink: 0;
+}
+
+/* ── Convergence sections ── */
+.convergence-section {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+  margin-bottom: 2rem;
+}
+.section-title-bar {
+  padding: 1.5rem 2.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 1.25rem;
+}
+.section-glyph {
+  font-size: 1.2rem; color: var(--gold); opacity: 0.88; flex-shrink: 0; padding-top: 3px;
+}
+.section-title-block {}
+.section-type-label {
+  font-size: 15px; font-weight: 500; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 0.25rem;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight: 400; font-style: italic;
+  color: var(--text); line-height: 1.2;
+}
+.section-fieldguide-note {
+  font-size: 15px; color: var(--text-dim); font-style: italic;
+  margin-top: 0.3rem; line-height: 1.6;
+}
+.section-body { padding: 2rem 2.5rem; }
+.section-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; font-weight: 300;
+  color: var(--text-secondary); line-height: 2;
+}
+.section-text p { margin-bottom: 1.25rem; }
+.section-text p:last-child { margin-bottom: 0; }
+
+.ancestor-evidence {
+  margin-top: 1.75rem; padding-top: 1.75rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.evidence-label {
+  font-size: 15px; font-weight: 500; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text-faint);
+  margin-bottom: 1rem;
+}
+.evidence-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+.evidence-chip {
+  background: var(--accent); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.6rem 1rem;
+}
+.evidence-name {
+  font-size: 15px; font-weight: 400; color: var(--gold); margin-bottom: 0.2rem;
+}
+.evidence-snippet {
+  font-size: 15px; color: var(--text-dim); line-height: 1.5;
+  font-family: 'Cormorant Garamond', serif;
+}
+
+/* ── Regenerate ── */
+.regen-bar {
+  text-align: center; margin-top: 3rem; padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+.btn-regen {
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gold); background: none;
+  border: 1px solid var(--gold-dim); border-radius: 6px;
+  padding: 10px 24px; cursor: pointer; transition: all 0.2s;
+}
+.btn-regen:hover { border-color: var(--gold); background: var(--accent); }
+
+/* ── Loading ── */
+.loading-state {
+  text-align: center; padding: 6rem 2rem;
+  opacity: 0; animation: fadeUp 0.6s ease 0.2s forwards;
+}
+.loading-glyph {
+  font-size: 2rem; color: var(--gold);
+  margin-bottom: 1.25rem; display: block;
+  animation: pulse 2s ease-in-out infinite;
+}
+.loading-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-style: italic; color: var(--text-dim);
+}
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 0.88; } 50% { opacity: 1; } }
+
+@media (max-width: 768px) {
+  .page { padding: 2.5rem 1.5rem 5rem; }
+  .section-title-bar { padding: 1.25rem 1.5rem; }
+  .section-body { padding: 1.5rem; }
+  .generate-panel { padding: 1.75rem 1.5rem; }
+  .snapshot-card { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-eyebrow">Christy Paxton Wade</div>
+    <h1 class="header-title">The Convergence</h1>
+    <div class="header-rule"></div>
+    <p class="header-sub">A structural analysis of the dominant frequency patterns across the ancestral weaving — drawn from lineage research, layer content, and the Navigation Map.</p>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Navigation Map</a>
+      <a class="nav-link" href="ancestral-weaving.html">Ancestral Weaving</a>
+      <a class="nav-link" href="fieldguide.html">The Fieldguide</a>
+    </div>
+  </div>
+
+  <div id="main-content">
+    <div class="loading-state">
+      <span class="loading-glyph">✦</span>
+      <div class="loading-text">Reading the lineage…</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+const CLIENT_NAME = 'Christy Paxton Wade';
+
+// ── Supabase helpers ────────────────────────────────────────
+async function sb(path) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+async function sbPost(table, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`Supabase POST ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+async function sbPatch(table, id, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`Supabase PATCH ${res.status}`);
+}
+
+// ── Claude API helper ───────────────────────────────────────
+async function callClaude(systemPrompt, userMessage) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMessage }]
+    })
+  });
+  const data = await res.json();
+  return data.content?.[0]?.text || '';
+}
+
+// ── Data loading ────────────────────────────────────────────
+async function loadClientData() {
+  const clients = await sb(`clients?name=eq.${encodeURIComponent(CLIENT_NAME)}&select=*`);
+  if (!clients.length) throw new Error('Client record not found.');
+  const client = clients[0];
+
+  const ancestors = await sb(
+    `client_ancestors?client_id=eq.${client.id}&select=*&order=sort_year.asc`
+  );
+
+  const freqRows = await sb(
+    `client_ancestor_frequencies?client_ancestor_id=in.(${ancestors.map(a=>a.id).join(',')})&select=client_ancestor_id,frequency_tag_id,strength`
+  ).catch(() => []);
+
+  const tagIds = [...new Set(freqRows.map(r => r.frequency_tag_id))];
+  const tags = tagIds.length
+    ? await sb(`frequency_tags?id=in.(${tagIds.join(',')})&select=id,name,slug`)
+    : [];
+
+  const tagMap = Object.fromEntries(tags.map(t => [t.id, t]));
+  const ancestorMap = Object.fromEntries(ancestors.map(a => [a.id, a]));
+
+  // Build frequency counts
+  const freqCounts = {};
+  const freqAncestors = {};
+  freqRows.forEach(r => {
+    const tag = tagMap[r.frequency_tag_id];
+    if (!tag) return;
+    if (!freqCounts[tag.name]) { freqCounts[tag.name] = 0; freqAncestors[tag.name] = []; }
+    freqCounts[tag.name]++;
+    freqAncestors[tag.name].push(ancestorMap[r.client_ancestor_id]);
+  });
+
+  const sortedFreqs = Object.entries(freqCounts)
+    .sort((a,b) => b[1] - a[1]);
+
+  return { client, ancestors, freqCounts, freqAncestors, sortedFreqs };
+}
+
+async function loadExistingConvergence(clientId) {
+  const convs = await sb(
+    `convergences?client_id=eq.${clientId}&order=created_at.desc&limit=1`
+  );
+  if (!convs.length) return null;
+  const conv = convs[0];
+  const sections = await sb(
+    `convergence_sections?convergence_id=eq.${conv.id}&order=sort_order.asc`
+  );
+  return { ...conv, sections };
+}
+
+// ── Frequency tag → fieldguide field ───────────────────────
+async function getFieldContext(tagName) {
+  const fields = await sb(
+    `fields?name=eq.${encodeURIComponent(tagName)}&select=name,tagline,field_rulers,bridge_nodes`
+  ).catch(() => []);
+  return fields[0] || null;
+}
+
+// ── Progress tracker ────────────────────────────────────────
+let progressEl;
+function setProgress(stepId, state) {
+  if (!progressEl) return;
+  const el = progressEl.querySelector(`[data-step="${stepId}"]`);
+  if (!el) return;
+  el.classList.remove('active','done');
+  el.classList.add(state);
+}
+
+// ── Generate convergence ────────────────────────────────────
+async function generateConvergence(clientData) {
+  const { client, ancestors, freqCounts, freqAncestors, sortedFreqs } = clientData;
+  const topFreqs = sortedFreqs.slice(0, 6);
+  const maxCount = topFreqs[0]?.[1] || 1;
+
+  // Create convergence record
+  setProgress('init', 'active');
+  const [conv] = await sbPost('convergences', {
+    client_id: client.id,
+    title: `The Convergence — ${new Date().toLocaleDateString('en-US', {month:'long', year:'numeric'})}`,
+    status: 'generating',
+    dominant_frequencies: topFreqs.map(([name]) => name),
+    version: 1
+  });
+  setProgress('init', 'done');
+
+  const SYSTEM = `You are writing a section of The Convergence — a structured ancestral frequency analysis for ${CLIENT_NAME}.
+
+The Convergence reads the dominant patterns in an ancestral lineage and surfaces what is carried, what remains unresolved, and what calls forward into the present descendant. 
+
+Your voice is: precise, mythically grounded, embodied. Not academic. Not sentimental. Write in complete paragraphs of 120–200 words. No bullet points. No headers within the text. Present tense where the pattern is still active. Speak directly to the living descendant when addressing "the living thread." Use the language of the Navigation Map: frequency, field, subterrain, threshold, signal, the unresolved, the thread.`;
+
+  const sections = [];
+
+  // ── Section 1: The lineage snapshot ──
+  setProgress('snapshot', 'active');
+  const eras = [...new Set(ancestors.map(a => a.era).filter(Boolean))];
+  const years = ancestors.map(a => a.sort_year).filter(Boolean).sort((a,b)=>a-b);
+  const snapshotPrompt = `Write the opening passage of The Convergence for ${CLIENT_NAME}.
+
+LINEAGE DATA:
+- ${ancestors.length} profiled ancestors
+- Temporal span: from ${years[0] < 0 ? Math.abs(years[0])+'BCE' : years[0]+'CE'} to ${years[years.length-1]} CE
+- Eras represented: ${eras.join(', ')}
+- Dominant frequencies identified: ${topFreqs.map(([n,c])=>`${n} (${c} ancestors)`).join(', ')}
+
+Write a single paragraph (150-180 words) that opens the document. Name the scope of the archive. Place the lineage in its historical sweep. Name the three most dominant patterns without yet analyzing them. End with a sentence that orients the reader toward what the convergence will reveal.`;
+
+  const snapshotText = await callClaude(SYSTEM, snapshotPrompt);
+  const [snapSection] = await sbPost('convergence_sections', {
+    convergence_id: conv.id,
+    section_type: 'snapshot',
+    title: 'The Lineage',
+    ai_draft: snapshotText,
+    final_text: snapshotText,
+    sort_order: 0
+  });
+  sections.push({ ...snapSection, freqName: null, freqCount: null, ancestors: [] });
+  setProgress('snapshot', 'done');
+
+  // ── Sections 2–6: Dominant frequency analyses ──
+  for (let i = 0; i < Math.min(5, topFreqs.length); i++) {
+    const [freqName, freqCount] = topFreqs[i];
+    const stepId = `freq_${i}`;
+    setProgress(stepId, 'active');
+
+    const freqAncs = (freqAncestors[freqName] || []).filter(Boolean);
+    const fieldCtx = await getFieldContext(freqName);
+
+    // Build ancestor evidence summary
+    const ancestorSummary = freqAncs.slice(0, 8).map(a => {
+      const layerSnippet = a.layer_thread
+        ? a.layer_thread.slice(0, 200)
+        : a.layer_terroir
+        ? a.layer_terroir.slice(0, 200)
+        : a.catalog_preview
+        ? a.catalog_preview.slice(0, 200)
+        : '';
+      return `${a.name} (${a.era || ''}, ${a.dates || ''}): ${layerSnippet}`;
+    }).join('\n\n');
+
+    const unresolved = freqAncs.slice(0, 5).map(a =>
+      a.layer_unresolved ? `${a.name}: ${a.layer_unresolved.slice(0,150)}` : null
+    ).filter(Boolean).join('\n');
+
+    const freqPrompt = `Write the convergence section for the frequency: ${freqName}
+
+FIELDGUIDE CONTEXT:
+${fieldCtx ? `Field: ${fieldCtx.name}\nTagline: ${fieldCtx.tagline || ''}\nRulers: ${fieldCtx.field_rulers || ''}` : `This frequency appears across ${freqCount} ancestors.`}
+
+ANCESTORS CARRYING THIS FREQUENCY (${freqCount} total):
+${ancestorSummary}
+
+UNRESOLVED LAYERS:
+${unresolved || 'Not yet documented.'}
+
+Write THREE paragraphs:
+1. The pattern: what this frequency looks like across this specific lineage, naming 2-3 ancestors and what they carry. (150-180 words)
+2. The unresolved thread: what has not yet been completed or metabolized across the lineage's carriers of this frequency. (120-150 words)  
+3. The living thread: how this frequency is active in the present descendant, what it calls for, what it makes possible. Speak directly to ${CLIENT_NAME}. (120-150 words)`;
+
+    const freqText = await callClaude(SYSTEM, freqPrompt);
+    const [freqSection] = await sbPost('convergence_sections', {
+      convergence_id: conv.id,
+      section_type: 'frequency',
+      title: freqName,
+      ai_draft: freqText,
+      final_text: freqText,
+      sort_order: i + 1
+    });
+    sections.push({
+      ...freqSection,
+      freqName,
+      freqCount,
+      ancestors: freqAncs,
+      fieldCtx
+    });
+    setProgress(stepId, 'done');
+  }
+
+  // ── Section: The Unresolved Thread ──
+  setProgress('unresolved', 'active');
+  const topUnresolved = ancestors
+    .filter(a => a.layer_unresolved)
+    .slice(0, 8)
+    .map(a => `${a.name}: ${a.layer_unresolved.slice(0, 180)}`)
+    .join('\n\n');
+
+  const unresPrompt = `Write the Unresolved Thread section of The Convergence.
+
+This section draws from the layer_unresolved content across the weaving — the patterns that have not yet been completed, metabolized, or returned to their source across generations.
+
+UNRESOLVED LAYERS FROM THE WEAVING:
+${topUnresolved}
+
+Write two paragraphs (total 250-300 words):
+1. Name the recurring themes in what has been left unresolved across the lineage. What has been held in the body, passed through the generations, waiting for a descendant with the right capacity to witness and complete it?
+2. Speak directly to ${CLIENT_NAME} about what this unresolved field is asking for now. What is the specific work the living descendant is positioned to do?`;
+
+  const unresText = await callClaude(SYSTEM, unresPrompt);
+  const [unresSection] = await sbPost('convergence_sections', {
+    convergence_id: conv.id,
+    section_type: 'unresolved',
+    title: 'The Unresolved Thread',
+    ai_draft: unresText,
+    final_text: unresText,
+    sort_order: topFreqs.length + 1
+  });
+  sections.push({ ...unresSection, freqName: null, freqCount: null, ancestors: [] });
+  setProgress('unresolved', 'done');
+
+  // ── Section: The Living Thread ──
+  setProgress('living', 'active');
+  const threadSummary = ancestors
+    .filter(a => a.layer_thread)
+    .slice(0, 6)
+    .map(a => `${a.name}: ${a.layer_thread.slice(0, 150)}`)
+    .join('\n\n');
+
+  const livingPrompt = `Write the closing section of The Convergence: The Living Thread.
+
+This section is the synthesis — the point at which all the frequency patterns, the unresolved layers, and the lineage's full arc converge in the present moment of the living descendant.
+
+DOMINANT FREQUENCIES: ${topFreqs.slice(0,5).map(([n])=>n).join(', ')}
+
+THREAD LAYERS FROM KEY ANCESTORS:
+${threadSummary}
+
+Write two paragraphs (total 250-300 words):
+1. Name what has been transmitted — not what has been suffered, but what has been earned, refined, and is now available. What is the specific gift of this lineage?
+2. Name what ${CLIENT_NAME} is positioned to do with what she carries. This should feel like a recognition, not an instruction. The closing sentence should be quiet and complete.`;
+
+  const livingText = await callClaude(SYSTEM, livingPrompt);
+  const [livingSection] = await sbPost('convergence_sections', {
+    convergence_id: conv.id,
+    section_type: 'living_thread',
+    title: 'The Living Thread',
+    ai_draft: livingText,
+    final_text: livingText,
+    sort_order: topFreqs.length + 2
+  });
+  sections.push({ ...livingSection, freqName: null, freqCount: null, ancestors: [] });
+  setProgress('living', 'done');
+
+  // Update convergence status
+  await sbPatch('convergences', conv.id, { status: 'complete' });
+
+  return {
+    ...conv,
+    sections,
+    topFreqs,
+    maxCount,
+    freqAncestors,
+    ancestors
+  };
+}
+
+// ── Render ──────────────────────────────────────────────────
+function renderSnapshot(conv) {
+  const { topFreqs, maxCount, ancestors } = conv;
+  const years = ancestors
+    ? ancestors.map(a => a.sort_year).filter(Boolean).sort((a,b)=>a-b)
+    : [];
+
+  const spanText = years.length
+    ? `${Math.abs(years[0])} ${years[0] < 0 ? 'BCE' : 'CE'} — ${years[years.length-1]} CE`
+    : '—';
+
+  return `
+    <div class="snapshot-card">
+      <div class="snapshot-item">
+        <div class="snapshot-label">Profiled Ancestors</div>
+        <div class="snapshot-value">${ancestors ? ancestors.length : '—'}</div>
+      </div>
+      <div class="snapshot-item">
+        <div class="snapshot-label">Temporal Span</div>
+        <div class="snapshot-value">${spanText}</div>
+      </div>
+      <div class="snapshot-item">
+        <div class="snapshot-label">Frequencies Identified</div>
+        <div class="snapshot-value">${topFreqs ? topFreqs.length : '—'}</div>
+      </div>
+    </div>
+
+    <div class="dominant-frequencies">
+      <div class="section-header">
+        <div class="section-header-line"></div>
+        <div class="section-header-label">Dominant Frequencies</div>
+        <div class="section-header-line"></div>
+      </div>
+      ${(topFreqs || []).slice(0,8).map(([name, count]) => `
+        <div class="frequency-bar-row">
+          <div class="freq-name">${name}</div>
+          <div class="freq-bar-wrap">
+            <div class="freq-bar" style="width:${Math.round((count/maxCount)*100)}%"></div>
+          </div>
+          <div class="freq-count">${count}</div>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+function renderSection(sec, freqAncestors) {
+  const glyphs = {
+    snapshot: '✦', frequency: '◈', unresolved: '◌', living_thread: '↑'
+  };
+  const glyph = glyphs[sec.section_type] || '·';
+
+  const fieldNote = sec.fieldCtx?.tagline
+    ? `<div class="section-fieldguide-note">${sec.fieldCtx.tagline}</div>` : '';
+
+  // Ancestor evidence chips for frequency sections
+  let evidenceHtml = '';
+  if (sec.section_type === 'frequency' && sec.ancestors?.length) {
+    const chips = sec.ancestors.slice(0, 8).map(a => {
+      const snippet = (a.layer_thread || a.catalog_preview || '').slice(0, 100);
+      return `<div class="evidence-chip">
+        <div class="evidence-name">${a.name}</div>
+        ${snippet ? `<div class="evidence-snippet">${snippet}…</div>` : ''}
+      </div>`;
+    }).join('');
+    evidenceHtml = `
+      <div class="ancestor-evidence">
+        <div class="evidence-label">Ancestors in this frequency (${sec.ancestors.length})</div>
+        <div class="evidence-grid">${chips}</div>
+      </div>`;
+  }
+
+  const typeLabels = {
+    snapshot: 'The Lineage',
+    frequency: 'Frequency Pattern',
+    unresolved: 'Unresolved Thread',
+    living_thread: 'The Living Thread'
+  };
+
+  const bodyText = (sec.final_text || sec.ai_draft || '')
+    .split('\n\n').filter(Boolean)
+    .map(p => `<p>${p.trim()}</p>`).join('');
+
+  return `
+    <div class="convergence-section">
+      <div class="section-title-bar">
+        <div class="section-glyph">${glyph}</div>
+        <div class="section-title-block">
+          <div class="section-type-label">${typeLabels[sec.section_type] || sec.section_type}</div>
+          <div class="section-title">${sec.title}</div>
+          ${fieldNote}
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="section-text">${bodyText}</div>
+        ${evidenceHtml}
+      </div>
+    </div>`;
+}
+
+function renderConvergence(conv, clientData) {
+  const freqAncestors = clientData?.freqAncestors || {};
+  const topFreqs = clientData?.sortedFreqs || conv.dominant_frequencies?.map(f=>[f,0]) || [];
+  const maxCount = topFreqs[0]?.[1] || 1;
+  const convWithMeta = { ...conv, topFreqs, maxCount, ancestors: clientData?.ancestors };
+
+  const sectionsHtml = (conv.sections || []).map(sec => {
+    const enriched = {
+      ...sec,
+      ancestors: sec.section_type === 'frequency'
+        ? (freqAncestors[sec.title] || []).filter(Boolean)
+        : [],
+      fieldCtx: null
+    };
+    return renderSection(enriched, freqAncestors);
+  }).join('');
+
+  return `
+    <div class="convergence-output">
+      ${renderSnapshot(convWithMeta)}
+      <div class="section-header">
+        <div class="section-header-line"></div>
+        <div class="section-header-label">The Analysis</div>
+        <div class="section-header-line"></div>
+      </div>
+      ${sectionsHtml}
+      <div class="regen-bar">
+        <button class="btn-regen" onclick="startGeneration()">Regenerate Convergence</button>
+      </div>
+    </div>`;
+}
+
+function renderGeneratePanel(clientData) {
+  const { ancestors, sortedFreqs } = clientData;
+  return `
+    <div class="generate-panel">
+      <div class="generate-title">Ready to generate</div>
+      <div class="generate-sub">${ancestors.length} weaving ancestors · ${sortedFreqs.length} frequency patterns identified · Dominant: ${sortedFreqs.slice(0,3).map(([n])=>n).join(', ')}</div>
+      <button class="btn-generate" id="gen-btn" onclick="startGeneration()">Generate the Convergence →</button>
+    </div>`;
+}
+
+function renderProgressPanel() {
+  const steps = [
+    { id:'init',       label:'Initialising convergence record' },
+    { id:'snapshot',   label:'Writing the lineage snapshot' },
+    { id:'freq_0',     label:'Analysing dominant frequency 1' },
+    { id:'freq_1',     label:'Analysing dominant frequency 2' },
+    { id:'freq_2',     label:'Analysing dominant frequency 3' },
+    { id:'freq_3',     label:'Analysing dominant frequency 4' },
+    { id:'freq_4',     label:'Analysing dominant frequency 5' },
+    { id:'unresolved', label:'Writing the unresolved thread' },
+    { id:'living',     label:'Writing the living thread' },
+  ];
+  return `
+    <div class="progress-wrap" id="progress-wrap" style="display:block">
+      ${steps.map(s => `
+        <div class="progress-step" data-step="${s.id}">
+          <span class="progress-dot"></span>
+          ${s.label}
+        </div>`).join('')}
+    </div>`;
+}
+
+// ── Main ────────────────────────────────────────────────────
+let globalClientData = null;
+
+async function startGeneration() {
+  const main = document.getElementById('main-content');
+  main.innerHTML = renderProgressPanel();
+  progressEl = main.querySelector('#progress-wrap');
+
+  try {
+    if (!globalClientData) globalClientData = await loadClientData();
+    const conv = await generateConvergence(globalClientData);
+    const enriched = {
+      ...conv,
+      sections: conv.sections.map(s => ({
+        ...s,
+        ancestors: s.section_type === 'frequency'
+          ? (globalClientData.freqAncestors[s.title] || []).filter(Boolean)
+          : []
+      }))
+    };
+    main.innerHTML = renderConvergence(enriched, globalClientData);
+  } catch(err) {
+    main.innerHTML = `<div style="text-align:center;padding:4rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:#c07060">
+      <p>The convergence could not be generated.</p>
+      <p style="font-size:15px;margin-top:0.5rem;opacity:0.88">${err.message}</p>
+      <button class="btn-regen" style="margin-top:1.5rem" onclick="init()">Try again</button>
+    </div>`;
+  }
+}
+
+async function init() {
+  const main = document.getElementById('main-content');
+  try {
+    globalClientData = await loadClientData();
+    const existing = await loadExistingConvergence(globalClientData.client.id);
+
+    if (existing && existing.sections?.length) {
+      main.innerHTML = renderConvergence(existing, globalClientData);
+    } else {
+      main.innerHTML = renderGeneratePanel(globalClientData);
+    }
+  } catch(err) {
+    main.innerHTML = `<div style="text-align:center;padding:4rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:#c07060">
+      <p>${err.message}</p>
+    </div>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
