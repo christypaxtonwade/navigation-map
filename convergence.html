@@ -352,98 +352,71 @@ body::before {
 }
 
 /* ── Print styles — full convergence ── */
+@page {
+  margin: 0.75in;
+  size: letter portrait;
+}
+
 @media print {
-  /* Reset everything to white/dark */
   *, *::before, *::after {
     opacity: 1 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    animation: none !important;
+    transition: none !important;
   }
-  body {
-    background: #fff !important;
-    color: #1e1a12 !important;
-  }
+  body { background: #fff !important; color: #000 !important; font-size: 14px !important; }
   body::before, body::after { display: none !important; }
 
-  /* Hide all chrome */
   .pdf-bar, .btn-generate, .generate-panel, .progress-wrap,
-  .header-nav-links, .summary-overlay, .regen-bar,
-  .nav-links, .header-nav-links { display: none !important; }
+  .header-nav-links, .summary-overlay, .nav-links { display: none !important; }
 
-  /* Page layout */
   .page { padding: 0 !important; max-width: 100% !important; }
 
-  /* Header */
-  .header { margin-bottom: 2rem !important; opacity: 1 !important; animation: none !important; }
-  .header-eyebrow { color: #9a6e22 !important; }
-  .header-title { color: #1e1a12 !important; font-size: 2.5rem !important; opacity: 1 !important; }
-  .header-subtitle { color: #6b5f48 !important; }
-  .header-sub { color: #3d3628 !important; }
-  .header-rule { background: #c9a87c !important; opacity: 1 !important; }
+  .header { margin-bottom: 1rem !important; opacity: 1 !important; }
+  .header-eyebrow { color: #9a6e22 !important; font-size: 10px !important; margin-bottom: 0.3rem !important; }
+  .header-title { color: #000 !important; font-size: 1.8rem !important; margin-bottom: 0.2rem !important; }
+  .header-subtitle { color: #333 !important; font-size: 12px !important; }
+  .header-sub { color: #333 !important; font-size: 12px !important; line-height: 1.5 !important; margin-bottom: 0.5rem !important; }
+  .header-rule { background: #c9a87c !important; margin: 0.6rem auto !important; }
 
-  /* Snapshot card */
   .snapshot-card {
-    background: #f8f4ec !important;
-    border: 1px solid #d4c8b0 !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
+    background: #f8f4ec !important; border: 1px solid #c9a87c !important;
+    padding: 0.6rem 0.9rem !important; margin-bottom: 1rem !important;
+    break-inside: avoid !important; gap: 0.5rem !important;
   }
-  .snapshot-label { color: #9a6e22 !important; }
-  .snapshot-value { color: #1e1a12 !important; }
+  .snapshot-label { color: #9a6e22 !important; font-size: 9px !important; margin-bottom: 0.15rem !important; }
+  .snapshot-value { color: #000 !important; font-size: 13px !important; }
 
-  /* Frequency bars */
-  .dominant-frequencies { break-inside: avoid !important; }
-  .freq-name { color: #1e1a12 !important; }
-  .freq-count { color: #6b5f48 !important; }
-  .freq-bar-wrap {
-    background: #e8e0d0 !important;
-    border: 1px solid #d4c8b0 !important;
-  }
-  .freq-bar {
-    background: #9a6e22 !important;
-    min-width: 4px !important;
-    display: block !important;
-    height: 100% !important;
-  }
+  .dominant-frequencies { margin-bottom: 0.75rem !important; break-inside: avoid !important; }
+  .section-header { margin-bottom: 0.5rem !important; }
+  .section-header-label { color: #9a6e22 !important; font-size: 9px !important; }
+  .section-header-line { background: #c9a87c !important; opacity: 1 !important; }
+  .frequency-bar-row { margin-bottom: 0.3rem !important; }
+  .freq-name { color: #000 !important; font-size: 12px !important; width: 170px !important; }
+  .freq-count { color: #333 !important; font-size: 11px !important; }
+  .freq-bar-wrap { background: #e0d8cc !important; border: 1px solid #c9a87c !important; height: 5px !important; }
+  .freq-bar { background: #9a6e22 !important; min-width: 4px !important; display: block !important; height: 100% !important; }
 
-  /* Section headers */
-  .section-header-line { background: #d4c8b0 !important; opacity: 1 !important; }
-  .section-header-label { color: #9a6e22 !important; }
-
-  /* Convergence sections */
+  .convergence-output { opacity: 1 !important; }
   .convergence-section {
-    background: #fff !important;
-    border: 1px solid #d4c8b0 !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    margin-bottom: 1.5rem !important;
-    opacity: 1 !important;
-    animation: none !important;
+    background: #fff !important; border: 1px solid #d4c8b0 !important;
+    margin-bottom: 0.6rem !important; break-inside: avoid !important; page-break-inside: avoid !important;
   }
   .section-title-bar {
-    background: #f8f4ec !important;
-    border-bottom: 1px solid #d4c8b0 !important;
+    background: #f8f4ec !important; border-bottom: 1px solid #d4c8b0 !important;
+    padding: 0.5rem 0.9rem !important;
   }
-  .section-glyph { color: #9a6e22 !important; opacity: 1 !important; }
-  .section-type-label { color: #9a6e22 !important; }
-  .section-title { color: #1e1a12 !important; }
-  .section-fieldguide-note { color: #6b5f48 !important; }
-  .section-body { background: #fff !important; }
-  .section-text { color: #1e1a12 !important; }
-  .section-text p { color: #1e1a12 !important; }
+  .section-glyph { color: #9a6e22 !important; font-size: 0.9rem !important; }
+  .section-type-label { color: #9a6e22 !important; font-size: 8px !important; margin-bottom: 0.1rem !important; }
+  .section-title { color: #000 !important; font-size: 1.1rem !important; line-height: 1.2 !important; }
+  .section-fieldguide-note { color: #333 !important; font-size: 11px !important; margin-top: 0.1rem !important; line-height: 1.4 !important; }
+  .section-body { padding: 0.6rem 0.9rem !important; }
+  .section-text { color: #000 !important; font-size: 12px !important; line-height: 1.55 !important; }
+  .section-text p { color: #000 !important; margin-bottom: 0.45rem !important; }
 
-  /* Evidence chips */
-  .ancestor-evidence { border-top: 1px solid #d4c8b0 !important; }
-  .evidence-label { color: #9a6e22 !important; }
-  .evidence-chip {
-    background: #f8f4ec !important;
-    border: 1px solid #d4c8b0 !important;
-  }
-  .evidence-name { color: #9a6e22 !important; }
-  .evidence-snippet { color: #3d3628 !important; }
-
-  /* Convergence output animation reset */
-  .convergence-output { opacity: 1 !important; animation: none !important; }
+  /* Hide evidence chips — they expand the document significantly */
+  .ancestor-evidence { display: none !important; }
 }
 
 /* ── Print styles — summary modal only ── */
