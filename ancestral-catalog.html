@@ -43,12 +43,12 @@ body::before {
 
 /* Header */
 .header { text-align: center; margin-bottom: 2.5rem; opacity: 0; animation: fadeUp 0.9s ease forwards; }
-.header-eyebrow { font-size: 11px; font-weight: 400; letter-spacing: 0.22em; color: var(--gold); text-transform: uppercase; margin-bottom: 0.9rem; }
+.header-eyebrow { font-size: 15px; font-weight: 400; letter-spacing: 0.22em; color: var(--gold); text-transform: uppercase; margin-bottom: 0.9rem; }
 .header-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem,5vw,3.6rem); font-weight: 300; font-style: italic; line-height: 1.05; }
 .header-rule { width: 40px; height: 1px; background: var(--gold-dim); margin: 1.2rem auto; }
 .header-sub { font-size: 15px; color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.8; }
 .header-links { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-top: 1rem; }
-.header-link { font-size: 14px; font-weight: 400; color: var(--gold); letter-spacing: 0.08em; text-decoration: none; border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px; transition: color 0.2s; }
+.header-link { font-size: 15px; font-weight: 400; color: var(--gold); letter-spacing: 0.08em; text-decoration: none; border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px; transition: color 0.2s; }
 .header-link:hover { color: #dfc090; }
 
 /* Controls */
@@ -57,7 +57,7 @@ body::before {
 .search-input {
   width: 100%; background: var(--surface); border: 1px solid var(--border);
   border-radius: 8px; padding: 10px 16px 10px 38px;
-  color: var(--text); font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 300;
+  color: var(--text); font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 300;
   outline: none; transition: border-color 0.2s;
 }
 .search-input:focus { border-color: var(--border-hover); }
@@ -65,7 +65,7 @@ body::before {
 .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; stroke: var(--text-dim); fill: none; }
 .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
 .filter-btn {
-  font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 400;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
   letter-spacing: 0.08em; padding: 7px 14px;
   border: 1px solid var(--border); border-radius: 20px;
   background: transparent; color: var(--text-dim); cursor: pointer;
@@ -73,7 +73,7 @@ body::before {
 }
 .filter-btn:hover { border-color: var(--border-hover); color: var(--text); }
 .filter-btn.active { background: var(--gold); color: #09090f; border-color: var(--gold); font-weight: 500; }
-.count-note { font-size: 13px; color: var(--text-dim); margin-left: auto; white-space: nowrap; }
+.count-note { font-size: 15px; color: var(--text-dim); margin-left: auto; white-space: nowrap; }
 
 /* Grid */
 .catalog-grid {
@@ -97,7 +97,7 @@ body::before {
 .keynote-card.open { border-color: rgba(196,190,248,0.38); background: var(--surface-2); }
 .keynote-card.hidden { display: none; }
 .keynote-era-bar { height: 3px; width: 100%; background: linear-gradient(90deg, rgba(196,190,248,0.7), rgba(196,190,248,0.15)); }
-.keynote-label { display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(196,190,248,0.8); background: rgba(196,190,248,0.08); border: 1px solid rgba(196,190,248,0.18); border-radius: 10px; padding: 2px 8px; margin-bottom: 0.5rem; }
+.keynote-label { display: inline-block; font-size: 15px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(196,190,248,0.8); background: rgba(196,190,248,0.08); border: 1px solid rgba(196,190,248,0.18); border-radius: 10px; padding: 2px 8px; margin-bottom: 0.5rem; }
 
 /* Card header bar — era color coding */
 .card-era-bar { height: 3px; width: 100%; }
@@ -110,14 +110,14 @@ body::before {
 .card-body { padding: 1.25rem 1.4rem 1.1rem; }
 .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; gap: 0.75rem; }
 .card-name { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-weight: 500; color: var(--text); line-height: 1.2; flex: 1; }
-.card-date { font-size: 12px; color: var(--text-dim); letter-spacing: 0.06em; white-space: nowrap; padding-top: 3px; flex-shrink: 0; }
-.card-epithet { font-size: 13px; font-style: italic; font-family: 'Cormorant Garamond', serif; color: var(--text-dim); margin-bottom: 0.6rem; line-height: 1.5; }
-.card-meta { font-size: 12px; color: var(--text-dim); letter-spacing: 0.04em; margin-bottom: 0.9rem; }
+.card-date { font-size: 15px; color: var(--text-dim); letter-spacing: 0.06em; white-space: nowrap; padding-top: 3px; flex-shrink: 0; }
+.card-epithet { font-size: 15px; font-style: italic; font-family: 'Cormorant Garamond', serif; color: var(--text-dim); margin-bottom: 0.6rem; line-height: 1.5; }
+.card-meta { font-size: 15px; color: var(--text-dim); letter-spacing: 0.04em; margin-bottom: 0.9rem; }
 
 /* Tags */
 .card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 0.9rem; }
 .tag {
-  font-size: 11px; font-weight: 400; letter-spacing: 0.06em;
+  font-size: 15px; font-weight: 400; letter-spacing: 0.06em;
   padding: 3px 9px; border-radius: 12px;
   background: var(--tag-bg); border: 1px solid var(--tag-border);
   color: var(--gold); white-space: nowrap;
@@ -130,9 +130,9 @@ body::before {
 .tag-weaving a:hover { text-decoration: underline; }
 
 /* Narrative — collapsed by default */
-.card-narrative-preview { font-size: 14px; color: var(--text-secondary); line-height: 1.75; }
+.card-narrative-preview { font-size: 15px; color: var(--text-secondary); line-height: 1.75; }
 .card-narrative-full {
-  font-size: 14px; color: var(--text-secondary); line-height: 1.75;
+  font-size: 15px; color: var(--text-secondary); line-height: 1.75;
   max-height: 0; overflow: hidden; opacity: 0;
   transition: max-height 0.5s ease, opacity 0.4s ease;
   border-top: 1px solid rgba(255,255,255,0.05);
@@ -141,7 +141,7 @@ body::before {
 .catalog-card.open .card-narrative-full { max-height: 600px; opacity: 1; margin-top: 0.75rem; padding-top: 0.75rem; }
 .card-chevron {
   display: inline-flex; align-items: center; gap: 5px;
-  font-size: 12px; color: var(--gold); margin-top: 0.6rem;
+  font-size: 15px; color: var(--gold); margin-top: 0.6rem;
   letter-spacing: 0.06em; cursor: pointer;
 }
 .card-chevron svg { width: 10px; height: 10px; stroke: var(--gold); fill: none; transition: transform 0.3s; }
@@ -184,7 +184,7 @@ body::before {
 <input class="search-input" id="search" oninput="applyAll()" placeholder="Search by name, place, field, epithet…" type="text"/>
 </div>
 <div class="filter-group">
-<span style="font-size:11px;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;padding-top:8px;flex-shrink:0">Filter</span>
+<span style="font-size: 15px;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;padding-top:8px;flex-shrink:0">Filter</span>
 <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
 <button class="filter-btn" onclick="setFilter('mythic', this)">Mythic</button>
 <button class="filter-btn" onclick="setFilter('ancient', this)">Ancient</button>
@@ -195,7 +195,7 @@ body::before {
     <button class="filter-btn" onclick="setFilter('keynote', this)">Keynotes</button>
 </div>
 <div class="filter-group sort-group">
-<span style="font-size:11px;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;padding-top:8px;flex-shrink:0">Sort</span>
+<span style="font-size: 15px;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;padding-top:8px;flex-shrink:0">Sort</span>
 <button class="filter-btn active sort-btn" onclick="setSort('chronological', this)">Chronological</button>
 <button class="filter-btn sort-btn" onclick="setSort('name', this)">Name</button>
 <button class="filter-btn sort-btn" onclick="setSort('location', this)">Location</button>
@@ -204,1149 +204,82 @@ body::before {
 <span class="count-note" id="count-note">26 ancestors</span>
 </div>
 <div class="catalog-grid" id="catalog-grid">
-<!-- ═══ ANNA DON VERCH MATHONWY ═══ -->
-<div class="catalog-card" data-era="mythic" data-search="anna don verch mathonwy prophetess dôn danu celtic britain goddess" data-sort-fields="ii iii xii xiii" data-sort-location="celtic britain" data-sort-name="anna don" data-sort-year="-3000" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-mythic"></div>
-<div class="card-body">
-<div class="card-top">
-<div class="card-name">Anna Don verch Mathonwy</div>
-<div class="card-date">mythic · before the erasure</div>
-</div>
-<div class="card-epithet">The Prophetess · Dôn · Danu · The Mother Before the Name Was Changed</div>
-<div class="card-meta">Celtic Britain · grandmother of Bran Fendigaid · wife of Beli Mawr</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html#">In Weaving ✦</a></span>
-<span class="tag">Anomalous Reception</span>
-<span class="tag">Threshold Events</span>
-<span class="tag">Sovereignty</span>
-<span class="tag">The Return</span>
-<span class="tag">Terra Incognita</span>
-</div>
-<div class="card-narrative-preview">Welsh mother goddess, equivalent to the Irish Danu and Gaulish Belisama. Wife of Beli Mawr, grandmother of Bran Fendigaid through their daughter Penarddun. Her name and identity were absorbed through Christianization — the goddess becoming the prophetess, the source becoming the connection. Medieval Welsh annals name her a near kinswoman of the Virgin Mary. She is the root from which the weaving's genealogical record grows.</div>
-<div class="card-narrative-full">The erasure of Anna Don verch Mathonwy is the thesis of the entire weaving in miniature: the goddess Dôn, whose name carries the same frequency as the Irish Danu and the Gaulish Belisama, absorbed into genealogical Christianity and made into a near-kinswoman of the Holy Family. The Mabinogion names her sister of Math mab Mathonwy, King of Gwynedd — the magician-king who required the feminine body as his foundation of power. Her lineage runs to Bran Fendigaid through Penarddun verch Beli, making her the deepest genealogical root in this entire archive. The cauldron Bran carries is her inheritance — the generative vessel of the goddess tradition, passed one generation into human lineage before it enters the mythic record as a magical object.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ BRAN FENDIGAID ═══ -->
-<div class="catalog-card" data-era="mythic" data-search="bran fendigaid ap llyr blessed raven cauldron white hill celtic britain" data-sort-fields="iii iv x" data-sort-location="wales" data-sort-name="bran fendigaid" data-sort-year="-100" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-mythic"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Bran Fendigaid ap Llyr</div><div class="card-date">mythic · pre-Roman</div></div>
-<div class="card-epithet">Blessed Raven · King of Britain · Keeper of the Cauldron</div>
-<div class="card-meta">Island of the Mighty · Wales · Second Branch of the Mabinogion</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Threshold Events</span>
-<span class="tag">Embodied Signal</span>
-<span class="tag">The Shadow</span>
-<span class="tag">Totemic Presences</span>
-
-</div>
-<div class="card-narrative-preview">Son of Llyr, grandson of Anna Don verch Mathonwy. Possessor of the Cauldron of Rebirth. Led his army to Ireland when his sister Branwen was enslaved. Mortally wounded by a poisoned spear, he commanded his seven companions to sever his head and carry it to the White Hill in London to guard Britain from invasion. For eighty-seven years the head presided over feasting and fellowship, speaking and prophesying. Bran in Welsh means raven.</div>
-<div class="card-narrative-full">The weaving's first genealogical card and the mythic template for the lineage's central pattern: the sovereign who must be sacrificed so his people survive, whose consciousness persists after the body has fallen. The Cauldron of Rebirth — the dead placed within it emerged whole but silent — is the proto-Grail, inherited from his grandmother Dôn's goddess tradition. The White Hill burial connects to Christina Young Higginson, born at White Hill, Dalkeith — a two-thousand-year circuit completed in the lineage. The raven is his sacred bird and the central axis of the Navigation Map carries it forward as a living sigil.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ BOUDICCA ═══ -->
-<div class="catalog-card" data-era="ancient" data-search="boudicca iceni queen warrior roman britain east anglia" data-sort-fields="iii xii" data-sort-location="east anglia" data-sort-name="boudicca" data-sort-year="61" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-ancient"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Boudicca</div><div class="card-date">died c. 61 AD</div></div>
-<div class="card-epithet">Queen of the Iceni · Warrior of the Land</div>
-<div class="card-meta">East Anglia, Roman Britain · died c. 61 AD</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Threshold Events</span>
-<span class="tag">Sovereignty</span>
-
-
-</div>
-<div class="card-narrative-preview">Queen of the Iceni tribe of East Anglia. When her husband Prasutagus died, Rome seized his lands and flogged her daughters. She led the most significant revolt against Roman occupation Britain ever produced, burning Camulodunum, Londinium, and Verulamium. Defeated by Suetonius Paulinus in 61 AD. Died by her own hand rather than captivity. Her name means Victory.</div>
-<div class="card-narrative-full">Boudicca's revolt was not merely military — it was the last sustained assertion of the pre-Roman Celtic sovereignty of Britain before four centuries of Roman occupation reshaped the island's culture, religion, and political identity. The pattern she embodies in this lineage: the woman who acts when no conventional path remains available, who places her body in service of what the land requires, who chooses her own end rather than surrender. Her daughters were the stated cause of the revolt. She rose for them and took the whole country with her.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ MARY MAGDALENE ═══ -->
-<div class="catalog-card" data-era="ancient" data-search="mary magdalene galilee jerusalem provence apostle teaching threshold" data-sort-fields="iii vii xi" data-sort-location="galilee" data-sort-name="magdalene mary" data-sort-year="30" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-ancient"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Mary Magdalene</div><div class="card-date">1st century AD</div></div>
-<div class="card-epithet">Apostle to the Apostles · Keeper of the Teaching · Witness at the Threshold</div>
-<div class="card-meta">Galilee · Jerusalem · Provence · 1st century AD</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Threshold Events</span>
-<span class="tag">The Creative Record</span>
-<span class="tag">The Teaching</span>
-
-
-</div>
-<div class="card-narrative-preview">First witness of the resurrection, first to carry the teaching forward after the crucifixion — and the first to be disbelieved. Her testimony was dismissed by those she carried it to. Later tradition made her penitent, erasing her role as witness and teacher. The alabaster jar, the anointing, the empty tomb: the woman who went to the threshold alone and returned with news the world was not ready to receive.</div>
-<div class="card-narrative-full">The pattern of Magdalene's erasure is the template for every erasure in this weaving: the feminine spiritual authority absorbed, diminished, and redirected by institutional power. She was not penitent — she was Apostle to the Apostles, the title given her by the early Church before the later tradition rewrote her role. Her tradition survived in Provence, in the Grail legends, in the Cathar beliefs of the Languedoc, in the Merovingian lineage claims that kept surfacing throughout medieval Europe. She is the weaving's most documented erasure and the most alive presence in the current restoration.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ GRADLON MAWR ═══ -->
-<div class="catalog-card" data-era="ancient" data-search="gradlon mawr cornouaille brittany ys breton king threshold" data-sort-fields="iii viii x" data-sort-location="brittany" data-sort-name="gradlon mawr" data-sort-year="400" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-ancient"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Gradlon Mawr ap Cynan</div><div class="card-date">c. 4th–5th century</div></div>
-<div class="card-epithet">King of Cornouaille · Builder of Ys · The Father at the Threshold</div>
-<div class="card-meta">Cornouaille, Brittany · Bay of Douarnenez · c. 4th–5th century</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Threshold Events</span>
-<span class="tag">Animal &amp; Nature Medicine</span>
-<span class="tag">The Shadow</span>
-
-</div>
-<div class="card-narrative-preview">King of Cornouaille in Brittany, builder of the drowned city of Ys. His daughter Dahut opened the sea gates and the city was swallowed. Gradlon escaped on his horse Morvarc'h — the horse that runs on the waves — carrying the shadow of the daughter he could not save. The city of Ys is said to still lie beneath the Bay of Douarnenez, and in Breton tradition its bells can sometimes be heard ringing from below the water.</div>
-<div class="card-narrative-full">Gradlon belongs to the Breton branch of the lineage — the Armorican inheritance that eventually connects through Constance de Châteaubriant to the Stewart line. His story encodes the pattern of the Celtic sovereign who sacrifices what he loves most for survival, and the drowned city encodes the suppression of the druidic and pre-Christian feminine that the Christianization of Brittany required. Dahut, the daughter who opened the gate — the feminine intelligence pushed into the depths — is the recurring figure of this lineage's shadow. The horse that runs on water is the oldest image of navigation across the impossible threshold.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ KING ARTHUR ═══ -->
-<div class="catalog-card" data-era="mythic" data-search="king arthur camelot avalon once future sovereignty britain" data-sort-fields="iii xii x" data-sort-location="britain" data-sort-name="arthur king" data-sort-year="500" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-mythic"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">King Arthur</div><div class="card-date">c. 5th–6th century</div></div>
-<div class="card-epithet">Once and Future King · The Sovereignty Question · Rex Quondam Rexque Futurus</div>
-<div class="card-meta">Post-Roman Britain · Camelot · Avalon · c. 5th–6th century</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Threshold Events</span>
-<span class="tag">Sovereignty</span>
-
-<span class="tag">The Shadow</span>
-</div>
-<div class="card-narrative-preview">The mythic sovereign of post-Roman Britain, sleeping under the hill until the land needs him again. His story encodes the sovereignty question that runs through this entire lineage: what does it mean to carry a sovereign frequency in a world not yet ready for it? The Round Table as a structural model — no head, no hierarchy, all seats equal. The wound at Camlann. The return to Avalon. The promise that he will come again when Britain needs him.</div>
-<div class="card-narrative-full">Arthur is Bran Fendigaid's mythic heir — the once and future king is the direct echo of the head that waits under the White Hill, guarding Britain until needed. Robert de Bruce identified with Arthur in his darkest moments, hiding in caves, watching spiders rebuild. The sovereignty question Arthur embodies is the Navigation Map's central inquiry: the capacity to hold sovereign frequency in conditions of extreme adversity, without performing it, without abandoning it, without the kingdom yet being ready to receive it. He waited. He returned. The time returns.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ MERLIN ═══ -->
-<div class="catalog-card" data-era="mythic" data-search="merlin myrddin wyllt shapeshifter seer architect wales camelot" data-sort-fields="i viii xi" data-sort-location="wales" data-sort-name="merlin" data-sort-year="500" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-mythic"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Merlin</div><div class="card-date">c. 5th–6th century</div></div>
-<div class="card-epithet">Myrddin Wyllt · Architect of the Pattern · The Shapeshifter at the Edge</div>
-<div class="card-meta">Wales · Camelot · The Crystal Cave · c. 5th–6th century</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Structural Models</span>
-<span class="tag">Animal &amp; Nature Medicine</span>
-<span class="tag">The Teaching</span>
-
-
-</div>
-<div class="card-narrative-preview">The wild prophet who lived at the edge of the forest, who lost his mind at the Battle of Arderydd and fled into the wilderness to speak with animals and receive visions. Merlin Emrys — the court seer, architect of Camelot, mover of Stonehenge. Two figures merged into one: the wild man and the court magician, the madness and the precision. He built the conditions for Arthur's sovereignty without inhabiting the throne himself.</div>
-<div class="card-narrative-full">Merlin's dual nature — Myrddin Wyllt the wild prophet and Merlin Emrys the architect — encodes a frequency that runs through this lineage: the person who holds the larger vision and builds the structural conditions for sovereignty without being the sovereign themselves. The teacher, the cartographer, the one who prepares the ground. His forest exile as the descent that produced the teaching: he had to lose the court, lose his mind, lose the ordinary world, in order to receive what the ordinary world could not give him. The Navigation Map is, in one register, a Merlin project.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ BERTILA OF SPOLETO ═══ -->
-<div class="catalog-card" data-era="medieval" data-search="bertila spoleto holy roman empress consors regni friuli italy" data-sort-fields="vii x xii" data-sort-location="italy" data-sort-name="bertila" data-sort-year="860" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-medieval"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Bertila of Spoleto</div><div class="card-date">c. 860 – 915</div></div>
-<div class="card-epithet">Holy Roman Empress · Consors Regni · Partner in Rule</div>
-<div class="card-meta">Northern Italy · Spoleto · Friuli · c. 860–915</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">The Creative Record</span>
-<span class="tag">The Shadow</span>
-<span class="tag">Sovereignty</span>
-
-
-</div>
-<div class="card-narrative-preview">Empress of the Carolingian successor states, wife of Berengar I. Her title was Consors Regni — partner in rule — and she governed with genuine authority alongside her husband. She was poisoned, almost certainly on political orders, in 915 — the year she reached her greatest power. The peak and the stripping in the same year. The pattern that runs through the feminine line of this weaving with striking consistency.</div>
-<div class="card-narrative-full">Bertila's specific frequency in this lineage is the woman who arrives at the summit of her power in the same season she is removed from it. Not before — after arrival, as if the arrival itself is what triggers the response. This pattern recurs in Almodis, Eleanor, and Melusine — the weaving's persistent encoding of the feminine sovereign whose greatest moment coincides with her greatest vulnerability. Bertila's heraldic lion rampant passes through the lineage into the Bruce arms and forward into the Scottish royal tradition.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ HENRY THE FOWLER ═══ -->
-<div class="catalog-card" data-era="medieval" data-search="henry fowler saxony east francia ottonian dynasty germany" data-sort-fields="i xi" data-sort-location="saxony" data-sort-name="henry fowler" data-sort-year="876" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-medieval"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Henry the Fowler</div><div class="card-date">876 – 936</div></div>
-<div class="card-epithet">King of East Francia · Founder of the Ottonian Dynasty</div>
-<div class="card-meta">Saxony · East Francia · 876–936</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Structural Models</span>
-<span class="tag">The Teaching</span>
-
-
-</div>
-<div class="card-narrative-preview">King of East Francia, founder of the Ottonian dynasty that produced the Holy Roman Emperors. Named the Fowler because he was reportedly hunting birds when informed of his election as king. Built the conditions for German imperial sovereignty without living to see its full expression — his son Otto I became the first Holy Roman Emperor. The builder who prepares the ground for what comes after him.</div>
-<div class="card-narrative-full">Henry belongs in this lineage primarily as a structural figure — his significance is architectural rather than personal. He built the administrative, military, and political conditions that allowed the Ottonian imperial project to become possible. His connection to Bertila of Spoleto through the Carolingian successor lineages makes him part of the same network of 9th-10th century European sovereignty that produced this weaving's earliest documented historical ancestors. His frequency: the one who builds what others will inhabit, the architect of the conditions rather than the inhabitant of them.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ PRÉSINE OF AVALON ═══ -->
-<div class="catalog-card" data-era="mythic" data-search="présine avalon fairy fountain scotland melusine mélior palestine mother" data-sort-fields="iii ix x xii" data-sort-location="avalon" data-sort-name="présine" data-sort-year="750" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-mythic"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Présine of Avalon</div><div class="card-date">mythic · before the beginning</div></div>
-<div class="card-epithet">The Fairy at the Fountain · She Who Set the Condition · Mother of the Three</div>
-<div class="card-meta">Avalon · Scotland · the Well of Thirst · daughter of Moronoe of Avalon</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Threshold Events</span>
-<span class="tag">The Mirror</span>
-<span class="tag">The Shadow</span>
-<span class="tag">Sovereignty</span>
-
-
-</div>
-<div class="card-narrative-preview">Daughter of Moronoe, one of the nine sisters of Avalon. Met Elinas, King of Scotland, at the Font de Sé — the Fountain of Thirst — where she danced among fairies. She agreed to marry him on one condition: he must never see her during childbirth or the bathing of their daughters. He forgot his promise. She took their three daughters to the Isle of Avalon and raised them in the old knowledge. When they imprisoned their father in retaliation, she punished them — encoding each daughter into the permanence of the natural world.</div>
-<div class="card-narrative-full">Présine is the origin of this branch's defining pattern: the woman who names the sacred condition before entering the marriage, watches it violated, retreats to preservation rather than collapse, and then must navigate daughters who respond to the same wound differently than she did. Her spell over her daughters was not a curse but a preservation — as long as there are woods and rivers and white mists above the streams, there will be fairies. They are the beauty of the world. That is why they will never perish. Her mother Moronoe was one of the nine sisters of Avalon who tended the wounded — placing Présine in direct descent from the Avalon sisterhood.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ MELUSINE ═══ -->
-<div class="catalog-card" data-era="mythic" data-search="melusine lusignan serpent fairy poitou architect la rochelle" data-sort-fields="iii vii x" data-sort-location="poitou" data-sort-name="melusine" data-sort-year="900" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-mythic"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Melusine</div><div class="card-date">mythic · 10th–12th c.</div></div>
-<div class="card-epithet">Fairy Serpent of Lusignan · Founding Architect · She Who Flies Rather Than Submit</div>
-<div class="card-meta">Poitou · Lusignan · Forest Spring · sister of Mélior · direct ancestor through Mélior's line</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Threshold Events</span>
-<span class="tag">The Creative Record</span>
-<span class="tag">The Shadow</span>
-
-
-</div>
-<div class="card-narrative-preview">Eldest daughter of Présine and Elinas. Architect of Vouvant, Mervent, Parthenay, La Rochelle, Niort, Châtelaillon, and said to have contributed to Mont Saint-Michel. Married Raymond of Lusignan on the condition he never see her on Saturdays. He watched. She flew. She returns to the castle of Lusignan each time one of her descendants is about to die, wailing. Her name means melodious, or Mother of Lusignan, or mist of the sea.</div>
-<div class="card-narrative-full">Melusine's story is the weaving's most complete encoding of the pattern of betrayal and transformation: the woman who built a kingdom and lost it to a husband who could not hold the vow he made. The Saturday transformation — serpent from the waist down — is not the curse but the truth he was not permitted to see. Her buildings outlasted her marriage: the towns and castles she built in a single night still stand. She did not disappear when she flew from the tower. She became the ancestral guardian of the lineage, returning at threshold moments. She is present in this weaving through her sister Mélior's direct line.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ MÉLIOR LA FÉE ═══ -->
-<div class="catalog-card" data-era="mythic" data-search="mélior la fée flateuse hawk castle avalon brittany nominoë direct ancestor" data-sort-fields="vi ix xi" data-sort-location="brittany" data-sort-name="mélior" data-sort-year="800" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-mythic"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Mélior la Fée</div><div class="card-date">mythic · 8th–9th century</div></div>
-<div class="card-epithet">La Flateuse · Princess of the Hawk's Castle · The Soother · Direct Ancestor</div>
-<div class="card-meta">Avalon · Brittany · daughter of Présine and Elinas · mother of Nominoë, first King of Brittany · Sosa 56,111,444,209</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Body as Active Practice</span>
-<span class="tag">The Mirror</span>
-<span class="tag">The Teaching</span>
-
-
-</div>
-<div class="card-narrative-preview">Middle daughter of Présine and Elinas, direct genealogical ancestor — Sosa number 56,111,444,209 in the documented family tree. La flateuse: the soother, the one who heals through gentle touch. Sealed inside the Hawk's Castle as her mother's punishment. Married Érispoë of Poher, Count of Poher in Brittany. Her son Nominoë became the first king of unified Brittany, successfully holding Breton sovereignty against the Carolingian Franks.</div>
-<div class="card-narrative-full">Mélior is the sister who did not become the famous legend — Melusine took the serpent tail and the architectural dynasty, while Mélior took the Breton marriage and the healing gift and the quiet continuance of the direct line. La flateuse does not mean flatterer in the modern pejorative sense — it means the one who soothes, who strokes gently, who heals through touch. From the older French meaning: to caress, to smooth, to ease. The soother produced the sovereign: her son Nominoë founded unified Brittany. French was always going to be the language of this branch of the lineage. Seven years of study for a reason.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ CONSTANCE DE CHÂTEAUBRIANT ═══ -->
-<div class="catalog-card" data-era="medieval" data-search="constance châteaubriant brittany flaad stewart threshold breton bridge" data-sort-fields="iii i" data-sort-location="brittany" data-sort-name="constance" data-sort-year="980" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-medieval"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Constance de Châteaubriant</div><div class="card-date">c. 980</div></div>
-<div class="card-epithet">The Breton Bridge · Lady of the Threshold Between Worlds</div>
-<div class="card-meta">Brittany · c. 980 · married Flaad, progenitor of the Stewart line</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Threshold Events</span>
-<span class="tag">Structural Models</span>
-
-
-</div>
-<div class="card-narrative-preview">Breton noblewoman of the House of Châteaubriant, at the eastern edge of Brittany where the Breton world meets the Frankish world. Married Flaad, progenitor of the Stewart line that would eventually produce the Scottish royal dynasty. She is the threshold between the Breton Celtic world and the Norman-Scottish lineage — carrying the Atlantic Celtic memory into the line that connects to Robert de Bruce and beyond.</div>
-<div class="card-narrative-full">Constance's significance is structural and genealogical — she is the hinge point where the Breton tradition enters the Stewart line. Her documentation is thin, which is itself information: she exists in the record primarily as the point where two lines meet, the woman whose significance is encoded in the genealogy that follows her rather than in any document that names her directly. This is the specific unresolved of women at the junction point. The ermine field of Brittany, the threshold line, the Atlantic shore where the Celtic saints arrived in their coracles — all of this she carries across into the Scottish line through her marriage.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ ALMODIS DE LA MARCHE ═══ -->
-<div class="catalog-card" data-era="medieval" data-search="almodis marche barcelona countess law written toulouse limousin" data-sort-fields="vii xii x" data-sort-location="barcelona" data-sort-name="almodis" data-sort-year="1020" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-medieval"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Almodis de la Marche</div><div class="card-date">c. 1020 – 1071</div></div>
-<div class="card-epithet">Countess of Barcelona · Consors et Auctrix · She Who Wrote the Law</div>
-<div class="card-meta">Limousin · Toulouse · Barcelona · c. 1020–1071</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">The Creative Record</span>
-<span class="tag">Sovereignty</span>
-<span class="tag">The Shadow</span>
-<span class="tag">Creative Record</span>
-
-</div>
-<div class="card-narrative-preview">Countess of Barcelona by right of marriage to Ramon Berenguer I. Known as Consors et Auctrix — partner and author. She co-authored the Usatges de Barcelona, the first written legal code of Catalonia. Married three times, twice divorced. Murdered by her stepson in 1071 — the same year she and her husband had completed the code of laws she helped write. Killed by the structure she helped build.</div>
-<div class="card-narrative-full">Almodis is the legal architect of this lineage — the woman who wrote the foundational law of a civilization and was killed by its heir in the same year. The Usatges de Barcelona governed Catalonia for centuries. Her frequency is the creative record at its most consequential: the document that outlives the maker by seven hundred years. Married twice and divorced, she was a woman who moved through the political structures of 11th century Europe with unusual autonomy and unusual risk. The pattern that follows Bertila recurs here: the woman at the height of her creative and political power, removed in the same season she arrives.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ LADY GODIVA ═══ -->
-<div class="catalog-card" data-era="medieval" data-search="lady godiva coventry mercia sovereign ride countess england" data-sort-fields="iii xii" data-sort-location="england" data-sort-name="godiva" data-sort-year="1040" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-medieval"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Lady Godiva</div><div class="card-date">c. 1040 – 1080</div></div>
-<div class="card-epithet">Countess of Mercia · The Sovereign Ride</div>
-<div class="card-meta">Coventry · Mercia · England · c. 1040–1080</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Threshold Events</span>
-<span class="tag">Sovereignty</span>
-
-
-</div>
-<div class="card-narrative-preview">Countess of Mercia, wife of Leofric. She petitioned her husband to reduce the oppressive taxation on Coventry's people. He agreed on the condition she ride naked through the town. She rode. The town averted their eyes except for one — Peeping Tom, whose later interpolation into the story tells more about the culture that added him than about the act she performed. The sovereign ride was a real act, documented. It performed vulnerability as power.</div>
-<div class="card-narrative-full">Godiva's ride is one of the most precise images in this lineage of the sovereign act performed under impossible conditions: the body placed in service of the people's need, the personal exposed for the collective benefit, the condition honored in full even when honoring it requires what should not be required. Her husband set the condition expecting she would refuse. She did not refuse. The condition was met and the taxes were lowered. This is the pattern of Présine at the fountain: the condition named, the vow kept, the sacred contract honored — but this time by the woman rather than violated by the man.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ ELEANOR OF AQUITAINE ═══ -->
-<div class="catalog-card" data-era="medieval" data-search="eleanor aquitaine queen france england troubadour imprisoned sarum" data-sort-fields="vii xi xii" data-sort-location="aquitaine" data-sort-name="eleanor" data-sort-year="1122" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-medieval"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Eleanor of Aquitaine</div><div class="card-date">1122 – 1204</div></div>
-<div class="card-epithet">Queen of France and England · Duchess in Her Own Right · The Long Endurance</div>
-<div class="card-meta">Aquitaine · Paris · London · Sarum · 1122–1204</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">The Creative Record</span>
-<span class="tag">The Teaching</span>
-<span class="tag">Sovereignty</span>
-<span class="tag">Creative Record</span>
-
-
-</div>
-<div class="card-narrative-preview">Queen of France, then Queen of England. Crusader. Patron of the troubadour tradition that became the foundation of European courtly literature. Imprisoned by Henry II at Sarum for sixteen years. Released at age sixty-seven and immediately resumed governing. Died at eighty-two having outlasted everyone who tried to contain her. She governed through the creative record when the political was denied her.</div>
-<div class="card-narrative-full">Eleanor is the lineage's most fully documented historical sovereign — and the most fully documented example of its central pattern. She held genuine sovereign power, was imprisoned by the man whose territory she brought to the marriage, and governed for sixteen years from captivity through the troubadour tradition she had cultivated. The creative record as the form of sovereignty that cannot be imprisoned. She is the direct ancestor of multiple lines in this weaving — Robert de Bruce descends from her Plantagenet line, and her frequency runs through the entire medieval branch.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ BRIGID SIGURDSDOTTIR ═══ -->
-<div class="catalog-card" data-era="medieval" data-search="brigid sigurdsdottir norse mother somerled western isles sacred name" data-sort-fields="ii iv iii" data-sort-location="western isles" data-sort-name="brigid" data-sort-year="1090" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-medieval"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Brigid Sigurdsdottir</div><div class="card-date">c. 1090 – unknown</div></div>
-<div class="card-epithet">The Named One · Norse Blood, Sacred Name · Mother of Somerled</div>
-<div class="card-meta">Norse · Western Isles · c. 1090 · wife of Gillebride mac Gille Adomnain</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Anomalous Reception</span>
-<span class="tag">Embodied Signal</span>
-<span class="tag">Threshold Events</span>
-
-
-</div>
-<div class="card-narrative-preview">Norse woman, daughter of Sigurd, who carried the name of the Celtic saint of the Bride's Isles. Married Gillebride mac Gille Adomnain — whose name meant servant of Brigid — so the devotion to Brigid and the embodiment of Brigid were married in the same union. Mother of Somerled. She is the Norse frequency entering this lineage quietly, through the mother, before Ragnhilda enters it explicitly through marriage. She is almost entirely invisible in the record beyond her name and her son.</div>
-<div class="card-narrative-full">Brigid Sigurdsdottir is the most important silent ancestor in the immediate Norse lineage — the one whose significance is carried in the name she bore rather than in any documented act. A Norse woman named for the Celtic patron saint of the isles where she lived: the paradox encoded in her name is the paradox her son would spend his life enacting at political and military scale. She was the threshold before Somerled was the threshold. The flame-keeper whose patronymic carries the navigational stars of her father's people and the sacred fire of her adopted tradition. She passed both to her son. He became a kingdom.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ SOMERLED ═══ -->
-<div class="catalog-card" data-era="medieval" data-search="somerled macgillebride king isles argyll norse gaelic summer traveler renfrew" data-sort-fields="i iii viii" data-sort-location="argyll" data-sort-name="somerled" data-sort-year="1113" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-medieval"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Somerled MacGillebride</div><div class="card-date">c. 1113 – 1164</div></div>
-<div class="card-epithet">Somerle Mòr · Rex Insularum · The Summer Traveler · King of the Isles</div>
-<div class="card-meta">Morven · Argyll · Western Isles · killed at Renfrew 1164</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Structural Models</span>
-<span class="tag">Threshold Events</span>
-<span class="tag">Animal &amp; Nature Medicine</span>
-
-
-</div>
-<div class="card-narrative-preview">Son of Gillebride and Brigid Sigurdsdottir — Gaelic by paternal lineage, Norse by maternal blood. First non-Norwegian king of the Isles, his kingdom independent of both Norway and Scotland simultaneously. Innovated the stern rudder — giving his galleys superior maneuverability over Norse steering-oar vessels. Died at Renfrew fighting Walter FitzAlan, the first High Steward of Scotland — the progenitor of the same family his great-granddaughter Jean MacRory would marry into.</div>
-<div class="card-narrative-full">Somerled is the amplified resonance point of the Norse-Gaelic synthesis in this lineage — the man who was made of two bloods and governed the exact threshold between them. His father was named servant of Brigid; his mother was named Brigid. His son Angus's line becomes the MacRuari clan, from which Jean MacRory descends. He died fighting the family that would become his own descendants' family within fifty years. The structural innovation of the stern rudder is the Navigation Map's most literal ancestor — the upgrade that changes the geometry of every journey taken afterward.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ RAGNHILDA OLAFSDOTTIR ═══ -->
-<div class="catalog-card" data-era="medieval" data-search="ragnhilda olafsdottir crovan dynasty isle man norse crossing legitimacy" data-sort-fields="iii xii i" data-sort-location="isle of man" data-sort-name="ragnhilda" data-sort-year="1117" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-medieval"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Ragnhilda Olafsdottir</div><div class="card-date">c. 1117 – unknown</div></div>
-<div class="card-epithet">The Legitimizing Queen · Daughter of the Crovan Dynasty · The Norse Crossing</div>
-<div class="card-meta">Isle of Man · Kingdom of the Isles · married Somerled c. 1140</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Threshold Events</span>
-<span class="tag">Sovereignty</span>
-
-
-<span class="tag">Structural Models</span>
-</div>
-<div class="card-narrative-preview">Daughter of Olaf the Red, King of Man and the Isles. Her marriage to Somerled c. 1140 carried the Norse Crovan dynasty's claim to the Kingdom of the Isles into his line — the kingdom was claimed through her blood, not his military conquest alone. She was the deed to the isles. Her son Angus's descendants became the clan MacRuari, from which Jean MacRory descends. The Norse royal frequency enters this lineage through her as explicit political inheritance.</div>
-<div class="card-narrative-full">Ragnhilda is the Norse royal line entering this lineage at full force — not as the quiet frequency of a mother's name but as the explicit political inheritance of a dynasty. The Crovan dynasty her grandfather founded had held the western seaways since the 9th century. She carried that claim to Somerled, who needed it to legitimize his kingship. Together they produced the sons whose descendants became the great Highland clans: MacDougall, MacDonald, MacRuari. She arrives through her own branch, from her own direction, as one of many rivers meeting at the delta of the living descendant who holds this weaving.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ JEAN MACRORY ═══ -->
-<div class="catalog-card" data-era="medieval" data-search="jean macrory bute arran stewart scotland heiress claimed name lineage" data-sort-fields="ii iii i" data-sort-location="western isles" data-sort-name="jean macrory" data-sort-year="1210" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-medieval"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Jean MacRory</div><div class="card-date">c. 1210 – c. 1267</div></div>
-<div class="card-epithet">Lady of Bute and Arran · The Claimed Name · Heiress of the Isles</div>
-<div class="card-meta">Western Isles of Scotland · married Alexander Stewart, 4th High Steward of Scotland, c. 1242</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Anomalous Reception</span>
-<span class="tag">Threshold Events</span>
-<span class="tag">Structural Models</span>
-
-
-
-</div>
-<div class="card-narrative-preview">Traditionally named daughter of James MacRory, granddaughter of Angus, great-granddaughter of Somerled. Heiress of Bute and Arran after her father and grandfather were killed in 1210 — she was likely an infant or unborn when her entire male line was destroyed. Married Alexander Stewart, 4th High Steward of Scotland, c. 1242. Her son James became 5th High Steward and his grandson Walter married Marjorie Bruce, producing Robert II — first Stewart king of Scotland.</div>
-<div class="card-narrative-full">The genealogical documentation of Jean MacRory is contested — modern scholars note no primary source confirms her parentage, suggesting it may have been constructed to legitimize the Stewart seizure of the islands she brought to the marriage. The same act of genealogical claiming performed for power in the 13th century is performed again by descendants searching for belonging in the 21st. The need to claim lineage — whatever need that meets — runs as a pattern through this ancestor's story in both directions. The open knot: not unfinished, but available to be taken up again by whoever comes with whatever need.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ ROBERT DE BRUCE ═══ -->
-<div class="catalog-card" data-era="medieval" data-search="robert bruce king scots bannockburn spider sovereignty scotland independence" data-sort-fields="xii iii x" data-sort-location="scotland" data-sort-name="robert bruce" data-sort-year="1274" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-medieval"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Robert de Bruce</div><div class="card-date">1274 – 1329</div></div>
-<div class="card-epithet">King of Scots · The Spider's Lesson · The Rebuilt Sovereignty</div>
-<div class="card-meta">Ayrshire · Scotland · 1274–1329</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Sovereignty</span>
-<span class="tag">Threshold Events</span>
-<span class="tag">The Shadow</span>
-
-
-
-</div>
-<div class="card-narrative-preview">King of Scots, victor of Bannockburn 1314, author of the Declaration of Arbroath. Excommunicated, hunted, hiding in caves watching spiders. He identified himself with the Arthur legend — the once and future king, the sovereignty that cannot be permanently extinguished, only temporarily driven underground. His heraldic lion rampant descends from Bertila of Spoleto through the lineage. He established Scottish independence for three centuries.</div>
-<div class="card-narrative-full">The Bruce's sovereignty was not won through continuous strength — it was rebuilt after complete collapse. At his lowest point he was a fugitive, excommunicated, with no kingdom, watching a spider attempt its web again and again until it succeeded. That story, which he reportedly told to his followers, is the sovereignty lesson in its most distilled form: not the one who was never defeated but the one who rebuilt from the ground after defeat. His connection to Jean MacRory through the Stewart marriage that united their lines makes him the pivot of the Scottish branch of this weaving.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ SIR JOHN BROCAS ═══ -->
-<div class="catalog-card" data-era="medieval" data-search="sir john brocas knight windsor master king horse gascony england" data-sort-fields="i xi" data-sort-location="england" data-sort-name="brocas john" data-sort-year="1298" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-medieval"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Sir John Brocas</div><div class="card-date">c. 1298 – 1365</div></div>
-<div class="card-epithet">Knight of Windsor · Master of the King's Horse · The Insider-Outsider</div>
-<div class="card-meta">Gascony · Windsor · Berkshire · c. 1298–1365</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Structural Models</span>
-<span class="tag">The Teaching</span>
-
-
-</div>
-<div class="card-narrative-preview">Gascon knight who rose to become Master of the King's Horse under Edward III and one of the original Knights of Windsor — the forerunner of the Order of the Garter. Born in Gascony, the duchy Eleanor of Aquitaine brought to the English crown, he arrived in England speaking the language of the court she had built. His heraldic arms — a moor's head — encode the Crusade era and the complex cultural traffic of 14th century Europe. He built his English seat at Beaurepaire in Berkshire.</div>
-<div class="card-narrative-full">Sir John Brocas represents the transition in this lineage from continental European nobility to English settlement — the Gascon who became English, the outsider who became the insider, the one who navigated the court culture Eleanor of Aquitaine's Aquitaine had helped create. His position as Master of the King's Horse is both practical and symbolic in this lineage of threshold figures: the one who manages the animal that crosses terrain, who tends the means of movement. Between him and Benoni Patten lies nearly four centuries of undocumented ancestors — the gap in the record that the silent voices speak through.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ BENONI PATTEN & EDITH COLE ═══ -->
-<div class="catalog-card" data-era="early-modern" data-search="benoni patten edith cole revolutionary war prison ship bunker hill vermont new hampshire" data-sort-fields="iii i vi" data-sort-location="new hampshire" data-sort-name="patten benoni" data-sort-year="1757" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-early-modern"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Benoni Patten &amp; Edith Cole</div><div class="card-date">1757–1832 · 1760–1843</div></div>
-<div class="card-epithet">The Soldier and the Deacon's Daughter · Survivors of the Prison Ships · Parents of an Apostle</div>
-<div class="card-meta">Vermont · New Hampshire · New York · married 1779 · parents of David Wyman Patten, LDS Apostle</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Threshold Events</span>
-<span class="tag">Structural Models</span>
-<span class="tag">Body as Active Practice</span>
-
-
-</div>
-<div class="card-narrative-preview">Benoni enlisted within two weeks of Lexington in 1775. He was likely present at Bunker Hill, fought at Valcour Island on Lake Champlain, and was captured by HMS Apollo in September 1777, held on British prison ships for six months at a 50% death rate. Released and hospitalized for a month. Married Edith Cole in 1779. Edith was the daughter of a church deacon who built a blockhouse at Canoe Meadow, NH. Their son David Wyman Patten became an LDS Apostle, killed at the Battle of Crooked River in 1838.</div>
-<div class="card-narrative-full">Benoni is one of several documented Revolutionary War ancestors in this lineage. His service record is detailed and sobering: the prison ship was not a brief captivity but six months in conditions where half the men died, bodies passed through hatches each morning. He was twenty-one. The Battle of Valcour Island — fought to lose well rather than lose decisively, buying one year that proved pivotal — encodes the lineage's recurring pattern of acting before the outcome is certain. Edith's pension application, filed as his widow, is her voice entering the record. Practical. Attesting to the marriage, the years at Canoe Meadow. The record she was permitted to make when the record-keeping finally needed something only she could provide.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ DIANTHA MORLEY BILLINGS ═══ -->
-<div class="catalog-card" data-era="modern" data-search="diantha morley billings midwife temple apron manti relief society kirtland nauvoo utah" data-sort-fields="vi vii iii" data-sort-location="utah" data-sort-name="diantha" data-sort-year="1796" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-modern"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Diantha Morley Billings</div><div class="card-date">1796 – 1879</div></div>
-<div class="card-epithet">Midwife · Temple Maker · The One Who Held the Lantern · First Relief Society President, Manti</div>
-<div class="card-meta">Montague MA · Kirtland OH · Missouri · Nauvoo · Manti Utah · great-great-great-grandmother</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Body as Active Practice</span>
-<span class="tag">The Creative Record</span>
-<span class="tag">Threshold Events</span>
-
-<span class="tag">Creative Record</span>
-
-</div>
-<div class="card-narrative-preview">First convert-generation LDS, baptized 1830 at Kirtland. Set apart by Joseph Smith as midwife; attended nine births the night of February 4, 1845, when the Saints were driven across the Mississippi River in winter. Delegated by Joseph Smith to design and embroider the first temple apron — the pattern used in every subsequent endowment ceremony. First Relief Society president in Manti. Only doctor and midwife in Manti for years. Adopted a Native American child she named Rose Billings.</div>
-<div class="card-narrative-full">Diantha's daughter Eunice gave testimony at age seventy — in 1902 — of the night in Missouri when the women fled separately through the briars in the dark, children holding their mothers' skirts, no sound permitted. Diantha led the way with a lantern half-concealed under her apron. At the crossroads a man stepped from behind a tree and flashed a sword in her face. She jumped back and screamed. He was a brother guarding the crossing. All the women arrived safely. That image — the lantern under the apron, the light present but concealed, guidance operating in concealment — is the frequency that runs from her to the living descendant who holds this weaving.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ CHRISTINA YOUNG HIGGINSON ═══ -->
-<div class="catalog-card" data-era="modern" data-search="christina young higginson stowaway midwife poetess white hill dalkeith scotland utah" data-sort-fields="vi vii xi xiii" data-sort-location="scotland" data-sort-name="christina" data-sort-year="1844" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-modern"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Christina Young Higginson</div><div class="card-date">1844 – 1910</div></div>
-<div class="card-epithet">The Stowaway · Midwife · Poetess · Born at White Hill</div>
-<div class="card-meta">Dalkeith, Scotland · Liverpool · Salt Lake Valley · Hatch, Idaho · direct ancestor · name carrier</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Body as Active Practice</span>
-<span class="tag">The Creative Record</span>
-<span class="tag">The Teaching</span>
-<span class="tag">The Return</span>
-
-<span class="tag">Creative Record</span>
-<span class="tag">The Spiral</span>
-</div>
-<div class="card-narrative-preview">Born July 31, 1844 at White Hill, Dalkeith, Scotland. Father drowned at sea before reaching New Orleans. Mother died 1855. Stowed away on the ship John G. Boyd in 1863 with three pence and a borrowed Danish phrase. Wrote a poem to Ann Paxman on the ship — Paxman becoming Paxton in the lineage she founded. Four hundred births as midwife. Relief Society President twenty-five years. Died 1910 writing a last poem to her son who would not arrive in time.</div>
-<div class="card-narrative-full">Christina Young Higginson closes the genealogical arc of this weaving before Inanna opens the mythic gateway. She was born at White Hill — the same name as the hill in London where Bran Fendigaid commanded his head to be buried. The weaving completes a two-thousand-year circuit. She wrote her ship poem to Ann Paxman, and the name Paxman lives in the lineage as Paxton — the name carried in this work today. She is the Sovereign Descent made body: the conditions were impossible, and she crossed the ocean anyway, and brought four hundred lives into the world with her hands, and wrote poems to the end.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-<!-- ═══ INANNA ═══ -->
-<div class="catalog-card" data-era="mythic" data-search="inanna sumer queen heaven earth descent underworld gates sovereignty return" data-sort-fields="iii x xii xiii" data-sort-location="sumer" data-sort-name="inanna" data-sort-year="-3500" data-weaving="true" onclick="toggleCard(this)">
-<div class="card-era-bar era-mythic"></div>
-<div class="card-body">
-<div class="card-top"><div class="card-name">Inanna</div><div class="card-date">before time was counted</div></div>
-<div class="card-epithet">Queen of Heaven and Earth · Lady of the Great Below · The First Descent · Gateway to the Mythic Tapestry</div>
-<div class="card-meta">Sumer · the oldest written myth · after Christina Young in the Weaving · opening the Mythic Tapestry</div>
-<div class="card-tags">
-<span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-<span class="tag">Threshold Events</span>
-<span class="tag">The Shadow</span>
-<span class="tag">Sovereignty</span>
-<span class="tag">The Return</span>
-
-
-
-<span class="tag">The Spiral</span>
-</div>
-<div class="card-narrative-preview">The oldest written myth. Sumerian queen of heaven and earth who descended through seven gates to the underworld, surrendering one garment at each — crown, rod and line of lapis lazuli, lapis beads, breastplate, gold ring, measuring rod, royal robe. Stood naked before Ereshkigal, her dark sister. Was killed and hung on a peg. Restored and returned, wearing new garments, chosen. She is the structural template of the entire Sovereign Descent.</div>
-<div class="card-narrative-full">Inanna sits at the end of the genealogical record and at the gateway to the Mythic Tapestry — the room that holds the archetypal figures who belong to the work through resonance and cosmology rather than bloodline. Her descent is the mythic template for every descent in this weaving: Bertila, Almodis, Eleanor, Melusine, Mélior, Christina Young. Each of them lived some version of the seven gates. Inanna's unresolved is not hers — it is the open door the entire weaving stands before. The seven gates are not historical. They are structural. She is still descending, in every woman who must lose everything in order to find what cannot be found any other way.</div>
-<div class="card-chevron">More <svg stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 10 6"><polyline points="1,1 5,5 9,1"></polyline></svg></div>
-</div>
-</div>
-  <!-- ═══ EDWARD OF WESSEX ═══ -->
-  <div class="catalog-card" data-era="medieval" data-weaving="true" data-sort-name="edward wessex" data-sort-year="871" data-sort-location="england wessex" data-sort-fields="structural models sovereignty threshold events" data-search="edward wessex alfred great anglo-saxon king england wessex æthelflæd" onclick="toggleCard(this)">
-    <div class="card-era-bar era-medieval"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Edward of Wessex</div><div class="card-date">871 – 924</div></div>
-      <div class="card-epithet">Edward the Elder · King of the Anglo-Saxons · England's Forgotten Founder</div>
-      <div class="card-meta">Wantage, Berkshire · Wessex · son of Alfred the Great · 28th great-grandfather · maternal line</div>
-      <div class="card-tags">
-        <span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-        <span class="tag">Structural Models</span>
-        <span class="tag">Sovereignty</span>
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Son of Alfred the Great. King of the Anglo-Saxons 899–924. Reconquered Viking-held southern England in partnership with his sister Æthelflæd, Lady of the Mercians — then absorbed her kingdom and minimized her record in the official chronicle upon her death. Three marriages: Ecgwynn (origins unrecorded), Ælfflæd of Wiltshire (whose daughters married European emperors and kings), Eadgifu of Kent. Five sons, eleven daughters. Built the burh network that became the administrative skeleton of England.</div>
-      <div class="card-narrative-full">The line from Edward to the living descendant crosses immediately into the Norse-Irish world through his daughter Eadgyth's marriage to Amlaíb Cuarán, Viking King of Dublin and York. He and Henry the Fowler — already in the weaving through a separate branch — were exact contemporaries whose children married each other: Edward's daughter Eadgyth to Otto I, Henry's son. Two ancestors arrived through entirely separate genealogical routes, joined by a single marriage in the next generation. His suppression of Æthelflæd's record while relying on her military partnership is the weaving's most documented example of the lineage's central pattern: the woman whose achievements were absorbed and minimized by the structure that depended on them.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
+  <div class="loading-state" style="grid-column:1/-1">
+    <span class="loading-glyph">✦</span>
+    <div class="loading-text">Gathering the lineage…</div>
   </div>
+</div>
 
-  <!-- ═══ EADGYTH OF WESSEX ═══ -->
-  <div class="catalog-card" data-era="medieval" data-weaving="false" data-sort-name="eadgyth wessex" data-sort-year="910" data-sort-location="england ireland" data-sort-fields="threshold events anomalous reception" data-search="eadgyth wessex daughter edward dublin norse-irish crossing" onclick="toggleCard(this)">
-    <div class="card-era-bar era-medieval"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Eadgyth of Wessex</div><div class="card-date">c. 910 – 946</div></div>
-      <div class="card-epithet">The Anglo-Saxon Princess in Dublin · The Threshold Crossing · Daughter of Edward the Elder</div>
-      <div class="card-meta">Wessex · Dublin · daughter of Edward of Wessex and Ælfflæd of Wiltshire · connecting link between Anglo-Saxon and Norse-Irish worlds</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Anomalous Reception</span>
-      </div>
-      <div class="card-narrative-preview">Daughter of Edward the Elder and Ælfflæd of Wiltshire. Her marriage to Amlaíb Cuarán, Norse-Gael King of Dublin and York, is the threshold crossing that sent Edward's bloodline into the Viking world. Note: some historians debate the exact maternal lineage at this junction — whether Amlaíb's mother was Eadgyth or another English princess. The FamilySearch documentation shows this connection; scholarly sources flag uncertainty. She is the pivot between two worlds in the lineage.</div>
-      <div class="card-narrative-full">Eadgyth represents a specific pattern in this lineage: the woman whose significance is structural — she is the crossing point, the marriage that carried one world's blood into another — while her individual life is almost entirely undocumented beyond the genealogical fact of the connection. Her name is preserved. Her dates are approximate. What happened between her departure from Wessex and the birth of her children in the Norse-Irish world is not recorded. She is one of the silent ancestors who exists in the archive primarily as a hinge — which is itself information about whose lives the record chose to preserve and whose it did not.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ AMLAÍB CUARÁN ═══ -->
-  <div class="catalog-card" data-era="medieval" data-weaving="false" data-sort-name="amlaíb cuarán" data-sort-year="923" data-sort-location="dublin ireland york" data-sort-fields="threshold events sovereignty the shadow" data-search="amlaíb cuarán olaf cuaran dublin york norse-irish king iona pilgrimage" onclick="toggleCard(this)">
-    <div class="card-era-bar era-medieval"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Amlaíb Cuarán</div><div class="card-date">c. 923 – 981</div></div>
-      <div class="card-epithet">King of Dublin and York · The Sandal King · Warrior, Pillager, Pilgrim of Iona</div>
-      <div class="card-meta">Dublin · York · Iona · Norse-Gael · died at Iona Abbey 981 after penance</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Sovereignty</span>
-        <span class="tag">The Shadow</span>
-        <span class="tag">The Return</span>
-      </div>
-      <div class="card-narrative-preview">Norse-Gael King of Dublin and Northumbria across forty years of rule. Renowned warrior and pillager of churches. Twice King of York, twice King of Dublin. Patron of Irish poets and Norse skalds simultaneously. Baptized at the court of King Edmund of Wessex in 943, then reportedly renounced his baptism when Edmund invaded Northumbria. Defeated at the Battle of Tara in 980 by Máel Sechnaill. Abdicated and went on pilgrimage to Iona, where he died "after penance and a good life."</div>
-      <div class="card-narrative-full">The Iona connection is the most significant geographical fact in Amlaíb's record for this weaving. He died at the monastery in 980. Somerled — already in this weaving through a separate branch — recaptured Iona from the Norwegians in 1164, two centuries later, and attempted to restore the Columban community there in the same year. Two ancestors, arriving through entirely separate genealogical routes, are both written into the history of the same island. Amlaíb came to Iona to die in penance. Somerled came to restore it. The same sacred ground holds them both. His byname cuarán — sandal — may derive from a ceremonial inauguration rite or may have been an insult; the record does not clarify. His descendants were kings in the Isle of Man and the Hebrides until the 13th century, which connects this branch to the same Atlantic world where the Norse lineage from Somerled and Ragnhilda was also operating.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ SIGTRYGG SILKBEARD ═══ -->
-  <div class="catalog-card" data-era="medieval" data-weaving="false" data-sort-name="sigtrygg silkbeard" data-sort-year="954" data-sort-location="dublin ireland" data-sort-fields="structural models creative record" data-search="sigtrygg silkbeard dublin coins norse-irish king brian boru" onclick="toggleCard(this)">
-    <div class="card-era-bar era-medieval"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Sigtrygg Silkbeard</div><div class="card-date">c. 954 – 1042</div></div>
-      <div class="card-epithet">King of Dublin · The Coin Maker · Longest-Reigning King of Viking Dublin</div>
-      <div class="card-meta">Dublin · son of Amlaíb Cuarán · reigned c. 989–1036 · commissioned first Irish coinage</div>
-      <div class="card-tags">
-        <span class="tag">Structural Models</span>
-        <span class="tag">The Creative Record</span>
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Son of Amlaíb Cuarán. King of Dublin for over forty years — the longest reign of any Viking king of Dublin. Commissioned the first coinage struck in Ireland, modeling his coins on English pennies. Present at the Battle of Clontarf in 1014 — the battle where Brian Boru defeated the Viking forces — fighting on the Viking side while his mother Gormflaith, Brian Boru's former wife, had helped instigate the conflict. His mother's relationships made his political position extraordinarily complicated.</div>
-      <div class="card-narrative-full">Sigtrygg's most lasting legacy is structural: the first Irish coins, bearing his image, introduced a monetary economy to Ireland that had operated on silver bullion. The coins are still found in archaeological contexts across the British Isles. His forty-year reign over Dublin represents the high-water mark of Hiberno-Norse urban culture — Dublin under his rule was one of the most significant trading cities in the Atlantic world. His mother Gormflaith had been married to three kings including Brian Boru, and her complex political maneuvers involving her son place Sigtrygg at the center of one of the most documented moments in Irish history: Clontarf. He survived the battle. Brian Boru did not. Sigtrygg was deposed in 1036 and lived his remaining years in obscurity.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ AMLAÍB MAC SITRIUC ═══ -->
-  <div class="catalog-card" data-era="medieval" data-weaving="false" data-sort-name="amlaíb mac sitriuc" data-sort-year="1000" data-sort-location="dublin ireland" data-sort-fields="threshold events" data-search="amlaíb óláfr mac sitriuc dublin son sigtrygg silkbeard" onclick="toggleCard(this)">
-    <div class="card-era-bar era-medieval"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Amlaíb or Óláfr mac Sitriuc</div><div class="card-date">c. 1000 – 1034</div></div>
-      <div class="card-epithet">Son of Silkbeard · The Connecting Generation</div>
-      <div class="card-meta">Dublin · son of Sigtrygg Silkbeard · father of Ragnell ferch Amloyt · the generation between the Viking kings and the Welsh line</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Anomalous Reception</span>
-      </div>
-      <div class="card-narrative-preview">Son of Sigtrygg Silkbeard, grandson of Amlaíb Cuarán. The documentation for this generation is thin — he is primarily a connecting node in the genealogical record, the bridge between the well-documented Viking kings of Dublin and the Welsh branch of the lineage that follows through his daughter Ragnell. The record preserves his name and position but little of his life. He died before his father Sigtrygg was deposed in 1036.</div>
-      <div class="card-narrative-full">Amlaíb mac Sitriuc is one of the genuinely thin places in this section of the genealogical record — his significance is positional rather than biographical. He is the generation in which the Norse-Irish Dublin line turns toward Wales through his daughter Ragnell's marriage. The movement of his descendants away from Dublin and into the Welsh world is itself interesting terrain: the Norse-Irish culture of Dublin was in political decline in the 1030s, and the generations after Sigtrygg's deposition moved into different political landscapes. This is the gap in the record that speaks — the documentation follows power, and as Dublin's Norse-Irish kings lost their central position, the record of their descendants becomes harder to trace.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ RAGNELL FERCH AMLOYT ═══ -->
-  <div class="catalog-card" data-era="medieval" data-weaving="false" data-sort-name="ragnell ferch amloyt" data-sort-year="1025" data-sort-location="wales" data-sort-fields="threshold events structural models" data-search="ragnell ferch amloyt wales daughter amlaíb mac sitriuc" onclick="toggleCard(this)">
-    <div class="card-era-bar era-medieval"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Ragnell ferch Amloyt</div><div class="card-date">c. 1025 – 1110</div></div>
-      <div class="card-epithet">The Norse-Irish into Wales · The Second Crossing · Daughter of Dublin, Mother of the Welsh Line</div>
-      <div class="card-meta">Wales · daughter of Amlaíb mac Sitriuc · the bridge from Viking Dublin into the Welsh genealogical record</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Structural Models</span>
-      </div>
-      <div class="card-narrative-preview">Daughter of Amlaíb mac Sitriuc, granddaughter of Sigtrygg Silkbeard, great-granddaughter of Amlaíb Cuarán. Her name is Norse — Ragnell, the same name carried by other women of the Norse-Irish world — but she appears in the Welsh genealogical record, suggesting a marriage that crossed from the Dublin Norse-Irish world into Wales. She is the second major threshold crossing in this section of the lineage: first from Anglo-Saxon Wessex into Norse-Irish Dublin through Eadgyth, and now from Dublin into Wales through Ragnell.</div>
-      <div class="card-narrative-full">Ragnell ferch Amloyt carries three generations of Viking Dublin in her blood — the sandal king, the silk-bearded coin maker, the connecting father — and brings that accumulation into the Welsh world through her marriage. Her life span, if the FamilySearch dates are accurate, was remarkable: born c. 1025, died c. 1110, she lived into her mid-eighties and would have witnessed the Norman Conquest, the transformation of Wales under Norman pressure, and the entire arc of 11th-century British history. Her name persisting as Norse in a Welsh genealogical context is itself a record of the crossing — the woman who carried the Dublin frequency into Wales and whose descendants eventually joined the line that leads through the Billings branch to the living descendant. She is holding a great deal of history in a thin genealogical record.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-
-  <!-- ═══ GRUFFYDD AP CYNAN ═══ -->
-  <div class="catalog-card" data-era="medieval" data-weaving="true" data-sort-name="gruffydd ap cynan" data-sort-year="1055" data-sort-location="wales gwynedd dublin" data-sort-fields="threshold events sovereignty creative record" data-search="gruffydd ap cynan gwynedd wales dublin norse-irish king chester imprisoned bards" onclick="toggleCard(this)">
-    <div class="card-era-bar era-medieval"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Gruffydd ap Cynan</div><div class="card-date">c. 1055 – 1137</div></div>
-      <div class="card-epithet">King of Gwynedd · Head and Defender of All Wales · Born in Dublin, Buried in Bangor</div>
-      <div class="card-meta">Dublin · Gwynedd · son of Cynan ap Iago and Ragnhildr of Dublin · maternal line</div>
-      <div class="card-tags">
-        <span class="tag tag-weaving"><a href="ancestral-weaving.html">In Weaving ✦</a></span>
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Sovereignty</span>
-        <span class="tag">The Creative Record</span>
-      </div>
-      <div class="card-narrative-preview">Born in Dublin of a Welsh father in exile and a Norse-Irish mother who was granddaughter of Sigtrygg Silkbeard. Claimed the throne of Gwynedd three times — losing it twice, imprisoned at Chester for over a decade, returning twice from Ireland with forces. Held Gwynedd from 1099 to his death in 1137. Mourned as "head and king and defender and pacifier of all Wales." Died old and blind. Buried at Bangor Cathedral. Left a bequest to Christ Church Dublin where he had worshipped as a boy.</div>
-      <div class="card-narrative-full">A near-contemporary biography survives — The History of Gruffudd ap Cynan — which is unusual for a 12th-century Welsh ruler. His life encodes the weaving's sovereignty pattern precisely: the rightful claim held through exile and imprisonment and multiple returns, the final tenure uninterrupted. The tradition that he brought bards and musicians from Ireland whose influence shaped Welsh bardic practice is recorded but not firmly documented. His daughter Gwenllian married Gruffudd ap Rhys of Deheubarth and became a celebrated figure of Welsh resistance in her own right.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ GRUFFUDD AP CADWALADR ═══ -->
-  <div class="catalog-card" data-era="medieval" data-weaving="false" data-sort-name="gruffudd ap cadwaladr" data-sort-year="1120" data-sort-location="wales gwynedd" data-sort-fields="threshold events" data-search="gruffudd ap cadwaladr wales gwynedd son gruffydd cynan" onclick="toggleCard(this)">
-    <div class="card-era-bar era-medieval"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Gruffudd ap Cadwaladr</div><div class="card-date">– c. 1172</div></div>
-      <div class="card-epithet">Son of the House of Gwynedd · The Connecting Generation</div>
-      <div class="card-meta">Wales · Gwynedd · son of Cadwaladr ap Gruffudd, grandson of Gruffydd ap Cynan</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Grandson of Gruffydd ap Cynan through Cadwaladr ap Gruffudd. The documentation for this generation is thin — he appears in the Welsh genealogical record as a connecting node between the well-documented House of Gwynedd and the generations that follow toward the Billings line. His father Cadwaladr was a significant figure in 12th-century Welsh politics; Gruffudd ap Cadwaladr himself is less individually documented. He is the generation in which the royal Welsh line begins its movement toward the ordinary genealogical record.</div>
-      <div class="card-narrative-full">The transition from documented Welsh royalty to the connecting Welsh genealogy that eventually reaches the American colonial period happens across several generations after Gruffydd ap Cynan — each one a step further from the documented royal record into the thinner terrain of regional Welsh lineage. Gruffudd ap Cadwaladr holds his place in the chain without the biographical richness of his great-grandfather. The record preserves his position; the life behind it is largely silent.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ CADWALADR AP GRUFFUDD ═══ -->
-  <div class="catalog-card" data-era="medieval" data-weaving="false" data-sort-name="cadwaladr ap gruffudd" data-sort-year="1240" data-sort-location="wales" data-sort-fields="threshold events" data-search="cadwaladr ap gruffudd wales 1240 1287 son gruffudd cadwaladr" onclick="toggleCard(this)">
-    <div class="card-era-bar era-medieval"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Cadwaladr ap Gruffudd</div><div class="card-date">1240 – 1287</div></div>
-      <div class="card-epithet">The Welsh Generation · Father of Ietis</div>
-      <div class="card-meta">Wales · 1240–1287 · father of Ietis verch Cadwaladr</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Welsh ancestor, 1240–1287. His life span falls across one of the most tumultuous periods in Welsh history — the reign of Llywelyn ap Gruffudd, the last native Prince of Wales, and the Edwardian conquest of Wales in 1282–83. Edward I's campaigns ended Welsh independence and imposed English rule across the principality. What Cadwaladr ap Gruffudd's specific experience of that conquest was, the record does not say. He is present in the genealogy as a father; what surrounded his life was political catastrophe for his people.</div>
-      <div class="card-narrative-full">The Edward I conquest of Wales in 1282–83 is the background against which Cadwaladr ap Gruffudd lived his adult years. Llywelyn ap Gruffudd — a descendant of Gruffydd ap Cynan through Owain Gwynedd — was killed in 1282, and with him died Welsh political independence. Edward I built his ring of castles and imposed English law. The Welsh royal tradition that Gruffydd ap Cynan had held and rebuilt was extinguished within 150 years of his death. The genealogical line from Gruffydd to Cadwaladr to Ietis carries this historical context even when the individual lives are not recorded.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ IETIS VERCH CADWALADR ═══ -->
-  <div class="catalog-card" data-era="medieval" data-weaving="false" data-sort-name="ietis verch cadwaladr" data-sort-year="1285" data-sort-location="wales" data-sort-fields="anomalous reception threshold events" data-search="ietis verch cadwaladr wales daughter cadwaladr" onclick="toggleCard(this)">
-    <div class="card-era-bar era-medieval"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Ietis verch Cadwaladr</div><div class="card-date">1285 –</div></div>
-      <div class="card-epithet">The Named Daughter · Welsh Woman of the Post-Conquest Generation</div>
-      <div class="card-meta">Wales · born c. 1285 · daughter of Cadwaladr ap Gruffudd · mother of Hywel Fychan ap Hywel</div>
-      <div class="card-tags">
-        <span class="tag">Anomalous Reception</span>
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Daughter of Cadwaladr ap Gruffudd, born c. 1285 in Wales in the immediate aftermath of the Edwardian conquest. Her name — Ietis — is Welsh, and its preservation in the record is itself notable: she is a woman whose individual name survived into the genealogical documentation when so many women of her era exist only as unnamed wives or mothers. Born into a Wales that had just lost its political independence. The record preserves her name, her parentage, and her child. The life between those facts is silent.</div>
-      <div class="card-narrative-full">Ietis verch Cadwaladr belongs to the pattern this weaving has traced in many of its female ancestors: the woman who enters the official record primarily as a connection point, whose name is preserved because it was necessary to document the lineage rather than because anyone recorded her individual life. In this case, her name carries the additional weight of being Welsh in a period when Welsh identity was under active political suppression — the language, the laws, the genealogical traditions all subject to English colonial administration. That her Welsh name survived in the record is a small act of preservation.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ HYWEL FYCHAN AP HYWEL ═══ -->
-  <div class="catalog-card" data-era="medieval" data-weaving="false" data-sort-name="hywel fychan ap hywel" data-sort-year="1304" data-sort-location="wales" data-sort-fields="threshold events" data-search="hywel fychan ap hywel wales 1304 1372 son ietis verch cadwaladr" onclick="toggleCard(this)">
-    <div class="card-era-bar era-medieval"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Hywel Fychan ap Hywel</div><div class="card-date">1304 – 1372</div></div>
-      <div class="card-epithet">Hywel the Lesser · The Welsh Line Continuing</div>
-      <div class="card-meta">Wales · 1304–1372 · son of Ietis verch Cadwaladr · the line continues toward the Billings branch</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Son of Ietis verch Cadwaladr, born 1304 in Wales. Fychan — the Welsh word for lesser or younger, used to distinguish from an older relative of the same name. He lived through the entire reign of Edward II, the rise and fall of Roger Mortimer, and the first decades of Edward III's reign. His life span of 1304–1372 places him in the Wales of the Statute of Rhuddlan's full implementation and the social disruption of the Black Death, which reached Wales in 1349. Individual documentation for his life has not been located.</div>
-      <div class="card-narrative-full">Fychan in a Welsh name means lesser or younger — distinguishing this Hywel from a father or elder kinsman of the same name. It is a naming convention that appears throughout Welsh genealogy and tells us something about the density of Welsh naming traditions: names repeated within families, disambiguated by qualifiers rather than entirely new names. His dates — 1304 to 1372 — span a period of significant hardship in Wales: post-conquest political suppression, economic disruption, and the Black Death. The genealogical record preserves his position in the line. The line continues downward from him toward the connection that eventually reaches the American colonial period and the Billings branch.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-
-  <!-- ═══ GWILYM AP HYWEL AP GWILYM ═══ -->
-  <div class="catalog-card" data-era="medieval" data-weaving="false" data-sort-name="gwilym ap hywel ap gwilym" data-sort-year="1325" data-sort-location="wales" data-sort-fields="threshold events" data-search="gwilym ap hywel ap gwilym wales 1325 1361 son hywel fychan ap hywel" onclick="toggleCard(this)">
-    <div class="card-era-bar era-medieval"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Gwilym ap Hywel ap Gwilym</div><div class="card-date">1325 – 1361</div></div>
-      <div class="card-epithet">The Welsh Generation Continuing</div>
-      <div class="card-meta">Wales · 1325–1361 · son of Hywel Fychan ap Hywel · father of Gwenllian verch Gwilym</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Son of Hywel Fychan ap Hywel. His name carries the double Welsh naming pattern — Gwilym ap Hywel ap Gwilym — preserving the grandfather's name through the father's generation and back again. He lived through the Black Death (reaching Wales 1349) and died at approximately 36 years old, which may reflect that plague or simply the general mortality of the 14th century. His daughter Gwenllian carries the line forward. Individual documentation has not been located.</div>
-      <div class="card-narrative-full">His short lifespan — 1325 to 1361 — places him directly in the generation most devastated by the Black Death, which reached Wales around 1349 and killed an estimated third of the population. Whether his death at approximately 36 was plague-related is not documented, but the context is significant: this entire section of the Welsh genealogical record exists in the shadow of that catastrophe. The naming convention — Gwilym carrying his grandfather's name — was standard Welsh practice and reflects the dense genealogical memory embedded in Welsh naming traditions.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ GWENLLIAN VERCH GWILYM ═══ -->
-  <div class="catalog-card" data-era="early-modern" data-weaving="false" data-sort-name="gwenllian verch gwilym" data-sort-year="1355" data-sort-location="wales" data-sort-fields="threshold events anomalous reception" data-search="gwenllian verch gwilym wales 1355 1455 daughter gwilym" onclick="toggleCard(this)">
-    <div class="card-era-bar era-early-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Gwenllian verch Gwilym</div><div class="card-date">1355 – 1455</div></div>
-      <div class="card-epithet">The Hundred-Year Woman · Keeper of the Name</div>
-      <div class="card-meta">Wales · 1355–1455 · daughter of Gwilym ap Hywel ap Gwilym · mother of Gwladus verch Dafydd Hywel</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Anomalous Reception</span>
-      </div>
-      <div class="card-narrative-preview">Her recorded lifespan of 1355–1455 would make her 100 years old at death — worth noting as a possible data entry anomaly in FamilySearch, though not impossible. She carries the name Gwenllian — the same name as Gruffydd ap Cynan's daughter who led Welsh resistance against the Normans, and the name of the last native Welsh princess imprisoned in an English nunnery in 1282. The name is a thread of Welsh resistance and identity carried through generations of women. Her individual life is not documented beyond her genealogical position.</div>
-      <div class="card-narrative-full">Gwenllian as a name in Welsh history carries specific weight: it belonged to the daughter of Gruffydd ap Cynan who married Gruffudd ap Rhys and became celebrated for her armed resistance to Norman rule, dying in battle in 1136. It also belonged to the infant daughter of Llywelyn ap Gruffudd, last native Prince of Wales, who was imprisoned at Sempringham Priory in 1282 at six months old and never released — dying there 54 years later without ever having lived in Wales. That a woman of this lineage carried that name in the generation after the Edwardian conquest is not accidental. Welsh naming traditions were genealogical memory. The name Gwenllian was a political act of remembrance.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ GWLADUS VERCH DAFYDD HYWEL ═══ -->
-  <div class="catalog-card" data-era="early-modern" data-weaving="false" data-sort-name="gwladus verch dafydd hywel" data-sort-year="1390" data-sort-location="wales" data-sort-fields="threshold events" data-search="gwladus verch dafydd hywel wales 1390 1454 daughter gwenllian" onclick="toggleCard(this)">
-    <div class="card-era-bar era-early-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Gwladus verch Dafydd Hywel</div><div class="card-date">1390 – 1454</div></div>
-      <div class="card-epithet">Welsh Woman of the Owain Glyndŵr Generation</div>
-      <div class="card-meta">Wales · 1390–1454 · daughter of Gwenllian verch Gwilym · mother of Agnes Vaughan</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Daughter of Gwenllian verch Gwilym. Her birth in 1390 places her in the generation of Owain Glyndŵr's revolt — the last major Welsh uprising against English rule, which began in 1400 and continued until approximately 1415. Glyndŵr declared himself Prince of Wales, convened a Welsh parliament, established alliances with France and Scotland, and came closer than anyone since Llywelyn to restoring Welsh sovereignty. His revolt failed, but its memory shaped Welsh identity for centuries. Gwladus grew up in that landscape. Her individual life is not documented.</div>
-      <div class="card-narrative-full">The Owain Glyndŵr revolt of 1400–1415 is the defining event of Gwladus's childhood and early adulthood. It transformed Wales — English punitive legislation following its suppression imposed severe restrictions on Welsh landholding, legal rights, and civic participation. The Wales Gwladus grew up in after the revolt was more constrained than the one she was born into. Her daughter Agnes Vaughan carries a surname — Vaughan — that is itself a Welshified form of the Norman name Vaugn, reflecting the ongoing cultural blending of this border region. The line is moving from deep Welsh genealogy toward the English-Welsh border world.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ AGNES VAUGHAN ═══ -->
-  <div class="catalog-card" data-era="early-modern" data-weaving="false" data-sort-name="agnes vaughan" data-sort-year="1400" data-sort-location="wales herefordshire" data-sort-fields="threshold events" data-search="agnes vaughan wales herefordshire 1400 daughter gwladus mother roger bodenham" onclick="toggleCard(this)">
-    <div class="card-era-bar era-early-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Agnes Vaughan</div><div class="card-date">c. 1400 –</div></div>
-      <div class="card-epithet">The Welsh-English Border Crossing · Mother of the Bodenham Line</div>
-      <div class="card-meta">Wales · Herefordshire border country · daughter of Gwladus verch Dafydd Hywel · mother of Roger Bodenham</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Structural Models</span>
-      </div>
-      <div class="card-narrative-preview">Daughter of Gwladus verch Dafydd Hywel. Her surname Vaughan — a Welshified Norman name — signals the cultural borderland she inhabits. Her son Roger Bodenham carries an English Herefordshire surname, placing the family firmly in the Welsh Marches where Welsh and English cultures had been mixing since the Norman Conquest. Agnes is the threshold figure where the Welsh genealogical line moves into the English border world. Her individual life is not documented beyond her genealogical position.</div>
-      <div class="card-narrative-full">The Welsh Marches — the borderland between Wales and England — were a distinct political and cultural zone throughout the medieval period. Marcher lords had semi-independent authority, Welsh law and English law operated in different places, and intermarriage between Welsh and English families was common. Agnes Vaughan's marriage into the Bodenham family of Herefordshire is consistent with this border-country reality. The Vaughan name itself reflects several generations of this mixing — Welsh families adopting Norman-derived surnames while maintaining Welsh cultural identity. She is one of many women in this lineage whose significance is structural: the crossing point between two worlds.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ ROGER BODENHAM ═══ -->
-  <div class="catalog-card" data-era="early-modern" data-weaving="false" data-sort-name="bodenham roger" data-sort-year="1512" data-sort-location="herefordshire england" data-sort-fields="structural models threshold events" data-search="roger bodenham herefordshire england 1512 1578 son agnes vaughan" onclick="toggleCard(this)">
-    <div class="card-era-bar era-early-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Roger Bodenham</div><div class="card-date">1512 – 1578</div></div>
-      <div class="card-epithet">The Herefordshire Generation · Tudor England</div>
-      <div class="card-meta">Herefordshire, England · 1512–1578 · son of Agnes Vaughan · father of Elizabeth Bodenham</div>
-      <div class="card-tags">
-        <span class="tag">Structural Models</span>
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Born 1512 in Herefordshire, the year before Henry VIII began his reign in full force. His life span of 1512–1578 covers the entirety of the English Reformation — Henry VIII's break with Rome, the dissolution of the monasteries, Edward VI, Mary I, and most of Elizabeth I's reign. Herefordshire was border country, close enough to Wales to maintain Welsh connections while fully within the English administrative and legal system. The Bodenham family were established Herefordshire gentry. Individual documentation for Roger specifically has not been located.</div>
-      <div class="card-narrative-full">Roger Bodenham's lifespan is bracketed entirely by the Tudor transformation of England. Born under Henry VIII, he lived through the dissolution of every monastery in the country, the religious reversals of Edward and Mary, and the establishment of the Elizabethan settlement. Herefordshire gentry families of this period navigated those reversals with varying degrees of conformity — some holding to the old faith, others adapting. His daughter Elizabeth's lifespan of 1534–1636 (if accurate) would span over a century, which is likely a data error. What the record does show is that the line is now firmly in Tudor England, moving toward the colonial period.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ ELIZABETH BODENHAM ═══ -->
-  <div class="catalog-card" data-era="early-modern" data-weaving="false" data-sort-name="bodenham elizabeth" data-sort-year="1534" data-sort-location="herefordshire england" data-sort-fields="threshold events" data-search="elizabeth bodenham herefordshire england 1534 1636 daughter roger bodenham thomas morgan" onclick="toggleCard(this)">
-    <div class="card-era-bar era-early-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Elizabeth Bodenham</div><div class="card-date">1534 – 1636</div></div>
-      <div class="card-epithet">The Bodenham–Morgan Bridge</div>
-      <div class="card-meta">Herefordshire, England · daughter of Roger Bodenham · married Thomas Morgan · note: recorded lifespan of 102 years likely contains a date error</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Daughter of Roger Bodenham of Herefordshire. Her marriage to Thomas Morgan (1551–1647) connects the Bodenham gentry line to the Welsh Morgan name — both families from the Herefordshire-Welsh border country. Her recorded dates of 1534–1636 would make her 102 at death, which is almost certainly a data entry error in FamilySearch rather than a documented lifespan. The connection she represents — Bodenham into Morgan, English border gentry into Welsh surname — is characteristic of this region and period.</div>
-      <div class="card-narrative-full">The Morgan surname she married into is one of the most common Welsh surnames, derived from the Welsh personal name Morcant. In the border country of Herefordshire, Morgan families were numerous and ranged from minor gentry to yeoman farmers. Thomas Morgan's dates of 1551–1647 (96 years) are also suspiciously long, suggesting this section of the FamilySearch tree may have accumulated date errors. The core genealogical connection — Bodenham daughter marrying into the Morgan family of the Welsh Marches — is plausible and consistent with the region's patterns. The specific dates require verification against primary sources.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ THOMAS MORGAN ═══ -->
-  <div class="catalog-card" data-era="early-modern" data-weaving="false" data-sort-name="morgan thomas" data-sort-year="1551" data-sort-location="wales herefordshire england" data-sort-fields="threshold events" data-search="thomas morgan wales herefordshire 1551 1647 husband elizabeth bodenham" onclick="toggleCard(this)">
-    <div class="card-era-bar era-early-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Thomas Morgan</div><div class="card-date">1551 – 1647</div></div>
-      <div class="card-epithet">The Morgan Line · Welsh Marches</div>
-      <div class="card-meta">Wales · Herefordshire · 1551–1647 · husband of Elizabeth Bodenham · father of Catherine Morgan · note: 96-year lifespan may contain date error</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Born 1551, likely in the Welsh Marches. His lifespan of 1551–1647, if accurate, would make him 96 at death — unusually long but not impossible for the period. He lived through the entire Elizabethan era, the reign of James I, and into the early years of the English Civil War. His daughter Catherine Morgan (1603–1680) connects to the Bryan line through marriage. The Morgan name is Welsh in origin, and its presence here continues the Welsh thread even as the family becomes geographically English.</div>
-      <div class="card-narrative-full">The English Civil War began in 1642, when Thomas Morgan would have been in his nineties if the dates are accurate. Herefordshire was contested territory during the war — the county changed hands multiple times between Royalist and Parliamentarian forces. Whether Thomas Morgan survived to see the war's outcome is unclear if the 1647 death date is correct — that places his death two years into the conflict, before the execution of Charles I in 1649. His daughter Catherine's marriage into the Bryan family connects this Welsh Marches line to the family that would eventually produce Morgan Bryan, the colonial American patriarch.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ CATHERINE MORGAN ═══ -->
-  <div class="catalog-card" data-era="early-modern" data-weaving="false" data-sort-name="morgan catherine" data-sort-year="1603" data-sort-location="herefordshire england" data-sort-fields="threshold events" data-search="catherine morgan 1603 1680 daughter thomas morgan francis bryan" onclick="toggleCard(this)">
-    <div class="card-era-bar era-early-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Catherine Morgan</div><div class="card-date">1603 – 1680</div></div>
-      <div class="card-epithet">The Morgan–Bryan Bridge · Civil War Generation</div>
-      <div class="card-meta">Herefordshire, England · 1603–1680 · daughter of Thomas Morgan · married Francis Bryan · mother of Morgan Bryan</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Structural Models</span>
-      </div>
-      <div class="card-narrative-preview">Daughter of Thomas Morgan, born 1603 — the year James I came to the English throne. Her marriage to Francis Bryan connects the Welsh Marches Morgan family to the Bryan line. Her son Morgan Bryan became one of the most documented colonial American patriarchs — founder of Bryan's Settlement in North Carolina, great-grandfather of Rebecca Bryan Boone who married Daniel Boone. Catherine's life of 1603–1680 spans the English Civil War, the Interregnum, and the Restoration — one of the most turbulent periods in English history.</div>
-      <div class="card-narrative-full">Catherine Morgan's life spans the English Civil War precisely. Born 1603, she would have been 39 when war broke out in 1642, old enough to have experienced the full upheaval: the execution of Charles I in 1649, Cromwell's Commonwealth, the Restoration of Charles II in 1660. Her son Morgan Bryan's family history includes the account that an ancestor opposed Cromwell and the family fled Ireland for Denmark — placing the Bryan family directly in the political turbulence Catherine lived through. Whether her marriage to Francis Bryan preceded or followed the family's displacement from Ireland is a question the record does not clearly answer. She is the woman through whom the Welsh Marches line and the Bryan colonial line meet.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ FRANCIS BRYAN ═══ -->
-  <div class="catalog-card" data-era="early-modern" data-weaving="false" data-sort-name="bryan francis" data-sort-year="1630" data-sort-location="ireland england" data-sort-fields="threshold events" data-search="francis bryan 1630 1687 ireland england son catherine morgan father morgan bryan" onclick="toggleCard(this)">
-    <div class="card-era-bar era-early-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Francis Bryan</div><div class="card-date">1630 – 1687</div></div>
-      <div class="card-epithet">The Irish Crossing · Cromwell's Shadow</div>
-      <div class="card-meta">Ireland · England · 1630–1687 · son of Catherine Morgan · father of Morgan Bryan · family displaced by Cromwell</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Son of Catherine Morgan and her husband, born 1630 in the decade before the English Civil War. The Bryan family history records that an ancestor opposed Oliver Cromwell and the family fled Ireland for Denmark, losing titles and lands they were never able to recover. Francis returned to Ireland before dying in Belfast in 1693 according to some sources. His son Morgan Bryan was born in Denmark in 1671 — the Danish period of the family's exile. The genealogical connection backward from Francis to the Welsh line is flagged by researchers as uncertain and possibly constructed.</div>
-      <div class="card-narrative-full">Francis Bryan's life is wrapped in the turbulence of mid-17th century British and Irish politics. The Cromwellian conquest of Ireland in 1649–53 displaced thousands of Irish and Anglo-Irish families — land was confiscated, families transported, entire communities disrupted. The account that the Bryan family fled to Denmark during this period is consistent with the documented experience of many Anglo-Irish families of the era. Whether Francis himself made the crossing to Denmark or whether that was an earlier generation requires careful source work. What is documented is that his son Morgan Bryan was born in Denmark in 1671 and eventually emigrated to colonial America around 1695.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ MORGAN BRYAN ═══ -->
-  <div class="catalog-card" data-era="modern" data-weaving="false" data-sort-name="bryan morgan" data-sort-year="1671" data-sort-location="north carolina virginia colonial america" data-sort-fields="threshold events structural models" data-search="morgan bryan 1671 1763 denmark ireland colonial america north carolina yadkin daniel boone" onclick="toggleCard(this)">
-    <div class="card-era-bar era-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Morgan Bryan</div><div class="card-date">1671 – 1763</div></div>
-      <div class="card-epithet">The American Crossing · Patriarch of the Yadkin · Great-Grandfather of Rebecca Bryan Boone</div>
-      <div class="card-meta">Denmark · Ireland · Pennsylvania · Virginia · North Carolina · founder of Bryan's Settlement · note: ancestry before Francis Bryan is disputed in genealogical research</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Structural Models</span>
-      </div>
-      <div class="card-narrative-preview">Born in Denmark 1671 to Francis Bryan and Sarah Brinker, of Irish and Welsh ancestry. Emigrated to colonial America around 1695, landing at Roanoke, Virginia. Settled near Reading, Pennsylvania, then Winchester, Virginia in 1730, then led his extended family to the Forks of the Yadkin River in North Carolina in 1748. Founded Bryan's Settlement. His route became known as Morgan Bryan's Road. Died Easter Sunday 1763 at age 92. His granddaughter Rebecca Bryan Boone married Daniel Boone. Note: his ancestry before Francis Bryan is flagged by genealogical researchers as uncertain.</div>
-      <div class="card-narrative-full">Morgan Bryan is the threshold figure between the British and American branches of this lineage — the man who made the crossing and founded the settlement that opened the Carolina and Kentucky frontier. His life is well documented from the American side: deeds, wills, Quaker meeting records, census data. The research challenge is backward from him — one careful genealogist explicitly notes that he "has been given many fanciful ancestries" and that his parents remain undocumented beyond the claim. The connection shown in FamilySearch from Morgan Bryan back through Francis Bryan to Catherine Morgan and the Welsh Marches line is one of the claimed ancestries flagged as unverified. His significance as a threshold figure stands regardless: the man who crossed and founded, whose granddaughter's name became part of American legend through her marriage to Daniel Boone, who died at 92 on Easter Sunday having built something that outlasted him.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-
-  <!-- ═══ JAMES BRYAN ═══ -->
-  <div class="catalog-card" data-era="early-modern" data-weaving="false" data-sort-name="bryan james" data-sort-year="1723" data-sort-location="north carolina virginia" data-sort-fields="threshold events" data-search="james bryan 1723 1807 son morgan bryan north carolina revolutionary war" onclick="toggleCard(this)">
-    <div class="card-era-bar era-early-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">James Bryan</div><div class="card-date">1723 – 1807</div></div>
-      <div class="card-epithet">Son of the Yadkin · Revolutionary War Generation</div>
-      <div class="card-meta">North Carolina · Virginia · son of Morgan Bryan · father of Susannah Bryan</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Structural Models</span>
-      </div>
-      <div class="card-narrative-preview">Son of Morgan Bryan and Martha Strode. Born 1723 at the Forks of the Yadkin, North Carolina. Morgan Bryan's sons had influential roles during the American Revolutionary War — James was among those who fought for the colonists. His sister Rebecca Bryan Boone married Daniel Boone. He lived to 84 years old, dying in 1807. His daughter Susannah married Bazel Boren and continued the westward movement of the family.</div>
-      <div class="card-narrative-full">James Bryan's life spans the full arc of the colonial American period: born into Morgan Bryan's Yadkin settlement, coming of age in the decades before the Revolution, serving in the war, and living long enough to see the frontier his family had helped establish become part of an established nation. The Bryan family's involvement with Daniel Boone through Rebecca Bryan Boone places them at the center of the American frontier narrative. James represents the generation that translated Morgan Bryan's founding settlement into established community.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ SUSANNAH BRYAN BOREN ═══ -->
-  <div class="catalog-card" data-era="modern" data-weaving="false" data-sort-name="bryan susannah" data-sort-year="1762" data-sort-location="north carolina tennessee" data-sort-fields="threshold events" data-search="susannah bryan boren 1762 1836 daughter james bryan wife bazel boren daniel boone cousin" onclick="toggleCard(this)">
-    <div class="card-era-bar era-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Susannah Bryan Boren</div><div class="card-date">1762 – 1836</div></div>
-      <div class="card-epithet">First Cousin to Rebecca Bryan Boone · Daughter of the Yadkin · Pioneer</div>
-      <div class="card-meta">Forks of the Yadkin, North Carolina · Tennessee · daughter of James Bryan · married Bazel Boren c.1777 · mother of Mary Boren</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Born c.1762 at the Forks of the Yadkin, daughter of James Bryan and granddaughter of Morgan Bryan. First cousin to Rebecca Bryan, who married Daniel Boone. Married Bazel Boren c.1777 — one of the militia men who explored Kentucky with George Bryan in 1779. Their first child Mary Boren was born September 1778. Susannah was among the women who accompanied the Bryan-Boren families into Kentucky in 1779, the nucleus of what became Bryan's Station. She moved with the family to Tennessee and eventually died in 1836.</div>
-      <div class="card-narrative-full">Susannah Bryan lived the same frontier movement as her grandfather Morgan Bryan, extending it one generation further. Her husband Bazel Boren was among the first justices of the Mero District alongside Andrew Jackson. Her daughter Mary Boren would carry the family into the LDS faith and to Winter Quarters. Susannah herself died in 1836, before the gathering to Nauvoo, her daughter Mary making the religious crossing without her. The Bryan women in this lineage consistently outlive the threshold events their children inherit from them.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ JACOB YOUNG (son of Alfred) ═══ -->
-  <div class="catalog-card" data-era="modern" data-weaving="false" data-sort-name="young jacob" data-sort-year="1834" data-sort-location="utah" data-sort-fields="threshold events" data-search="jacob young 1834 1884 son alfred douglas young utah pioneer" onclick="toggleCard(this)">
-    <div class="card-era-bar era-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Jacob Young</div><div class="card-date">1834 – 1884</div></div>
-      <div class="card-epithet">Son of the Visionary · The Carried Name</div>
-      <div class="card-meta">Utah · son of Alfred Douglas Young · named for his grandfather who abandoned Mary Boren · father of Lydia Ann Young</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Son of Alfred Douglas Young and Anne Chappell, born 1834. Named Jacob — the name of Alfred's father who had left Mary Boren before Alfred was born, the grandfather Alfred never knew. Alfred carried that name forward into his son rather than away from it. Jacob Young grew up in the LDS pioneer community, made the westward crossing, and settled in Utah. He died in 1884 at age 50, leaving behind his daughter Lydia Ann Young. Documentation for his individual life beyond the genealogical record has not been located.</div>
-      <div class="card-narrative-full">Jacob Young exists in this genealogical record primarily as a carrying generation — he carried his grandfather's name and the Utah pioneer inheritance forward to Lydia Ann, who carried the Young line into the Billings family through her marriage to Alfred Vivian Billings. The name Jacob in this lineage moves through three generations: the absent grandfather who left Mary Boren, the son Alfred named after him, and the echo it carries forward. Whether Alfred's choice to use that name was deliberate reconciliation, family tradition, or circumstance is not documented.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ LYDIA ANN YOUNG ═══ -->
-  <div class="catalog-card" data-era="modern" data-weaving="false" data-sort-name="young lydia ann" data-sort-year="1858" data-sort-location="utah" data-sort-fields="threshold events structural models" data-search="lydia ann young 1858 1928 daughter jacob young married alfred vivian billings convergence" onclick="toggleCard(this)">
-    <div class="card-era-bar era-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Lydia Ann Young</div><div class="card-date">1858 – 1928</div></div>
-      <div class="card-epithet">The Convergence · Where Two Lines Joined</div>
-      <div class="card-meta">Utah · daughter of Jacob Young · married Alfred Vivian Billings · the point where the Young line and the Billings line join</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Structural Models</span>
-      </div>
-      <div class="card-narrative-preview">Daughter of Jacob Young, granddaughter of Alfred Douglas Young. Her marriage to Alfred Vivian Billings is the documented convergence point where two separate branches of this lineage — the Young line descending from Mary Boren and Alfred Douglas Young, and the Billings line descending from Diantha Morley Billings through George Pierce Billings — join in a single marriage. Both families were Utah pioneers. Both lines had been in the same LDS community through Missouri, Nauvoo, Winter Quarters, and the Salt Lake Valley. They joined here.</div>
-      <div class="card-narrative-full">The convergence Lydia Ann represents is documented: Mary Boren died at Winter Quarters in 1848 while Diantha Morley Billings was crossing the Mississippi River that same winter with the expelled Saints. The two women inhabited the same crisis without meeting in the documented record. Their grandchildren married in Utah a generation later. Lydia Ann Young is the woman through whom those two threads became one family. Her individual life — her experience of growing up in pioneer Utah, her marriage, her children — is not documented beyond the genealogical record. The convergence she embodies is what the record preserves.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ ALFRED VIVIAN BILLINGS ═══ -->
-  <div class="catalog-card" data-era="modern" data-weaving="false" data-sort-name="billings alfred vivian" data-sort-year="1900" data-sort-location="utah idaho" data-sort-fields="threshold events" data-search="alfred vivian billings 1900 1949 son lydia ann young george pierce billings" onclick="toggleCard(this)">
-    <div class="card-era-bar era-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Alfred Vivian Billings</div><div class="card-date">1900 – 1949</div></div>
-      <div class="card-epithet">The Billings–Young Convergence · 20th Century Generation</div>
-      <div class="card-meta">Utah · Idaho · son of George Pierce Billings and Lydia Ann Young · father of Russell McBeth Billings</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Son of George Pierce Billings and Lydia Ann Young — the first generation born of the convergence between the Billings and Young lines. Born 1900, died 1949 at age 49. His short life spans the first half of the 20th century: two World Wars, the Depression, the full arc of American modernity arriving in the communities his pioneer grandparents had established. Father of Russell McBeth Billings. Individual documentation beyond the genealogical record has not been located.</div>
-      <div class="card-narrative-full">Alfred Vivian Billings carries both Diantha Morley Billings's line and Alfred Douglas Young's line in his name and in his blood — the midwife who held the lantern in Missouri and the visionary who could not deny what he had seen, joined now in a single 20th-century man. He died at 49, younger than most of his ancestors. His son Russell McBeth Billings continued the line toward Rebecca Billings and the living descendant.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ RUSSELL McBETH BILLINGS ═══ -->
-  <div class="catalog-card" data-era="modern" data-weaving="false" data-sort-name="billings russell mcbeth" data-sort-year="1926" data-sort-location="idaho washington" data-sort-fields="threshold events" data-search="russell mcbeth billings 1926 2009 son alfred vivian billings father rebecca billings" onclick="toggleCard(this)">
-    <div class="card-era-bar era-modern"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Russell McBeth Billings</div><div class="card-date">1926 – 2009</div></div>
-      <div class="card-epithet">The Grandfather Generation</div>
-      <div class="card-meta">Idaho · Washington · son of Alfred Vivian Billings · father of Rebecca Billings · grandfather of the living descendant</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">Son of Alfred Vivian Billings and Gladys Eliza McBeth. Born 1926, died 2009. His life spans World War II through the early 21st century. Father of Rebecca Billings. The McBeth name in his middle name signals another genealogical thread not yet researched in this archive. He is the grandfather of the living descendant through Rebecca Billings, and his death in 2009 means he may have been known personally. Individual documentation has not been located.</div>
-      <div class="card-narrative-full">Russell McBeth Billings is the most recent ancestor in this archive, dying in 2009 within living memory of the current generation. The genealogical line from Edward of Wessex (871–924) arrives at Russell (1926–2009) across twenty-eight documented generations and over eleven centuries. He carried the full convergence of the Billings and Young lines — Diantha Morley Billings and Alfred Douglas Young and Mary Boren and Morgan Bryan and Gruffydd ap Cynan and Edward of Wessex — in his person, without any of it being visible as such in the ordinary course of a 20th-century life.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-
-  <!-- ═══ HISTORICAL KEYNOTE: THE DESPOSYNI TRADITION ═══ -->
-  <div class="keynote-card" data-era="ancient" data-weaving="false" data-sort-name="desposyni tradition" data-sort-year="100" data-sort-location="palestine rome frankish kingdoms" data-sort-fields="threshold events the shadow the teaching" data-search="desposyni jesus family relatives blood lineage eusebius julius africanus sylvester church history sacred genealogy" onclick="toggleCard(this)">
-    <div class="keynote-era-bar"></div>
-    <div class="card-body">
-      <div class="card-top">
-        <div class="card-name">
-          <span class="keynote-label">Historical Keynote</span><br>
-          The Desposyni Tradition
-        </div>
-        <div class="card-date">1st–4th century AD</div>
-      </div>
-      <div class="card-epithet">Belonging to the Lord · The Blood Relatives of Jesus · The Family the Church Erased</div>
-      <div class="card-meta">Palestine · Rome · Frankish Kingdoms · documented in Eusebius, Julius Africanus, Hegesippus · pertains to the lineage claim in the FamilySearch tree through Sarah-Damaris Bat Yeshoshua</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">The Shadow</span>
-        <span class="tag">The Teaching</span>
-        <span class="tag">Anomalous Reception</span>
-      </div>
-      <div class="card-narrative-preview">The term Desposyni — from the Greek meaning "belonging to the Lord" — referred to the documented biological relatives of Jesus of Nazareth. It was coined by the historian Sextus Julius Africanus in the early 3rd century and preserved by Eusebius of Caesarea in his Ecclesiastical History. The Desposyni are historically real: they governed the early Jewish-Christian church for over a century, were called before Emperor Domitian for questioning, and sent representatives to Pope Sylvester I in 318 AD demanding recognition. The Roman Church refused. That refusal is the last documented contact between the institutional church and the family of Jesus.</div>
-      <div class="card-narrative-full">What the historical record actually shows is specific and documented. Julius Africanus writes that the blood relatives of Jesus — called Desposyni — came from Nazareth and Cochaba in Judea and preserved their genealogies from memory after Herod had burned the public genealogical archives to obscure his own ignoble origins. Eusebius quotes Hegesippus reporting that in the reign of Emperor Domitian (81–96 AD), the grandsons of Jude — named as the brother of Jesus — were brought before the Emperor, interrogated about their Davidic lineage and their property, found to be simple farmers, and released as politically harmless. This is documented Roman administrative history. What is also documented is the meeting of 318 AD, when Desposyni representatives came to Pope Sylvester I and asked that Jerusalem be restored as the mother church, that the Greek Christian bishops be replaced by bishops from Jesus's own bloodline, and that the church's money flow back to Jerusalem. Sylvester refused all three demands and declared Rome the mother church. The Desposyni disappear from the institutional record after this meeting. The gap between what is documented — that Jesus had a family, that the family governed the early church, that the family was recognized as legitimate for 150 years, and was then formally displaced in 318 — and what is claimed in certain genealogical traditions — that specific named individuals can be traced through Frankish kings to living descendants — is where honest uncertainty lives. The documented tradition is real and significant. The specific genealogical chains attaching individual named people to that tradition, including the FamilySearch entry for Sarah-Damaris Bat Yeshoshua, belong to a different category: constructed sacred genealogy, which is itself historically significant as a phenomenon but is not the same order of evidence as the early church sources. This Keynote holds both: the documented historical reality of a family whose existence, governance, and eventual displacement is recorded in primary sources, and the honest acknowledgment that the specific genealogical thread in this tree connecting that family to the living descendant is a tradition rather than a documented chain. Both things are true and worth holding.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-
-  <!-- ═══ HISTORICAL KEYNOTE: THE MIGRATION PERIOD ═══ -->
-  <div class="keynote-card" data-era="ancient" data-weaving="false" data-sort-name="migration period völkerwanderung" data-sort-year="350" data-sort-location="europe frankish germanic lombard burgundian" data-sort-fields="threshold events structural models" data-search="migration period völkerwanderung franks lombards alemanni burgundians vandals huns germanic tribes rome collapse" onclick="toggleCard(this)">
-    <div class="keynote-era-bar"></div>
-    <div class="card-body">
-      <div class="card-top">
-        <div class="card-name"><span class="keynote-label">Historical Keynote</span><br>The Migration Period · Völkerwanderung</div>
-        <div class="card-date">c. 300 – 700 AD</div>
-      </div>
-      <div class="card-epithet">The Great Movement · When the Known World Reorganized Itself · The Ecosystem of the Germanic Kingdoms</div>
-      <div class="card-meta">Western Europe · Germanic tribal territories · Roman frontier zones · pertains to the Frankish, Lombard, Alemanni, and Burgundian figures visible in the lineage tree of this period</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Structural Models</span>
-        <span class="tag">The Shadow</span>
-      </div>
-      <div class="card-narrative-preview">Between approximately 300 and 700 AD, the Germanic and Hunnic peoples of central and eastern Europe moved westward and southward in massive waves, collapsing the Western Roman Empire and reshaping the political landscape of Europe into the kingdoms that would become medieval France, Germany, Italy, Spain, and England. The Franks, Lombards, Alemanni, Burgundians, and Vandals — all visible in this lineage's FamilySearch tree — were real historical peoples whose movements are documented in Roman, Byzantine, and early medieval sources. The specific genealogical figures named in the tree vary greatly in how well they can be documented as individuals.</div>
-      <div class="card-narrative-full">The Völkerwanderung — the Great Migration — is one of the most significant threshold events in Western history. What caused it is still debated: Hunnic pressure from the east, climate shifts, Roman internal instability, or all three simultaneously. What resulted is clear: the Western Roman Empire ceased to exist as a political entity in 476 AD, replaced by a patchwork of Germanic kingdoms that each claimed varying degrees of Roman legitimacy while organizing themselves around tribal kinship structures. The Franks — the most important tribal group for this lineage — are documented from the 3rd century onward in Roman sources. The Sicambri, one of the Frankish tribal groups appearing in the FamilySearch tree as the lineage of Sarah-Damaris, are mentioned in Julius Caesar's Gallic Wars and appear in Tacitus. Their specific royal genealogies, however, were written down centuries after the fact in documents shaped by the political needs of later Merovingian and Carolingian rulers who wanted to demonstrate ancient noble descent. What genealogical research in this period honestly shows: the tribal peoples were real, the migrations were real, the kingdoms they built were real. The specific named individuals and their lineage chains — the Antenors and Clodimirs and Marcomirs appearing in FamilySearch trees — are often drawn from texts like the Genealogy of the Frankish Kings, composed centuries after the events it describes, by scribes who had political reasons to construct impressive ancestral chains. The ecosystem of the Migration Period is documented and historically rich. The specific branches that grew through it are harder to trace with confidence. This Keynote holds the ecosystem — the human reality of peoples in motion, kingdoms forming and dissolving, the old Roman world becoming something entirely new — as the honest frame for the names that appear in the lineage tree of this era.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ HISTORICAL KEYNOTE: THE SICAMBRIAN AND EARLY FRANKISH WORLD ═══ -->
-  <div class="keynote-card" data-era="ancient" data-weaving="false" data-sort-name="sicambrian frankish world" data-sort-year="50" data-sort-location="gaul rhineland frankish territory" data-sort-fields="threshold events structural models sovereignty" data-search="sicambri franks merovingian clovis rhineland gaul caesar tacitus germanic tribes kingdom" onclick="toggleCard(this)">
-    <div class="keynote-era-bar"></div>
-    <div class="card-body">
-      <div class="card-top">
-        <div class="card-name"><span class="keynote-label">Historical Keynote</span><br>The Sicambrian and Early Frankish World</div>
-        <div class="card-date">c. 50 BC – 500 AD</div>
-      </div>
-      <div class="card-epithet">The Tribe at the Rhine · From Caesar's Frontier to Clovis's Kingdom · The World the Lineage Moved Through</div>
-      <div class="card-meta">Rhineland · Gaul · Toxandria · pertains to the Sicambrian and early Frankish figures in the lineage tree including Antenor, Ratherius, Richemir, Odomir, Marcomir, Clodomir</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Sovereignty</span>
-        <span class="tag">Structural Models</span>
-      </div>
-      <div class="card-narrative-preview">The Sicambri were a real Germanic tribal people documented by Julius Caesar, Tacitus, and Strabo — inhabiting the right bank of the Rhine where it bends westward, raiding into Gaul and clashing with Roman legions. Caesar crossed the Rhine specifically to intimidate them in 55 BC. Augustus eventually forced a large portion of the Sicambri to relocate west of the Rhine into Roman Gaul, where they were absorbed into the broader Frankish tribal confederation that would eventually produce the Merovingian dynasty. The names that appear in this lineage tree — Antenor, Ratherius, Richemir, Odomir, Marcomir, Clodomir — belong to a genealogical tradition that is historically contested but culturally significant.</div>
-      <div class="card-narrative-full">The documented historical picture: the Sicambri appear in Roman sources from the 1st century BC through the 1st century AD. They were one of several Germanic tribal groups that the Roman Empire repeatedly attempted to pacify, relocate, and absorb into frontier military service. Some Sicambrian warriors served in Roman auxiliary units. By the 2nd and 3rd centuries the Sicambri had largely merged into the broader Frankish confederation — the name Franci appearing in Roman sources around 260 AD as a collective term for the Germanic peoples along the lower and middle Rhine. The Merovingian dynasty, which unified the Frankish kingdoms under Clovis in the late 5th century, claimed descent from these Frankish tribal leaders. The specific genealogical chains — the kings named Antenor, Ratherius, Richemir — appear in medieval documents like the Liber Historiae Francorum (composed around 727 AD) and the later Genealogy of the Frankish Kings, which traced Merovingian ancestry back into antiquity, often with more concern for dynastic legitimacy than historical accuracy. Historians today treat these early Frankish genealogies with significant skepticism as biographical sources while acknowledging them as evidence of how the Franks understood their own origins and constructed their royal legitimacy. The lineage tree passes through this world. The ecosystem is documented. The specific branches are drawn partly from history and partly from medieval dynastic construction — which is itself an honest and interesting thing to know about the tradition you're carrying.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ HISTORICAL KEYNOTE: THE ROMAN-FRANKISH FRONTIER ═══ -->
-  <div class="keynote-card" data-era="ancient" data-weaving="false" data-sort-name="roman frankish frontier" data-sort-year="1" data-sort-location="rome gaul rhineland" data-sort-fields="threshold events structural models" data-search="roman senate gaul rhineland frontier gaius asinius quadratus roman historian germanic roman marriage elite" onclick="toggleCard(this)">
-    <div class="keynote-era-bar"></div>
-    <div class="card-body">
-      <div class="card-top">
-        <div class="card-name"><span class="keynote-label">Historical Keynote</span><br>The Roman–Frankish Frontier</div>
-        <div class="card-date">1st–3rd century AD</div>
-      </div>
-      <div class="card-epithet">Where Two Worlds Touched · Roman Senators and Germanic Kings · The Elite Who Crossed Both</div>
-      <div class="card-meta">Rome · Gaul · Rhine frontier · pertains to Roman senatorial figures in the lineage tree including Gaius Asinius Quadratus, Julia Charax, and Roman connections visible in the 1st–3rd century branches</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Structural Models</span>
-        <span class="tag">Anomalous Reception</span>
-      </div>
-      <div class="card-narrative-preview">Gaius Asinius Quadratus was a real Roman historian of the 3rd century AD — he wrote a history of Rome in fifteen books and a history of the Parthian wars, fragments of which survive. His name appearing in a lineage tree is not inherently implausible: Roman senatorial families did intermarry with frontier elites, and the blending of Roman and Germanic noble lines was common by the 2nd and 3rd centuries. What the Roman–Frankish frontier actually looked like, and why these crossings matter for understanding the ecosystem this lineage moved through, is the subject of this Keynote.</div>
-      <div class="card-narrative-full">The Rhine–Danube frontier was not a wall. It was a zone — a permeable boundary where Roman military officers, merchants, administrators, and local Germanic elites interacted continuously for centuries. Germanic tribal leaders sent their sons to be educated in Roman cities. Roman commanders married into local elite families to secure alliances. Germanic soldiers rose through Roman military ranks and some became Roman citizens and even senators. This two-way permeability means that by the 2nd and 3rd centuries, the distinction between "Roman" and "Germanic" among the elite classes of the frontier zone was often more political than ethnic. Gaius Asinius Quadratus is documented as a historian — his works are cited by later Byzantine authors. Whether the specific genealogical connection shown in the FamilySearch tree linking him to the Frankish lineage is documented is a separate question; the general phenomenon of Roman senatorial families connecting with Frankish frontier elites is historically real. Julia Charax, another name visible in this section of the tree, is harder to trace — charax means palisade in Greek, and the name appears in various Roman and Greek contexts without clear individual documentation for the specific person shown. The honest picture: the ecosystem of Roman-Frankish frontier interaction is documented and produced exactly the kind of mixed elite genealogies that later medieval scribes would draw on when constructing royal ancestry chains. Your lineage tree moves through this world. The world was real. The specific connections require source-by-source evaluation.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-
-  <!-- ═══ HISTORICAL KEYNOTE: THE VANDAL KINGDOM AND THE FALL OF ROME ═══ -->
-  <div class="keynote-card" data-era="ancient" data-weaving="false" data-sort-name="vandal kingdom fall rome" data-sort-year="429" data-sort-location="north africa carthage rome" data-sort-fields="threshold events sovereignty the shadow" data-search="vandals gaiseric carthage north africa rome sack 455 huneric eudocia migration period" onclick="toggleCard(this)">
-    <div class="keynote-era-bar"></div>
-    <div class="card-body">
-      <div class="card-top">
-        <div class="card-name"><span class="keynote-label">Historical Keynote</span><br>The Vandal Kingdom and the Fall of Rome</div>
-        <div class="card-date">c. 400 – 534 AD</div>
-      </div>
-      <div class="card-epithet">The Sea People of Late Antiquity · Carthage Again · When Rome Was Sacked for the Second Time</div>
-      <div class="card-meta">North Africa · Mediterranean · Rome · pertains to Gaiseric, Huneric, Eudocia, and Licinia Eudoxia visible in the lineage tree of this period</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">Sovereignty</span>
-        <span class="tag">The Shadow</span>
-      </div>
-      <div class="card-narrative-preview">In 429 AD, King Gaiseric led approximately 80,000 Vandals across the Strait of Gibraltar from Spain into North Africa — the most consequential crossing of the Migration Period. Within a decade they had taken Carthage, the wealthiest city in the western Mediterranean, and turned the Vandals into a naval power that terrorized Roman shipping for a generation. In 455 Gaiseric sacked Rome itself — the second sack of the city in less than fifty years. The Vandals held North Africa until 534, when Justinian's general Belisarius destroyed the kingdom in a single campaign. The lineage tree carries names from this world: Gaiseric himself, his son Huneric who married the Roman princess Eudocia, and the Roman imperial family they connected to through that marriage.</div>
-      <div class="card-narrative-full">Gaiseric is one of the most documented and consequential figures of the 5th century. His byname "the Lame" appears in the sources — Jordanes, Procopius, and Victor of Vita all write about him. He was a strategic genius who transformed a land-bound Germanic tribe into a Mediterranean sea power within a single generation. His political use of marriage is directly relevant to the lineage tree: his son Huneric was betrothed to Eudocia, the daughter of Emperor Valentinian III, in 442 AD — a treaty that gave the Vandals formal recognition from the Western Roman Empire. When Valentinian was assassinated in 455, Gaiseric used the broken betrothal treaty as justification for sacking Rome. Eudocia was taken to Carthage and did eventually marry Huneric. Their son Hilderic later became king of the Vandals. The Roman empress Licinia Eudoxia — Eudocia's mother, wife of Valentinian III — is also documented. She was the daughter of the Eastern Emperor Theodosius II, placing the Roman imperial genealogy directly in this section of the tree. The Vandal kingdom ended in 534 when Justinian reconquered North Africa. Procopius documented the campaign in detail. The Vandal population was dispersed, the kingdom dissolved, and the name Vandal became synonymous with destruction in the Western imagination — an act of historical reputation-making that has lasted fifteen centuries. The lineage passed through this world. Some of the women in this section of the tree — the Roman imperial daughters given as political hostages in marriage to Germanic kings — are among the most documented women of late antiquity.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ GAISERIC ═══ -->
-  <div class="catalog-card" data-era="ancient" data-weaving="false" data-sort-name="gaiseric vandals" data-sort-year="389" data-sort-location="north africa carthage" data-sort-fields="sovereignty threshold events" data-search="gaiseric le boiteux vandals king carthage rome sack 455 north africa" onclick="toggleCard(this)">
-    <div class="card-era-bar era-ancient"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Gaiseric, King of the Vandals</div><div class="card-date">389 – 477</div></div>
-      <div class="card-epithet">Le Boiteux · The Lame · Terror of the Mediterranean</div>
-      <div class="card-meta">Pannonia · Spain · North Africa · Carthage · one of the most documented figures of the Migration Period</div>
-      <div class="card-tags">
-        <span class="tag">Sovereignty</span>
-        <span class="tag">Threshold Events</span>
-      </div>
-      <div class="card-narrative-preview">King of the Vandals 428–477. Led 80,000 Vandals across the Strait of Gibraltar in 429, took Carthage in 439, sacked Rome in 455. Built the first major Germanic naval power in the Mediterranean. His son Huneric married the Roman princess Eudocia in a political alliance that gave the Vandals formal imperial recognition. Documented in detail by Procopius, Jordanes, and Victor of Vita. His byname "the Lame" appears in multiple contemporary sources. Ruled for nearly fifty years — one of the longest reigns of the Migration Period.</div>
-      <div class="card-narrative-full">Gaiseric is historically documented with unusual detail for a Migration Period king. His strategic intelligence — recognizing that North Africa rather than Europe was the prize, that naval power could project Vandal force across the Mediterranean, that political marriages could secure treaty rights from Rome — made him qualitatively different from most Germanic leaders of his era. Edward Gibbon in The Decline and Fall of the Roman Empire described him as one of the most able political and military leaders of the 5th century. His appearance in this lineage tree through Huneric and the Roman imperial family is genealogically plausible — the Huneric-Eudocia marriage is documented history. Whether the specific chain connecting those documented figures to the living descendant is traceable with confidence is a separate question.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-  <!-- ═══ EUDOCIA (VANDAL QUEEN) ═══ -->
-  <div class="catalog-card" data-era="ancient" data-weaving="false" data-sort-name="eudocia vandal queen" data-sort-year="439" data-sort-location="rome carthage" data-sort-fields="threshold events the shadow" data-search="eudocia flavia placida valentinian daughter huneric vandal queen rome carthage hostage" onclick="toggleCard(this)">
-    <div class="card-era-bar era-ancient"></div>
-    <div class="card-body">
-      <div class="card-top"><div class="card-name">Eudocia Flavia Placida</div><div class="card-date">c. 439 – after 472</div></div>
-      <div class="card-epithet">Roman Princess Given to Carthage · Daughter of Empire · Wife of Huneric</div>
-      <div class="card-meta">Rome · Carthage · daughter of Emperor Valentinian III and Empress Licinia Eudoxia · married Huneric, son of Gaiseric · taken to Carthage at the sack of Rome 455</div>
-      <div class="card-tags">
-        <span class="tag">Threshold Events</span>
-        <span class="tag">The Shadow</span>
-      </div>
-      <div class="card-narrative-preview">Daughter of the Western Roman Emperor Valentinian III and Empress Licinia Eudoxia, betrothed to Huneric, son of Gaiseric, in 442 AD as part of a Roman-Vandal treaty. When her father was assassinated in 455, her mother appealed to Gaiseric, who sacked Rome and took both women to Carthage. Eudocia was married to Huneric as previously arranged. Their son Hilderic later became the last Vandal king. She eventually left Huneric and traveled to Jerusalem, where she died. Documented in Procopius and other late antique sources.</div>
-      <div class="card-narrative-full">Eudocia's life encodes the most precise version of a pattern that appears throughout this lineage: the woman given in political marriage as a treaty instrument, whose personal experience of that crossing is largely absent from the record that preserved the political fact. She was betrothed at approximately age three. She was taken to Carthage as part of the sack of Rome at approximately age sixteen. She married the man she had been promised to. She eventually left and went to Jerusalem. The sources that document her — Procopius primarily — are interested in the political transactions, not her experience of them. She belongs in this catalog as one of the most clearly documented women in the lineage tree's late antique section, and as a precise example of the pattern of women whose lives were the currency of political treaties between empires.</div>
-      <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
-    </div>
-  </div>
-
-
-</div><!-- end grid -->
 <div class="catalog-footer">
 <div class="footer-rule"></div>
 <p class="footer-note">The catalog holds what is known. The gaps hold what is still arriving. Both are part of the archive.</p>
 </div>
 </div><!-- end page -->
+
+<style>
+.loading-state {
+  text-align: center; padding: 6rem 2rem;
+  opacity: 0; animation: fadeUp 0.6s ease 0.2s forwards;
+}
+.loading-glyph {
+  font-size: 1.8rem; color: var(--gold); Noneopacity: 0.88;
+  margin-bottom: 1.25rem; display: block;
+  animation: pulse 2s ease-in-out infinite;
+}
+.loading-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-style: italic; color: var(--text-dim);
+}
+.error-state {
+  text-align: center; padding: 4rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; color: #c07060;
+}
+@keyframes pulse { 0%, 100% { opacity: 0.88; } 50% { opacity: 1.0; } } 50% { Noneopacity: 0.88; } }
+.catalog-card.keynote-card { border-color: rgba(196,190,248,0.2); }
+.catalog-card.keynote-card:hover { border-color: rgba(196,190,248,0.38); }
+</style>
+
 <script>
+const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+
 let activeFilter = 'all';
 let activeSort = 'chronological';
 
-function toggleCard(card) {
-  card.classList.toggle('open');
+// Map Supabase era values to filter categories and era bar CSS classes
+const ERA_FILTER = {
+  'mythic':        'mythic',
+  'classical':     'ancient',
+  'post-roman':    'ancient',
+  'early-medieval':'medieval',
+  'high-medieval': 'medieval',
+  'late-medieval': 'medieval',
+  'early-modern':  'early-modern',
+  'colonial':      'early-modern',
+  '19th-century':  'modern',
+};
+const ERA_BAR_CLASS = {
+  'mythic':        'era-mythic',
+  'classical':     'era-ancient',
+  'post-roman':    'era-ancient',
+  'early-medieval':'era-medieval',
+  'high-medieval': 'era-medieval',
+  'late-medieval': 'era-medieval',
+  'early-modern':  'era-early-modern',
+  'colonial':      'era-early-modern',
+  '19th-century':  'era-modern',
+};
+
+async function supabaseFetch(path) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  if (!res.ok) throw new Error(`Supabase error ${res.status}`);
+  return res.json();
 }
+
+function toggleCard(card) { card.classList.toggle('open'); }
 
 function setFilter(filter, btn) {
   activeFilter = filter;
@@ -1364,62 +297,116 @@ function setSort(sort, btn) {
 
 function applyAll() {
   const query = document.getElementById('search').value.toLowerCase();
-  const grid = document.getElementById('catalog-grid');
+  const grid  = document.getElementById('catalog-grid');
   const cards = Array.from(document.querySelectorAll('.catalog-card'));
   let visible = 0;
 
-  // Filter
   cards.forEach(card => {
-    const searchText = (card.dataset.search || '') + ' ' +
-      card.querySelector('.card-name').textContent.toLowerCase() + ' ' +
-      (card.dataset.sortLocation || '') + ' ' +
-      (card.dataset.sortFields || '');
-    const era = card.dataset.era || '';
-    const inWeaving = card.dataset.weaving === 'true';
-
+    const searchText = (card.dataset.search || '').toLowerCase();
+    const filterCat  = card.dataset.filterCat || '';
+    const inWeaving  = card.dataset.weaving === 'true';
     const matchesSearch = !query || searchText.includes(query);
-    const isKeynote = card.classList.contains('keynote-card');
     const matchesFilter =
       activeFilter === 'all' ||
       (activeFilter === 'weaving' && inWeaving) ||
-      (activeFilter === 'keynote' && isKeynote) ||
-      activeFilter === era;
-
-    if (matchesSearch && matchesFilter) {
-      card.classList.remove('hidden');
-      visible++;
-    } else {
-      card.classList.add('hidden');
-    }
+      activeFilter === filterCat;
+    if (matchesSearch && matchesFilter) { card.classList.remove('hidden'); visible++; }
+    else card.classList.add('hidden');
   });
 
-  // Sort visible cards
   const visibleCards = cards.filter(c => !c.classList.contains('hidden'));
-
   visibleCards.sort((a, b) => {
-    if (activeSort === 'name') {
-      return (a.dataset.sortName || '').localeCompare(b.dataset.sortName || '');
-    } else if (activeSort === 'chronological') {
-      return parseInt(a.dataset.sortYear || 0) - parseInt(b.dataset.sortYear || 0);
-    } else if (activeSort === 'location') {
-      return (a.dataset.sortLocation || '').localeCompare(b.dataset.sortLocation || '');
-    } else if (activeSort === 'field') {
-      return (a.dataset.sortFields || '').localeCompare(b.dataset.sortFields || '');
-    }
-    return 0;
+    if (activeSort === 'name')     return (a.dataset.sortName || '').localeCompare(b.dataset.sortName || '');
+    if (activeSort === 'location') return (a.dataset.sortLocation || '').localeCompare(b.dataset.sortLocation || '');
+    return parseInt(a.dataset.sortYear || 0) - parseInt(b.dataset.sortYear || 0);
   });
-
-  // Re-append in sorted order
   visibleCards.forEach(card => grid.appendChild(card));
 
   document.getElementById('count-note').textContent =
     visible === 1 ? '1 ancestor' : visible + ' ancestors';
 }
 
-// Stagger card animations on load
-document.querySelectorAll('.catalog-card').forEach((card, i) => {
-  card.style.animationDelay = (0.04 * i) + 's';
-});
+function buildCard(ancestor, freqTags, index) {
+  const era       = ancestor.era || '';
+  const filterCat = ERA_FILTER[era] || 'modern';
+  const barClass  = ERA_BAR_CLASS[era] || 'era-modern';
+  const inWeaving = ancestor.status === 'weaving';
+
+  const searchParts = [ancestor.name, ancestor.epithet, ancestor.dates,
+    ancestor.location, ancestor.era, ancestor.catalog_preview, ...freqTags]
+    .filter(Boolean).join(' ').toLowerCase();
+
+  const weavingTag = inWeaving ? `<span class="tag tag-weaving">In Weaving \u2736</span>` : '';
+  const freqHtml   = freqTags.map(t => `<span class="tag">${t}</span>`).join('');
+
+  const preview = ancestor.catalog_preview || '';
+  const full    = ancestor.catalog_full || '';
+  const hasMore = full && full.trim() !== preview.trim();
+
+  const narrativeHtml = hasMore
+    ? `<div class="card-narrative-preview">${preview}</div>
+       <div class="card-narrative-full">${full}</div>
+       <div class="card-chevron">More <svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>`
+    : `<div class="card-narrative-preview">${preview}</div>`;
+
+  const card = document.createElement('div');
+  card.className = 'catalog-card' + (ancestor.status === 'margin' ? ' margin-ancestor' : '');
+  card.dataset.filterCat    = filterCat;
+  card.dataset.weaving      = inWeaving ? 'true' : 'false';
+  card.dataset.search       = searchParts;
+  card.dataset.sortName     = (ancestor.name || '').toLowerCase();
+  card.dataset.sortLocation = (ancestor.location || '').toLowerCase();
+  card.dataset.sortYear     = ancestor.sort_year || 0;
+  card.style.animationDelay = (0.04 * index) + 's';
+  card.onclick = function() { toggleCard(this); };
+
+  card.innerHTML = `
+    <div class="card-era-bar ${barClass}"></div>
+    <div class="card-body">
+      <div class="card-top">
+        <div class="card-name">${ancestor.name || '\u2014'}</div>
+        ${ancestor.dates ? `<div class="card-date">${ancestor.dates}</div>` : ''}
+      </div>
+      ${ancestor.epithet ? `<div class="card-epithet">${ancestor.epithet}</div>` : ''}
+      ${ancestor.location ? `<div class="card-meta">${ancestor.location}</div>` : ''}
+      <div class="card-tags">${weavingTag}${freqHtml}</div>
+      ${narrativeHtml}
+    </div>`;
+
+  return card;
+}
+
+async function init() {
+  const grid = document.getElementById('catalog-grid');
+  try {
+    const [ancestors, freqRows] = await Promise.all([
+      supabaseFetch('ancestors?select=*&order=sort_year.asc'),
+      supabaseFetch('ancestor_frequencies?select=ancestor_id,frequency_tags(name)').catch(() => [])
+    ]);
+
+    const freqMap = {};
+    freqRows.forEach(row => {
+      const name = row.frequency_tags?.name;
+      if (!name) return;
+      if (!freqMap[row.ancestor_id]) freqMap[row.ancestor_id] = [];
+      freqMap[row.ancestor_id].push(name);
+    });
+
+    grid.innerHTML = '';
+    ancestors.forEach((a, i) => grid.appendChild(buildCard(a, freqMap[a.id] || [], i)));
+
+    const total = ancestors.length;
+    document.getElementById('count-note').textContent = total + ' ancestor' + (total !== 1 ? 's' : '');
+
+  } catch (err) {
+    grid.innerHTML = `<div class="error-state" style="grid-column:1/-1">
+      <p>The catalog could not be retrieved.</p>
+      <p style="font-size: 15px;margin-top:0.5rem;Noneopacity: 0.88">${err.message}</p>
+    </div>`;
+  }
+}
+
+init();
 </script>
 </body>
 </html>
