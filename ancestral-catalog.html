@@ -338,6 +338,7 @@ function buildCard(ancestor, freqTags, index) {
     ancestor.location, ancestor.era, ancestor.catalog_preview, ...freqTags]
     .filter(Boolean).join(' ').toLowerCase();
 
+  const isKeynote  = ancestor.status === 'keynote';
   const weavingTag = inWeaving ? `<span class="tag tag-weaving">In Weaving \u2736</span>` : '';
   const freqHtml   = freqTags.map(t => `<span class="tag">${t}</span>`).join('');
 
@@ -352,7 +353,9 @@ function buildCard(ancestor, freqTags, index) {
     : `<div class="card-narrative-preview">${preview}</div>`;
 
   const card = document.createElement('div');
-  card.className = 'catalog-card' + (ancestor.status === 'margin' ? ' margin-ancestor' : '');
+  card.className = 'catalog-card'
+    + (ancestor.status === 'margin' ? ' margin-ancestor' : '')
+    + (isKeynote ? ' keynote-card' : '');
   card.dataset.filterCat    = filterCat;
   card.dataset.weaving      = inWeaving ? 'true' : 'false';
   card.dataset.search       = searchParts;
@@ -363,8 +366,9 @@ function buildCard(ancestor, freqTags, index) {
   card.onclick = function() { toggleCard(this); };
 
   card.innerHTML = `
-    <div class="card-era-bar ${barClass}"></div>
+    <div class="${isKeynote ? 'keynote-era-bar' : `card-era-bar ${barClass}`}"></div>
     <div class="card-body">
+      ${isKeynote ? '<div><span class="keynote-label">Historical Keynote</span></div>' : ''}
       <div class="card-top">
         <div class="card-name">${ancestor.name || '\u2014'}</div>
         ${ancestor.dates ? `<div class="card-date">${ancestor.dates}</div>` : ''}
