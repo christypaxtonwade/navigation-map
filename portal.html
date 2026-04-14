@@ -59,7 +59,7 @@ body::before {
    LOGIN SCREEN
 ════════════════════════════════════════════════════ */
 #view-login {
-  display: flex; align-items: center; justify-content: center;
+  align-items: center; justify-content: center;
   min-height: 100vh; padding: 2rem;
 }
 #view-login.active { display: flex; }
@@ -719,13 +719,20 @@ async function enterApp() {
 
   showView('view-app');
 
+  // Navigate to hash if present, otherwise default
+  const hashPanel = panelForHash(window.location.hash);
+  const startPanel = hashPanel || defaultPanel();
+
   if (isAdmin) {
-    showPanel('panel-overview');
-    populateOverview();
-    populateWeavingClientSelect();
+    await Promise.all([populateWeavingClientSelect()]);
+    showPanel(startPanel);
+    if (startPanel === 'panel-overview') populateOverview();
+    if (startPanel === 'panel-clients') renderClientList();
+    if (startPanel === 'panel-convergence-admin') loadAllConvergences();
   } else {
-    showPanel('panel-my-weaving');
-    loadMyWeaving();
+    showPanel(startPanel);
+    if (startPanel === 'panel-my-weaving') loadMyWeaving();
+    if (startPanel === 'panel-my-convergence') loadMyConvergence();
   }
 }
 
@@ -763,13 +770,54 @@ function buildNav() {
   });
 }
 
+// ── Hash routing ──────────────────────────────────────
+// Maps URL hash → panel ID for browser back/forward support
+const ADMIN_HASH_MAP = {
+  '#overview':      'panel-overview',
+  '#clients':       'panel-clients',
+  '#weaving':       'panel-weaving',
+  '#convergences':  'panel-convergence-admin',
+};
+const CLIENT_HASH_MAP = {
+  '#my-weaving':    'panel-my-weaving',
+  '#my-convergence':'panel-my-convergence',
+};
+function hashForPanel(panelId) {
+  const all = { ...ADMIN_HASH_MAP, ...CLIENT_HASH_MAP };
+  return Object.keys(all).find(h => all[h] === panelId) || '#overview';
+}
+function panelForHash(hash) {
+  const map = (isAdmin && !isPreviewingAsClient) ? ADMIN_HASH_MAP : CLIENT_HASH_MAP;
+  return map[hash] || null;
+}
+function defaultPanel() {
+  return (isAdmin && !isPreviewingAsClient) ? 'panel-overview' : 'panel-my-weaving';
+}
+
+// Listen for back/forward navigation
+window.addEventListener('hashchange', () => {
+  if (!document.getElementById('view-app').classList.contains('active')) return;
+  const target = panelForHash(window.location.hash);
+  if (target) activatePanel(target);
+});
+
 function showPanel(panelId) {
+  // Update hash without triggering hashchange listener
+  const newHash = hashForPanel(panelId);
+  if (window.location.hash !== newHash) {
+    history.pushState(null, '', newHash);
+  }
+  activatePanel(panelId);
+}
+
+function activatePanel(panelId) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.panel === panelId);
   });
   const panel = document.getElementById(panelId);
   if (panel) panel.classList.add('active');
+  window.scrollTo(0, 0);
 }
 
 // ── View toggle ───────────────────────────────────────
@@ -806,6 +854,7 @@ function stopPreview() {
 function showView(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
 }
 
 // ── REST helpers ──────────────────────────────────────
