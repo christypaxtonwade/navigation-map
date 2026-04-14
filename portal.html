@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Map Guide & Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #09090f;
+  --surface: #0f1018;
+  --surface-2: #161722;
+  --border: rgba(180,155,100,0.14);
+  --border-hover: rgba(180,155,100,0.28);
+  --gold: #c9a87c;
+  --gold-bright: #dfc090;
+  --gold-dim: rgba(201,168,124,0.35);
+  --accent: rgba(201,168,124,0.08);
+  --text: #ede8dc;
+  --text-secondary: #c8c0b0;
+  --text-dim: #8a8478;
+  --text-faint: #4e4c46;
+  --teal: #6dd8b2;
+  --teal-dim: rgba(109,216,178,0.15);
+  --amber: #f5aa88;
+  --amber-dim: rgba(245,170,136,0.15);
+  --red: #c07060;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Jost', sans-serif; font-weight: 300;
+  font-size: 15px; min-height: 100vh; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(201,168,124,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,124,0.018) 1px, transparent 1px);
+  background-size: 52px 52px; pointer-events: none; z-index: 0;
+}
+
+/* ── Typography helpers ── */
+.eyebrow {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 0.5rem;
+}
+.serif { font-family: 'Cormorant Garamond', serif; }
+
+/* ── Views ── */
+.view { display: none; position: relative; z-index: 1; min-height: 100vh; }
+.view.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   LOGIN SCREEN
+════════════════════════════════════════════════════ */
+#view-login {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; padding: 2rem;
+}
+#view-login.active { display: flex; }
+
+.login-card {
+  width: 100%; max-width: 420px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 3rem 2.5rem;
+  opacity: 0; animation: fadeUp 0.7s ease forwards;
+}
+.login-glyph {
+  text-align: center; font-size: 2rem; color: var(--gold);
+  margin-bottom: 1.5rem; opacity: 0.7;
+}
+.login-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.9rem; font-weight: 300; font-style: italic;
+  color: var(--text); text-align: center; margin-bottom: 0.4rem;
+}
+.login-sub {
+  font-size: 13px; color: var(--text-dim); text-align: center;
+  margin-bottom: 2rem; letter-spacing: 0.04em;
+}
+.login-rule {
+  width: 32px; height: 1px; background: var(--gold-dim);
+  margin: 0 auto 2rem;
+}
+
+.field-group { margin-bottom: 1.25rem; }
+.field-label {
+  display: block; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 0.5rem;
+}
+.field-input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 10px 14px;
+  color: var(--text); font-family: 'Jost', sans-serif;
+  font-size: 15px; font-weight: 300; outline: none;
+  transition: border-color 0.2s;
+}
+.field-input:focus { border-color: var(--gold-dim); }
+
+.btn-primary {
+  width: 100%; padding: 11px; border: none; border-radius: 6px;
+  background: var(--gold); color: var(--bg);
+  font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.2s; margin-top: 0.5rem;
+}
+.btn-primary:hover { background: var(--gold-bright); }
+.btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+.login-error {
+  font-size: 13px; color: var(--red); text-align: center;
+  margin-top: 1rem; min-height: 1.2em;
+}
+
+/* ════════════════════════════════════════════════════
+   SHARED APP SHELL
+════════════════════════════════════════════════════ */
+.app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+
+.app-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(9,9,15,0.95); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.app-header-left { display: flex; align-items: center; gap: 1.25rem; }
+.app-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-style: italic; color: var(--gold);
+  letter-spacing: 0.04em; white-space: nowrap;
+}
+.app-role-badge {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.16em;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 10px;
+}
+.role-admin {
+  background: var(--teal-dim); border: 1px solid rgba(109,216,178,0.22);
+  color: var(--teal);
+}
+.role-client {
+  background: var(--accent); border: 1px solid var(--border);
+  color: var(--gold);
+}
+
+.app-header-right { display: flex; align-items: center; gap: 1rem; }
+.btn-view-toggle {
+  font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 400;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 6px 12px; border-radius: 5px; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+  background: var(--accent); border: 1px solid var(--border);
+  color: var(--gold);
+}
+.btn-view-toggle:hover { border-color: var(--border-hover); color: var(--gold-bright); }
+.btn-view-toggle.previewing {
+  background: var(--amber-dim); border-color: rgba(245,170,136,0.3);
+  color: var(--amber);
+}
+
+.btn-signout {
+  font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 400;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 6px 12px; border-radius: 5px; cursor: pointer;
+  background: transparent; border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-faint); transition: all 0.2s;
+}
+.btn-signout:hover { border-color: var(--border); color: var(--text-dim); }
+
+.app-nav {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
+}
+.app-nav::-webkit-scrollbar { display: none; }
+.nav-tab {
+  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 400;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0 1.25rem; height: 44px;
+  display: inline-flex; align-items: center; cursor: pointer;
+  border: none; background: none; color: var(--text-dim);
+  border-bottom: 2px solid transparent; white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.admin-only-tab { display: none; }
+
+.app-content { flex: 1; padding: 2.5rem 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+/* ════════════════════════════════════════════════════
+   PANELS
+════════════════════════════════════════════════════ */
+.panel { display: none; }
+.panel.active { display: block; }
+
+.panel-header { margin-bottom: 2rem; }
+.panel-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem; font-weight: 300; font-style: italic;
+  color: var(--text); margin-bottom: 0.3rem;
+}
+.panel-sub { font-size: 14px; color: var(--text-dim); line-height: 1.7; }
+
+/* ── Cards & grids ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1.5rem 1.75rem;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border-hover); }
+
+.card-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem; margin-bottom: 2rem;
+}
+
+.stat-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem; margin-bottom: 2rem;
+}
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 1.25rem 1.5rem; text-align: center;
+}
+.stat-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.4rem; font-weight: 300; color: var(--gold); line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.stat-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); }
+
+/* ── Section headers ── */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1rem; padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.section-title {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--gold);
+}
+
+/* ── Client list ── */
+.client-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.client-row {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 1rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+}
+.client-row:hover { border-color: var(--border-hover); background: var(--surface-2); }
+.client-row.selected {
+  border-color: var(--gold-dim); background: var(--accent);
+}
+.client-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem; font-weight: 400; color: var(--text);
+}
+.client-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.client-badge {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 10px;
+  background: var(--teal-dim); border: 1px solid rgba(109,216,178,0.22);
+  color: var(--teal); white-space: nowrap; flex-shrink: 0;
+}
+
+/* ── Ancestor list (for weaving panel) ── */
+.ancestor-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.ancestor-row {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.75rem 1rem;
+  display: flex; align-items: center; gap: 0.75rem;
+  transition: border-color 0.2s;
+}
+.ancestor-row:hover { border-color: var(--border-hover); }
+.ancestor-era-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.ancestor-name-block { flex: 1; }
+.ancestor-name-text { font-size: 14px; color: var(--text); }
+.ancestor-dates { font-size: 12px; color: var(--text-faint); }
+.ancestor-freq-count {
+  font-size: 11px; color: var(--text-dim);
+  background: var(--accent); border: 1px solid var(--border);
+  border-radius: 10px; padding: 2px 8px; flex-shrink: 0;
+}
+
+/* Era colors */
+.era-mythic    { background: rgba(196,190,248,0.6); }
+.era-ancient   { background: rgba(245,170,136,0.6); }
+.era-medieval  { background: rgba(201,168,124,0.7); }
+.era-early-modern { background: rgba(109,216,178,0.5); }
+.era-modern    { background: rgba(201,168,124,0.4); }
+
+/* ── Convergence panel ── */
+.convergence-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; margin-bottom: 1rem;
+}
+.convergence-card-header {
+  padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.convergence-card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem; font-weight: 400; font-style: italic; color: var(--text);
+}
+.convergence-card-meta { font-size: 12px; color: var(--text-dim); }
+.convergence-card-body { padding: 1.25rem 1.5rem; }
+.convergence-status {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 10px;
+}
+.status-published {
+  background: var(--teal-dim); border: 1px solid rgba(109,216,178,0.22);
+  color: var(--teal);
+}
+.status-draft {
+  background: var(--accent); border: 1px solid var(--border);
+  color: var(--gold);
+}
+
+/* ── Buttons ── */
+.btn {
+  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 400;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 8px 16px; border-radius: 6px; cursor: pointer;
+  transition: all 0.2s; text-decoration: none; display: inline-block;
+}
+.btn-gold { background: var(--gold); color: var(--bg); border: 1px solid var(--gold); }
+.btn-gold:hover { background: var(--gold-bright); border-color: var(--gold-bright); }
+.btn-outline { background: none; border: 1px solid var(--border); color: var(--text-dim); }
+.btn-outline:hover { border-color: var(--border-hover); color: var(--text); }
+.btn-sm { padding: 5px 10px; font-size: 11px; }
+
+/* ── Admin panels ── */
+.two-col { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start; }
+.sidebar-sticky { position: sticky; top: calc(56px + 44px + 2.5rem); }
+
+.form-group { margin-bottom: 1.25rem; }
+.form-label {
+  display: block; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 0.5rem;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 9px 12px;
+  color: var(--text); font-family: 'Jost', sans-serif;
+  font-size: 14px; font-weight: 300; outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--gold-dim);
+}
+.form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238a8478' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.form-select option { background: var(--surface); }
+.form-textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+/* ── Inline message ── */
+.msg {
+  font-size: 13px; padding: 8px 12px; border-radius: 6px; margin-bottom: 1rem;
+}
+.msg-success {
+  background: var(--teal-dim); border: 1px solid rgba(109,216,178,0.22);
+  color: var(--teal);
+}
+.msg-error {
+  background: rgba(192,112,96,0.1); border: 1px solid rgba(192,112,96,0.25);
+  color: var(--red);
+}
+
+/* ── Loading ── */
+.loading {
+  text-align: center; padding: 4rem 2rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-style: italic; color: var(--text-dim);
+}
+.loading-glyph {
+  display: block; font-size: 1.6rem; color: var(--gold);
+  margin-bottom: 1rem; animation: pulse 2s ease-in-out infinite;
+}
+
+/* ── Empty state ── */
+.empty {
+  text-align: center; padding: 3rem; color: var(--text-dim);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem; font-style: italic;
+}
+
+/* ── Preview banner ── */
+.preview-banner {
+  background: var(--amber-dim); border-bottom: 1px solid rgba(245,170,136,0.25);
+  padding: 8px 2rem; text-align: center;
+  font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--amber); display: none;
+}
+.preview-banner.visible { display: block; }
+
+/* ── Frequency bar (convergence overview) ── */
+.freq-row {
+  display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;
+}
+.freq-label { font-size: 13px; color: var(--text-secondary); width: 200px; flex-shrink: 0; }
+.freq-bar-wrap {
+  flex: 1; height: 4px; background: rgba(255,255,255,0.05);
+  border-radius: 2px; overflow: hidden;
+}
+.freq-bar { height: 100%; background: var(--gold); border-radius: 2px; }
+.freq-count { font-size: 12px; color: var(--text-dim); width: 30px; text-align: right; flex-shrink: 0; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 768px) {
+  .app-content { padding: 1.5rem 1rem; }
+  .two-col { grid-template-columns: 1fr; }
+  .sidebar-sticky { position: static; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Login View ── -->
+<div id="view-login" class="view active">
+  <div class="login-card">
+    <div class="login-glyph">✦</div>
+    <div class="login-title">Map Guide & Portal</div>
+    <p class="login-sub">Christy Paxton Wade · Navigation Map of Consciousness</p>
+    <div class="login-rule"></div>
+    <div class="field-group">
+      <label class="field-label" for="login-email">Email</label>
+      <input class="field-input" id="login-email" type="email" autocomplete="email" placeholder="your@email.com">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="login-password">Password</label>
+      <input class="field-input" id="login-password" type="password" autocomplete="current-password" placeholder="••••••••">
+    </div>
+    <button class="btn-primary" id="btn-login" onclick="handleLogin()">Enter →</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ── App View ── -->
+<div id="view-app" class="view">
+  <div class="app-shell">
+
+    <!-- Preview banner (admin viewing as client) -->
+    <div class="preview-banner" id="preview-banner">
+      Viewing as Client — <a href="#" onclick="stopPreview()" style="color:inherit;text-decoration:underline;cursor:pointer">Return to Admin</a>
+    </div>
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="app-header-left">
+        <div class="app-logo">Map Guide & Portal</div>
+        <span class="app-role-badge" id="role-badge">·</span>
+      </div>
+      <div class="app-header-right">
+        <button class="btn-view-toggle" id="btn-toggle-view" onclick="toggleClientPreview()" style="display:none">View as Client</button>
+        <button class="btn-signout" onclick="handleSignOut()">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- Nav tabs -->
+    <nav class="app-nav" id="app-nav">
+      <!-- Injected by JS based on role -->
+    </nav>
+
+    <!-- Content -->
+    <main class="app-content">
+
+      <!-- ══ ADMIN: Overview ══ -->
+      <div class="panel" id="panel-overview">
+        <div class="panel-header">
+          <div class="eyebrow">Map Guide & Portal</div>
+          <div class="panel-title">Overview</div>
+          <p class="panel-sub" id="overview-sub">Loading…</p>
+        </div>
+        <div class="stat-grid" id="overview-stats"></div>
+        <div class="section-header">
+          <div class="section-title">Clients</div>
+          <button class="btn btn-outline btn-sm" onclick="showPanel('panel-clients')">View All →</button>
+        </div>
+        <div class="client-list" id="overview-clients"></div>
+      </div>
+
+      <!-- ══ ADMIN: Clients ══ -->
+      <div class="panel" id="panel-clients">
+        <div class="panel-header">
+          <div class="eyebrow">Administration</div>
+          <div class="panel-title">Clients</div>
+          <p class="panel-sub">Manage client records and their ancestral weavings.</p>
+        </div>
+        <div class="section-header">
+          <div class="section-title">All Clients</div>
+          <button class="btn btn-gold btn-sm" onclick="showAddClientForm()">+ New Client</button>
+        </div>
+        <div id="add-client-form" style="display:none;margin-bottom:1.5rem;">
+          <div class="card">
+            <div class="eyebrow" style="margin-bottom:1rem">New Client</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+              <div class="form-group">
+                <label class="form-label">Name</label>
+                <input class="form-input" id="new-client-name" placeholder="Full name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input class="form-input" id="new-client-email" type="email" placeholder="email@example.com">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes (optional)</label>
+              <textarea class="form-textarea" id="new-client-notes" placeholder="Initial intake notes, session context…" rows="3"></textarea>
+            </div>
+            <div style="display:flex;gap:0.75rem;">
+              <button class="btn btn-gold" onclick="createClient()">Create Client</button>
+              <button class="btn btn-outline" onclick="document.getElementById('add-client-form').style.display='none'">Cancel</button>
+            </div>
+            <div id="client-create-msg" style="margin-top:0.75rem;"></div>
+          </div>
+        </div>
+        <div class="client-list" id="clients-list"></div>
+      </div>
+
+      <!-- ══ ADMIN: Weaving Builder ══ -->
+      <div class="panel" id="panel-weaving">
+        <div class="panel-header">
+          <div class="eyebrow">Administration</div>
+          <div class="panel-title">Ancestral Weaving</div>
+          <p class="panel-sub">Build and manage client ancestor assignments.</p>
+        </div>
+        <div class="two-col">
+          <div class="sidebar-sticky">
+            <div class="card">
+              <div class="eyebrow" style="margin-bottom:1rem">Select Client</div>
+              <select class="form-select" id="weaving-client-select" onchange="loadClientWeaving()">
+                <option value="">— Choose a client —</option>
+              </select>
+            </div>
+            <div class="card" style="margin-top:1rem" id="weaving-add-ancestor" style="display:none">
+              <div class="eyebrow" style="margin-bottom:1rem">Add Ancestor</div>
+              <select class="form-select" id="ancestor-select" style="margin-bottom:0.75rem">
+                <option value="">— Choose ancestor —</option>
+              </select>
+              <select class="form-select" id="ancestor-strength" style="margin-bottom:0.75rem">
+                <option value="dominant">Dominant</option>
+                <option value="emerging">Emerging</option>
+                <option value="noted">Noted</option>
+              </select>
+              <button class="btn btn-gold" style="width:100%" onclick="addAncestorToClient()">Add to Weaving</button>
+              <div id="weaving-add-msg" style="margin-top:0.75rem;"></div>
+            </div>
+          </div>
+          <div>
+            <div id="weaving-content">
+              <div class="empty">Select a client to view their weaving.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ ADMIN: Convergence Manager ══ -->
+      <div class="panel" id="panel-convergence-admin">
+        <div class="panel-header">
+          <div class="eyebrow">Administration</div>
+          <div class="panel-title">Convergences</div>
+          <p class="panel-sub">View and manage all generated Convergences.</p>
+        </div>
+        <div id="convergence-admin-content">
+          <div class="loading"><span class="loading-glyph">✦</span>Loading convergences…</div>
+        </div>
+      </div>
+
+      <!-- ══ CLIENT: My Weaving ══ -->
+      <div class="panel" id="panel-my-weaving">
+        <div class="panel-header">
+          <div class="eyebrow">Your Ancestral Archive</div>
+          <div class="panel-title">The Weaving</div>
+          <p class="panel-sub">The ancestors assembled for your lineage research — each one carrying a frequency that shapes the Convergence.</p>
+        </div>
+        <div id="client-weaving-content">
+          <div class="loading"><span class="loading-glyph">✦</span>Gathering the threads…</div>
+        </div>
+      </div>
+
+      <!-- ══ CLIENT: My Convergence ══ -->
+      <div class="panel" id="panel-my-convergence">
+        <div class="panel-header">
+          <div class="eyebrow">Your Analysis</div>
+          <div class="panel-title">The Convergence</div>
+          <p class="panel-sub">The pattern analysis generated from your ancestral weaving.</p>
+        </div>
+        <div id="client-convergence-content">
+          <div class="loading"><span class="loading-glyph">✦</span>Reading the frequencies…</div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────
+const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+const ADMIN_EMAIL = 'christypaxtonwade@gmail.com';
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── State ─────────────────────────────────────────────
+let currentUser = null;
+let isAdmin = false;
+let isPreviewingAsClient = false;
+let previewClientId = null;
+let allClients = [];
+let allAncestors = [];
+let allFreqTags = [];
+
+// ── Bootstrap ─────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  // Check for existing session
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    currentUser = session.user;
+    await enterApp();
+  }
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      currentUser = session.user;
+      await enterApp();
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      isAdmin = false;
+      showView('view-login');
+    }
+  });
+});
+
+// ── Auth ──────────────────────────────────────────────
+async function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw    = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  const btn   = document.getElementById('btn-login');
+
+  errEl.textContent = '';
+  btn.disabled = true; btn.textContent = 'Entering…';
+
+  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+  if (error) {
+    errEl.textContent = error.message;
+    btn.disabled = false; btn.textContent = 'Enter →';
+  }
+}
+
+async function handleSignOut() {
+  await sb.auth.signOut();
+}
+
+// Allow Enter key on login
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('view-login').classList.contains('active')) {
+    handleLogin();
+  }
+});
+
+// ── Enter app ────────────────────────────────────────
+async function enterApp() {
+  isAdmin = currentUser.email === ADMIN_EMAIL;
+
+  // Update role badge
+  const badge = document.getElementById('role-badge');
+  badge.textContent = isAdmin ? 'Admin' : 'Client';
+  badge.className = 'app-role-badge ' + (isAdmin ? 'role-admin' : 'role-client');
+
+  // Show/hide admin toggle
+  document.getElementById('btn-toggle-view').style.display = isAdmin ? 'block' : 'none';
+
+  // Build nav
+  buildNav();
+
+  // Load data
+  await Promise.all([loadClients(), loadAncestors()]);
+
+  showView('view-app');
+
+  if (isAdmin) {
+    showPanel('panel-overview');
+    populateOverview();
+    populateWeavingClientSelect();
+  } else {
+    showPanel('panel-my-weaving');
+    loadMyWeaving();
+  }
+}
+
+// ── Navigation ────────────────────────────────────────
+function buildNav() {
+  const nav = document.getElementById('app-nav');
+  nav.innerHTML = '';
+
+  const adminTabs = [
+    { id: 'panel-overview', label: 'Overview' },
+    { id: 'panel-clients',  label: 'Clients' },
+    { id: 'panel-weaving',  label: 'Weaving Builder' },
+    { id: 'panel-convergence-admin', label: 'Convergences' },
+  ];
+  const clientTabs = [
+    { id: 'panel-my-weaving',     label: 'My Weaving' },
+    { id: 'panel-my-convergence', label: 'The Convergence' },
+  ];
+
+  const tabs = (isAdmin && !isPreviewingAsClient) ? adminTabs : clientTabs;
+  tabs.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-tab';
+    btn.textContent = t.label;
+    btn.dataset.panel = t.id;
+    btn.onclick = () => {
+      showPanel(t.id);
+      if (t.id === 'panel-convergence-admin') loadAllConvergences();
+      if (t.id === 'panel-my-weaving') loadMyWeaving();
+      if (t.id === 'panel-my-convergence') loadMyConvergence();
+      if (t.id === 'panel-weaving') populateWeavingClientSelect();
+      if (t.id === 'panel-clients') renderClientList();
+    };
+    nav.appendChild(btn);
+  });
+}
+
+function showPanel(panelId) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.panel === panelId);
+  });
+  const panel = document.getElementById(panelId);
+  if (panel) panel.classList.add('active');
+}
+
+// ── View toggle ───────────────────────────────────────
+function toggleClientPreview() {
+  if (isPreviewingAsClient) {
+    stopPreview();
+  } else {
+    // Use Christy's own client record for preview
+    const christyClient = allClients.find(c => c.email === ADMIN_EMAIL || c.name === 'Christy Paxton Wade');
+    if (christyClient) {
+      startPreview(christyClient.id);
+    } else if (allClients.length > 0) {
+      startPreview(allClients[0].id);
+    } else {
+      alert('No client records found to preview.');
+    }
+  }
+}
+
+function startPreview(clientId) {
+  isPreviewingAsClient = true;
+  previewClientId = clientId;
+  document.getElementById('preview-banner').classList.add('visible');
+  document.getElementById('btn-toggle-view').textContent = 'Exit Preview';
+  document.getElementById('btn-toggle-view').classList.add('previewing');
+  buildNav();
+  showPanel('panel-my-weaving');
+  loadMyWeaving();
+}
+
+function stopPreview() {
+  isPreviewingAsClient = false;
+  previewClientId = null;
+  document.getElementById('preview-banner').classList.remove('visible');
+  document.getElementById('btn-toggle-view').textContent = 'View as Client';
+  document.getElementById('btn-toggle-view').classList.remove('previewing');
+  buildNav();
+  showPanel('panel-overview');
+}
+
+// ── View switching ────────────────────────────────────
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── Data loaders ──────────────────────────────────────
+async function loadClients() {
+  const { data } = await sb.from('clients').select('*').order('name');
+  allClients = data || [];
+}
+
+async function loadAncestors() {
+  const { data } = await sb.from('ancestors').select('id,slug,name,epithet,dates,era,sort_year,status').order('sort_year');
+  allAncestors = data || [];
+}
+
+// ── REST helpers ──────────────────────────────────────
+async function rest(path) {
+  const { data: { session } } = await sb.auth.getSession();
+  const token = session?.access_token || SUPABASE_ANON_KEY;
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
+  });
+  return res.json();
+}
+
+async function restPost(table, body) {
+  const { data: { session } } = await sb.auth.getSession();
+  const token = session?.access_token || SUPABASE_ANON_KEY;
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+
+// ── Era helpers ───────────────────────────────────────
+const ERA_DOT = {
+  mythic: 'era-mythic', ancient: 'era-ancient', classical: 'era-ancient',
+  'post-roman': 'era-ancient', 'early-medieval': 'era-medieval',
+  'high-medieval': 'era-medieval', 'late-medieval': 'era-medieval',
+  renaissance: 'era-early-modern', reformation: 'era-early-modern',
+  colonial: 'era-early-modern', enlightenment: 'era-early-modern',
+  '19th-century': 'era-modern', contemporary: 'era-modern'
+};
+function eraDot(era) { return ERA_DOT[era] || 'era-modern'; }
+
+// ════════════════════════════════════════════════════
+// ADMIN — OVERVIEW
+// ════════════════════════════════════════════════════
+async function populateOverview() {
+  const [convData, weavingData] = await Promise.all([
+    rest('convergences?select=id,status&limit=100'),
+    rest('client_ancestors?select=id&limit=500')
+  ]);
+
+  const convs = Array.isArray(convData) ? convData : [];
+  const weavings = Array.isArray(weavingData) ? weavingData : [];
+
+  document.getElementById('overview-sub').textContent =
+    `${allClients.length} client${allClients.length !== 1 ? 's' : ''} · ${allAncestors.length} ancestors in database · ${convs.length} convergence${convs.length !== 1 ? 's' : ''} generated`;
+
+  document.getElementById('overview-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-number">${allClients.length}</div>
+      <div class="stat-label">Clients</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">${allAncestors.filter(a => a.status === 'weaving').length}</div>
+      <div class="stat-label">Weaving Ancestors</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">${weavings.length}</div>
+      <div class="stat-label">Assigned Ancestors</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">${convs.length}</div>
+      <div class="stat-label">Convergences</div>
+    </div>
+  `;
+
+  const clientsEl = document.getElementById('overview-clients');
+  if (allClients.length === 0) {
+    clientsEl.innerHTML = '<div class="empty">No clients yet. Create your first client in the Clients tab.</div>';
+    return;
+  }
+  clientsEl.innerHTML = allClients.slice(0, 5).map(c => `
+    <div class="client-row" onclick="goToClient('${c.id}')">
+      <div>
+        <div class="client-name">${c.name}</div>
+        <div class="client-meta">${c.email || '—'}</div>
+      </div>
+      <span class="client-badge">Active</span>
+    </div>
+  `).join('');
+}
+
+function goToClient(clientId) {
+  showPanel('panel-clients');
+  renderClientList();
+}
+
+// ════════════════════════════════════════════════════
+// ADMIN — CLIENTS
+// ════════════════════════════════════════════════════
+function renderClientList() {
+  const el = document.getElementById('clients-list');
+  if (allClients.length === 0) {
+    el.innerHTML = '<div class="empty">No clients yet.</div>';
+    return;
+  }
+  el.innerHTML = allClients.map(c => `
+    <div class="client-row">
+      <div>
+        <div class="client-name">${c.name}</div>
+        <div class="client-meta">${c.email || '—'}${c.notes ? ' · ' + c.notes.slice(0, 60) + '…' : ''}</div>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-shrink:0;">
+        <button class="btn btn-outline btn-sm" onclick="previewAsClient('${c.id}')">Preview as Client</button>
+        <a href="convergence.html" class="btn btn-outline btn-sm" target="_blank">Open Convergence ↗</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showAddClientForm() {
+  const f = document.getElementById('add-client-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+async function createClient() {
+  const name  = document.getElementById('new-client-name').value.trim();
+  const email = document.getElementById('new-client-email').value.trim();
+  const notes = document.getElementById('new-client-notes').value.trim();
+  const msgEl = document.getElementById('client-create-msg');
+
+  if (!name) { msgEl.innerHTML = '<div class="msg msg-error">Name is required.</div>'; return; }
+
+  const result = await restPost('clients', { name, email: email || null, notes: notes || null });
+
+  if (result && !result.code) {
+    msgEl.innerHTML = '<div class="msg msg-success">Client created successfully.</div>';
+    await loadClients();
+    renderClientList();
+    populateWeavingClientSelect();
+    document.getElementById('new-client-name').value = '';
+    document.getElementById('new-client-email').value = '';
+    document.getElementById('new-client-notes').value = '';
+    setTimeout(() => { msgEl.innerHTML = ''; }, 3000);
+  } else {
+    msgEl.innerHTML = `<div class="msg msg-error">${result?.message || 'Failed to create client.'}</div>`;
+  }
+}
+
+function previewAsClient(clientId) {
+  startPreview(clientId);
+}
+
+// ════════════════════════════════════════════════════
+// ADMIN — WEAVING BUILDER
+// ════════════════════════════════════════════════════
+function populateWeavingClientSelect() {
+  const sel = document.getElementById('weaving-client-select');
+  sel.innerHTML = '<option value="">— Choose a client —</option>';
+  allClients.forEach(c => {
+    sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+  });
+
+  // Populate ancestor select
+  const aSel = document.getElementById('ancestor-select');
+  aSel.innerHTML = '<option value="">— Choose ancestor —</option>';
+  allAncestors.filter(a => a.status === 'weaving' || a.status === 'catalog').forEach(a => {
+    aSel.innerHTML += `<option value="${a.id}">${a.name}${a.dates ? ' · ' + a.dates : ''}</option>`;
+  });
+}
+
+async function loadClientWeaving() {
+  const clientId = document.getElementById('weaving-client-select').value;
+  const container = document.getElementById('weaving-content');
+
+  if (!clientId) {
+    container.innerHTML = '<div class="empty">Select a client to view their weaving.</div>';
+    document.getElementById('weaving-add-ancestor').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('weaving-add-ancestor').style.display = 'block';
+  container.innerHTML = '<div class="loading"><span class="loading-glyph">✦</span>Loading weaving…</div>';
+
+  const rows = await rest(`client_ancestors?client_id=eq.${clientId}&select=*&order=sort_year.asc`);
+  const freqRows = await rest(`client_ancestor_frequencies?select=client_ancestor_id,frequency_tags(name)&client_ancestor_id=in.(${(rows || []).map(r => r.id).join(',')||'null'})`);
+
+  // Build freq count map
+  const freqMap = {};
+  (freqRows || []).forEach(r => {
+    const name = r.frequency_tags?.name;
+    if (!name) return;
+    if (!freqMap[r.client_ancestor_id]) freqMap[r.client_ancestor_id] = [];
+    freqMap[r.client_ancestor_id].push(name);
+  });
+
+  if (!rows || rows.length === 0) {
+    container.innerHTML = `
+      <div class="section-header"><div class="section-title">Weaving — 0 ancestors</div></div>
+      <div class="empty">No ancestors assigned yet. Use the form to add from the catalog.</div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="section-header">
+      <div class="section-title">Weaving — ${rows.length} ancestor${rows.length !== 1 ? 's' : ''}</div>
+    </div>
+    <div class="ancestor-list">
+      ${rows.map(a => {
+        const freqs = freqMap[a.id] || [];
+        return `<div class="ancestor-row">
+          <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
+          <div class="ancestor-name-block">
+            <div class="ancestor-name-text">${a.name}</div>
+            <div class="ancestor-dates">${a.dates || ''} ${a.location ? '· ' + a.location : ''}</div>
+          </div>
+          <span class="ancestor-freq-count">${freqs.length} freq${freqs.length !== 1 ? 's' : ''}</span>
+          <button class="btn btn-outline btn-sm" onclick="removeClientAncestor('${a.id}', '${clientId}')" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Remove</button>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+async function addAncestorToClient() {
+  const clientId   = document.getElementById('weaving-client-select').value;
+  const ancestorId = document.getElementById('ancestor-select').value;
+  const strength   = document.getElementById('ancestor-strength').value;
+  const msgEl      = document.getElementById('weaving-add-msg');
+
+  if (!clientId || !ancestorId) {
+    msgEl.innerHTML = '<div class="msg msg-error">Select both a client and an ancestor.</div>';
+    return;
+  }
+
+  const ancestor = allAncestors.find(a => a.id === ancestorId);
+  if (!ancestor) return;
+
+  // Build the client_ancestor record from the master ancestor
+  const payload = {
+    client_id: clientId,
+    ancestor_id: ancestorId,
+    slug: ancestor.slug,
+    name: ancestor.name,
+    epithet: ancestor.epithet || null,
+    dates: ancestor.dates || null,
+    era: ancestor.era || null,
+    sort_year: ancestor.sort_year || 0,
+    status: ancestor.status || 'catalog'
+  };
+
+  const result = await restPost('client_ancestors', payload);
+
+  if (result && !result.code) {
+    const caId = Array.isArray(result) ? result[0]?.id : result?.id;
+
+    // Now seed frequency tags from ancestor_frequencies at dominant strength
+    const freqRows = await rest(`ancestor_frequencies?ancestor_id=eq.${ancestorId}&select=frequency_tag_id`);
+    if (caId && freqRows && freqRows.length > 0) {
+      const freqPayloads = freqRows.map(f => ({
+        client_ancestor_id: caId,
+        frequency_tag_id: f.frequency_tag_id,
+        strength
+      }));
+      for (const fp of freqPayloads) {
+        await restPost('client_ancestor_frequencies', fp);
+      }
+    }
+
+    msgEl.innerHTML = `<div class="msg msg-success">Added ${ancestor.name}.</div>`;
+    setTimeout(() => { msgEl.innerHTML = ''; }, 2500);
+    loadClientWeaving();
+  } else {
+    const errMsg = result?.message || result?.details || 'Failed to add ancestor.';
+    msgEl.innerHTML = `<div class="msg msg-error">${errMsg}</div>`;
+  }
+}
+
+async function removeClientAncestor(clientAncestorId, clientId) {
+  if (!confirm('Remove this ancestor from the weaving?')) return;
+  const { data: { session } } = await sb.auth.getSession();
+  const token = session?.access_token || SUPABASE_ANON_KEY;
+  await fetch(`${SUPABASE_URL}/rest/v1/client_ancestor_frequencies?client_ancestor_id=eq.${clientAncestorId}`, {
+    method: 'DELETE',
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
+  });
+  await fetch(`${SUPABASE_URL}/rest/v1/client_ancestors?id=eq.${clientAncestorId}`, {
+    method: 'DELETE',
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
+  });
+  loadClientWeaving();
+}
+
+// ════════════════════════════════════════════════════
+// ADMIN — ALL CONVERGENCES
+// ════════════════════════════════════════════════════
+async function loadAllConvergences() {
+  const container = document.getElementById('convergence-admin-content');
+  const convs = await rest('convergences?select=*,clients(name)&order=created_at.desc');
+
+  if (!convs || convs.length === 0) {
+    container.innerHTML = '<div class="empty">No convergences generated yet.</div>';
+    return;
+  }
+
+  container.innerHTML = convs.map(c => `
+    <div class="convergence-card">
+      <div class="convergence-card-header">
+        <div>
+          <div class="convergence-card-title">${c.title || 'The Convergence'}</div>
+          <div class="convergence-card-meta">${c.clients?.name || '—'} · ${new Date(c.created_at).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'})}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <span class="convergence-status ${c.status === 'published' ? 'status-published' : 'status-draft'}">${c.status}</span>
+          <a href="convergence.html" class="btn btn-outline btn-sm" target="_blank">Open ↗</a>
+        </div>
+      </div>
+      ${c.dominant_frequencies?.length ? `
+      <div class="convergence-card-body">
+        <div class="eyebrow" style="margin-bottom:0.75rem">Dominant Frequencies</div>
+        ${c.dominant_frequencies.slice(0,5).map((f,i) => `
+          <div class="freq-row">
+            <div class="freq-label">${f}</div>
+            <div class="freq-bar-wrap">
+              <div class="freq-bar" style="width:${Math.max(10, 100 - i*15)}%"></div>
+            </div>
+          </div>`).join('')}
+      </div>` : ''}
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════════════════
+// CLIENT — MY WEAVING
+// ════════════════════════════════════════════════════
+async function loadMyWeaving() {
+  const container = document.getElementById('client-weaving-content');
+
+  // Determine which client to show
+  let clientId = null;
+  if (isPreviewingAsClient && previewClientId) {
+    clientId = previewClientId;
+  } else {
+    // Find client record matching current user
+    const myClient = allClients.find(c => c.auth_user_id === currentUser.id || c.email === currentUser.email);
+    clientId = myClient?.id;
+  }
+
+  if (!clientId) {
+    container.innerHTML = '<div class="empty">No weaving has been assembled for your account yet. Contact your guide to begin.</div>';
+    return;
+  }
+
+  const rows = await rest(`client_ancestors?client_id=eq.${clientId}&select=*&order=sort_year.asc`);
+
+  if (!rows || rows.length === 0) {
+    container.innerHTML = '<div class="empty">Your weaving is being assembled. Return when your ancestral research is complete.</div>';
+    return;
+  }
+
+  const freqRows = await rest(`client_ancestor_frequencies?select=client_ancestor_id,strength,frequency_tags(name)&client_ancestor_id=in.(${rows.map(r => r.id).join(',')})`);
+  const freqMap = {};
+  (freqRows || []).forEach(r => {
+    const name = r.frequency_tags?.name;
+    if (!name) return;
+    if (!freqMap[r.client_ancestor_id]) freqMap[r.client_ancestor_id] = [];
+    freqMap[r.client_ancestor_id].push(name);
+  });
+
+  // Group by era arc
+  const arcGroups = [
+    { label: 'Mythic · Ancient', eras: ['mythic','ancient','classical','post-roman'] },
+    { label: 'Medieval', eras: ['early-medieval','high-medieval','late-medieval'] },
+    { label: 'Early Modern · Colonial', eras: ['renaissance','reformation','colonial','enlightenment'] },
+    { label: '19th Century · Contemporary', eras: ['19th-century','contemporary'] },
+  ];
+
+  const grouped = {};
+  arcGroups.forEach(g => { grouped[g.label] = []; });
+
+  rows.forEach(a => {
+    const era = (a.era || '').toLowerCase();
+    const grp = arcGroups.find(g => g.eras.includes(era));
+    const lbl = grp ? grp.label : '19th Century · Contemporary';
+    if (!grouped[lbl]) grouped[lbl] = [];
+    grouped[lbl].push(a);
+  });
+
+  let html = `<div style="margin-bottom:1rem;font-size:13px;color:var(--text-dim)">${rows.length} ancestors assembled across the lineage</div>`;
+
+  arcGroups.forEach(g => {
+    const group = grouped[g.label] || [];
+    if (!group.length) return;
+    html += `<div class="section-header" style="margin-top:2rem"><div class="section-title">${g.label}</div></div>`;
+    html += '<div class="ancestor-list">';
+    group.forEach(a => {
+      const freqs = freqMap[a.id] || [];
+      const topFreqs = freqs.slice(0, 3).map(f => `<span style="font-size:11px;padding:2px 7px;border-radius:8px;background:var(--accent);border:1px solid var(--border);color:var(--gold);white-space:nowrap">${f}</span>`).join('');
+      html += `<div class="ancestor-row">
+        <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
+        <div class="ancestor-name-block" style="flex:1">
+          <div class="ancestor-name-text">${a.name}</div>
+          <div class="ancestor-dates">${a.dates || ''} ${a.location ? '· ' + a.location : ''}</div>
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${topFreqs}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════
+// CLIENT — MY CONVERGENCE
+// ════════════════════════════════════════════════════
+async function loadMyConvergence() {
+  const container = document.getElementById('client-convergence-content');
+
+  let clientId = null;
+  if (isPreviewingAsClient && previewClientId) {
+    clientId = previewClientId;
+  } else {
+    const myClient = allClients.find(c => c.auth_user_id === currentUser.id || c.email === currentUser.email);
+    clientId = myClient?.id;
+  }
+
+  if (!clientId) {
+    container.innerHTML = '<div class="empty">No convergence available yet.</div>';
+    return;
+  }
+
+  const convs = await rest(`convergences?client_id=eq.${clientId}&order=created_at.desc&limit=1`);
+
+  if (!convs || convs.length === 0) {
+    container.innerHTML = `
+      <div class="empty" style="padding:4rem">
+        Your Convergence has not yet been generated.<br>
+        <a href="convergence.html" class="btn btn-gold" style="display:inline-block;margin-top:1.5rem" target="_blank">Open Convergence Generator →</a>
+      </div>`;
+    return;
+  }
+
+  const conv = convs[0];
+  const sections = await rest(`convergence_sections?convergence_id=eq.${conv.id}&order=sort_order.asc`);
+  const mainSections = (sections || []).filter(s => s.title !== 'Summary');
+
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;font-style:italic;color:var(--text)">${conv.title || 'The Convergence'}</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:0.25rem">Generated ${new Date(conv.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</div>
+      </div>
+      <a href="convergence.html" class="btn btn-outline" target="_blank">Open Full Convergence ↗</a>
+    </div>`;
+
+  if (conv.dominant_frequencies?.length) {
+    html += `<div class="card" style="margin-bottom:1.5rem">
+      <div class="eyebrow" style="margin-bottom:1rem">Dominant Frequencies</div>
+      ${conv.dominant_frequencies.slice(0,5).map((f,i) => `
+        <div class="freq-row">
+          <div class="freq-label">${f}</div>
+          <div class="freq-bar-wrap"><div class="freq-bar" style="width:${Math.max(15, 100-i*15)}%"></div></div>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  mainSections.forEach(s => {
+    const text = s.final_text || s.ai_draft || '';
+    if (!text) return;
+    html += `<div class="convergence-card" style="margin-bottom:1rem">
+      <div class="convergence-card-header">
+        <div class="convergence-card-title">${s.title}</div>
+        <span class="convergence-status ${s.section_type === 'pattern' ? 'status-published' : 'status-draft'}">${s.section_type}</span>
+      </div>
+      <div class="convergence-card-body" style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:2;color:var(--text-secondary)">
+        ${text.split('\n\n').map(p => p.trim() ? `<p style="margin-bottom:0.75rem">${p}</p>` : '').join('')}
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+}
+</script>
+</body>
+</html>
