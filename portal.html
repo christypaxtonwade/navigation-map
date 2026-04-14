@@ -426,6 +426,128 @@ body::before {
   .sidebar-sticky { position: static; }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ════════════════════════════════════════════════════
+   ANCESTOR RESEARCH — chips, review panel, AI states
+════════════════════════════════════════════════════ */
+
+/* AI generation loading overlay */
+.ai-loading {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 3rem 2rem; gap: 1rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.ai-loading-glyph {
+  font-size: 2rem; color: var(--gold);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+.ai-loading-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-style: italic; color: var(--text-dim);
+}
+.ai-loading-sub {
+  font-size: 12px; color: var(--text-faint); letter-spacing: 0.08em;
+}
+
+/* Verification badge */
+.verify-badge {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 4px 10px; border-radius: 10px;
+}
+.verify-verified {
+  background: var(--teal-dim); border: 1px solid rgba(109,216,178,0.22);
+  color: var(--teal);
+}
+.verify-ambiguous {
+  background: var(--amber-dim); border: 1px solid rgba(245,170,136,0.3);
+  color: var(--amber);
+}
+.verify-not_found {
+  background: rgba(192,112,96,0.1); border: 1px solid rgba(192,112,96,0.25);
+  color: var(--red);
+}
+
+/* Review panel */
+.review-panel {
+  animation: fadeUp 0.4s ease forwards;
+}
+.review-section {
+  margin-bottom: 1.75rem;
+}
+.review-section-title {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 1rem; padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.review-grid-2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+}
+.review-grid-3 {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;
+}
+
+/* Frequency tag chips */
+.chip-field {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  padding: 8px 10px; border: 1px solid var(--border);
+  border-radius: 6px; background: var(--bg);
+  min-height: 44px; align-items: center;
+  transition: border-color 0.2s;
+}
+.chip-field:focus-within { border-color: var(--gold-dim); }
+.chip {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 11px; font-weight: 400; letter-spacing: 0.06em;
+  padding: 3px 8px 3px 10px; border-radius: 20px;
+  background: var(--accent); border: 1px solid var(--border);
+  color: var(--gold); white-space: nowrap; transition: border-color 0.2s;
+}
+.chip:hover { border-color: var(--border-hover); }
+.chip-remove {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-faint); font-size: 13px; line-height: 1;
+  padding: 0 1px; transition: color 0.15s;
+  display: flex; align-items: center;
+}
+.chip-remove:hover { color: var(--red); }
+.chip-strength-label {
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-faint); padding-left: 5px;
+  border-left: 1px solid rgba(255,255,255,0.1); margin-left: 2px;
+  cursor: pointer;
+}
+.chip-strength-label:hover { color: var(--gold); }
+.chip-add-row {
+  display: flex; gap: 0.5rem; margin-top: 0.75rem; align-items: center;
+}
+.chip-add-select, .chip-strength-select {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 7px 10px; color: var(--text);
+  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 300;
+  outline: none; transition: border-color 0.2s; appearance: none;
+}
+.chip-add-select { flex: 1; }
+.chip-strength-select { width: 130px; }
+.chip-add-select:focus, .chip-strength-select:focus { border-color: var(--gold-dim); }
+.btn-chip-add {
+  font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 400;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 7px 14px; border-radius: 6px; cursor: pointer;
+  background: var(--accent); border: 1px solid var(--border);
+  color: var(--gold); transition: all 0.2s; white-space: nowrap;
+}
+.btn-chip-add:hover { border-color: var(--border-hover); color: var(--gold-bright); }
+.confirm-bar {
+  position: sticky; bottom: 0; z-index: 50;
+  background: rgba(9,9,15,0.97); backdrop-filter: blur(8px);
+  border-top: 1px solid var(--border); padding: 1rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap; margin: 2rem -2rem -2.5rem;
+}
+.confirm-bar-left { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
 </style>
 </head>
 <body>
@@ -605,6 +727,59 @@ body::before {
         </div>
       </div>
 
+      <!-- ══ ADMIN: Ancestor Research ══ -->
+      <div class="panel" id="panel-ancestor-research">
+        <div class="panel-header">
+          <div class="eyebrow">Administration</div>
+          <div class="panel-title">Ancestor Research</div>
+          <p class="panel-sub">Enter a name and context. The AI verifies identity, determines catalog vs weaving status, and generates the full record. Review and edit all fields before confirming to the database.</p>
+        </div>
+
+        <!-- Input form -->
+        <div class="card" id="ancestor-research-form" style="max-width:720px;margin-bottom:2rem">
+          <div class="eyebrow" style="margin-bottom:1.25rem">Disambiguation Input</div>
+          <div class="review-grid-2" style="margin-bottom:1rem">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">Name <span style="color:var(--red)">*</span></label>
+              <input class="form-input" id="ar-name" placeholder="e.g. Robert de Bruce">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">Dates</label>
+              <input class="form-input" id="ar-dates" placeholder="e.g. 1274–1329">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location / Region</label>
+            <input class="form-input" id="ar-location" placeholder="e.g. Scotland, Kingdom of Scots">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Context Notes</label>
+            <textarea class="form-textarea" id="ar-notes" rows="3" placeholder="Any additional context — lineage connection, known significance, why this ancestor is being researched…"></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:1.5rem">
+            <label class="form-label">Level Override</label>
+            <select class="form-select" id="ar-level">
+              <option value="auto">Auto — let AI determine</option>
+              <option value="catalog">Catalog</option>
+              <option value="weaving">Weaving</option>
+              <option value="keynote">Keynote</option>
+            </select>
+          </div>
+          <button class="btn btn-gold" id="ar-generate-btn" onclick="generateAncestorAI()">✦ Generate Record</button>
+          <div id="ar-form-msg" style="margin-top:0.75rem"></div>
+        </div>
+
+        <!-- AI loading state -->
+        <div class="ai-loading" id="ar-loading" style="display:none;max-width:720px;margin-bottom:2rem">
+          <div class="ai-loading-glyph">✦</div>
+          <div class="ai-loading-text">Researching the ancestor…</div>
+          <div class="ai-loading-sub">Disambiguation · Documentation · Frequency mapping</div>
+        </div>
+
+        <!-- Review panel — rendered by JS -->
+        <div id="ar-review" style="display:none"></div>
+      </div>
+
     </main>
   </div>
 </div>
@@ -742,10 +917,11 @@ function buildNav() {
   nav.innerHTML = '';
 
   const adminTabs = [
-    { id: 'panel-overview', label: 'Overview' },
-    { id: 'panel-clients',  label: 'Clients' },
-    { id: 'panel-weaving',  label: 'Weaving Builder' },
-    { id: 'panel-convergence-admin', label: 'Convergences' },
+    { id: 'panel-overview',           label: 'Overview' },
+    { id: 'panel-clients',            label: 'Clients' },
+    { id: 'panel-weaving',            label: 'Weaving Builder' },
+    { id: 'panel-convergence-admin',  label: 'Convergences' },
+    { id: 'panel-ancestor-research',  label: 'Ancestor Research' },
   ];
   const clientTabs = [
     { id: 'panel-my-weaving',     label: 'My Weaving' },
@@ -765,6 +941,7 @@ function buildNav() {
       if (t.id === 'panel-my-convergence') loadMyConvergence();
       if (t.id === 'panel-weaving') populateWeavingClientSelect();
       if (t.id === 'panel-clients') renderClientList();
+      if (t.id === 'panel-ancestor-research') initAncestorResearch();
     };
     nav.appendChild(btn);
   });
@@ -773,10 +950,11 @@ function buildNav() {
 // ── Hash routing ──────────────────────────────────────
 // Maps URL hash → panel ID for browser back/forward support
 const ADMIN_HASH_MAP = {
-  '#overview':      'panel-overview',
-  '#clients':       'panel-clients',
-  '#weaving':       'panel-weaving',
-  '#convergences':  'panel-convergence-admin',
+  '#overview':            'panel-overview',
+  '#clients':             'panel-clients',
+  '#weaving':             'panel-weaving',
+  '#convergences':        'panel-convergence-admin',
+  '#ancestor-research':   'panel-ancestor-research',
 };
 const CLIENT_HASH_MAP = {
   '#my-weaving':    'panel-my-weaving',
@@ -923,11 +1101,15 @@ async function populateOverview() {
   const weavings = Array.isArray(weavingData) ? weavingData : [];
 
   document.getElementById('overview-sub').textContent =
-    `${allClients.length} client${allClients.length !== 1 ? 's' : ''} · ${allAncestors.length} ancestors in database · ${convs.length} convergence${convs.length !== 1 ? 's' : ''} generated`;
+    `${allClients.length} client${allClients.length !== 1 ? 's' : ''} · ${allAncestors.filter(a=>a.status!=='keynote').length} ancestors · ${allAncestors.filter(a=>a.status==='keynote').length} keynote cards · ${convs.length} convergence${convs.length !== 1 ? 's' : ''} generated`;
+
+  const assignable = allAncestors.filter(a => a.status === 'weaving' || a.status === 'catalog');
+  const keynotes   = allAncestors.filter(a => a.status === 'keynote');
 
   document.getElementById('overview-stats').innerHTML = `
     <div class="stat-card"><div class="stat-number">${allClients.length}</div><div class="stat-label">Clients</div></div>
-    <div class="stat-card"><div class="stat-number">${allAncestors.filter(a=>a.status==='weaving').length}</div><div class="stat-label">Weaving Ancestors</div></div>
+    <div class="stat-card"><div class="stat-number">${assignable.length}</div><div class="stat-label">Assignable Ancestors</div></div>
+    <div class="stat-card"><div class="stat-number">${keynotes.length}</div><div class="stat-label">Keynote Cards</div></div>
     <div class="stat-card"><div class="stat-number">${weavings.length}</div><div class="stat-label">Assigned Ancestors</div></div>
     <div class="stat-card"><div class="stat-number">${convs.length}</div><div class="stat-label">Convergences</div></div>
   `;
@@ -1013,8 +1195,22 @@ async function loadClientWeaving() {
   const rows = await rest(`client_ancestors?client_id=eq.${clientId}&select=*&order=sort_year.asc`);
   if (!Array.isArray(rows) || !rows.length) {
     container.innerHTML = `<div class="section-header"><div class="section-title">Weaving — 0 ancestors</div></div><div class="empty">No ancestors assigned yet.</div>`;
+    // All ancestors available — reset dropdown
+    const aSel = document.getElementById('ancestor-select');
+    aSel.innerHTML = '<option value="">— Choose ancestor —</option>';
+    allAncestors.filter(a => a.status === 'weaving' || a.status === 'catalog').forEach(a => {
+      aSel.innerHTML += `<option value="${a.id}">${a.name}${a.dates ? ' · ' + a.dates : ''}</option>`;
+    });
     return;
   }
+
+  // Filter out already-assigned ancestors from the dropdown
+  const assignedIds = new Set(rows.map(r => r.ancestor_id));
+  const aSel = document.getElementById('ancestor-select');
+  aSel.innerHTML = '<option value="">— Choose ancestor —</option>';
+  allAncestors.filter(a => (a.status === 'weaving' || a.status === 'catalog') && !assignedIds.has(a.id)).forEach(a => {
+    aSel.innerHTML += `<option value="${a.id}">${a.name}${a.dates ? ' · ' + a.dates : ''}</option>`;
+  });
 
   const idList = rows.map(r=>r.id).join(',');
   const freqRows = await rest(`client_ancestor_frequencies?select=client_ancestor_id,frequency_tags(name)&client_ancestor_id=in.(${idList})`);
@@ -1225,6 +1421,439 @@ async function loadMyConvergence() {
     </div>`;
   });
   container.innerHTML = html;
+}
+// ════════════════════════════════════════════════════
+// ANCESTOR RESEARCH
+// ════════════════════════════════════════════════════
+
+// State for current review session
+let arReviewData = null;      // raw AI result
+let arChips = [];             // [{ tagId, tagName, tagType, strength }]
+let allFrequencyTags = [];    // loaded from DB
+
+async function initAncestorResearch() {
+  if (!allFrequencyTags.length) {
+    const tags = await rest('frequency_tags?select=id,slug,name,type&order=name');
+    allFrequencyTags = Array.isArray(tags) ? tags : [];
+  }
+}
+
+async function generateAncestorAI() {
+  const name     = document.getElementById('ar-name').value.trim();
+  const dates    = document.getElementById('ar-dates').value.trim();
+  const location = document.getElementById('ar-location').value.trim();
+  const notes    = document.getElementById('ar-notes').value.trim();
+  const level    = document.getElementById('ar-level').value;
+  const msgEl    = document.getElementById('ar-form-msg');
+  const btn      = document.getElementById('ar-generate-btn');
+
+  if (!name) { msgEl.innerHTML = '<div class="msg msg-error">Name is required.</div>'; return; }
+
+  // Ensure freq tags are loaded
+  if (!allFrequencyTags.length) await initAncestorResearch();
+
+  // Show loading
+  msgEl.innerHTML = '';
+  btn.disabled = true; btn.textContent = 'Generating…';
+  document.getElementById('ar-loading').style.display = 'flex';
+  document.getElementById('ar-review').style.display = 'none';
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/functions/v1/generate-ancestor`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'apikey': SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ name, dates, location, notes, level })
+      }
+    );
+    const data = await res.json();
+
+    if (data.error) throw new Error(data.error);
+
+    arReviewData = data;
+    arChips = matchFrequencyTags(data.frequency_tags || []);
+    renderAncestorReview(data);
+
+  } catch (err) {
+    msgEl.innerHTML = `<div class="msg msg-error">Generation failed: ${err.message}</div>`;
+  } finally {
+    document.getElementById('ar-loading').style.display = 'none';
+    btn.disabled = false; btn.textContent = '✦ Generate Record';
+  }
+}
+
+// Match AI-suggested tag names (which are field/subterrain names) to real frequency_tags records
+function matchFrequencyTags(suggestedNames) {
+  const chips = [];
+  const usedIds = new Set();
+  suggestedNames.forEach(suggested => {
+    const norm = suggested.toLowerCase().trim();
+    // Try exact match first, then prefix/contains
+    const match =
+      allFrequencyTags.find(t => t.name.toLowerCase() === norm) ||
+      allFrequencyTags.find(t => norm.startsWith(t.name.toLowerCase())) ||
+      allFrequencyTags.find(t => t.name.toLowerCase().startsWith(norm)) ||
+      allFrequencyTags.find(t => t.name.toLowerCase().includes(norm) || norm.includes(t.name.toLowerCase()));
+    if (match && !usedIds.has(match.id)) {
+      usedIds.add(match.id);
+      chips.push({ tagId: match.id, tagName: match.name, tagType: match.type, strength: 'noted' });
+    }
+  });
+  return chips;
+}
+
+function renderAncestorReview(d) {
+  const vClass = `verify-badge verify-${d.verification_status || 'ambiguous'}`;
+  const vLabel = { verified: '✓ Verified', ambiguous: '⚠ Ambiguous', not_found: '✗ Not Found' }[d.verification_status] || d.verification_status;
+
+  const eraOptions = ['mythic','ancient','classical','post-roman','early-medieval','high-medieval','late-medieval','renaissance','reformation','colonial','enlightenment','19th-century','contemporary']
+    .map(e => `<option value="${e}" ${e === d.era ? 'selected' : ''}>${e}</option>`).join('');
+  const statusOptions = ['catalog','weaving','margin','keynote']
+    .map(s => `<option value="${s}" ${s === d.status ? 'selected' : ''}>${s}</option>`).join('');
+  const clientOptions = allClients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+  const reviewEl = document.getElementById('ar-review');
+  reviewEl.innerHTML = `
+    <div class="review-panel">
+
+      <!-- Verification strip -->
+      <div class="card" style="margin-bottom:1.5rem;display:flex;align-items:flex-start;gap:1.25rem;flex-wrap:wrap">
+        <span class="${vClass}">${vLabel}</span>
+        <div style="flex:1;font-size:13px;color:var(--text-dim);line-height:1.6">${d.verification_note || ''}</div>
+      </div>
+
+      <!-- Core identity -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="review-section-title">Core Identity</div>
+        <div class="review-grid-2" style="margin-bottom:1rem">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Name</label>
+            <input class="form-input" id="rv-name" value="${esc(d.name)}">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Epithet</label>
+            <input class="form-input" id="rv-epithet" value="${esc(d.epithet)}">
+          </div>
+        </div>
+        <div class="review-grid-3" style="margin-bottom:1rem">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Dates</label>
+            <input class="form-input" id="rv-dates" value="${esc(d.dates)}">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Location</label>
+            <input class="form-input" id="rv-location" value="${esc(d.location)}">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Sort Year</label>
+            <input class="form-input" id="rv-sort-year" type="number" value="${d.sort_year || ''}">
+          </div>
+        </div>
+        <div class="review-grid-2">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Era</label>
+            <select class="form-select" id="rv-era">${eraOptions}</select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Status</label>
+            <select class="form-select" id="rv-status">${statusOptions}</select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="review-section-title">Catalog Content</div>
+        <div class="form-group">
+          <label class="form-label">Catalog Preview <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">(short summary — 1–2 sentences)</span></label>
+          <textarea class="form-textarea" id="rv-catalog-preview" rows="3">${esc(d.catalog_preview)}</textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Catalog Full <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">(expanded record)</span></label>
+          <textarea class="form-textarea" id="rv-catalog-full" rows="6">${esc(d.catalog_full)}</textarea>
+        </div>
+      </div>
+
+      <!-- Layers -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="review-section-title">Four Layers</div>
+        <div class="form-group">
+          <label class="form-label">Terroir <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">land · body · physical root</span></label>
+          <textarea class="form-textarea" id="rv-layer-terroir" rows="3">${esc(d.layer_terroir)}</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unresolved <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">wound · compression · pattern</span></label>
+          <textarea class="form-textarea" id="rv-layer-unresolved" rows="3">${esc(d.layer_unresolved)}</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Thread <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">through-line · signal carried forward</span></label>
+          <textarea class="form-textarea" id="rv-layer-thread" rows="3">${esc(d.layer_thread)}</textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Lineage <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">bloodline · cultural transmission</span></label>
+          <textarea class="form-textarea" id="rv-layer-lineage" rows="3">${esc(d.layer_lineage)}</textarea>
+        </div>
+      </div>
+
+      <!-- Sigil -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="review-section-title">Sigil</div>
+        <div class="review-grid-2">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Sigil Name</label>
+            <input class="form-input" id="rv-sigil-name" value="${esc(d.sigil_name)}">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Sigil Description</label>
+            <input class="form-input" id="rv-sigil-description" value="${esc(d.sigil_description)}">
+          </div>
+        </div>
+      </div>
+
+      <!-- Frequency Tags -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="review-section-title">Frequency Tags</div>
+        <div class="chip-field" id="ar-chip-display"></div>
+        <div class="chip-add-row">
+          <select class="chip-add-select" id="ar-chip-select">
+            <option value="">— Add a frequency tag —</option>
+            ${allFrequencyTags.map(t => `<option value="${t.id}" data-name="${esc(t.name)}" data-type="${t.type}">${t.name} <span style="color:var(--text-faint)">(${t.type})</span></option>`).join('')}
+          </select>
+          <select class="chip-strength-select" id="ar-chip-strength">
+            <option value="noted">Noted</option>
+            <option value="emerging">Emerging</option>
+            <option value="dominant">Dominant</option>
+          </select>
+          <button class="btn-chip-add" onclick="addChip()">+ Add</button>
+        </div>
+        <div id="ar-chip-unmatched" style="margin-top:0.75rem;font-size:12px;color:var(--text-faint)"></div>
+      </div>
+
+      <!-- Confirm bar -->
+      <div class="confirm-bar">
+        <div class="confirm-bar-left">
+          <label class="form-label" style="margin:0;white-space:nowrap">Assign to client:</label>
+          <select class="form-select" id="ar-assign-client" style="min-width:200px;margin:0">
+            <option value="">— Save to catalog only —</option>
+            ${clientOptions}
+          </select>
+          <select class="form-select" id="ar-assign-strength" style="width:140px;margin:0">
+            <option value="dominant">Dominant</option>
+            <option value="emerging">Emerging</option>
+            <option value="noted">Noted</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:0.75rem;align-items:center">
+          <div id="ar-confirm-msg" style="font-size:13px"></div>
+          <button class="btn btn-outline" onclick="resetAncestorResearch()">Start Over</button>
+          <button class="btn btn-gold" onclick="confirmAncestorToDatabase()">Confirm & Save →</button>
+        </div>
+      </div>
+
+    </div>`;
+
+  reviewEl.style.display = 'block';
+  renderChips();
+  reportUnmatchedTags(d.frequency_tags || []);
+  // Research prompts are outside the confirm bar, appended after
+  const promptsCard = document.createElement('div');
+  promptsCard.className = 'card';
+  promptsCard.id = 'ar-research-prompts';
+  promptsCard.style.marginTop = '1.5rem';
+  reviewEl.querySelector('.review-panel').appendChild(promptsCard);
+  if (d.research_prompts?.length) renderResearchPrompts(d.research_prompts);
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderChips() {
+  const display = document.getElementById('ar-chip-display');
+  if (!display) return;
+  if (!arChips.length) {
+    display.innerHTML = '<span style="font-size:12px;color:var(--text-faint);font-style:italic">No tags assigned yet</span>';
+    return;
+  }
+  display.innerHTML = arChips.map((c, i) => `
+    <span class="chip">
+      ${esc(c.tagName)}
+      <span class="chip-strength-label" onclick="cycleChipStrength(${i})" title="Click to change strength">${c.strength}</span>
+      <button class="chip-remove" onclick="removeChip(${i})" title="Remove tag">×</button>
+    </span>`).join('');
+}
+
+function addChip() {
+  const sel    = document.getElementById('ar-chip-select');
+  const strSel = document.getElementById('ar-chip-strength');
+  const tagId  = sel.value;
+  if (!tagId) return;
+  if (arChips.find(c => c.tagId === tagId)) return; // already added
+  const opt     = sel.options[sel.selectedIndex];
+  const tagName = opt.dataset.name || opt.text;
+  const tagType = opt.dataset.type || '';
+  arChips.push({ tagId, tagName, tagType, strength: strSel.value });
+  sel.value = '';
+  renderChips();
+}
+
+function removeChip(index) {
+  arChips.splice(index, 1);
+  renderChips();
+}
+
+function cycleChipStrength(index) {
+  const order = ['noted', 'emerging', 'dominant'];
+  const cur   = arChips[index].strength;
+  arChips[index].strength = order[(order.indexOf(cur) + 1) % order.length];
+  renderChips();
+}
+
+function reportUnmatchedTags(suggestedNames) {
+  const el = document.getElementById('ar-chip-unmatched');
+  if (!el) return;
+  const matchedNames = arChips.map(c => c.tagName.toLowerCase());
+  const unmatched = suggestedNames.filter(n => {
+    const norm = n.toLowerCase();
+    return !matchedNames.some(m => m === norm || m.includes(norm) || norm.includes(m));
+  });
+  if (unmatched.length) {
+    el.innerHTML = `<span style="color:var(--amber)">⚠ Not found in DB: ${unmatched.join(', ')}</span><br>
+      <span style="color:var(--text-faint)">These field or subterrain names don't match existing frequency_tags records. Create them in Supabase or adjust the name to match an existing tag.</span>`;
+  } else {
+    el.textContent = `✓ All ${suggestedNames.length} AI-suggested tags matched to database records.`;
+    el.style.color = 'var(--teal)';
+  }
+}
+
+function renderResearchPrompts(prompts) {
+  if (!prompts || !prompts.length) return;
+  const el = document.getElementById('ar-research-prompts');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="review-section-title" style="margin-bottom:0.75rem">Research Prompts</div>
+    <div style="font-size:13px;color:var(--text-dim);line-height:1.8">
+      ${prompts.map((p, i) => `<div style="display:flex;gap:0.75rem;margin-bottom:0.5rem">
+        <span style="color:var(--gold);flex-shrink:0;font-weight:500">${i+1}.</span>
+        <span>${esc(p)}</span>
+      </div>`).join('')}
+    </div>`;
+}
+
+async function confirmAncestorToDatabase() {
+  const msgEl  = document.getElementById('ar-confirm-msg');
+  const btn    = document.querySelector('.confirm-bar .btn-gold');
+  const clientId      = document.getElementById('ar-assign-client').value;
+  const assignStrength = document.getElementById('ar-assign-strength').value;
+
+  const nameVal = document.getElementById('rv-name').value.trim();
+  if (!nameVal) { msgEl.innerHTML = '<span style="color:var(--red)">Name is required.</span>'; return; }
+
+  // Build slug from name
+  const slug = nameVal.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim().replace(/\s+/g, '-');
+
+  const payload = {
+    slug,
+    name:              nameVal,
+    epithet:           document.getElementById('rv-epithet').value.trim() || null,
+    dates:             document.getElementById('rv-dates').value.trim() || null,
+    location:          document.getElementById('rv-location').value.trim() || null,
+    era:               document.getElementById('rv-era').value || null,
+    sort_year:         parseInt(document.getElementById('rv-sort-year').value) || null,
+    status:            document.getElementById('rv-status').value || 'catalog',
+    catalog_preview:   document.getElementById('rv-catalog-preview').value.trim() || null,
+    catalog_full:      document.getElementById('rv-catalog-full').value.trim() || null,
+    layer_terroir:     document.getElementById('rv-layer-terroir').value.trim() || null,
+    layer_unresolved:  document.getElementById('rv-layer-unresolved').value.trim() || null,
+    layer_thread:      document.getElementById('rv-layer-thread').value.trim() || null,
+    layer_lineage:     document.getElementById('rv-layer-lineage').value.trim() || null,
+    sigil_name:        document.getElementById('rv-sigil-name').value.trim() || null,
+    sigil_description: document.getElementById('rv-sigil-description').value.trim() || null,
+  };
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+  msgEl.innerHTML = '';
+
+  try {
+    // 1. Insert ancestor
+    const result = await restPost('ancestors', payload);
+    if (!Array.isArray(result) || !result[0]?.id) {
+      throw new Error(result?.message || result?.details || result?.code || 'Failed to save ancestor');
+    }
+    const ancestorId = result[0].id;
+
+    // 2. Save frequency tags
+    for (const chip of arChips) {
+      await restPost('ancestor_frequencies', {
+        ancestor_id:       ancestorId,
+        frequency_tag_id:  chip.tagId,
+        strength:          chip.strength,
+      });
+    }
+
+    // 3. Optionally assign to client
+    if (clientId) {
+      const ancestor = result[0];
+      const caPayload = {
+        client_id:   clientId,
+        ancestor_id: ancestorId,
+        slug:        payload.slug,
+        name:        payload.name,
+        epithet:     payload.epithet || null,
+        dates:       payload.dates || null,
+        era:         payload.era || null,
+        sort_year:   payload.sort_year || 0,
+        status:      payload.status || 'catalog',
+      };
+      const caResult = await restPost('client_ancestors', caPayload);
+      if (Array.isArray(caResult) && caResult[0]?.id) {
+        const caId = caResult[0].id;
+        for (const chip of arChips) {
+          await restPost('client_ancestor_frequencies', {
+            client_ancestor_id: caId,
+            frequency_tag_id:   chip.tagId,
+            strength:           assignStrength,
+          });
+        }
+      }
+    }
+
+    // Reload ancestors cache
+    await loadAncestors();
+    msgEl.innerHTML = `<span style="color:var(--teal)">✓ ${payload.name} saved${clientId ? ' and assigned to client' : ''}.</span>`;
+    btn.textContent = '✓ Saved';
+
+    // Offer to start another after a pause
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = 'Confirm & Save →';
+    }, 3000);
+
+  } catch (err) {
+    msgEl.innerHTML = `<span style="color:var(--red)">${err.message}</span>`;
+    btn.disabled = false; btn.textContent = 'Confirm & Save →';
+  }
+}
+
+function resetAncestorResearch() {
+  arReviewData = null;
+  arChips = [];
+  document.getElementById('ar-review').style.display = 'none';
+  document.getElementById('ar-review').innerHTML = '';
+  document.getElementById('ar-name').value = '';
+  document.getElementById('ar-dates').value = '';
+  document.getElementById('ar-location').value = '';
+  document.getElementById('ar-notes').value = '';
+  document.getElementById('ar-level').value = 'auto';
+  document.getElementById('ar-form-msg').innerHTML = '';
 }
 </script>
 </body>
