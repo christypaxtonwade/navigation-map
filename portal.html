@@ -548,6 +548,88 @@ body::before {
   gap: 1rem; flex-wrap: wrap; margin: 2rem -2rem -2.5rem;
 }
 .confirm-bar-left { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+
+/* ── Mode toggle ── */
+.mode-toggle {
+  display: flex; gap: 0; margin-bottom: 2rem;
+  border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden; max-width: 360px;
+}
+.mode-btn {
+  flex: 1; font-family: 'Jost', sans-serif; font-size: 12px;
+  font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 10px 16px; border: none; background: transparent;
+  color: var(--text-dim); cursor: pointer; transition: all 0.2s;
+}
+.mode-btn:first-child { border-right: 1px solid var(--border); }
+.mode-btn.active { background: var(--accent); color: var(--gold); }
+.mode-btn:hover:not(.active) { color: var(--text); }
+
+/* ── Editor form ── */
+.editor-section { margin-bottom: 1.75rem; }
+.editor-section-title {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 1rem; padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.editor-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.editor-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+/* ── Upload areas ── */
+.upload-area {
+  border: 1px dashed var(--border); border-radius: 8px;
+  padding: 1.25rem; text-align: center; cursor: pointer;
+  transition: border-color 0.2s; background: var(--bg);
+}
+.upload-area:hover { border-color: var(--gold-dim); }
+.upload-area input[type="file"] { display: none; }
+.upload-label {
+  font-size: 12px; color: var(--text-dim); letter-spacing: 0.06em;
+  cursor: pointer; display: block;
+}
+.upload-preview {
+  margin-top: 0.75rem; display: flex; gap: 0.75rem;
+  align-items: flex-start; flex-wrap: wrap;
+}
+.upload-preview img {
+  max-height: 80px; max-width: 120px; border-radius: 4px;
+  border: 1px solid var(--border); object-fit: contain;
+}
+.upload-preview-note {
+  font-size: 11px; color: var(--text-faint); margin-top: 0.25rem;
+  word-break: break-all;
+}
+.sigil-preview-wrap {
+  display: flex; gap: 1rem; align-items: flex-start;
+}
+.sigil-preview-box {
+  width: 80px; height: 80px; flex-shrink: 0;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface); display: flex;
+  align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.sigil-preview-box svg { width: 80px; height: 80px; }
+
+/* ── Client assignment chips ── */
+.client-assignment-chip {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 12px; padding: 4px 10px 4px 12px;
+  border-radius: 20px; background: var(--teal-dim);
+  border: 1px solid rgba(109,216,178,0.22); color: var(--teal);
+}
+.client-assignment-chip .chip-remove { color: var(--teal); }
+.client-assignment-chip .chip-remove:hover { color: var(--red); }
+
+/* ── Save bar ── */
+.editor-save-bar {
+  position: sticky; bottom: 0; z-index: 50;
+  background: rgba(9,9,15,0.97); backdrop-filter: blur(8px);
+  border-top: 1px solid var(--border); padding: 1rem 1.5rem;
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 1rem; margin: 2rem -2rem -2.5rem;
+}
 </style>
 </head>
 <body>
@@ -732,52 +814,77 @@ body::before {
         <div class="panel-header">
           <div class="eyebrow">Administration</div>
           <div class="panel-title">Ancestor Research</div>
-          <p class="panel-sub">Enter a name and context. The AI verifies identity, determines catalog vs weaving status, and generates the full record. Review and edit all fields before confirming to the database.</p>
         </div>
 
-        <!-- Input form -->
-        <div class="card" id="ancestor-research-form" style="max-width:720px;margin-bottom:2rem">
-          <div class="eyebrow" style="margin-bottom:1.25rem">Disambiguation Input</div>
-          <div class="review-grid-2" style="margin-bottom:1rem">
-            <div class="form-group" style="margin-bottom:0">
-              <label class="form-label">Name <span style="color:var(--red)">*</span></label>
-              <input class="form-input" id="ar-name" placeholder="e.g. Robert de Bruce">
+        <!-- Mode toggle -->
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="mode-btn-generate" onclick="showGenerateMode()">✦ Generate New</button>
+          <button class="mode-btn" id="mode-btn-edit" onclick="showEditMode()">✎ Edit Existing</button>
+        </div>
+
+        <!-- ═══ GENERATE MODE ═══ -->
+        <div id="ar-generate-mode">
+          <p class="panel-sub" style="margin-bottom:1.5rem">Enter a name and context. The AI verifies identity, determines catalog vs weaving status, and generates the full record. Review and edit all fields before confirming to the database.</p>
+
+          <div class="card" id="ancestor-research-form" style="max-width:720px;margin-bottom:2rem">
+            <div class="eyebrow" style="margin-bottom:1.25rem">Disambiguation Input</div>
+            <div class="review-grid-2" style="margin-bottom:1rem">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Name <span style="color:var(--red)">*</span></label>
+                <input class="form-input" id="ar-name" placeholder="e.g. Robert de Bruce">
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Dates</label>
+                <input class="form-input" id="ar-dates" placeholder="e.g. 1274–1329">
+              </div>
             </div>
+            <div class="form-group">
+              <label class="form-label">Location / Region</label>
+              <input class="form-input" id="ar-location" placeholder="e.g. Scotland, Kingdom of Scots">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Context Notes</label>
+              <textarea class="form-textarea" id="ar-notes" rows="3" placeholder="Any additional context — lineage connection, known significance, why this ancestor is being researched…"></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom:1.5rem">
+              <label class="form-label">Level Override</label>
+              <select class="form-select" id="ar-level">
+                <option value="auto">Auto — let AI determine</option>
+                <option value="catalog">Catalog</option>
+                <option value="weaving">Weaving</option>
+                <option value="keynote">Keynote</option>
+              </select>
+            </div>
+            <button class="btn btn-gold" id="ar-generate-btn" onclick="generateAncestorAI()">✦ Generate Record</button>
+            <div id="ar-form-msg" style="margin-top:0.75rem"></div>
+          </div>
+
+          <div class="ai-loading" id="ar-loading" style="display:none;max-width:720px;margin-bottom:2rem">
+            <div class="ai-loading-glyph">✦</div>
+            <div class="ai-loading-text">Researching the ancestor…</div>
+            <div class="ai-loading-sub">Disambiguation · Documentation · Frequency mapping</div>
+          </div>
+
+          <div id="ar-review" style="display:none"></div>
+        </div>
+
+        <!-- ═══ EDIT MODE ═══ -->
+        <div id="ar-edit-mode" style="display:none">
+          <p class="panel-sub" style="margin-bottom:1.5rem">Select an ancestor to edit any field. All changes save directly to Supabase.</p>
+
+          <div class="card" style="max-width:720px;margin-bottom:2rem">
             <div class="form-group" style="margin-bottom:0">
-              <label class="form-label">Dates</label>
-              <input class="form-input" id="ar-dates" placeholder="e.g. 1274–1329">
+              <label class="form-label">Select Ancestor</label>
+              <select class="form-select" id="ed-ancestor-select" onchange="loadAncestorForEdit()">
+                <option value="">— Choose an ancestor —</option>
+              </select>
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Location / Region</label>
-            <input class="form-input" id="ar-location" placeholder="e.g. Scotland, Kingdom of Scots">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Context Notes</label>
-            <textarea class="form-textarea" id="ar-notes" rows="3" placeholder="Any additional context — lineage connection, known significance, why this ancestor is being researched…"></textarea>
-          </div>
-          <div class="form-group" style="margin-bottom:1.5rem">
-            <label class="form-label">Level Override</label>
-            <select class="form-select" id="ar-level">
-              <option value="auto">Auto — let AI determine</option>
-              <option value="catalog">Catalog</option>
-              <option value="weaving">Weaving</option>
-              <option value="keynote">Keynote</option>
-            </select>
-          </div>
-          <button class="btn btn-gold" id="ar-generate-btn" onclick="generateAncestorAI()">✦ Generate Record</button>
-          <div id="ar-form-msg" style="margin-top:0.75rem"></div>
+
+          <!-- Editor form — rendered by JS -->
+          <div id="ar-editor-form" style="display:none"></div>
         </div>
 
-        <!-- AI loading state -->
-        <div class="ai-loading" id="ar-loading" style="display:none;max-width:720px;margin-bottom:2rem">
-          <div class="ai-loading-glyph">✦</div>
-          <div class="ai-loading-text">Researching the ancestor…</div>
-          <div class="ai-loading-sub">Disambiguation · Documentation · Frequency mapping</div>
-        </div>
-
-        <!-- Review panel — rendered by JS -->
-        <div id="ar-review" style="display:none"></div>
       </div>
 
     </main>
@@ -1854,6 +1961,536 @@ function resetAncestorResearch() {
   document.getElementById('ar-notes').value = '';
   document.getElementById('ar-level').value = 'auto';
   document.getElementById('ar-form-msg').innerHTML = '';
+}
+async function restPatch(table, id, body) {
+  const token = accessToken || SUPABASE_ANON_KEY;
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(body)
+  });
+  return res.ok;
+}
+
+// ════════════════════════════════════════════════════
+// ANCESTOR EDITOR
+// ════════════════════════════════════════════════════
+
+let editorAncestorId = null;
+let editorChips = [];
+let editorClientAssignments = [];
+
+function showGenerateMode() {
+  document.getElementById('ar-generate-mode').style.display = 'block';
+  document.getElementById('ar-edit-mode').style.display = 'none';
+  document.getElementById('mode-btn-generate').classList.add('active');
+  document.getElementById('mode-btn-edit').classList.remove('active');
+}
+
+function showEditMode() {
+  document.getElementById('ar-generate-mode').style.display = 'none';
+  document.getElementById('ar-edit-mode').style.display = 'block';
+  document.getElementById('mode-btn-edit').classList.add('active');
+  document.getElementById('mode-btn-generate').classList.remove('active');
+  populateAncestorEditorSelector();
+}
+
+function populateAncestorEditorSelector() {
+  const sel = document.getElementById('ed-ancestor-select');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Choose an ancestor —</option>';
+  [...allAncestors]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a.id;
+      opt.textContent = `${a.name}${a.dates ? ' · ' + a.dates : ''} (${a.status || 'catalog'})`;
+      if (a.id === current) opt.selected = true;
+      sel.appendChild(opt);
+    });
+}
+
+async function loadAncestorForEdit() {
+  const id = document.getElementById('ed-ancestor-select').value;
+  const formEl = document.getElementById('ar-editor-form');
+  if (!id) { formEl.style.display = 'none'; return; }
+
+  formEl.innerHTML = '<div class="loading"><span class="loading-glyph">✦</span>Loading ancestor…</div>';
+  formEl.style.display = 'block';
+
+  if (!allFrequencyTags.length) {
+    const tags = await rest('frequency_tags?select=id,slug,name,type&order=name');
+    allFrequencyTags = Array.isArray(tags) ? tags : [];
+  }
+
+  const [ancestor, freqRows, clientRows] = await Promise.all([
+    rest(`ancestors?id=eq.${id}&select=*`).then(r => r[0]),
+    rest(`ancestor_frequencies?ancestor_id=eq.${id}&select=id,strength,frequency_tag_id,frequency_tags(id,name,type)`).catch(() => []),
+    rest(`client_ancestors?ancestor_id=eq.${id}&select=id,client_id,clients(name)`).catch(() => [])
+  ]);
+
+  editorAncestorId = id;
+  editorChips = (Array.isArray(freqRows) ? freqRows : []).map(r => ({
+    recordId: r.id,
+    tagId: r.frequency_tag_id,
+    tagName: r.frequency_tags?.name || '',
+    tagType: r.frequency_tags?.type || '',
+    strength: r.strength || 'noted'
+  }));
+  editorClientAssignments = (Array.isArray(clientRows) ? clientRows : []).map(r => ({
+    clientAncestorId: r.id,
+    clientId: r.client_id,
+    clientName: r.clients?.name || r.client_id
+  }));
+
+  renderEditorForm(ancestor);
+}
+
+function renderEditorForm(a) {
+  const eraOptions = ['mythic','ancient','classical','post-roman','early-medieval','high-medieval','late-medieval','renaissance','reformation','colonial','enlightenment','19th-century','contemporary']
+    .map(e => `<option value="${e}" ${e === a.era ? 'selected' : ''}>${e}</option>`).join('');
+  const statusOptions = ['catalog','weaving','margin','keynote']
+    .map(s => `<option value="${s}" ${s === a.status ? 'selected' : ''}>${s}</option>`).join('');
+  const linkedOptions = allAncestors
+    .filter(x => x.id !== editorAncestorId)
+    .map(x => `<option value="${x.id}" ${x.id === a.linked_ancestor_id ? 'selected' : ''}>${x.name}</option>`)
+    .join('');
+  const clientOptions = allClients
+    .filter(c => !editorClientAssignments.find(ca => ca.clientId === c.id))
+    .map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+  const photoPreview = a.photo_url
+    ? `<div class="upload-preview"><img src="${esc(a.photo_url)}" alt="Photo"><div class="upload-preview-note">${esc(a.photo_url)}</div></div>` : '';
+  const sigilImgPreview = a.sigil_image_url
+    ? `<div class="upload-preview"><img src="${esc(a.sigil_image_url)}" alt="Sigil"><div class="upload-preview-note">${esc(a.sigil_image_url)}</div></div>` : '';
+
+  document.getElementById('ar-editor-form').innerHTML = `
+
+    <!-- Identity -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="editor-section-title">Identity</div>
+      <div class="editor-grid-2" style="margin-bottom:1rem">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Name</label>
+          <input class="form-input" id="ed-name" value="${esc(a.name)}">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Epithet</label>
+          <input class="form-input" id="ed-epithet" value="${esc(a.epithet)}">
+        </div>
+      </div>
+      <div class="editor-grid-3" style="margin-bottom:1rem">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Dates</label>
+          <input class="form-input" id="ed-dates" value="${esc(a.dates)}">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Location</label>
+          <input class="form-input" id="ed-location" value="${esc(a.location)}">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Sort Year</label>
+          <input class="form-input" id="ed-sort-year" type="number" value="${a.sort_year || ''}">
+        </div>
+      </div>
+      <div class="editor-grid-2">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Era</label>
+          <select class="form-select" id="ed-era">${eraOptions}</select>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Linked Ancestor <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">paired entry</span></label>
+          <select class="form-select" id="ed-linked">
+            <option value="">— None —</option>
+            ${linkedOptions}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Designation -->
+    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(201,168,124,0.25)">
+      <div class="editor-section-title">Where This Ancestor Appears</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:1.25rem">
+        ${[
+          ['catalog','Catalog only','Appears in the Ancestral Catalog grid. Catalog Preview and Full text are shown. Layers are not displayed.'],
+          ['weaving','Catalog + Weaving','Appears in both the Catalog and the Weaving timeline. All four layers and sigil are displayed.'],
+          ['margin','Margin','Appears in the Catalog with lighter styling. For ancestors whose lineage connection is uncertain or peripheral.'],
+          ['keynote','Keynote Card','Appears in the Catalog with keynote card format. Represents an era or archetype rather than a specific documented person.']
+        ].map(([val, label, note]) => `
+          <label style="cursor:pointer;display:block;padding:0.875rem 1rem;border-radius:8px;border:1px solid ${a.status===val?'var(--gold-dim)':'var(--border)'};background:${a.status===val?'var(--accent)':'transparent'};transition:all 0.2s" id="ed-status-card-${val}">
+            <input type="radio" name="ed-status-radio" value="${val}" ${a.status===val?'checked':''} style="display:none" onchange="updateStatusCards()">
+            <div style="font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:${a.status===val?'var(--gold)':'var(--text-dim)'};margin-bottom:0.4rem">${label}</div>
+            <div style="font-size:11px;color:var(--text-faint);line-height:1.5">${note}</div>
+          </label>`).join('')}
+      </div>
+      <input type="hidden" id="ed-status" value="${a.status || 'catalog'}">
+    </div>
+
+    <!-- Photo -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="editor-section-title">Photograph</div>
+      <div class="upload-area" onclick="document.getElementById('ed-photo-input').click()">
+        <input type="file" id="ed-photo-input" accept="image/jpeg,image/png,image/webp" onchange="handleAncestorUpload(this,'photo')">
+        <span class="upload-label">Click to upload JPG or PNG — family photographs, portraits</span>
+      </div>
+      <div id="ed-photo-preview">${photoPreview}</div>
+      <input type="hidden" id="ed-photo-url" value="${esc(a.photo_url)}">
+    </div>
+
+    <!-- Catalog -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="editor-section-title">Catalog Content <span style="color:var(--text-faint);font-size:9px;letter-spacing:0.1em">ALL STATUSES</span></div>
+      <p style="font-size:12px;color:var(--text-faint);margin-bottom:1rem;line-height:1.6">These fields appear in the Ancestral Catalog regardless of status. Catalog Preview is the card summary. Catalog Full expands when the card is opened.</p>
+      <div class="form-group">
+        <label class="form-label">Catalog Preview <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">1–2 sentences · appears on the card face</span></label>
+        <textarea class="form-textarea" id="ed-catalog-preview" rows="3">${esc(a.catalog_preview)}</textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Catalog Full <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">expanded record · shown when card is opened</span></label>
+        <textarea class="form-textarea" id="ed-catalog-full" rows="6">${esc(a.catalog_full)}</textarea>
+      </div>
+    </div>
+
+    <!-- Layers -->
+    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(109,216,178,0.15)">
+      <div class="editor-section-title">Four Layers <span style="color:var(--teal);font-size:9px;letter-spacing:0.1em">WEAVING STATUS ONLY</span></div>
+      <p style="font-size:12px;color:var(--text-faint);margin-bottom:1.25rem;line-height:1.6">These passages appear in the Ancestral Weaving timeline and feed The Convergence. They are only displayed when Status is set to Weaving. Each layer corresponds to a register of the Navigation Map.</p>
+      <div class="form-group">
+        <label class="form-label">Terroir <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">somatic register · land, body, place, physical history</span></label>
+        <textarea class="form-textarea" id="ed-layer-terroir" rows="5">${esc(a.layer_terroir)}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Unresolved <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">unreceived register · wound, compression, unnamed pattern</span></label>
+        <textarea class="form-textarea" id="ed-layer-unresolved" rows="5">${esc(a.layer_unresolved)}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Thread <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">mythic register · signal carried forward · feeds The Convergence most heavily</span></label>
+        <textarea class="form-textarea" id="ed-layer-thread" rows="5">${esc(a.layer_thread)}</textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Lineage <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">conceptual register · transmission mechanism, Fieldguide fields activated</span></label>
+        <textarea class="form-textarea" id="ed-layer-lineage" rows="5">${esc(a.layer_lineage)}</textarea>
+      </div>
+    </div>
+
+    <!-- Sigil -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="editor-section-title">Sigil</div>
+      <div class="editor-grid-2" style="margin-bottom:1rem">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Sigil Name</label>
+          <input class="form-input" id="ed-sigil-name" value="${esc(a.sigil_name)}">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Sigil Description</label>
+          <input class="form-input" id="ed-sigil-description" value="${esc(a.sigil_description)}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sigil SVG <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">raw SVG code</span></label>
+        <div class="sigil-preview-wrap">
+          <div class="sigil-preview-box" id="ed-sigil-preview">${a.sigil_svg || ''}</div>
+          <textarea class="form-textarea" id="ed-sigil-svg" rows="6" style="flex:1" oninput="updateSigilPreview(this.value)">${esc(a.sigil_svg)}</textarea>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Sigil Image <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">upload a JPG/PNG image of a family crest or hand-drawn sigil</span></label>
+        <div class="upload-area" onclick="document.getElementById('ed-sigil-input').click()">
+          <input type="file" id="ed-sigil-input" accept="image/jpeg,image/png,image/webp" onchange="handleAncestorUpload(this,'sigil')">
+          <span class="upload-label">Click to upload — family crest, heraldic image, hand-drawn sigil</span>
+        </div>
+        <div id="ed-sigil-img-preview">${sigilImgPreview}</div>
+        <input type="hidden" id="ed-sigil-image-url" value="${esc(a.sigil_image_url)}">
+      </div>
+    </div>
+
+    <!-- Frequency Tags -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="editor-section-title">Frequency Tags</div>
+      <div class="chip-field" id="ed-chip-display"></div>
+      <div class="chip-add-row">
+        <select class="chip-add-select" id="ed-chip-select">
+          <option value="">— Add a frequency tag —</option>
+          ${allFrequencyTags.map(t => `<option value="${t.id}" data-name="${esc(t.name)}" data-type="${t.type}">${t.name} (${t.type})</option>`).join('')}
+        </select>
+        <select class="chip-strength-select" id="ed-chip-strength">
+          <option value="noted">Noted</option>
+          <option value="emerging">Emerging</option>
+          <option value="dominant">Dominant</option>
+        </select>
+        <button class="btn-chip-add" onclick="addEditorChip()">+ Add</button>
+      </div>
+    </div>
+
+    <!-- Client Assignments -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="editor-section-title">Client Assignments</div>
+      <div id="ed-client-chips" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;min-height:32px"></div>
+      <div class="chip-add-row">
+        <select class="chip-add-select" id="ed-client-assign-select">
+          <option value="">— Assign to client —</option>
+          ${clientOptions}
+        </select>
+        <select class="chip-strength-select" id="ed-client-assign-strength">
+          <option value="dominant">Dominant</option>
+          <option value="emerging">Emerging</option>
+          <option value="noted">Noted</option>
+        </select>
+        <button class="btn-chip-add" onclick="assignAncestorToClientEditor()">+ Assign</button>
+      </div>
+      <div id="ed-client-msg" style="margin-top:0.5rem;font-size:13px"></div>
+    </div>
+
+    <!-- Save bar -->
+    <div class="editor-save-bar">
+      <div id="ed-save-msg" style="font-size:13px"></div>
+      <button class="btn btn-outline" onclick="loadAncestorForEdit()">Discard Changes</button>
+      <button class="btn btn-gold" onclick="saveAncestorEdits()">Save All Changes →</button>
+    </div>
+  `;
+
+  renderEditorChips();
+  renderEditorClientChips();
+}
+
+function updateStatusCards() {
+  const selected = document.querySelector('input[name="ed-status-radio"]:checked')?.value || 'catalog';
+  document.getElementById('ed-status').value = selected;
+  ['catalog','weaving','margin','keynote'].forEach(val => {
+    const card = document.getElementById(`ed-status-card-${val}`);
+    if (!card) return;
+    const isActive = val === selected;
+    card.style.borderColor = isActive ? 'var(--gold-dim)' : 'var(--border)';
+    card.style.background = isActive ? 'var(--accent)' : 'transparent';
+    card.querySelector('div').style.color = isActive ? 'var(--gold)' : 'var(--text-dim)';
+  });
+}
+  const box = document.getElementById('ed-sigil-preview');
+  if (box) box.innerHTML = svg;
+}
+
+// ── Editor chip management ─────────────────────────────
+function renderEditorChips() {
+  const el = document.getElementById('ed-chip-display');
+  if (!el) return;
+  if (!editorChips.length) {
+    el.innerHTML = '<span style="font-size:12px;color:var(--text-faint);font-style:italic">No tags assigned</span>';
+    return;
+  }
+  el.innerHTML = editorChips.map((c, i) => `
+    <span class="chip">
+      ${esc(c.tagName)}
+      <span class="chip-strength-label" onclick="cycleEditorChipStrength(${i})" title="Click to change">${c.strength}</span>
+      <button class="chip-remove" onclick="removeEditorChip(${i})">×</button>
+    </span>`).join('');
+}
+
+function addEditorChip() {
+  const sel = document.getElementById('ed-chip-select');
+  const str = document.getElementById('ed-chip-strength');
+  const tagId = sel.value;
+  if (!tagId || editorChips.find(c => c.tagId === tagId)) return;
+  const opt = sel.options[sel.selectedIndex];
+  editorChips.push({ recordId: null, tagId, tagName: opt.dataset.name || opt.text, tagType: opt.dataset.type || '', strength: str.value });
+  sel.value = '';
+  renderEditorChips();
+}
+
+function removeEditorChip(i) { editorChips.splice(i, 1); renderEditorChips(); }
+
+function cycleEditorChipStrength(i) {
+  const order = ['noted','emerging','dominant'];
+  editorChips[i].strength = order[(order.indexOf(editorChips[i].strength) + 1) % order.length];
+  renderEditorChips();
+}
+
+// ── Editor client assignments ──────────────────────────
+function renderEditorClientChips() {
+  const el = document.getElementById('ed-client-chips');
+  if (!el) return;
+  if (!editorClientAssignments.length) {
+    el.innerHTML = '<span style="font-size:12px;color:var(--text-faint);font-style:italic">Not assigned to any client</span>';
+    return;
+  }
+  el.innerHTML = editorClientAssignments.map((ca, i) => `
+    <span class="client-assignment-chip">
+      ${esc(ca.clientName)}
+      <button class="chip-remove" onclick="removeAncestorClientAssignment(${i})" title="Remove">×</button>
+    </span>`).join('');
+}
+
+async function assignAncestorToClientEditor() {
+  const clientId = document.getElementById('ed-client-assign-select').value;
+  const strength = document.getElementById('ed-client-assign-strength').value;
+  const msgEl = document.getElementById('ed-client-msg');
+  if (!clientId || !editorAncestorId) return;
+
+  const ancestor = allAncestors.find(a => a.id === editorAncestorId);
+  if (!ancestor) return;
+
+  const payload = {
+    client_id: clientId, ancestor_id: editorAncestorId,
+    slug: ancestor.slug, name: ancestor.name,
+    epithet: ancestor.epithet || null, dates: ancestor.dates || null,
+    era: ancestor.era || null, sort_year: ancestor.sort_year || 0,
+    status: ancestor.status || 'catalog'
+  };
+
+  const result = await restPost('client_ancestors', payload);
+  if (Array.isArray(result) && result[0]?.id) {
+    const caId = result[0].id;
+    for (const chip of editorChips) {
+      await restPost('client_ancestor_frequencies', { client_ancestor_id: caId, frequency_tag_id: chip.tagId, strength });
+    }
+    const client = allClients.find(c => c.id === clientId);
+    editorClientAssignments.push({ clientAncestorId: caId, clientId, clientName: client?.name || clientId });
+    renderEditorClientChips();
+    // Refresh dropdown
+    const sel = document.getElementById('ed-client-assign-select');
+    const opt = sel.querySelector(`option[value="${clientId}"]`);
+    if (opt) opt.remove();
+    sel.value = '';
+    msgEl.innerHTML = `<span style="color:var(--teal)">✓ Assigned to ${client?.name || clientId}</span>`;
+    setTimeout(() => { msgEl.innerHTML = ''; }, 2500);
+  } else {
+    msgEl.innerHTML = `<span style="color:var(--red)">Failed to assign.</span>`;
+  }
+}
+
+async function removeAncestorClientAssignment(i) {
+  const ca = editorClientAssignments[i];
+  if (!ca || !confirm(`Remove this ancestor from ${ca.clientName}'s weaving?`)) return;
+  await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${ca.clientAncestorId}`);
+  await restDelete(`client_ancestors?id=eq.${ca.clientAncestorId}`);
+  editorClientAssignments.splice(i, 1);
+  // Add client back to dropdown
+  const client = allClients.find(c => c.id === ca.clientId);
+  if (client) {
+    const sel = document.getElementById('ed-client-assign-select');
+    const opt = document.createElement('option');
+    opt.value = client.id; opt.textContent = client.name;
+    sel.appendChild(opt);
+  }
+  renderEditorClientChips();
+}
+
+// ── File uploads ───────────────────────────────────────
+async function handleAncestorUpload(input, field) {
+  const file = input.files[0];
+  if (!file) return;
+  const ancestor = allAncestors.find(a => a.id === editorAncestorId);
+  const slug = ancestor?.slug || editorAncestorId || 'unknown';
+  const ext = file.name.split('.').pop().toLowerCase();
+  const path = `${slug}/${field}-${Date.now()}.${ext}`;
+
+  const uploadBtn = input.closest('.upload-area');
+  if (uploadBtn) uploadBtn.querySelector('.upload-label').textContent = 'Uploading…';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/ancestor-media/${path}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': file.type,
+        'x-upsert': 'true'
+      },
+      body: file
+    });
+    if (!res.ok) throw new Error('Upload failed');
+
+    const url = `${SUPABASE_URL}/storage/v1/object/public/ancestor-media/${path}`;
+
+    if (field === 'photo') {
+      document.getElementById('ed-photo-url').value = url;
+      document.getElementById('ed-photo-preview').innerHTML =
+        `<div class="upload-preview"><img src="${url}" alt="Photo"><div class="upload-preview-note">${url}</div></div>`;
+      if (uploadBtn) uploadBtn.querySelector('.upload-label').textContent = '✓ Uploaded — click to replace';
+    } else if (field === 'sigil') {
+      document.getElementById('ed-sigil-image-url').value = url;
+      document.getElementById('ed-sigil-img-preview').innerHTML =
+        `<div class="upload-preview"><img src="${url}" alt="Sigil"><div class="upload-preview-note">${url}</div></div>`;
+      if (uploadBtn) uploadBtn.querySelector('.upload-label').textContent = '✓ Uploaded — click to replace';
+    }
+  } catch(err) {
+    if (uploadBtn) uploadBtn.querySelector('.upload-label').textContent = '✗ Upload failed — try again';
+    console.error('Upload error:', err);
+  }
+}
+
+// ── Save all edits ─────────────────────────────────────
+async function saveAncestorEdits() {
+  const msgEl = document.getElementById('ed-save-msg');
+  const btn = document.querySelector('.editor-save-bar .btn-gold');
+  if (!editorAncestorId) return;
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const nameVal = document.getElementById('ed-name').value.trim();
+  if (!nameVal) {
+    msgEl.innerHTML = '<span style="color:var(--red)">Name is required.</span>';
+    btn.disabled = false; btn.textContent = 'Save All Changes →';
+    return;
+  }
+
+  const payload = {
+    name:              nameVal,
+    epithet:           document.getElementById('ed-epithet').value.trim() || null,
+    dates:             document.getElementById('ed-dates').value.trim() || null,
+    location:          document.getElementById('ed-location').value.trim() || null,
+    era:               document.getElementById('ed-era').value || null,
+    sort_year:         parseInt(document.getElementById('ed-sort-year').value) || null,
+    status:            document.getElementById('ed-status').value || 'catalog',
+    linked_ancestor_id: document.getElementById('ed-linked').value || null,
+    catalog_preview:   document.getElementById('ed-catalog-preview').value.trim() || null,
+    catalog_full:      document.getElementById('ed-catalog-full').value.trim() || null,
+    layer_terroir:     document.getElementById('ed-layer-terroir').value.trim() || null,
+    layer_unresolved:  document.getElementById('ed-layer-unresolved').value.trim() || null,
+    layer_thread:      document.getElementById('ed-layer-thread').value.trim() || null,
+    layer_lineage:     document.getElementById('ed-layer-lineage').value.trim() || null,
+    sigil_name:        document.getElementById('ed-sigil-name').value.trim() || null,
+    sigil_description: document.getElementById('ed-sigil-description').value.trim() || null,
+    sigil_svg:         document.getElementById('ed-sigil-svg').value.trim() || null,
+    sigil_image_url:   document.getElementById('ed-sigil-image-url').value.trim() || null,
+    photo_url:         document.getElementById('ed-photo-url').value.trim() || null,
+  };
+
+  try {
+    // 1. Patch ancestor record
+    const ok = await restPatch('ancestors', editorAncestorId, payload);
+    if (!ok) throw new Error('Failed to save ancestor record');
+
+    // 2. Sync frequency tags — delete all existing, reinsert
+    await restDelete(`ancestor_frequencies?ancestor_id=eq.${editorAncestorId}`);
+    for (const chip of editorChips) {
+      await restPost('ancestor_frequencies', {
+        ancestor_id: editorAncestorId,
+        frequency_tag_id: chip.tagId,
+        strength: chip.strength
+      });
+    }
+
+    // 3. Reload local cache
+    await loadAncestors();
+    populateAncestorEditorSelector();
+
+    msgEl.innerHTML = '<span style="color:var(--teal)">✓ All changes saved.</span>';
+    btn.textContent = '✓ Saved';
+    setTimeout(() => {
+      btn.disabled = false; btn.textContent = 'Save All Changes →';
+      msgEl.innerHTML = '';
+    }, 3000);
+
+  } catch(err) {
+    msgEl.innerHTML = `<span style="color:var(--red)">${err.message}</span>`;
+    btn.disabled = false; btn.textContent = 'Save All Changes →';
+  }
 }
 </script>
 </body>
