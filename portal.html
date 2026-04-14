@@ -2271,7 +2271,8 @@ function updateStatusCards() {
     card.querySelector('div').style.color = isActive ? 'var(--gold)' : 'var(--text-dim)';
   });
 }
-  const box = document.getElementById('ed-sigil-preview');
+
+function updateSigilPreview(svg) {
   if (box) box.innerHTML = svg;
 }
 
