@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Map Guide & Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -615,37 +615,37 @@ const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
 const ADMIN_EMAIL = 'christypaxtonwade@gmail.com';
 
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 // ── State ─────────────────────────────────────────────
 let currentUser = null;
+let accessToken = null;
 let isAdmin = false;
 let isPreviewingAsClient = false;
 let previewClientId = null;
 let allClients = [];
 let allAncestors = [];
-let allFreqTags = [];
 
 // ── Bootstrap ─────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', async () => {
-  // Check for existing session
-  const { data: { session } } = await sb.auth.getSession();
-  if (session?.user) {
-    currentUser = session.user;
-    await enterApp();
+window.addEventListener('DOMContentLoaded', () => {
+  // Check for existing session in storage
+  const stored = sessionStorage.getItem('portal_session');
+  if (stored) {
+    try {
+      const s = JSON.parse(stored);
+      accessToken = s.access_token;
+      currentUser = s.user;
+      enterApp();
+      return;
+    } catch(e) { sessionStorage.removeItem('portal_session'); }
   }
+  showView('view-login');
+  document.getElementById('login-email').focus();
+});
 
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
-      currentUser = session.user;
-      await enterApp();
-    } else if (event === 'SIGNED_OUT') {
-      currentUser = null;
-      isAdmin = false;
-      showView('view-login');
-    }
-  });
+// Enter key on login
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('view-login').classList.contains('active')) {
+    handleLogin();
+  }
 });
 
 // ── Auth ──────────────────────────────────────────────
@@ -656,42 +656,65 @@ async function handleLogin() {
   const btn   = document.getElementById('btn-login');
 
   errEl.textContent = '';
+  if (!email || !pw) { errEl.textContent = 'Email and password required.'; return; }
+
   btn.disabled = true; btn.textContent = 'Entering…';
 
-  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
-  if (error) {
-    errEl.textContent = error.message;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password: pw })
+    });
+    const data = await res.json();
+
+    if (data.access_token) {
+      accessToken = data.access_token;
+      currentUser = data.user;
+      sessionStorage.setItem('portal_session', JSON.stringify({ access_token: accessToken, user: currentUser }));
+      enterApp();
+    } else {
+      errEl.textContent = data.error_description || data.msg || 'Login failed. Check your credentials.';
+      btn.disabled = false; btn.textContent = 'Enter →';
+    }
+  } catch(err) {
+    errEl.textContent = 'Network error — please try again.';
     btn.disabled = false; btn.textContent = 'Enter →';
   }
 }
 
 async function handleSignOut() {
-  await sb.auth.signOut();
-}
-
-// Allow Enter key on login
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('view-login').classList.contains('active')) {
-    handleLogin();
+  // Revoke token
+  if (accessToken) {
+    fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${accessToken}` }
+    }).catch(() => {});
   }
-});
+  sessionStorage.removeItem('portal_session');
+  accessToken = null; currentUser = null; isAdmin = false;
+  isPreviewingAsClient = false; previewClientId = null;
+  showView('view-login');
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+  document.getElementById('btn-login').disabled = false;
+  document.getElementById('btn-login').textContent = 'Enter →';
+}
 
 // ── Enter app ────────────────────────────────────────
 async function enterApp() {
   isAdmin = currentUser.email === ADMIN_EMAIL;
 
-  // Update role badge
   const badge = document.getElementById('role-badge');
   badge.textContent = isAdmin ? 'Admin' : 'Client';
   badge.className = 'app-role-badge ' + (isAdmin ? 'role-admin' : 'role-client');
 
-  // Show/hide admin toggle
   document.getElementById('btn-toggle-view').style.display = isAdmin ? 'block' : 'none';
 
-  // Build nav
   buildNav();
-
-  // Load data
   await Promise.all([loadClients(), loadAncestors()]);
 
   showView('view-app');
@@ -754,21 +777,15 @@ function toggleClientPreview() {
   if (isPreviewingAsClient) {
     stopPreview();
   } else {
-    // Use Christy's own client record for preview
     const christyClient = allClients.find(c => c.email === ADMIN_EMAIL || c.name === 'Christy Paxton Wade');
-    if (christyClient) {
-      startPreview(christyClient.id);
-    } else if (allClients.length > 0) {
-      startPreview(allClients[0].id);
-    } else {
-      alert('No client records found to preview.');
-    }
+    if (christyClient) startPreview(christyClient.id);
+    else if (allClients.length > 0) startPreview(allClients[0].id);
+    else alert('No client records found to preview.');
   }
 }
 
 function startPreview(clientId) {
-  isPreviewingAsClient = true;
-  previewClientId = clientId;
+  isPreviewingAsClient = true; previewClientId = clientId;
   document.getElementById('preview-banner').classList.add('visible');
   document.getElementById('btn-toggle-view').textContent = 'Exit Preview';
   document.getElementById('btn-toggle-view').classList.add('previewing');
@@ -778,8 +795,7 @@ function startPreview(clientId) {
 }
 
 function stopPreview() {
-  isPreviewingAsClient = false;
-  previewClientId = null;
+  isPreviewingAsClient = false; previewClientId = null;
   document.getElementById('preview-banner').classList.remove('visible');
   document.getElementById('btn-toggle-view').textContent = 'View as Client';
   document.getElementById('btn-toggle-view').classList.remove('previewing');
@@ -787,27 +803,14 @@ function stopPreview() {
   showPanel('panel-overview');
 }
 
-// ── View switching ────────────────────────────────────
 function showView(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-// ── Data loaders ──────────────────────────────────────
-async function loadClients() {
-  const { data } = await sb.from('clients').select('*').order('name');
-  allClients = data || [];
-}
-
-async function loadAncestors() {
-  const { data } = await sb.from('ancestors').select('id,slug,name,epithet,dates,era,sort_year,status').order('sort_year');
-  allAncestors = data || [];
-}
-
 // ── REST helpers ──────────────────────────────────────
 async function rest(path) {
-  const { data: { session } } = await sb.auth.getSession();
-  const token = session?.access_token || SUPABASE_ANON_KEY;
+  const token = accessToken || SUPABASE_ANON_KEY;
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
   });
@@ -815,8 +818,7 @@ async function rest(path) {
 }
 
 async function restPost(table, body) {
-  const { data: { session } } = await sb.auth.getSession();
-  const token = session?.access_token || SUPABASE_ANON_KEY;
+  const token = accessToken || SUPABASE_ANON_KEY;
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
     method: 'POST',
     headers: {
@@ -830,6 +832,14 @@ async function restPost(table, body) {
   return res.json();
 }
 
+async function restDelete(path) {
+  const token = accessToken || SUPABASE_ANON_KEY;
+  await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    method: 'DELETE',
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
+  });
+}
+
 // ── Era helpers ───────────────────────────────────────
 const ERA_DOT = {
   mythic: 'era-mythic', ancient: 'era-ancient', classical: 'era-ancient',
@@ -841,6 +851,17 @@ const ERA_DOT = {
 };
 function eraDot(era) { return ERA_DOT[era] || 'era-modern'; }
 
+// ── Data loaders ──────────────────────────────────────
+async function loadClients() {
+  const data = await rest('clients?select=*&order=name');
+  allClients = Array.isArray(data) ? data : [];
+}
+
+async function loadAncestors() {
+  const data = await rest('ancestors?select=id,slug,name,epithet,dates,era,sort_year,status&order=sort_year');
+  allAncestors = Array.isArray(data) ? data : [];
+}
+
 // ════════════════════════════════════════════════════
 // ADMIN — OVERVIEW
 // ════════════════════════════════════════════════════
@@ -849,7 +870,6 @@ async function populateOverview() {
     rest('convergences?select=id,status&limit=100'),
     rest('client_ancestors?select=id&limit=500')
   ]);
-
   const convs = Array.isArray(convData) ? convData : [];
   const weavings = Array.isArray(weavingData) ? weavingData : [];
 
@@ -857,43 +877,22 @@ async function populateOverview() {
     `${allClients.length} client${allClients.length !== 1 ? 's' : ''} · ${allAncestors.length} ancestors in database · ${convs.length} convergence${convs.length !== 1 ? 's' : ''} generated`;
 
   document.getElementById('overview-stats').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-number">${allClients.length}</div>
-      <div class="stat-label">Clients</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number">${allAncestors.filter(a => a.status === 'weaving').length}</div>
-      <div class="stat-label">Weaving Ancestors</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number">${weavings.length}</div>
-      <div class="stat-label">Assigned Ancestors</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number">${convs.length}</div>
-      <div class="stat-label">Convergences</div>
-    </div>
+    <div class="stat-card"><div class="stat-number">${allClients.length}</div><div class="stat-label">Clients</div></div>
+    <div class="stat-card"><div class="stat-number">${allAncestors.filter(a=>a.status==='weaving').length}</div><div class="stat-label">Weaving Ancestors</div></div>
+    <div class="stat-card"><div class="stat-number">${weavings.length}</div><div class="stat-label">Assigned Ancestors</div></div>
+    <div class="stat-card"><div class="stat-number">${convs.length}</div><div class="stat-label">Convergences</div></div>
   `;
 
   const clientsEl = document.getElementById('overview-clients');
-  if (allClients.length === 0) {
+  if (!allClients.length) {
     clientsEl.innerHTML = '<div class="empty">No clients yet. Create your first client in the Clients tab.</div>';
     return;
   }
-  clientsEl.innerHTML = allClients.slice(0, 5).map(c => `
-    <div class="client-row" onclick="goToClient('${c.id}')">
-      <div>
-        <div class="client-name">${c.name}</div>
-        <div class="client-meta">${c.email || '—'}</div>
-      </div>
+  clientsEl.innerHTML = allClients.slice(0,5).map(c => `
+    <div class="client-row" onclick="showPanel('panel-clients');renderClientList()">
+      <div><div class="client-name">${c.name}</div><div class="client-meta">${c.email || '—'}</div></div>
       <span class="client-badge">Active</span>
-    </div>
-  `).join('');
-}
-
-function goToClient(clientId) {
-  showPanel('panel-clients');
-  renderClientList();
+    </div>`).join('');
 }
 
 // ════════════════════════════════════════════════════
@@ -901,22 +900,15 @@ function goToClient(clientId) {
 // ════════════════════════════════════════════════════
 function renderClientList() {
   const el = document.getElementById('clients-list');
-  if (allClients.length === 0) {
-    el.innerHTML = '<div class="empty">No clients yet.</div>';
-    return;
-  }
+  if (!allClients.length) { el.innerHTML = '<div class="empty">No clients yet.</div>'; return; }
   el.innerHTML = allClients.map(c => `
     <div class="client-row">
-      <div>
-        <div class="client-name">${c.name}</div>
-        <div class="client-meta">${c.email || '—'}${c.notes ? ' · ' + c.notes.slice(0, 60) + '…' : ''}</div>
+      <div><div class="client-name">${c.name}</div><div class="client-meta">${c.email || '—'}${c.notes ? ' · ' + c.notes.slice(0,60) + '…' : ''}</div></div>
+      <div style="display:flex;gap:0.5rem;flex-shrink:0">
+        <button class="btn btn-outline btn-sm" onclick="startPreview('${c.id}')">Preview as Client</button>
+        <a href="convergence.html" class="btn btn-outline btn-sm" target="_blank">Convergence ↗</a>
       </div>
-      <div style="display:flex;gap:0.5rem;flex-shrink:0;">
-        <button class="btn btn-outline btn-sm" onclick="previewAsClient('${c.id}')">Preview as Client</button>
-        <a href="convergence.html" class="btn btn-outline btn-sm" target="_blank">Open Convergence ↗</a>
-      </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function showAddClientForm() {
@@ -929,27 +921,18 @@ async function createClient() {
   const email = document.getElementById('new-client-email').value.trim();
   const notes = document.getElementById('new-client-notes').value.trim();
   const msgEl = document.getElementById('client-create-msg');
-
   if (!name) { msgEl.innerHTML = '<div class="msg msg-error">Name is required.</div>'; return; }
-
-  const result = await restPost('clients', { name, email: email || null, notes: notes || null });
-
+  const result = await restPost('clients', { name, email: email||null, notes: notes||null });
   if (result && !result.code) {
-    msgEl.innerHTML = '<div class="msg msg-success">Client created successfully.</div>';
-    await loadClients();
-    renderClientList();
-    populateWeavingClientSelect();
+    msgEl.innerHTML = '<div class="msg msg-success">Client created.</div>';
+    await loadClients(); renderClientList(); populateWeavingClientSelect();
     document.getElementById('new-client-name').value = '';
     document.getElementById('new-client-email').value = '';
     document.getElementById('new-client-notes').value = '';
     setTimeout(() => { msgEl.innerHTML = ''; }, 3000);
   } else {
-    msgEl.innerHTML = `<div class="msg msg-error">${result?.message || 'Failed to create client.'}</div>`;
+    msgEl.innerHTML = `<div class="msg msg-error">${result?.message || 'Failed.'}</div>`;
   }
-}
-
-function previewAsClient(clientId) {
-  startPreview(clientId);
 }
 
 // ════════════════════════════════════════════════════
@@ -958,11 +941,8 @@ function previewAsClient(clientId) {
 function populateWeavingClientSelect() {
   const sel = document.getElementById('weaving-client-select');
   sel.innerHTML = '<option value="">— Choose a client —</option>';
-  allClients.forEach(c => {
-    sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-  });
+  allClients.forEach(c => { sel.innerHTML += `<option value="${c.id}">${c.name}</option>`; });
 
-  // Populate ancestor select
   const aSel = document.getElementById('ancestor-select');
   aSel.innerHTML = '<option value="">— Choose ancestor —</option>';
   allAncestors.filter(a => a.status === 'weaving' || a.status === 'catalog').forEach(a => {
@@ -973,52 +953,41 @@ function populateWeavingClientSelect() {
 async function loadClientWeaving() {
   const clientId = document.getElementById('weaving-client-select').value;
   const container = document.getElementById('weaving-content');
-
   if (!clientId) {
     container.innerHTML = '<div class="empty">Select a client to view their weaving.</div>';
     document.getElementById('weaving-add-ancestor').style.display = 'none';
     return;
   }
-
   document.getElementById('weaving-add-ancestor').style.display = 'block';
   container.innerHTML = '<div class="loading"><span class="loading-glyph">✦</span>Loading weaving…</div>';
 
   const rows = await rest(`client_ancestors?client_id=eq.${clientId}&select=*&order=sort_year.asc`);
-  const freqRows = await rest(`client_ancestor_frequencies?select=client_ancestor_id,frequency_tags(name)&client_ancestor_id=in.(${(rows || []).map(r => r.id).join(',')||'null'})`);
+  if (!Array.isArray(rows) || !rows.length) {
+    container.innerHTML = `<div class="section-header"><div class="section-title">Weaving — 0 ancestors</div></div><div class="empty">No ancestors assigned yet.</div>`;
+    return;
+  }
 
-  // Build freq count map
+  const idList = rows.map(r=>r.id).join(',');
+  const freqRows = await rest(`client_ancestor_frequencies?select=client_ancestor_id,frequency_tags(name)&client_ancestor_id=in.(${idList})`);
   const freqMap = {};
-  (freqRows || []).forEach(r => {
-    const name = r.frequency_tags?.name;
-    if (!name) return;
+  (Array.isArray(freqRows) ? freqRows : []).forEach(r => {
+    const name = r.frequency_tags?.name; if (!name) return;
     if (!freqMap[r.client_ancestor_id]) freqMap[r.client_ancestor_id] = [];
     freqMap[r.client_ancestor_id].push(name);
   });
 
-  if (!rows || rows.length === 0) {
-    container.innerHTML = `
-      <div class="section-header"><div class="section-title">Weaving — 0 ancestors</div></div>
-      <div class="empty">No ancestors assigned yet. Use the form to add from the catalog.</div>`;
-    return;
-  }
-
   container.innerHTML = `
-    <div class="section-header">
-      <div class="section-title">Weaving — ${rows.length} ancestor${rows.length !== 1 ? 's' : ''}</div>
-    </div>
+    <div class="section-header"><div class="section-title">Weaving — ${rows.length} ancestor${rows.length!==1?'s':''}</div></div>
     <div class="ancestor-list">
-      ${rows.map(a => {
-        const freqs = freqMap[a.id] || [];
-        return `<div class="ancestor-row">
-          <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
-          <div class="ancestor-name-block">
-            <div class="ancestor-name-text">${a.name}</div>
-            <div class="ancestor-dates">${a.dates || ''} ${a.location ? '· ' + a.location : ''}</div>
-          </div>
-          <span class="ancestor-freq-count">${freqs.length} freq${freqs.length !== 1 ? 's' : ''}</span>
-          <button class="btn btn-outline btn-sm" onclick="removeClientAncestor('${a.id}', '${clientId}')" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Remove</button>
-        </div>`;
-      }).join('')}
+      ${rows.map(a => `<div class="ancestor-row">
+        <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
+        <div class="ancestor-name-block">
+          <div class="ancestor-name-text">${a.name}</div>
+          <div class="ancestor-dates">${a.dates||''} ${a.location ? '· '+a.location : ''}</div>
+        </div>
+        <span class="ancestor-freq-count">${(freqMap[a.id]||[]).length} freq${(freqMap[a.id]||[]).length!==1?'s':''}</span>
+        <button class="btn btn-outline btn-sm" onclick="removeClientAncestor('${a.id}','${clientId}')" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Remove</button>
+      </div>`).join('')}
     </div>`;
 }
 
@@ -1027,67 +996,33 @@ async function addAncestorToClient() {
   const ancestorId = document.getElementById('ancestor-select').value;
   const strength   = document.getElementById('ancestor-strength').value;
   const msgEl      = document.getElementById('weaving-add-msg');
-
-  if (!clientId || !ancestorId) {
-    msgEl.innerHTML = '<div class="msg msg-error">Select both a client and an ancestor.</div>';
-    return;
-  }
-
+  if (!clientId || !ancestorId) { msgEl.innerHTML = '<div class="msg msg-error">Select both a client and an ancestor.</div>'; return; }
   const ancestor = allAncestors.find(a => a.id === ancestorId);
   if (!ancestor) return;
-
-  // Build the client_ancestor record from the master ancestor
-  const payload = {
-    client_id: clientId,
-    ancestor_id: ancestorId,
-    slug: ancestor.slug,
-    name: ancestor.name,
-    epithet: ancestor.epithet || null,
-    dates: ancestor.dates || null,
-    era: ancestor.era || null,
-    sort_year: ancestor.sort_year || 0,
-    status: ancestor.status || 'catalog'
-  };
-
+  const payload = { client_id: clientId, ancestor_id: ancestorId, slug: ancestor.slug, name: ancestor.name, epithet: ancestor.epithet||null, dates: ancestor.dates||null, era: ancestor.era||null, sort_year: ancestor.sort_year||0, status: ancestor.status||'catalog' };
   const result = await restPost('client_ancestors', payload);
-
   if (result && !result.code) {
     const caId = Array.isArray(result) ? result[0]?.id : result?.id;
-
-    // Now seed frequency tags from ancestor_frequencies at dominant strength
-    const freqRows = await rest(`ancestor_frequencies?ancestor_id=eq.${ancestorId}&select=frequency_tag_id`);
-    if (caId && freqRows && freqRows.length > 0) {
-      const freqPayloads = freqRows.map(f => ({
-        client_ancestor_id: caId,
-        frequency_tag_id: f.frequency_tag_id,
-        strength
-      }));
-      for (const fp of freqPayloads) {
-        await restPost('client_ancestor_frequencies', fp);
+    if (caId) {
+      const freqRows = await rest(`ancestor_frequencies?ancestor_id=eq.${ancestorId}&select=frequency_tag_id`);
+      if (Array.isArray(freqRows) && freqRows.length) {
+        for (const fp of freqRows) {
+          await restPost('client_ancestor_frequencies', { client_ancestor_id: caId, frequency_tag_id: fp.frequency_tag_id, strength });
+        }
       }
     }
-
     msgEl.innerHTML = `<div class="msg msg-success">Added ${ancestor.name}.</div>`;
     setTimeout(() => { msgEl.innerHTML = ''; }, 2500);
     loadClientWeaving();
   } else {
-    const errMsg = result?.message || result?.details || 'Failed to add ancestor.';
-    msgEl.innerHTML = `<div class="msg msg-error">${errMsg}</div>`;
+    msgEl.innerHTML = `<div class="msg msg-error">${result?.message || result?.details || 'Failed to add ancestor.'}</div>`;
   }
 }
 
 async function removeClientAncestor(clientAncestorId, clientId) {
   if (!confirm('Remove this ancestor from the weaving?')) return;
-  const { data: { session } } = await sb.auth.getSession();
-  const token = session?.access_token || SUPABASE_ANON_KEY;
-  await fetch(`${SUPABASE_URL}/rest/v1/client_ancestor_frequencies?client_ancestor_id=eq.${clientAncestorId}`, {
-    method: 'DELETE',
-    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
-  });
-  await fetch(`${SUPABASE_URL}/rest/v1/client_ancestors?id=eq.${clientAncestorId}`, {
-    method: 'DELETE',
-    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
-  });
+  await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${clientAncestorId}`);
+  await restDelete(`client_ancestors?id=eq.${clientAncestorId}`);
   loadClientWeaving();
 }
 
@@ -1097,37 +1032,30 @@ async function removeClientAncestor(clientAncestorId, clientId) {
 async function loadAllConvergences() {
   const container = document.getElementById('convergence-admin-content');
   const convs = await rest('convergences?select=*,clients(name)&order=created_at.desc');
-
-  if (!convs || convs.length === 0) {
+  if (!Array.isArray(convs) || !convs.length) {
     container.innerHTML = '<div class="empty">No convergences generated yet.</div>';
     return;
   }
-
   container.innerHTML = convs.map(c => `
     <div class="convergence-card">
       <div class="convergence-card-header">
         <div>
           <div class="convergence-card-title">${c.title || 'The Convergence'}</div>
-          <div class="convergence-card-meta">${c.clients?.name || '—'} · ${new Date(c.created_at).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'})}</div>
+          <div class="convergence-card-meta">${c.clients?.name || '—'} · ${new Date(c.created_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:0.75rem;">
-          <span class="convergence-status ${c.status === 'published' ? 'status-published' : 'status-draft'}">${c.status}</span>
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          <span class="convergence-status ${c.status==='published'?'status-published':'status-draft'}">${c.status}</span>
           <a href="convergence.html" class="btn btn-outline btn-sm" target="_blank">Open ↗</a>
         </div>
       </div>
-      ${c.dominant_frequencies?.length ? `
-      <div class="convergence-card-body">
+      ${c.dominant_frequencies?.length ? `<div class="convergence-card-body">
         <div class="eyebrow" style="margin-bottom:0.75rem">Dominant Frequencies</div>
-        ${c.dominant_frequencies.slice(0,5).map((f,i) => `
-          <div class="freq-row">
-            <div class="freq-label">${f}</div>
-            <div class="freq-bar-wrap">
-              <div class="freq-bar" style="width:${Math.max(10, 100 - i*15)}%"></div>
-            </div>
-          </div>`).join('')}
+        ${c.dominant_frequencies.slice(0,5).map((f,i) => `<div class="freq-row">
+          <div class="freq-label">${f}</div>
+          <div class="freq-bar-wrap"><div class="freq-bar" style="width:${Math.max(10,100-i*15)}%"></div></div>
+        </div>`).join('')}
       </div>` : ''}
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 // ════════════════════════════════════════════════════
@@ -1135,51 +1063,41 @@ async function loadAllConvergences() {
 // ════════════════════════════════════════════════════
 async function loadMyWeaving() {
   const container = document.getElementById('client-weaving-content');
-
-  // Determine which client to show
   let clientId = null;
   if (isPreviewingAsClient && previewClientId) {
     clientId = previewClientId;
   } else {
-    // Find client record matching current user
     const myClient = allClients.find(c => c.auth_user_id === currentUser.id || c.email === currentUser.email);
     clientId = myClient?.id;
   }
-
   if (!clientId) {
     container.innerHTML = '<div class="empty">No weaving has been assembled for your account yet. Contact your guide to begin.</div>';
     return;
   }
-
   const rows = await rest(`client_ancestors?client_id=eq.${clientId}&select=*&order=sort_year.asc`);
-
-  if (!rows || rows.length === 0) {
-    container.innerHTML = '<div class="empty">Your weaving is being assembled. Return when your ancestral research is complete.</div>';
+  if (!Array.isArray(rows) || !rows.length) {
+    container.innerHTML = '<div class="empty">Your weaving is being assembled.</div>';
     return;
   }
-
-  const freqRows = await rest(`client_ancestor_frequencies?select=client_ancestor_id,strength,frequency_tags(name)&client_ancestor_id=in.(${rows.map(r => r.id).join(',')})`);
+  const idList = rows.map(r=>r.id).join(',');
+  const freqRows = await rest(`client_ancestor_frequencies?select=client_ancestor_id,strength,frequency_tags(name)&client_ancestor_id=in.(${idList})`);
   const freqMap = {};
-  (freqRows || []).forEach(r => {
-    const name = r.frequency_tags?.name;
-    if (!name) return;
+  (Array.isArray(freqRows)?freqRows:[]).forEach(r => {
+    const name = r.frequency_tags?.name; if (!name) return;
     if (!freqMap[r.client_ancestor_id]) freqMap[r.client_ancestor_id] = [];
     freqMap[r.client_ancestor_id].push(name);
   });
 
-  // Group by era arc
   const arcGroups = [
     { label: 'Mythic · Ancient', eras: ['mythic','ancient','classical','post-roman'] },
     { label: 'Medieval', eras: ['early-medieval','high-medieval','late-medieval'] },
     { label: 'Early Modern · Colonial', eras: ['renaissance','reformation','colonial','enlightenment'] },
     { label: '19th Century · Contemporary', eras: ['19th-century','contemporary'] },
   ];
-
   const grouped = {};
   arcGroups.forEach(g => { grouped[g.label] = []; });
-
   rows.forEach(a => {
-    const era = (a.era || '').toLowerCase();
+    const era = (a.era||'').toLowerCase();
     const grp = arcGroups.find(g => g.eras.includes(era));
     const lbl = grp ? grp.label : '19th Century · Contemporary';
     if (!grouped[lbl]) grouped[lbl] = [];
@@ -1187,27 +1105,24 @@ async function loadMyWeaving() {
   });
 
   let html = `<div style="margin-bottom:1rem;font-size:13px;color:var(--text-dim)">${rows.length} ancestors assembled across the lineage</div>`;
-
   arcGroups.forEach(g => {
-    const group = grouped[g.label] || [];
+    const group = grouped[g.label]||[];
     if (!group.length) return;
-    html += `<div class="section-header" style="margin-top:2rem"><div class="section-title">${g.label}</div></div>`;
-    html += '<div class="ancestor-list">';
+    html += `<div class="section-header" style="margin-top:2rem"><div class="section-title">${g.label}</div></div><div class="ancestor-list">`;
     group.forEach(a => {
-      const freqs = freqMap[a.id] || [];
-      const topFreqs = freqs.slice(0, 3).map(f => `<span style="font-size:11px;padding:2px 7px;border-radius:8px;background:var(--accent);border:1px solid var(--border);color:var(--gold);white-space:nowrap">${f}</span>`).join('');
+      const freqs = freqMap[a.id]||[];
+      const topFreqs = freqs.slice(0,3).map(f=>`<span style="font-size:11px;padding:2px 7px;border-radius:8px;background:var(--accent);border:1px solid var(--border);color:var(--gold);white-space:nowrap">${f}</span>`).join('');
       html += `<div class="ancestor-row">
         <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
         <div class="ancestor-name-block" style="flex:1">
           <div class="ancestor-name-text">${a.name}</div>
-          <div class="ancestor-dates">${a.dates || ''} ${a.location ? '· ' + a.location : ''}</div>
+          <div class="ancestor-dates">${a.dates||''} ${a.location?'· '+a.location:''}</div>
         </div>
         <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${topFreqs}</div>
       </div>`;
     });
     html += '</div>';
   });
-
   container.innerHTML = html;
 }
 
@@ -1216,7 +1131,6 @@ async function loadMyWeaving() {
 // ════════════════════════════════════════════════════
 async function loadMyConvergence() {
   const container = document.getElementById('client-convergence-content');
-
   let clientId = null;
   if (isPreviewingAsClient && previewClientId) {
     clientId = previewClientId;
@@ -1224,61 +1138,43 @@ async function loadMyConvergence() {
     const myClient = allClients.find(c => c.auth_user_id === currentUser.id || c.email === currentUser.email);
     clientId = myClient?.id;
   }
-
-  if (!clientId) {
-    container.innerHTML = '<div class="empty">No convergence available yet.</div>';
-    return;
-  }
+  if (!clientId) { container.innerHTML = '<div class="empty">No convergence available yet.</div>'; return; }
 
   const convs = await rest(`convergences?client_id=eq.${clientId}&order=created_at.desc&limit=1`);
-
-  if (!convs || convs.length === 0) {
-    container.innerHTML = `
-      <div class="empty" style="padding:4rem">
-        Your Convergence has not yet been generated.<br>
-        <a href="convergence.html" class="btn btn-gold" style="display:inline-block;margin-top:1.5rem" target="_blank">Open Convergence Generator →</a>
-      </div>`;
+  if (!Array.isArray(convs) || !convs.length) {
+    container.innerHTML = `<div class="empty" style="padding:4rem">Your Convergence has not yet been generated.<br>
+      <a href="convergence.html" class="btn btn-gold" style="display:inline-block;margin-top:1.5rem" target="_blank">Open Convergence Generator →</a></div>`;
     return;
   }
-
   const conv = convs[0];
   const sections = await rest(`convergence_sections?convergence_id=eq.${conv.id}&order=sort_order.asc`);
-  const mainSections = (sections || []).filter(s => s.title !== 'Summary');
+  const mainSections = (Array.isArray(sections)?sections:[]).filter(s => s.title !== 'Summary');
 
-  let html = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
-      <div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;font-style:italic;color:var(--text)">${conv.title || 'The Convergence'}</div>
-        <div style="font-size:12px;color:var(--text-dim);margin-top:0.25rem">Generated ${new Date(conv.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</div>
-      </div>
-      <a href="convergence.html" class="btn btn-outline" target="_blank">Open Full Convergence ↗</a>
-    </div>`;
-
+  let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+    <div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;font-style:italic;color:var(--text)">${conv.title||'The Convergence'}</div>
+      <div style="font-size:12px;color:var(--text-dim);margin-top:0.25rem">Generated ${new Date(conv.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</div>
+    </div>
+    <a href="convergence.html" class="btn btn-outline" target="_blank">Open Full Convergence ↗</a>
+  </div>`;
   if (conv.dominant_frequencies?.length) {
-    html += `<div class="card" style="margin-bottom:1.5rem">
-      <div class="eyebrow" style="margin-bottom:1rem">Dominant Frequencies</div>
-      ${conv.dominant_frequencies.slice(0,5).map((f,i) => `
-        <div class="freq-row">
-          <div class="freq-label">${f}</div>
-          <div class="freq-bar-wrap"><div class="freq-bar" style="width:${Math.max(15, 100-i*15)}%"></div></div>
-        </div>`).join('')}
+    html += `<div class="card" style="margin-bottom:1.5rem"><div class="eyebrow" style="margin-bottom:1rem">Dominant Frequencies</div>
+      ${conv.dominant_frequencies.slice(0,5).map((f,i)=>`<div class="freq-row"><div class="freq-label">${f}</div><div class="freq-bar-wrap"><div class="freq-bar" style="width:${Math.max(15,100-i*15)}%"></div></div></div>`).join('')}
     </div>`;
   }
-
   mainSections.forEach(s => {
     const text = s.final_text || s.ai_draft || '';
     if (!text) return;
     html += `<div class="convergence-card" style="margin-bottom:1rem">
       <div class="convergence-card-header">
         <div class="convergence-card-title">${s.title}</div>
-        <span class="convergence-status ${s.section_type === 'pattern' ? 'status-published' : 'status-draft'}">${s.section_type}</span>
+        <span class="convergence-status ${s.section_type==='pattern'?'status-published':'status-draft'}">${s.section_type}</span>
       </div>
       <div class="convergence-card-body" style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:2;color:var(--text-secondary)">
-        ${text.split('\n\n').map(p => p.trim() ? `<p style="margin-bottom:0.75rem">${p}</p>` : '').join('')}
+        ${text.split('\n\n').map(p=>p.trim()?`<p style="margin-bottom:0.75rem">${p}</p>`:'').join('')}
       </div>
     </div>`;
   });
-
   container.innerHTML = html;
 }
 </script>
