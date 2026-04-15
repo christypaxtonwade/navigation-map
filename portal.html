@@ -150,6 +150,16 @@ body::before {
 }
 
 .app-header-right { display: flex; align-items: center; gap: 1rem; }
+
+.portal-site-nav { display: flex; align-items: center; gap: 0; }
+.portal-site-link {
+  font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 400;
+  letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none;
+  color: var(--text-faint); padding: 4px 10px;
+  border-right: 1px solid var(--border); transition: color 0.2s;
+}
+.portal-site-link:last-child { border-right: none; padding-right: 0; margin-right: 0.5rem; }
+.portal-site-link:hover { color: var(--gold); }
 .btn-view-toggle {
   font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 400;
   letter-spacing: 0.1em; text-transform: uppercase;
@@ -670,6 +680,13 @@ body::before {
         <span class="app-role-badge" id="role-badge">·</span>
       </div>
       <div class="app-header-right">
+        <nav class="portal-site-nav" aria-label="Site navigation">
+          <a href="index.html" class="portal-site-link">Map</a>
+          <a href="fieldguide.html" class="portal-site-link">Fieldguide</a>
+          <a href="ancestral-weaving.html" class="portal-site-link">Weaving</a>
+          <a href="ancestral-catalog.html" class="portal-site-link">Catalog</a>
+          <a href="convergence.html" class="portal-site-link">Convergence</a>
+        </nav>
         <button class="btn-view-toggle" id="btn-toggle-view" onclick="toggleClientPreview()" style="display:none">View as Client</button>
         <button class="btn-signout" onclick="handleSignOut()">Sign Out</button>
       </div>
