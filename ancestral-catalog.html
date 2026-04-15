@@ -274,8 +274,13 @@ const ERA_BAR_CLASS = {
 };
 
 async function supabaseFetch(path) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  const sep = path.includes('?') ? '&' : '?';
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}${sep}limit=2000`, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Prefer': 'count=none'
+    }
   });
   if (!res.ok) throw new Error(`Supabase error ${res.status}`);
   return res.json();
@@ -338,7 +343,6 @@ function buildCard(ancestor, freqTags, index) {
     ancestor.location, ancestor.era, ancestor.catalog_preview, ...freqTags]
     .filter(Boolean).join(' ').toLowerCase();
 
-  const isKeynote  = ancestor.status === 'keynote';
   const weavingTag = inWeaving ? `<span class="tag tag-weaving">In Weaving \u2736</span>` : '';
   const freqHtml   = freqTags.map(t => `<span class="tag">${t}</span>`).join('');
 
@@ -353,9 +357,7 @@ function buildCard(ancestor, freqTags, index) {
     : `<div class="card-narrative-preview">${preview}</div>`;
 
   const card = document.createElement('div');
-  card.className = 'catalog-card'
-    + (ancestor.status === 'margin' ? ' margin-ancestor' : '')
-    + (isKeynote ? ' keynote-card' : '');
+  card.className = 'catalog-card' + (ancestor.status === 'margin' ? ' margin-ancestor' : '');
   card.dataset.filterCat    = filterCat;
   card.dataset.weaving      = inWeaving ? 'true' : 'false';
   card.dataset.search       = searchParts;
@@ -366,9 +368,8 @@ function buildCard(ancestor, freqTags, index) {
   card.onclick = function() { toggleCard(this); };
 
   card.innerHTML = `
-    <div class="${isKeynote ? 'keynote-era-bar' : `card-era-bar ${barClass}`}"></div>
+    <div class="card-era-bar ${barClass}"></div>
     <div class="card-body">
-      ${isKeynote ? '<div><span class="keynote-label">Historical Keynote</span></div>' : ''}
       <div class="card-top">
         <div class="card-name">${ancestor.name || '\u2014'}</div>
         ${ancestor.dates ? `<div class="card-date">${ancestor.dates}</div>` : ''}
@@ -385,14 +386,20 @@ function buildCard(ancestor, freqTags, index) {
 async function init() {
   const grid = document.getElementById('catalog-grid');
   try {
-    const [ancestors, freqRows] = await Promise.all([
+    const [ancestors, freqRows, tagRows] = await Promise.all([
       supabaseFetch('ancestors?select=*&order=sort_year.asc'),
-      supabaseFetch('ancestor_frequencies?select=ancestor_id,frequency_tags(name)').catch(() => [])
+      supabaseFetch('ancestor_frequencies?select=ancestor_id,frequency_tag_id,strength').catch(() => []),
+      supabaseFetch('frequency_tags?select=id,name,type').catch(() => [])
     ]);
 
+    // Build tag lookup: id → name
+    const tagById = {};
+    tagRows.forEach(t => { tagById[t.id] = t.name; });
+
+    // Build freqMap: ancestor_id → [tag names]
     const freqMap = {};
     freqRows.forEach(row => {
-      const name = row.frequency_tags?.name;
+      const name = tagById[row.frequency_tag_id];
       if (!name) return;
       if (!freqMap[row.ancestor_id]) freqMap[row.ancestor_id] = [];
       freqMap[row.ancestor_id].push(name);
@@ -407,7 +414,7 @@ async function init() {
   } catch (err) {
     grid.innerHTML = `<div class="error-state" style="grid-column:1/-1">
       <p>The catalog could not be retrieved.</p>
-      <p style="font-size: 15px;margin-top:0.5rem;Noneopacity: 0.88">${err.message}</p>
+      <p style="font-size: 15px;margin-top:0.5rem;opacity:0.88">${err.message}</p>
     </div>`;
   }
 }
