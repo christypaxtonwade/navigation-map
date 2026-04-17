@@ -14,11 +14,12 @@
   --border: rgba(201,168,76,0.12);
   --border-hover: rgba(201,168,76,0.26);
   --gold: #d4a84c;
-  --gold-dim: rgba(212,168,76,0.4);
+  --gold-dim: rgba(212,168,76,0.7);
   --gold-wash: rgba(212,168,76,0.06);
   --text: #f2eedd;
   --text-secondary: #ccc4b4;
-  --text-dim: #9a948e;
+  --text-dim: #b3aa9f;
+  --text-faint: #9a9088;
   --mythic: #c4bef8;
   --conceptual: #6dd8b2;
   --somatic: #f5aa88;
@@ -98,17 +99,17 @@ body.astro-view .astro-axis-note { max-height: 160px; opacity: 1; margin-top: 1.
 .legend { display: flex; justify-content: center; gap: 1.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.9s ease 0.25s forwards; }
 .legend-item { display: flex; align-items: center; gap: 9px; font-size: 15px; color: var(--text-secondary); font-weight: 300; }
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-.legend-dot.m { background: var(--mythic); Noneopacity: 0.88; }
-.legend-dot.c { background: var(--conceptual); Noneopacity: 0.88; }
-.legend-dot.s { background: var(--somatic); Noneopacity: 0.88; }
-.legend-dot.u { background: #9a6e22; Noneopacity: 0.88; }
+.legend-dot.m { background: var(--mythic); opacity: 0.88; }
+.legend-dot.c { background: var(--conceptual); opacity: 0.88; }
+.legend-dot.s { background: var(--somatic); opacity: 0.88; }
+.legend-dot.u { background: #9a6e22; opacity: 0.88; }
 
 /* ── Arc dividers ── */
 .arc-label { text-align: center; margin: 2.5rem 0 1.5rem; opacity: 0; animation: fadeUp 0.9s ease forwards; }
 .arc-label-inner { display: inline-flex; align-items: center; gap: 1rem; }
 .arc-rule { width: 80px; height: 1px; background: var(--border); }
 .arc-text { font-size: 15px; font-weight: 400; letter-spacing: 0.2em; color: var(--text-dim); text-transform: uppercase; }
-.arc-glyph { font-size: 16px; color: var(--gold); Noneopacity: 0.88; }
+.arc-glyph { font-size: 16px; color: var(--gold); opacity: 0.88; }
 
 /* ── Field cards — FULL WIDTH ── */
 .field-card {
@@ -145,7 +146,7 @@ body.astro-view .astro-axis-note { max-height: 160px; opacity: 1; margin-top: 1.
 .field-number {
   font-family: 'Cormorant Garamond', serif;
   font-size: 2.2rem; font-weight: 300; font-style: italic;
-  color: var(--gold); Noneopacity: 0.88; line-height: 1;
+  color: var(--gold); opacity: 0.88; line-height: 1;
   display: block;
 }
 .field-numeral-sign {
@@ -204,7 +205,7 @@ body.astro-view .astro-axis-note { max-height: 160px; opacity: 1; margin-top: 1.
 .subterrain-chip-link {
   font-size: 15px; color: var(--gold);
   letter-spacing: 0.06em; margin-top: 5px;
-  display: block; Noneopacity: 0.88;
+  display: block; opacity: 0.88;
 }
 
 /* ── Astro panel ── */
