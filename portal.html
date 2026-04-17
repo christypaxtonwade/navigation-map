@@ -17,12 +17,12 @@
   --border-hover: rgba(180,155,100,0.28);
   --gold: #c9a87c;
   --gold-bright: #dfc090;
-  --gold-dim: rgba(201,168,124,0.35);
+  --gold-dim: rgba(201,168,124,0.7);
   --accent: rgba(201,168,124,0.08);
   --text: #ede8dc;
   --text-secondary: #c8c0b0;
-  --text-dim: #8a8478;
-  --text-faint: #4e4c46;
+  --text-dim: #b3aa9f;
+  --text-faint: #9a9088;
   --teal: #6dd8b2;
   --teal-dim: rgba(109,216,178,0.15);
   --amber: #f5aa88;
@@ -46,7 +46,7 @@ body::before {
 
 /* ── Typography helpers ── */
 .eyebrow {
-  font-size: 10px; font-weight: 500; letter-spacing: 0.22em;
+  font-size: 15px; font-weight: 500; letter-spacing: 0.22em;
   text-transform: uppercase; color: var(--gold); margin-bottom: 0.5rem;
 }
 .serif { font-family: 'Cormorant Garamond', serif; }
@@ -72,7 +72,7 @@ body::before {
 }
 .login-glyph {
   text-align: center; font-size: 2rem; color: var(--gold);
-  margin-bottom: 1.5rem; opacity: 0.7;
+  margin-bottom: 1.5rem; opacity: 0.88;
 }
 .login-title {
   font-family: 'Cormorant Garamond', serif;
@@ -80,7 +80,7 @@ body::before {
   color: var(--text); text-align: center; margin-bottom: 0.4rem;
 }
 .login-sub {
-  font-size: 13px; color: var(--text-dim); text-align: center;
+  font-size: 15px; color: var(--text-dim); text-align: center;
   margin-bottom: 2rem; letter-spacing: 0.04em;
 }
 .login-rule {
@@ -90,7 +90,7 @@ body::before {
 
 .field-group { margin-bottom: 1.25rem; }
 .field-label {
-  display: block; font-size: 11px; font-weight: 500;
+  display: block; font-size: 15px; font-weight: 500;
   letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--text-dim); margin-bottom: 0.5rem;
 }
@@ -106,7 +106,7 @@ body::before {
 .btn-primary {
   width: 100%; padding: 11px; border: none; border-radius: 6px;
   background: var(--gold); color: var(--bg);
-  font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 500;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500;
   letter-spacing: 0.1em; text-transform: uppercase;
   cursor: pointer; transition: background 0.2s; margin-top: 0.5rem;
 }
@@ -114,7 +114,7 @@ body::before {
 .btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; }
 
 .login-error {
-  font-size: 13px; color: var(--red); text-align: center;
+  font-size: 15px; color: var(--red); text-align: center;
   margin-top: 1rem; min-height: 1.2em;
 }
 
@@ -137,7 +137,7 @@ body::before {
   letter-spacing: 0.04em; white-space: nowrap;
 }
 .app-role-badge {
-  font-size: 10px; font-weight: 500; letter-spacing: 0.16em;
+  font-size: 15px; font-weight: 500; letter-spacing: 0.16em;
   text-transform: uppercase; padding: 3px 8px; border-radius: 10px;
 }
 .role-admin {
@@ -150,18 +150,8 @@ body::before {
 }
 
 .app-header-right { display: flex; align-items: center; gap: 1rem; }
-
-.portal-site-nav { display: flex; align-items: center; gap: 0; }
-.portal-site-link {
-  font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 400;
-  letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none;
-  color: var(--text-faint); padding: 4px 10px;
-  border-right: 1px solid var(--border); transition: color 0.2s;
-}
-.portal-site-link:last-child { border-right: none; padding-right: 0; margin-right: 0.5rem; }
-.portal-site-link:hover { color: var(--gold); }
 .btn-view-toggle {
-  font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 400;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
   letter-spacing: 0.1em; text-transform: uppercase;
   padding: 6px 12px; border-radius: 5px; cursor: pointer;
   transition: all 0.2s; white-space: nowrap;
@@ -175,7 +165,7 @@ body::before {
 }
 
 .btn-signout {
-  font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 400;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
   letter-spacing: 0.1em; text-transform: uppercase;
   padding: 6px 12px; border-radius: 5px; cursor: pointer;
   background: transparent; border: 1px solid rgba(255,255,255,0.08);
@@ -190,7 +180,7 @@ body::before {
 }
 .app-nav::-webkit-scrollbar { display: none; }
 .nav-tab {
-  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 400;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
   letter-spacing: 0.1em; text-transform: uppercase;
   padding: 0 1.25rem; height: 44px;
   display: inline-flex; align-items: center; cursor: pointer;
@@ -216,7 +206,7 @@ body::before {
   font-size: 2rem; font-weight: 300; font-style: italic;
   color: var(--text); margin-bottom: 0.3rem;
 }
-.panel-sub { font-size: 14px; color: var(--text-dim); line-height: 1.7; }
+.panel-sub { font-size: 15px; color: var(--text-dim); line-height: 1.7; }
 
 /* ── Cards & grids ── */
 .card {
@@ -244,7 +234,7 @@ body::before {
   font-size: 2.4rem; font-weight: 300; color: var(--gold); line-height: 1;
   margin-bottom: 0.3rem;
 }
-.stat-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); }
+.stat-label { font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); }
 
 /* ── Section headers ── */
 .section-header {
@@ -253,7 +243,7 @@ body::before {
   border-bottom: 1px solid var(--border);
 }
 .section-title {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.18em;
+  font-size: 15px; font-weight: 500; letter-spacing: 0.18em;
   text-transform: uppercase; color: var(--gold);
 }
 
@@ -273,9 +263,9 @@ body::before {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.15rem; font-weight: 400; color: var(--text);
 }
-.client-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.client-meta { font-size: 15px; color: var(--text-dim); margin-top: 2px; }
 .client-badge {
-  font-size: 10px; font-weight: 500; letter-spacing: 0.1em;
+  font-size: 15px; font-weight: 500; letter-spacing: 0.1em;
   text-transform: uppercase; padding: 3px 8px; border-radius: 10px;
   background: var(--teal-dim); border: 1px solid rgba(109,216,178,0.22);
   color: var(--teal); white-space: nowrap; flex-shrink: 0;
@@ -294,10 +284,10 @@ body::before {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
 .ancestor-name-block { flex: 1; }
-.ancestor-name-text { font-size: 14px; color: var(--text); }
-.ancestor-dates { font-size: 12px; color: var(--text-faint); }
+.ancestor-name-text { font-size: 15px; color: var(--text); }
+.ancestor-dates { font-size: 15px; color: var(--text-faint); }
 .ancestor-freq-count {
-  font-size: 11px; color: var(--text-dim);
+  font-size: 15px; color: var(--text-dim);
   background: var(--accent); border: 1px solid var(--border);
   border-radius: 10px; padding: 2px 8px; flex-shrink: 0;
 }
@@ -322,10 +312,10 @@ body::before {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.25rem; font-weight: 400; font-style: italic; color: var(--text);
 }
-.convergence-card-meta { font-size: 12px; color: var(--text-dim); }
+.convergence-card-meta { font-size: 15px; color: var(--text-dim); }
 .convergence-card-body { padding: 1.25rem 1.5rem; }
 .convergence-status {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
+  font-size: 15px; font-weight: 500; letter-spacing: 0.1em;
   text-transform: uppercase; padding: 3px 8px; border-radius: 10px;
 }
 .status-published {
@@ -339,7 +329,7 @@ body::before {
 
 /* ── Buttons ── */
 .btn {
-  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 400;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
   letter-spacing: 0.1em; text-transform: uppercase;
   padding: 8px 16px; border-radius: 6px; cursor: pointer;
   transition: all 0.2s; text-decoration: none; display: inline-block;
@@ -348,7 +338,7 @@ body::before {
 .btn-gold:hover { background: var(--gold-bright); border-color: var(--gold-bright); }
 .btn-outline { background: none; border: 1px solid var(--border); color: var(--text-dim); }
 .btn-outline:hover { border-color: var(--border-hover); color: var(--text); }
-.btn-sm { padding: 5px 10px; font-size: 11px; }
+.btn-sm { padding: 5px 10px; font-size: 15px; }
 
 /* ── Admin panels ── */
 .two-col { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start; }
@@ -356,7 +346,7 @@ body::before {
 
 .form-group { margin-bottom: 1.25rem; }
 .form-label {
-  display: block; font-size: 11px; font-weight: 500;
+  display: block; font-size: 15px; font-weight: 500;
   letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--text-dim); margin-bottom: 0.5rem;
 }
@@ -364,7 +354,7 @@ body::before {
   width: 100%; background: var(--bg); border: 1px solid var(--border);
   border-radius: 6px; padding: 9px 12px;
   color: var(--text); font-family: 'Jost', sans-serif;
-  font-size: 14px; font-weight: 300; outline: none;
+  font-size: 15px; font-weight: 300; outline: none;
   transition: border-color 0.2s;
 }
 .form-input:focus, .form-select:focus, .form-textarea:focus {
@@ -376,7 +366,7 @@ body::before {
 
 /* ── Inline message ── */
 .msg {
-  font-size: 13px; padding: 8px 12px; border-radius: 6px; margin-bottom: 1rem;
+  font-size: 15px; padding: 8px 12px; border-radius: 6px; margin-bottom: 1rem;
 }
 .msg-success {
   background: var(--teal-dim); border: 1px solid rgba(109,216,178,0.22);
@@ -409,7 +399,7 @@ body::before {
 .preview-banner {
   background: var(--amber-dim); border-bottom: 1px solid rgba(245,170,136,0.25);
   padding: 8px 2rem; text-align: center;
-  font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--amber); display: none;
 }
 .preview-banner.visible { display: block; }
@@ -418,16 +408,16 @@ body::before {
 .freq-row {
   display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;
 }
-.freq-label { font-size: 13px; color: var(--text-secondary); width: 200px; flex-shrink: 0; }
+.freq-label { font-size: 15px; color: var(--text-secondary); width: 200px; flex-shrink: 0; }
 .freq-bar-wrap {
   flex: 1; height: 4px; background: rgba(255,255,255,0.05);
   border-radius: 2px; overflow: hidden;
 }
 .freq-bar { height: 100%; background: var(--gold); border-radius: 2px; }
-.freq-count { font-size: 12px; color: var(--text-dim); width: 30px; text-align: right; flex-shrink: 0; }
+.freq-count { font-size: 15px; color: var(--text-dim); width: 30px; text-align: right; flex-shrink: 0; }
 
 @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+@keyframes pulse { 0%, 100% { opacity: 0.88; } 50% { opacity: 1; } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 @media (max-width: 768px) {
@@ -457,13 +447,13 @@ body::before {
   font-size: 1.1rem; font-style: italic; color: var(--text-dim);
 }
 .ai-loading-sub {
-  font-size: 12px; color: var(--text-faint); letter-spacing: 0.08em;
+  font-size: 15px; color: var(--text-faint); letter-spacing: 0.08em;
 }
 
 /* Verification badge */
 .verify-badge {
   display: inline-flex; align-items: center; gap: 0.4rem;
-  font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
+  font-size: 15px; font-weight: 500; letter-spacing: 0.12em;
   text-transform: uppercase; padding: 4px 10px; border-radius: 10px;
 }
 .verify-verified {
@@ -487,7 +477,7 @@ body::before {
   margin-bottom: 1.75rem;
 }
 .review-section-title {
-  font-size: 10px; font-weight: 500; letter-spacing: 0.2em;
+  font-size: 15px; font-weight: 500; letter-spacing: 0.2em;
   text-transform: uppercase; color: var(--gold);
   margin-bottom: 1rem; padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border);
@@ -510,7 +500,7 @@ body::before {
 .chip-field:focus-within { border-color: var(--gold-dim); }
 .chip {
   display: inline-flex; align-items: center; gap: 0.3rem;
-  font-size: 11px; font-weight: 400; letter-spacing: 0.06em;
+  font-size: 15px; font-weight: 400; letter-spacing: 0.06em;
   padding: 3px 8px 3px 10px; border-radius: 20px;
   background: var(--accent); border: 1px solid var(--border);
   color: var(--gold); white-space: nowrap; transition: border-color 0.2s;
@@ -518,13 +508,13 @@ body::before {
 .chip:hover { border-color: var(--border-hover); }
 .chip-remove {
   background: none; border: none; cursor: pointer;
-  color: var(--text-faint); font-size: 13px; line-height: 1;
+  color: var(--text-faint); font-size: 15px; line-height: 1;
   padding: 0 1px; transition: color 0.15s;
   display: flex; align-items: center;
 }
 .chip-remove:hover { color: var(--red); }
 .chip-strength-label {
-  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--text-faint); padding-left: 5px;
   border-left: 1px solid rgba(255,255,255,0.1); margin-left: 2px;
   cursor: pointer;
@@ -536,14 +526,14 @@ body::before {
 .chip-add-select, .chip-strength-select {
   background: var(--bg); border: 1px solid var(--border);
   border-radius: 6px; padding: 7px 10px; color: var(--text);
-  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 300;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 300;
   outline: none; transition: border-color 0.2s; appearance: none;
 }
 .chip-add-select { flex: 1; }
 .chip-strength-select { width: 130px; }
 .chip-add-select:focus, .chip-strength-select:focus { border-color: var(--gold-dim); }
 .btn-chip-add {
-  font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 400;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
   letter-spacing: 0.08em; text-transform: uppercase;
   padding: 7px 14px; border-radius: 6px; cursor: pointer;
   background: var(--accent); border: 1px solid var(--border);
@@ -566,7 +556,7 @@ body::before {
   overflow: hidden; max-width: 360px;
 }
 .mode-btn {
-  flex: 1; font-family: 'Jost', sans-serif; font-size: 12px;
+  flex: 1; font-family: 'Jost', sans-serif; font-size: 15px;
   font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase;
   padding: 10px 16px; border: none; background: transparent;
   color: var(--text-dim); cursor: pointer; transition: all 0.2s;
@@ -578,7 +568,7 @@ body::before {
 /* ── Editor form ── */
 .editor-section { margin-bottom: 1.75rem; }
 .editor-section-title {
-  font-size: 10px; font-weight: 500; letter-spacing: 0.2em;
+  font-size: 15px; font-weight: 500; letter-spacing: 0.2em;
   text-transform: uppercase; color: var(--gold);
   margin-bottom: 1rem; padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border);
@@ -595,7 +585,7 @@ body::before {
 .upload-area:hover { border-color: var(--gold-dim); }
 .upload-area input[type="file"] { display: none; }
 .upload-label {
-  font-size: 12px; color: var(--text-dim); letter-spacing: 0.06em;
+  font-size: 15px; color: var(--text-dim); letter-spacing: 0.06em;
   cursor: pointer; display: block;
 }
 .upload-preview {
@@ -607,7 +597,7 @@ body::before {
   border: 1px solid var(--border); object-fit: contain;
 }
 .upload-preview-note {
-  font-size: 11px; color: var(--text-faint); margin-top: 0.25rem;
+  font-size: 15px; color: var(--text-faint); margin-top: 0.25rem;
   word-break: break-all;
 }
 .sigil-preview-wrap {
@@ -625,7 +615,7 @@ body::before {
 /* ── Client assignment chips ── */
 .client-assignment-chip {
   display: inline-flex; align-items: center; gap: 0.4rem;
-  font-size: 12px; padding: 4px 10px 4px 12px;
+  font-size: 15px; padding: 4px 10px 4px 12px;
   border-radius: 20px; background: var(--teal-dim);
   border: 1px solid rgba(109,216,178,0.22); color: var(--teal);
 }
@@ -680,13 +670,6 @@ body::before {
         <span class="app-role-badge" id="role-badge">·</span>
       </div>
       <div class="app-header-right">
-        <nav class="portal-site-nav" aria-label="Site navigation">
-          <a href="index.html" class="portal-site-link">Map</a>
-          <a href="fieldguide.html" class="portal-site-link">Fieldguide</a>
-          <a href="ancestral-weaving.html" class="portal-site-link">Weaving</a>
-          <a href="ancestral-catalog.html" class="portal-site-link">Catalog</a>
-          <a href="convergence.html" class="portal-site-link">Convergence</a>
-        </nav>
         <button class="btn-view-toggle" id="btn-toggle-view" onclick="toggleClientPreview()" style="display:none">View as Client</button>
         <button class="btn-signout" onclick="handleSignOut()">Sign Out</button>
       </div>
@@ -1473,14 +1456,14 @@ async function loadMyWeaving() {
     grouped[lbl].push(a);
   });
 
-  let html = `<div style="margin-bottom:1rem;font-size:13px;color:var(--text-dim)">${rows.length} ancestors assembled across the lineage</div>`;
+  let html = `<div style="margin-bottom:1rem;font-size:15px;color:var(--text-dim)">${rows.length} ancestors assembled across the lineage</div>`;
   arcGroups.forEach(g => {
     const group = grouped[g.label]||[];
     if (!group.length) return;
     html += `<div class="section-header" style="margin-top:2rem"><div class="section-title">${g.label}</div></div><div class="ancestor-list">`;
     group.forEach(a => {
       const freqs = freqMap[a.id]||[];
-      const topFreqs = freqs.slice(0,3).map(f=>`<span style="font-size:11px;padding:2px 7px;border-radius:8px;background:var(--accent);border:1px solid var(--border);color:var(--gold);white-space:nowrap">${f}</span>`).join('');
+      const topFreqs = freqs.slice(0,3).map(f=>`<span style="font-size:15px;padding:2px 7px;border-radius:8px;background:var(--accent);border:1px solid var(--border);color:var(--gold);white-space:nowrap">${f}</span>`).join('');
       html += `<div class="ancestor-row">
         <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
         <div class="ancestor-name-block" style="flex:1">
@@ -1522,7 +1505,7 @@ async function loadMyConvergence() {
   let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
     <div>
       <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;font-style:italic;color:var(--text)">${conv.title||'The Convergence'}</div>
-      <div style="font-size:12px;color:var(--text-dim);margin-top:0.25rem">Generated ${new Date(conv.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</div>
+      <div style="font-size:15px;color:var(--text-dim);margin-top:0.25rem">Generated ${new Date(conv.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</div>
     </div>
     <a href="convergence.html" class="btn btn-outline" target="_blank">Open Full Convergence ↗</a>
   </div>`;
@@ -1648,7 +1631,7 @@ function renderAncestorReview(d) {
       <!-- Verification strip -->
       <div class="card" style="margin-bottom:1.5rem;display:flex;align-items:flex-start;gap:1.25rem;flex-wrap:wrap">
         <span class="${vClass}">${vLabel}</span>
-        <div style="flex:1;font-size:13px;color:var(--text-dim);line-height:1.6">${d.verification_note || ''}</div>
+        <div style="flex:1;font-size:15px;color:var(--text-dim);line-height:1.6">${d.verification_note || ''}</div>
       </div>
 
       <!-- Core identity -->
@@ -1694,11 +1677,11 @@ function renderAncestorReview(d) {
       <div class="card" style="margin-bottom:1.5rem">
         <div class="review-section-title">Catalog Content</div>
         <div class="form-group">
-          <label class="form-label">Catalog Preview <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">(short summary — 1–2 sentences)</span></label>
+          <label class="form-label">Catalog Preview <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">(short summary — 1–2 sentences)</span></label>
           <textarea class="form-textarea" id="rv-catalog-preview" rows="3">${esc(d.catalog_preview)}</textarea>
         </div>
         <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Catalog Full <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">(expanded record)</span></label>
+          <label class="form-label">Catalog Full <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">(expanded record)</span></label>
           <textarea class="form-textarea" id="rv-catalog-full" rows="6">${esc(d.catalog_full)}</textarea>
         </div>
       </div>
@@ -1707,19 +1690,19 @@ function renderAncestorReview(d) {
       <div class="card" style="margin-bottom:1.5rem">
         <div class="review-section-title">Four Layers</div>
         <div class="form-group">
-          <label class="form-label">Terroir <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">land · body · physical root</span></label>
+          <label class="form-label">Terroir <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">land · body · physical root</span></label>
           <textarea class="form-textarea" id="rv-layer-terroir" rows="3">${esc(d.layer_terroir)}</textarea>
         </div>
         <div class="form-group">
-          <label class="form-label">Unresolved <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">wound · compression · pattern</span></label>
+          <label class="form-label">Unresolved <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">wound · compression · pattern</span></label>
           <textarea class="form-textarea" id="rv-layer-unresolved" rows="3">${esc(d.layer_unresolved)}</textarea>
         </div>
         <div class="form-group">
-          <label class="form-label">Thread <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">through-line · signal carried forward</span></label>
+          <label class="form-label">Thread <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">through-line · signal carried forward</span></label>
           <textarea class="form-textarea" id="rv-layer-thread" rows="3">${esc(d.layer_thread)}</textarea>
         </div>
         <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Lineage <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">bloodline · cultural transmission</span></label>
+          <label class="form-label">Lineage <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">bloodline · cultural transmission</span></label>
           <textarea class="form-textarea" id="rv-layer-lineage" rows="3">${esc(d.layer_lineage)}</textarea>
         </div>
       </div>
@@ -1755,7 +1738,7 @@ function renderAncestorReview(d) {
           </select>
           <button class="btn-chip-add" onclick="addChip()">+ Add</button>
         </div>
-        <div id="ar-chip-unmatched" style="margin-top:0.75rem;font-size:12px;color:var(--text-faint)"></div>
+        <div id="ar-chip-unmatched" style="margin-top:0.75rem;font-size:15px;color:var(--text-faint)"></div>
       </div>
 
       <!-- Confirm bar -->
@@ -1773,7 +1756,7 @@ function renderAncestorReview(d) {
           </select>
         </div>
         <div style="display:flex;gap:0.75rem;align-items:center">
-          <div id="ar-confirm-msg" style="font-size:13px"></div>
+          <div id="ar-confirm-msg" style="font-size:15px"></div>
           <button class="btn btn-outline" onclick="resetAncestorResearch()">Start Over</button>
           <button class="btn btn-gold" onclick="confirmAncestorToDatabase()">Confirm & Save →</button>
         </div>
@@ -1802,7 +1785,7 @@ function renderChips() {
   const display = document.getElementById('ar-chip-display');
   if (!display) return;
   if (!arChips.length) {
-    display.innerHTML = '<span style="font-size:12px;color:var(--text-faint);font-style:italic">No tags assigned yet</span>';
+    display.innerHTML = '<span style="font-size:15px;color:var(--text-faint);font-style:italic">No tags assigned yet</span>';
     return;
   }
   display.innerHTML = arChips.map((c, i) => `
@@ -1862,7 +1845,7 @@ function renderResearchPrompts(prompts) {
   if (!el) return;
   el.innerHTML = `
     <div class="review-section-title" style="margin-bottom:0.75rem">Research Prompts</div>
-    <div style="font-size:13px;color:var(--text-dim);line-height:1.8">
+    <div style="font-size:15px;color:var(--text-dim);line-height:1.8">
       ${prompts.map((p, i) => `<div style="display:flex;gap:0.75rem;margin-bottom:0.5rem">
         <span style="color:var(--gold);flex-shrink:0;font-weight:500">${i+1}.</span>
         <span>${esc(p)}</span>
@@ -2121,7 +2104,7 @@ function renderEditorForm(a) {
           <select class="form-select" id="ed-era">${eraOptions}</select>
         </div>
         <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Linked Ancestor <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">paired entry</span></label>
+          <label class="form-label">Linked Ancestor <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">paired entry</span></label>
           <select class="form-select" id="ed-linked">
             <option value="">— None —</option>
             ${linkedOptions}
@@ -2142,8 +2125,8 @@ function renderEditorForm(a) {
         ].map(([val, label, note]) => `
           <label style="cursor:pointer;display:block;padding:0.875rem 1rem;border-radius:8px;border:1px solid ${a.status===val?'var(--gold-dim)':'var(--border)'};background:${a.status===val?'var(--accent)':'transparent'};transition:all 0.2s" id="ed-status-card-${val}">
             <input type="radio" name="ed-status-radio" value="${val}" ${a.status===val?'checked':''} style="display:none" onchange="updateStatusCards()">
-            <div style="font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:${a.status===val?'var(--gold)':'var(--text-dim)'};margin-bottom:0.4rem">${label}</div>
-            <div style="font-size:11px;color:var(--text-faint);line-height:1.5">${note}</div>
+            <div style="font-size:15px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:${a.status===val?'var(--gold)':'var(--text-dim)'};margin-bottom:0.4rem">${label}</div>
+            <div style="font-size:15px;color:var(--text-faint);line-height:1.5">${note}</div>
           </label>`).join('')}
       </div>
       <input type="hidden" id="ed-status" value="${a.status || 'catalog'}">
@@ -2162,36 +2145,36 @@ function renderEditorForm(a) {
 
     <!-- Catalog -->
     <div class="card" style="margin-bottom:1.5rem">
-      <div class="editor-section-title">Catalog Content <span style="color:var(--text-faint);font-size:9px;letter-spacing:0.1em">ALL STATUSES</span></div>
-      <p style="font-size:12px;color:var(--text-faint);margin-bottom:1rem;line-height:1.6">These fields appear in the Ancestral Catalog regardless of status. Catalog Preview is the card summary. Catalog Full expands when the card is opened.</p>
+      <div class="editor-section-title">Catalog Content <span style="color:var(--text-faint);font-size:15px;letter-spacing:0.1em">ALL STATUSES</span></div>
+      <p style="font-size:15px;color:var(--text-faint);margin-bottom:1rem;line-height:1.6">These fields appear in the Ancestral Catalog regardless of status. Catalog Preview is the card summary. Catalog Full expands when the card is opened.</p>
       <div class="form-group">
-        <label class="form-label">Catalog Preview <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">1–2 sentences · appears on the card face</span></label>
+        <label class="form-label">Catalog Preview <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">1–2 sentences · appears on the card face</span></label>
         <textarea class="form-textarea" id="ed-catalog-preview" rows="3">${esc(a.catalog_preview)}</textarea>
       </div>
       <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Catalog Full <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">expanded record · shown when card is opened</span></label>
+        <label class="form-label">Catalog Full <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">expanded record · shown when card is opened</span></label>
         <textarea class="form-textarea" id="ed-catalog-full" rows="6">${esc(a.catalog_full)}</textarea>
       </div>
     </div>
 
     <!-- Layers -->
     <div class="card" style="margin-bottom:1.5rem;border-color:rgba(109,216,178,0.15)">
-      <div class="editor-section-title">Four Layers <span style="color:var(--teal);font-size:9px;letter-spacing:0.1em">WEAVING STATUS ONLY</span></div>
-      <p style="font-size:12px;color:var(--text-faint);margin-bottom:1.25rem;line-height:1.6">These passages appear in the Ancestral Weaving timeline and feed The Convergence. They are only displayed when Status is set to Weaving. Each layer corresponds to a register of the Navigation Map.</p>
+      <div class="editor-section-title">Four Layers <span style="color:var(--teal);font-size:15px;letter-spacing:0.1em">WEAVING STATUS ONLY</span></div>
+      <p style="font-size:15px;color:var(--text-faint);margin-bottom:1.25rem;line-height:1.6">These passages appear in the Ancestral Weaving timeline and feed The Convergence. They are only displayed when Status is set to Weaving. Each layer corresponds to a register of the Navigation Map.</p>
       <div class="form-group">
-        <label class="form-label">Terroir <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">somatic register · land, body, place, physical history</span></label>
+        <label class="form-label">Terroir <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">somatic register · land, body, place, physical history</span></label>
         <textarea class="form-textarea" id="ed-layer-terroir" rows="5">${esc(a.layer_terroir)}</textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">Unresolved <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">unreceived register · wound, compression, unnamed pattern</span></label>
+        <label class="form-label">Unresolved <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">unreceived register · wound, compression, unnamed pattern</span></label>
         <textarea class="form-textarea" id="ed-layer-unresolved" rows="5">${esc(a.layer_unresolved)}</textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">Thread <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">mythic register · signal carried forward · feeds The Convergence most heavily</span></label>
+        <label class="form-label">Thread <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">mythic register · signal carried forward · feeds The Convergence most heavily</span></label>
         <textarea class="form-textarea" id="ed-layer-thread" rows="5">${esc(a.layer_thread)}</textarea>
       </div>
       <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Lineage <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">conceptual register · transmission mechanism, Fieldguide fields activated</span></label>
+        <label class="form-label">Lineage <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">conceptual register · transmission mechanism, Fieldguide fields activated</span></label>
         <textarea class="form-textarea" id="ed-layer-lineage" rows="5">${esc(a.layer_lineage)}</textarea>
       </div>
     </div>
@@ -2210,14 +2193,14 @@ function renderEditorForm(a) {
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Sigil SVG <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">raw SVG code</span></label>
+        <label class="form-label">Sigil SVG <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">raw SVG code</span></label>
         <div class="sigil-preview-wrap">
           <div class="sigil-preview-box" id="ed-sigil-preview">${a.sigil_svg || ''}</div>
           <textarea class="form-textarea" id="ed-sigil-svg" rows="6" style="flex:1" oninput="updateSigilPreview(this.value)">${esc(a.sigil_svg)}</textarea>
         </div>
       </div>
       <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Sigil Image <span style="color:var(--text-faint);font-size:10px;text-transform:none;letter-spacing:0">upload a JPG/PNG image of a family crest or hand-drawn sigil</span></label>
+        <label class="form-label">Sigil Image <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">upload a JPG/PNG image of a family crest or hand-drawn sigil</span></label>
         <div class="upload-area" onclick="document.getElementById('ed-sigil-input').click()">
           <input type="file" id="ed-sigil-input" accept="image/jpeg,image/png,image/webp" onchange="handleAncestorUpload(this,'sigil')">
           <span class="upload-label">Click to upload — family crest, heraldic image, hand-drawn sigil</span>
@@ -2261,12 +2244,12 @@ function renderEditorForm(a) {
         </select>
         <button class="btn-chip-add" onclick="assignAncestorToClientEditor()">+ Assign</button>
       </div>
-      <div id="ed-client-msg" style="margin-top:0.5rem;font-size:13px"></div>
+      <div id="ed-client-msg" style="margin-top:0.5rem;font-size:15px"></div>
     </div>
 
     <!-- Save bar -->
     <div class="editor-save-bar">
-      <div id="ed-save-msg" style="font-size:13px"></div>
+      <div id="ed-save-msg" style="font-size:15px"></div>
       <button class="btn btn-outline" onclick="loadAncestorForEdit()">Discard Changes</button>
       <button class="btn btn-gold" onclick="saveAncestorEdits()">Save All Changes →</button>
     </div>
@@ -2298,7 +2281,7 @@ function renderEditorChips() {
   const el = document.getElementById('ed-chip-display');
   if (!el) return;
   if (!editorChips.length) {
-    el.innerHTML = '<span style="font-size:12px;color:var(--text-faint);font-style:italic">No tags assigned</span>';
+    el.innerHTML = '<span style="font-size:15px;color:var(--text-faint);font-style:italic">No tags assigned</span>';
     return;
   }
   el.innerHTML = editorChips.map((c, i) => `
@@ -2333,7 +2316,7 @@ function renderEditorClientChips() {
   const el = document.getElementById('ed-client-chips');
   if (!el) return;
   if (!editorClientAssignments.length) {
-    el.innerHTML = '<span style="font-size:12px;color:var(--text-faint);font-style:italic">Not assigned to any client</span>';
+    el.innerHTML = '<span style="font-size:15px;color:var(--text-faint);font-style:italic">Not assigned to any client</span>';
     return;
   }
   el.innerHTML = editorClientAssignments.map((ca, i) => `
