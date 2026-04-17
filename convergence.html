@@ -15,11 +15,11 @@
   --border-hover: rgba(180,155,100,0.28);
   --gold: #c9a87c;
   --gold-bright: #dfc090;
-  --gold-dim: rgba(201,168,124,0.35);
+  --gold-dim: rgba(201,168,124,0.7);
   --text: #ede8dc;
   --text-secondary: #c8c0b0;
-  --text-dim: #8a8478;
-  --text-faint: #4e4c46;
+  --text-dim: #b3aa9f;
+  --text-faint: #9a9088;
   --mythic: #c4bef8;
   --conceptual: #6dd8b2;
   --somatic: #f5aa88;
@@ -261,196 +261,6 @@ body::before {
   font-size: 1.1rem; font-style: italic; color: var(--text-dim);
 }
 
-/* ── PDF action bar ── */
-.pdf-bar {
-  display: flex; justify-content: center; gap: 1rem;
-  flex-wrap: wrap; margin-top: 2rem; padding-top: 2rem;
-  border-top: 1px solid var(--border);
-}
-.btn-pdf {
-  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  border-radius: 6px; padding: 10px 22px; cursor: pointer;
-  transition: all 0.2s; text-decoration: none; display: inline-block;
-}
-.btn-pdf-full {
-  color: var(--bg); background: var(--gold); border: 1px solid var(--gold);
-}
-.btn-pdf-full:hover { background: var(--gold-bright); border-color: var(--gold-bright); }
-.btn-pdf-summary {
-  color: var(--gold); background: none; border: 1px solid var(--gold-dim);
-}
-.btn-pdf-summary:hover { border-color: var(--gold); background: var(--accent); }
-.btn-regen {
-  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--text-dim); background: none;
-  border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;
-  padding: 10px 22px; cursor: pointer; transition: all 0.2s;
-}
-.btn-regen:hover { border-color: var(--border-hover); color: var(--text); }
-
-/* ── Summary modal ── */
-.summary-overlay {
-  position: fixed; inset: 0; z-index: 1000;
-  background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);
-  display: flex; align-items: flex-start; justify-content: center;
-  padding: 3rem 2rem; overflow-y: auto;
-}
-.summary-modal {
-  background: #fff; color: #1e1a12;
-  max-width: 720px; width: 100%;
-  border-radius: 4px; padding: 4rem;
-  font-family: 'Cormorant Garamond', serif;
-  position: relative;
-}
-.summary-modal-close {
-  position: absolute; top: 1.5rem; right: 1.5rem;
-  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: #6b5f48; background: none; border: 1px solid #d4c8b0;
-  border-radius: 4px; padding: 6px 14px; cursor: pointer;
-  transition: all 0.2s;
-}
-.summary-modal-close:hover { border-color: #9a6e22; color: #9a6e22; }
-.summary-modal-print {
-  position: absolute; top: 1.5rem; right: 8rem;
-  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: #1e1a12; background: #c9a87c; border: 1px solid #c9a87c;
-  border-radius: 4px; padding: 6px 14px; cursor: pointer;
-  transition: all 0.2s;
-}
-.summary-modal-print:hover { background: #dfc090; }
-.summary-eyebrow {
-  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
-  letter-spacing: 0.22em; text-transform: uppercase;
-  color: #9a6e22; margin-bottom: 0.75rem;
-}
-.summary-title {
-  font-size: 2.2rem; font-weight: 300; font-style: italic;
-  color: #1e1a12; line-height: 1; margin-bottom: 0.5rem;
-}
-.summary-subtitle {
-  font-size: 1rem; color: #6b5f48; margin-bottom: 0.5rem;
-}
-.summary-rule { width: 40px; height: 1px; background: #c9a87c; margin: 1.5rem 0; }
-.summary-freq-list {
-  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 300;
-  color: #6b5f48; letter-spacing: 0.06em;
-  margin-bottom: 2rem;
-}
-.summary-body {
-  font-size: 17px; font-weight: 300; line-height: 2;
-  color: #3d3628;
-}
-.summary-body p { margin-bottom: 1.25rem; }
-.summary-body p:last-child { margin-bottom: 0; }
-.summary-generating {
-  text-align: center; padding: 3rem 0;
-  font-style: italic; color: #6b5f48;
-}
-
-/* ── Print styles — full convergence ── */
-@page {
-  margin: 0.75in;
-  size: letter portrait;
-}
-
-@media print {
-  *, *::before, *::after {
-    opacity: 1 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    animation: none !important;
-    transition: none !important;
-  }
-  body { background: #fff !important; color: #000 !important; font-size: 15px !important; }
-  body::before, body::after { display: none !important; }
-
-  /* Contain everything within printable width */
-  html, body { width: 100% !important; overflow-x: hidden !important; }
-  .page {
-    width: 100% !important; max-width: 100% !important;
-    padding: 0 !important; margin: 0 !important;
-    overflow: hidden !important; box-sizing: border-box !important;
-  }
-  .convergence-output, .dominant-frequencies,
-  .snapshot-card, .convergence-section,
-  .section-title-bar, .section-body {
-    width: 100% !important; max-width: 100% !important;
-    box-sizing: border-box !important; overflow: hidden !important;
-  }
-  .freq-name { width: 150px !important; flex-shrink: 0 !important; }
-  .evidence-grid { display: none !important; }
-
-  .pdf-bar, .btn-generate, .generate-panel, .progress-wrap,
-  .header-nav-links, .summary-overlay, .nav-links { display: none !important; }
-
-  .page { padding: 0 !important; max-width: 100% !important; }
-
-  .header { margin-bottom: 1rem !important; opacity: 1 !important; }
-  .header-eyebrow { color: #9a6e22 !important; font-size: 10px !important; margin-bottom: 0.3rem !important; }
-  .header-title { color: #000 !important; font-size: 1.8rem !important; margin-bottom: 0.2rem !important; }
-  .header-subtitle { color: #333 !important; font-size: 12px !important; }
-  .header-sub { color: #333 !important; font-size: 12px !important; line-height: 1.5 !important; margin-bottom: 0.5rem !important; }
-  .header-rule { background: #c9a87c !important; margin: 0.6rem auto !important; }
-
-  .snapshot-card {
-    background: #f8f4ec !important; border: 1px solid #c9a87c !important;
-    padding: 0.6rem 0.9rem !important; margin-bottom: 1rem !important;
-    break-inside: avoid !important; gap: 0.5rem !important;
-  }
-  .snapshot-label { color: #9a6e22 !important; font-size: 9px !important; margin-bottom: 0.15rem !important; }
-  .snapshot-value { color: #000 !important; font-size: 13px !important; }
-
-  .dominant-frequencies { margin-bottom: 0.75rem !important; break-inside: avoid !important; }
-  .section-header { margin-bottom: 0.5rem !important; }
-  .section-header-label { color: #9a6e22 !important; font-size: 9px !important; }
-  .section-header-line { background: #c9a87c !important; opacity: 1 !important; }
-  .frequency-bar-row { margin-bottom: 0.3rem !important; }
-  .freq-name { color: #000 !important; font-size: 12px !important; width: 170px !important; }
-  .freq-count { color: #333 !important; font-size: 11px !important; }
-  .freq-bar-wrap { background: #e0d8cc !important; border: 1px solid #c9a87c !important; height: 5px !important; }
-  .freq-bar { background: #9a6e22 !important; min-width: 4px !important; display: block !important; height: 100% !important; }
-
-  .convergence-output { opacity: 1 !important; }
-  .convergence-section {
-    background: #fff !important; border: 1px solid #d4c8b0 !important;
-    margin-bottom: 0.6rem !important;
-  }
-  .section-title-bar {
-    background: #f8f4ec !important; border-bottom: 1px solid #d4c8b0 !important;
-    padding: 0.5rem 0.9rem !important;
-    break-after: avoid !important; page-break-after: avoid !important;
-  }
-  .section-glyph { color: #9a6e22 !important; font-size: 0.9rem !important; }
-  .section-type-label { color: #9a6e22 !important; font-size: 8px !important; margin-bottom: 0.1rem !important; }
-  .section-title { color: #000 !important; font-size: 1.1rem !important; line-height: 1.2 !important; }
-  .section-fieldguide-note { color: #333 !important; font-size: 11px !important; margin-top: 0.1rem !important; line-height: 1.4 !important; }
-  .section-body { padding: 0.6rem 0.9rem !important; }
-  .section-text { color: #000 !important; font-size: 13.5px !important; line-height: 1.65 !important; }
-  .section-text p { color: #000 !important; margin-bottom: 0.5rem !important; }
-
-  /* Hide evidence chips — they expand the document significantly */
-  .ancestor-evidence { display: none !important; }
-}
-
-/* ── Print styles — summary modal only ── */
-@media print {
-  .summary-overlay { display: none !important; }
-}
-.summary-overlay.printing {
-  position: static !important;
-  background: none !important;
-  backdrop-filter: none !important;
-  padding: 0 !important;
-}
-.summary-overlay.printing .summary-modal {
-  box-shadow: none !important;
-  border-radius: 0 !important;
-}
-
 @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulse { 0%, 100% { opacity: 0.88; } 50% { opacity: 1; } }
 
@@ -475,7 +285,6 @@ body::before {
       <a class="nav-link" href="index.html">Navigation Map</a>
       <a class="nav-link" href="ancestral-weaving.html">Ancestral Weaving</a>
       <a class="nav-link" href="fieldguide.html">The Fieldguide</a>
-      <a class="nav-link" href="portal.html">Portal</a>
     </div>
   </div>
 
@@ -486,23 +295,7 @@ body::before {
     </div>
   </div>
 
-<!-- ── Summary overlay ── -->
-<div class="summary-overlay" id="summary-overlay" style="display:none">
-  <div class="summary-modal" id="summary-modal">
-    <button class="summary-modal-print" onclick="printSummary()">Save PDF</button>
-    <button class="summary-modal-close" onclick="closeSummary()">Close</button>
-    <div class="summary-eyebrow">Christy Paxton Wade</div>
-    <div class="summary-title">The Convergence</div>
-    <div class="summary-subtitle" id="summary-subtitle"></div>
-    <div class="summary-rule"></div>
-    <div class="summary-freq-list" id="summary-freq-list"></div>
-    <div class="summary-body" id="summary-body">
-      <div class="summary-generating">Generating summary…</div>
-    </div>
-  </div>
 </div>
-
-</div><!-- end .page -->
 
 <script>
 const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
@@ -547,26 +340,20 @@ async function sbPatch(table, id, body) {
   if (!res.ok) throw new Error(`Supabase PATCH ${res.status}`);
 }
 
-// ── Claude API via Supabase Edge Function ──────────────────
+// ── Claude API helper ───────────────────────────────────────
 async function callClaude(systemPrompt, userMessage) {
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-convergence`, {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${SUPABASE_KEY}`
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      system_prompt: systemPrompt,
-      user_message: userMessage
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMessage }]
     })
   });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Generation failed: ${err}`);
-  }
   const data = await res.json();
-  if (data.error) throw new Error(data.error);
-  return data.text || '';
+  return data.content?.[0]?.text || '';
 }
 
 // ── Data loading ────────────────────────────────────────────
@@ -649,7 +436,7 @@ async function generateConvergence(clientData) {
   const [conv] = await sbPost('convergences', {
     client_id: client.id,
     title: `The Convergence — ${new Date().toLocaleDateString('en-US', {month:'long', year:'numeric'})}`,
-    status: 'draft',
+    status: 'generating',
     dominant_frequencies: topFreqs.map(([name]) => name),
     version: 1
   });
@@ -680,7 +467,7 @@ Write a single paragraph (150-180 words) that opens the document. Name the scope
   const snapshotText = await callClaude(SYSTEM, snapshotPrompt);
   const [snapSection] = await sbPost('convergence_sections', {
     convergence_id: conv.id,
-    section_type: 'pattern',
+    section_type: 'snapshot',
     title: 'The Lineage',
     ai_draft: snapshotText,
     final_text: snapshotText,
@@ -804,7 +591,7 @@ Write two paragraphs (total 250-300 words):
   const livingText = await callClaude(SYSTEM, livingPrompt);
   const [livingSection] = await sbPost('convergence_sections', {
     convergence_id: conv.id,
-    section_type: 'closing',
+    section_type: 'living_thread',
     title: 'The Living Thread',
     ai_draft: livingText,
     final_text: livingText,
@@ -814,7 +601,7 @@ Write two paragraphs (total 250-300 words):
   setProgress('living', 'done');
 
   // Update convergence status
-  await sbPatch('convergences', conv.id, { status: 'published' });
+  await sbPatch('convergences', conv.id, { status: 'complete' });
 
   return {
     ...conv,
@@ -873,7 +660,7 @@ function renderSnapshot(conv) {
 
 function renderSection(sec, freqAncestors) {
   const glyphs = {
-    pattern: '✦', frequency: '◈', unresolved: '◌', closing: '↑'
+    snapshot: '✦', frequency: '◈', unresolved: '◌', living_thread: '↑'
   };
   const glyph = glyphs[sec.section_type] || '·';
 
@@ -898,10 +685,10 @@ function renderSection(sec, freqAncestors) {
   }
 
   const typeLabels = {
-    pattern: 'The Lineage',
+    snapshot: 'The Lineage',
     frequency: 'Frequency Pattern',
     unresolved: 'Unresolved Thread',
-    closing: 'The Living Thread'
+    living_thread: 'The Living Thread'
   };
 
   const bodyText = (sec.final_text || sec.ai_draft || '')
@@ -951,10 +738,8 @@ function renderConvergence(conv, clientData) {
         <div class="section-header-line"></div>
       </div>
       ${sectionsHtml}
-      <div class="pdf-bar">
-        <button class="btn-pdf btn-pdf-full" onclick="window.print()">Save Full PDF</button>
-        <button class="btn-pdf btn-pdf-summary" onclick="openSummary()">Generate Summary PDF</button>
-        <button class="btn-regen" onclick="startGeneration()">Regenerate</button>
+      <div class="regen-bar">
+        <button class="btn-regen" onclick="startGeneration()">Regenerate Convergence</button>
       </div>
     </div>`;
 }
@@ -1037,163 +822,6 @@ async function init() {
       <p>${err.message}</p>
     </div>`;
   }
-}
-
-// ── Summary ─────────────────────────────────────────────────
-let summaryGenerated = false;
-
-async function openSummary() {
-  document.getElementById('summary-overlay').style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-
-  if (summaryGenerated) return;
-
-  // Populate metadata
-  if (globalClientData) {
-    const years = globalClientData.ancestors
-      .map(a => a.sort_year).filter(Boolean).sort((a,b) => a-b);
-    const span = years.length
-      ? `${Math.abs(years[0])} ${years[0]<0?'BCE':'CE'} — ${years[years.length-1]} CE`
-      : '';
-    document.getElementById('summary-subtitle').textContent =
-      `${globalClientData.ancestors.length} ancestors · ${span}`;
-    document.getElementById('summary-freq-list').textContent =
-      'Dominant frequencies: ' + (globalClientData.sortedFreqs || [])
-        .slice(0,5).map(([n])=>n).join(' · ');
-  }
-
-  // Check for existing summary section
-  try {
-    if (globalClientData) {
-      const existing = await sb(
-        `convergence_sections?convergence_id=eq.${await getLatestConvergenceId()}&title=eq.Summary&limit=1`
-      );
-      if (existing.length && existing[0].final_text) {
-        renderSummaryText(existing[0].final_text);
-        summaryGenerated = true;
-        return;
-      }
-    }
-
-    // Generate new summary
-    await generateSummary();
-    summaryGenerated = true;
-  } catch(err) {
-    document.getElementById('summary-body').innerHTML =
-      `<p style="color:#c07060">${err.message}</p>`;
-  }
-}
-
-async function getLatestConvergenceId() {
-  if (!globalClientData) throw new Error('No client data');
-  const convs = await sb(
-    `convergences?client_id=eq.${globalClientData.client.id}&order=created_at.desc&limit=1`
-  );
-  if (!convs.length) throw new Error('No convergence found');
-  return convs[0].id;
-}
-
-async function generateSummary() {
-  const convId = await getLatestConvergenceId();
-  const sections = await sb(
-    `convergence_sections?convergence_id=eq.${convId}&order=sort_order.asc`
-  );
-
-  const fullText = sections
-    .filter(s => s.final_text || s.ai_draft)
-    .map(s => `## ${s.title}\n${s.final_text || s.ai_draft}`)
-    .join('\n\n');
-
-  const topFreqs = (globalClientData?.sortedFreqs || [])
-    .slice(0,5).map(([n])=>n).join(', ');
-
-  const summaryPrompt = `You are writing a two-page executive summary of The Convergence — a complete ancestral frequency analysis — for ${CLIENT_NAME}.
-
-The full analysis follows. Compress it into a summary of approximately 600 words across four short sections:
-
-1. THE LINEAGE (2–3 sentences): Who is in this archive. The temporal and geographic scope. What this lineage held.
-2. THE DOMINANT PATTERN (3–4 sentences): The single most defining frequency across the weaving. What it looks like. What it has demanded of its carriers.
-3. WHAT HAS BEEN HELD (3–4 sentences): The primary unresolved thread. What has been passed forward in the body, waiting.
-4. THE LIVING THREAD (3–4 sentences): What ${CLIENT_NAME} is positioned to do with what she carries. What the lineage has been preparing. One closing sentence.
-
-Write in the same voice as the full analysis. Dense, grounded, no preamble.
-
-FULL CONVERGENCE:
-${fullText.slice(0, 6000)}`;
-
-  const summaryText = await callClaude(
-    `You are summarising The Convergence for ${CLIENT_NAME}. Precise, embodied, mythically grounded voice. Four clearly separated sections. No bullet points.`,
-    summaryPrompt
-  );
-
-  // Store as a convergence section
-  await sbPost('convergence_sections', {
-    convergence_id: convId,
-    section_type: 'pattern',
-    title: 'Summary',
-    ai_draft: summaryText,
-    final_text: summaryText,
-    sort_order: 99
-  });
-
-  renderSummaryText(summaryText);
-}
-
-function renderSummaryText(text) {
-  const html = text.split('\n\n').filter(Boolean)
-    .map(p => {
-      // Style section headers
-      if (p.startsWith('##') || p.match(/^[A-Z][A-Z\s]+$/)) {
-        const label = p.replace(/^#+\s*/, '').trim();
-        return `<p style="font-family:'Jost',sans-serif;font-size:15px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:#9a6e22;margin-bottom:0.25rem;margin-top:1.5rem">${label}</p>`;
-      }
-      return `<p>${p.trim()}</p>`;
-    }).join('');
-  document.getElementById('summary-body').innerHTML = html;
-}
-
-function closeSummary() {
-  document.getElementById('summary-overlay').style.display = 'none';
-  document.body.style.overflow = '';
-}
-
-function printSummary() {
-  const modal = document.getElementById('summary-modal');
-  const win = window.open('', '_blank', 'width=800,height=900');
-  win.document.write(`<!DOCTYPE html><html><head>
-    <meta charset="UTF-8">
-    <title>The Convergence — Summary</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-    <style>
-      body { font-family: 'Cormorant Garamond', serif; font-size: 17px;
-        color: #1e1a12; padding: 3rem 4rem; max-width: 720px; margin: 0 auto;
-        font-weight: 300; line-height: 2; }
-      .eyebrow { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
-        letter-spacing: 0.22em; text-transform: uppercase; color: #9a6e22; margin-bottom: 0.5rem; }
-      h1 { font-size: 2.2rem; font-weight: 300; font-style: italic;
-        color: #1e1a12; line-height: 1; margin-bottom: 0.4rem; }
-      .subtitle { font-size: 1rem; color: #6b5f48; margin-bottom: 0.4rem; }
-      .freq { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 300;
-        color: #6b5f48; letter-spacing: 0.06em; margin-bottom: 1.5rem; }
-      hr { border: none; border-top: 1px solid #c9a87c; width: 40px;
-        margin: 1.25rem 0; }
-      p { margin-bottom: 1rem; color: #3d3628; }
-      .section-head { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500;
-        letter-spacing: 0.16em; text-transform: uppercase; color: #9a6e22;
-        margin-top: 1.5rem; margin-bottom: 0.2rem; }
-    </style>
-  </head><body>
-    <div class="eyebrow">Christy Paxton Wade</div>
-    <h1>The Convergence</h1>
-    <div class="subtitle">${document.getElementById('summary-subtitle').textContent}</div>
-    <div class="freq">${document.getElementById('summary-freq-list').textContent}</div>
-    <hr>
-    ${document.getElementById('summary-body').innerHTML
-      .replace(/style="[^"]*color:#9a6e22[^"]*"/g, 'class="section-head"')}
-  </body></html>`);
-  win.document.close();
-  win.focus();
-  setTimeout(() => { win.print(); }, 800);
 }
 
 init();
