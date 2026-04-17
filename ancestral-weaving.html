@@ -36,7 +36,7 @@ html { scroll-behavior: smooth; }
   width: 180px; height: 180px;
   filter: invert(1) sepia(1) saturate(2.5) hue-rotate(8deg) brightness(0.88);
   mix-blend-mode: screen;
-  Noneopacity: 0.88;
+  opacity: 0.88;
   transition: opacity 0.4s;
 }
 .triquetra-img:hover { opacity: 1; }
@@ -113,11 +113,11 @@ body::before {
   color: var(--text-secondary); letter-spacing: 0.04em;
 }
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.legend-dot.terroir    { background: var(--gold); Noneopacity: 0.88; }
-.legend-dot.unresolved { background: var(--somatic); Noneopacity: 0.88; }
-.legend-dot.thread     { background: var(--mythic); Noneopacity: 0.88; }
-.legend-dot.lineage    { background: var(--conceptual); Noneopacity: 0.88; }
-.legend-dot.sigil      { background: var(--gold-bright); Noneopacity: 0.88; }
+.legend-dot.terroir    { background: var(--gold); opacity: 0.88; }
+.legend-dot.unresolved { background: var(--somatic); opacity: 0.88; }
+.legend-dot.thread     { background: var(--mythic); opacity: 0.88; }
+.legend-dot.lineage    { background: var(--conceptual); opacity: 0.88; }
+.legend-dot.sigil      { background: var(--gold-bright); opacity: 0.88; }
 
 /* Timeline */
 .timeline { position: relative; padding-left: 3rem; }
@@ -136,7 +136,7 @@ body::before {
   content: ''; position: absolute;
   left: -3rem; top: 1.6rem;
   width: 9px; height: 9px; border-radius: 50%;
-  background: var(--gold); Noneopacity: 0.88;
+  background: var(--gold); opacity: 0.88;
   transform: translateX(-4px);
 }
 .ancestor-date {
@@ -364,7 +364,7 @@ body::before {
   <h1 class="header-title">The Ancestral Weaving</h1>
   <div class="header-rule"></div>
   <p class="header-sub">A living archive of blood lineage — each ancestor grounded in their terroir, their unresolved patterns witnessed with truth and innerstanding, their threads woven forward into the present.</p>
-  <p class="header-sub" style="margin-top:0.75rem; font-size: 15px; Noneopacity: 0.88;">This is not a single thread. These ancestors arrive from many separate branches of the lineage — Celtic, Norse, Norman, Breton, Gaelic, Scottish, Welsh, American — each from their own direction, through their own century, along their own route. They do not all connect to each other. They connect to the same living descendant from entirely different directions, converging in one body the way rivers converge at a delta. The weaving holds the convergence. The genealogical chart holds the individual lines. These are not the same document.</p>
+  <p class="header-sub" style="margin-top:0.75rem; font-size: 15px; opacity: 0.88;">This is not a single thread. These ancestors arrive from many separate branches of the lineage — Celtic, Norse, Norman, Breton, Gaelic, Scottish, Welsh, American — each from their own direction, through their own century, along their own route. They do not all connect to each other. They connect to the same living descendant from entirely different directions, converging in one body the way rivers converge at a delta. The weaving holds the convergence. The genealogical chart holds the individual lines. These are not the same document.</p>
   <p class="triquetra-note">The Druidic triquetra on the left shoulder — land, sea, sky; past, present, future; maiden, mother, crone — is carried in the body as a living sigil of this weaving.</p>
   <a href="index.html" class="header-link">← Navigation Map</a>
   <a href="fieldguide.html" class="header-link">Fieldguide ↗</a>
@@ -386,7 +386,7 @@ body::before {
 
 <div class="timeline" id="weaving-timeline">
   <div class="loading-state" style="text-align:center;padding:6rem 2rem;opacity:0;animation:fadeUp 0.6s ease 0.2s forwards">
-    <span style="font-size:1.8rem;color:var(--gold);Noneopacity: 0.88;display:block;margin-bottom:1.25rem;animation:none">✦</span>
+    <span style="font-size:1.8rem;color:var(--gold);opacity: 0.88;display:block;margin-bottom:1.25rem;animation:none">✦</span>
     <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-style:italic;color:var(--text-dim)">Gathering the threads…</div>
   </div>
 </div>
@@ -420,13 +420,8 @@ const ERA_GROUPS = [
 ];
 
 async function supabaseFetch(path) {
-  const sep = path.includes('?') ? '&' : '?';
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}${sep}limit=2000`, {
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Prefer': 'count=none'
-    }
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
   });
   if (!res.ok) throw new Error(`Supabase error ${res.status}`);
   return res.json();
@@ -447,7 +442,7 @@ function renderLayer(layer, a) {
             ${a.sigil_description ? `<div class="sigil-text">${a.sigil_description}</div>` : ''}
           </div>
         </div>`
-      : `<div class="layer-text" style="font-style:italic;Noneopacity: 0.88;font-size: 15px">Sigil pending migration.</div>`;
+      : `<div class="layer-text" style="font-style:italic;opacity: 0.88;font-size: 15px">Sigil pending migration.</div>`;
     return `<div class="layer ${layer.cls}">
       <div class="layer-label"><span class="layer-label-dot"></span>${layer.label}</div>
       ${content}
@@ -456,7 +451,7 @@ function renderLayer(layer, a) {
   const value = a[layer.key];
   const text = value
     ? `<div class="layer-text">${value}</div>`
-    : `<div class="layer-text" style="font-style:italic;Noneopacity: 0.88;font-size: 15px">Content pending migration.</div>`;
+    : `<div class="layer-text" style="font-style:italic;opacity: 0.88;font-size: 15px">Content pending migration.</div>`;
   return `<div class="layer ${layer.cls}">
     <div class="layer-label"><span class="layer-label-dot"></span>${layer.label}</div>
     ${text}
@@ -498,20 +493,14 @@ function renderAncestor(a, freqTags, i) {
 async function init() {
   const timeline = document.getElementById('weaving-timeline');
   try {
-    const [ancestors, freqRows, tagRows] = await Promise.all([
+    const [ancestors, freqRows] = await Promise.all([
       supabaseFetch('ancestors?select=*&order=sort_year.asc'),
-      supabaseFetch('ancestor_frequencies?select=ancestor_id,frequency_tag_id,strength').catch(() => []),
-      supabaseFetch('frequency_tags?select=id,name,type').catch(() => [])
+      supabaseFetch('ancestor_frequencies?select=ancestor_id,frequency_tags(name)').catch(() => [])
     ]);
 
-    // Build tag lookup: id → name
-    const tagById = {};
-    tagRows.forEach(t => { tagById[t.id] = t.name; });
-
-    // Build freqMap: ancestor_id → [tag names]
     const freqMap = {};
     freqRows.forEach(r => {
-      const name = tagById[r.frequency_tag_id];
+      const name = r.frequency_tags?.name;
       if (!name) return;
       if (!freqMap[r.ancestor_id]) freqMap[r.ancestor_id] = [];
       freqMap[r.ancestor_id].push(name);
@@ -545,7 +534,7 @@ async function init() {
   } catch (err) {
     timeline.innerHTML = `<div style="text-align:center;padding:4rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:#c07060">
       <p>The weaving could not be retrieved.</p>
-      <p style="font-size: 15px;margin-top:0.5rem;opacity:0.88">${err.message}</p>
+      <p style="font-size: 15px;margin-top:0.5rem;opacity: 0.88">${err.message}</p>
     </div>`;
   }
 }
