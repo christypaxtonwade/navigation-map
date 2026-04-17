@@ -60,13 +60,7 @@ body::before {
 .header-link { font-size: 15px; font-weight: 400; color: var(--gold); letter-spacing: 0.08em; text-decoration: none; border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px; transition: color 0.2s, border-color 0.2s; }
 .header-link:hover { color: #dfc090; border-color: var(--gold); }
 
-/* ── View Toggle ── */
-.view-toggle { display: flex; justify-content: center; margin-bottom: 2.5rem; opacity: 0; animation: fadeUp 0.9s ease 0.08s forwards; }
-.toggle-btn { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400; letter-spacing: 0.1em; padding: 11px 36px; border: 1px solid var(--border-hover); background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.25s; }
-.toggle-btn:first-child { border-radius: 24px 0 0 24px; border-right: none; }
-.toggle-btn:last-child  { border-radius: 0 24px 24px 0; }
-.toggle-btn.active { background: var(--gold); color: #09090f; border-color: var(--gold); font-weight: 500; }
-.toggle-btn:not(.active):hover { border-color: var(--gold-dim); color: var(--text); }
+/* ── (toggle removed — single integrated view) ── */
 
 /* ── Central axis ── */
 .axis-card {
@@ -76,7 +70,7 @@ body::before {
   opacity: 0; animation: fadeUp 0.9s ease 0.15s forwards;
   transition: border-color 0.4s;
 }
-body.astro-view .axis-card { border-color: rgba(212,168,76,0.22); }
+.axis-card { border-color: rgba(212,168,76,0.22); }
 .axis-card::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 320px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
 .axis-art  { padding: 2rem 3rem 0; }
 .axis-body { padding: 1.5rem 3rem 2.5rem; }
@@ -88,8 +82,7 @@ body.astro-view .axis-card { border-color: rgba(212,168,76,0.22); }
 .bird-name { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 500; color: var(--text); display: block; margin-bottom: 5px; }
 .bird-quality { font-size: 15px; font-weight: 300; color: var(--text-dim); letter-spacing: 0.06em; }
 .bird-divider { width: 1px; height: 42px; background: var(--border); flex-shrink: 0; }
-.astro-axis-note { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.5s ease, opacity 0.4s ease; border-top: 1px solid var(--astro-gold); margin-top: 0; }
-body.astro-view .astro-axis-note { max-height: 160px; opacity: 1; margin-top: 1.5rem; }
+.astro-axis-note { border-top: 1px solid var(--astro-gold); margin-top: 1.5rem; }
 .astro-axis-inner { padding: 1.25rem 0 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .astro-axis-glyphs { font-size: 1.8rem; color: var(--gold); letter-spacing: 0.15em; }
 .astro-axis-label { font-size: 15px; color: var(--text-secondary); letter-spacing: 0.07em; }
@@ -209,8 +202,7 @@ body.astro-view .astro-axis-note { max-height: 160px; opacity: 1; margin-top: 1.
 }
 
 /* ── Astro panel ── */
-.astro-panel { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.45s ease, opacity 0.4s ease; border-top: 1px solid var(--astro-gold); margin-top: 0; }
-body.astro-view .astro-panel { max-height: 200px; opacity: 1; margin-top: 1rem; }
+.astro-panel { border-top: 1px solid var(--astro-gold); margin-top: 1rem; }
 .astro-panel-inner { padding: 1rem 0 0; display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; }
 .astro-glyphs-block { flex-shrink: 0; }
 .astro-sign { font-size: 15px; font-weight: 500; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 3px; }
@@ -238,18 +230,7 @@ body.astro-view .astro-panel { max-height: 200px; opacity: 1; margin-top: 1rem; 
 .fieldguide-link { display: inline-block; font-size: 15px; color: var(--gold); text-decoration: none; letter-spacing: 0.06em; margin-top: 1rem; border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px; transition: color 0.2s; }
 .fieldguide-link:hover { color: #dfc090; }
 
-/* ── Aspects ── */
-.aspects-section { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.6s ease, opacity 0.5s ease; margin-bottom: 0; }
-body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom: 14px; }
-.aspects-header { text-align: center; font-size: 15px; letter-spacing: 0.16em; color: var(--gold); text-transform: uppercase; margin-bottom: 16px; padding-top: 4px; }
-.aspect-thread { background: var(--surface); border: 1px solid rgba(212,168,76,0.1); border-radius: 14px; padding: 1.4rem 2rem; margin-bottom: 10px; }
-.aspect-row { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 0.85rem; flex-wrap: wrap; }
-.aspect-from { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 500; color: var(--text); flex: 1; min-width: 160px; }
-.aspect-to { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 500; color: var(--text); flex: 1; text-align: right; min-width: 160px; }
-.aspect-center { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
-.aspect-glyph { font-size: 2rem; color: var(--gold); line-height: 1; }
-.aspect-name { font-size: 15px; color: var(--text-dim); letter-spacing: 0.07em; text-transform: uppercase; white-space: nowrap; }
-.aspect-description { font-size: 16px; font-style: italic; font-family: 'Cormorant Garamond', serif; color: var(--text-secondary); line-height: 1.85; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 0.85rem; }
+/* ── (aspects section removed — connective tissue lives in bridge_nodes / Fieldguide) ── */
 
 /* ── Footer ── */
 .map-footer { text-align: center; margin-top: 4rem; opacity: 0; animation: fadeUp 0.9s ease 2s forwards; }
@@ -271,8 +252,6 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
   .birds { flex-direction: column; }
   .bird-divider { width: 40px; height: 1px; }
   .axis-body, .axis-art { padding-left: 1.25rem; padding-right: 1.25rem; }
-  .aspect-from, .aspect-to { flex: 100%; text-align: left; }
-  .aspect-center { flex-direction: row; gap: 8px; margin: 4px 0; }
 }
 </style>
 </head>
@@ -293,10 +272,6 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
   </div>
 </header>
 
-<div class="view-toggle">
-  <button class="toggle-btn active" id="btn-spatial" onclick="setView('spatial')">Spatial</button>
-  <button class="toggle-btn" id="btn-astro" onclick="setView('astro')">Astrological</button>
-</div>
 
 <!-- Central axis -->
 <div class="axis-card">
@@ -431,7 +406,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
   </svg>
   <div class="card-body">
     <div class="card-top">
-      <div class="field-number-block"><span class="field-number">II</span><span class="field-numeral-sign">♆☊</span></div>
+      <div class="field-number-block"><span class="field-number">II</span><span class="field-numeral-sign">♆☊⚷</span></div>
       <div class="card-title-block">
         <div class="card-title">Anomalous Reception</div>
         <div class="card-tagline">Dissolution at the threshold of incarnation. The field pours in before the self has formed to filter it.</div>
@@ -441,8 +416,8 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
     <div class="card-elements">WOW signal · Telepathic awareness · Akashic records · Angels · Ancestors speaking · Spirit guides · Free will · Intuition · The discernment layer</div>
     <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
-      <div class="astro-glyphs-block"><div class="astro-sign">Pisces</div><div class="astro-planets">♆ ☊</div><div class="astro-rulers">Neptune · North Node</div></div>
-      <div class="astro-principle">Neptune's dissolution. The karmic direction set at the moment of arrival. What arrives that you did not generate — and the rigorous practice of knowing the difference between reception and projection.</div>
+      <div class="astro-glyphs-block"><div class="astro-sign">Pisces</div><div class="astro-planets">♆ ☊ ⚷</div><div class="astro-rulers">Neptune · North Node · Chiron</div></div>
+      <div class="astro-principle">Neptune's dissolution at the crown. The karmic direction set at the moment of arrival. Chiron's wound is the break in the personal field that allows reception to enter. What arrives that you did not generate — and the rigorous practice of knowing the difference between genuine reception and projection.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
       <div class="reg-item reg-item-mythic"><div class="reg-label"><span class="reg-label-dot"></span>Mythic</div><div class="reg-text">The 72-second signal that arrived once and was never repeated. Every tradition names the messengers differently. The function is consistent: something arrives from beyond the personal field with specific intelligence that was not generated here.</div></div>
@@ -475,18 +450,18 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
   </svg>
   <div class="card-body">
     <div class="card-top">
-      <div class="field-number-block"><span class="field-number">III</span><span class="field-numeral-sign">♈♓</span></div>
+      <div class="field-number-block"><span class="field-number">III</span><span class="field-numeral-sign">♇☋</span></div>
       <div class="card-title-block">
         <div class="card-title">Threshold Events</div>
-        <div class="card-tagline">Endings and beginnings as the same crossing. Aries erupts through. Pisces dissolves into. The portal lives between them.</div>
+        <div class="card-tagline">The crossing point between worlds. Pluto opens the threshold. The South Node carries the karmic inheritance that determines which thresholds a life will meet.</div>
       </div>
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">Dream state · Astral travel · Breathwork visions · Meditation · Time travel · Memory · Photographs as portals · Ancestral visits · Portals · Quantum leaping · Sovereign descent · Inanna's descent</div>
     <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
-      <div class="astro-glyphs-block"><div class="astro-sign">Aries · Pisces</div><div class="astro-planets">♈ ♓</div><div class="astro-rulers">Mars erupts · Neptune dissolves</div></div>
-      <div class="astro-principle">Birth and death as the same threshold. The portal lives between the eruption and the dissolution — in the place where one thing has ended and another has not yet begun.</div>
+      <div class="astro-glyphs-block"><div class="astro-sign">Scorpio</div><div class="astro-planets">♇ ☋</div><div class="astro-rulers">Pluto · South Node</div></div>
+      <div class="astro-principle">Pluto at the abyss — the crossing point between the known and the underworld. The South Node carries the karmic inheritance that determines which thresholds a life will cross. Every threshold event is both personal and ancestral: the crossing you make was prepared by crossings made before you.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
       <div class="reg-item reg-item-mythic"><div class="reg-label"><span class="reg-label-dot"></span>Mythic</div><div class="reg-text">Inanna descends through seven gates, surrendering one garment at each threshold — naked before the underworld queen, her own dark sister. The Sovereign Descent as the mythic template for all threshold work: you go down because something essential is there.</div></div>
@@ -516,18 +491,18 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
   </svg>
   <div class="card-body">
     <div class="card-top">
-      <div class="field-number-block"><span class="field-number">IV</span><span class="field-numeral-sign">♀♁</span></div>
+      <div class="field-number-block"><span class="field-number">IV</span><span class="field-numeral-sign">☽♀</span></div>
       <div class="card-title-block">
         <div class="card-title">Embodied Signal</div>
-        <div class="card-tagline">The body settling into earth after the first crossing. Learning to read what the physical world is actually transmitting.</div>
+        <div class="card-tagline">The receptive body. The Moon governs what the body knows before the mind arrives. Venus governs what the senses transmit. Beauty and signal as the same phenomenon.</div>
       </div>
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">Ravens · Goldfinch · Wren · Wings · Saltwater · Minerals · Crystals · Wind currents · Ocean currents · Vibration · Resonance</div>
     <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
-      <div class="astro-glyphs-block"><div class="astro-sign">Taurus</div><div class="astro-planets">♀ ♁</div><div class="astro-rulers">Venus · Earth</div></div>
-      <div class="astro-principle">The first stable ground after the descent. The senses awakening, learning what the physical world is actually transmitting. Beauty and signal as the same phenomenon.</div>
+      <div class="astro-glyphs-block"><div class="astro-sign">Cancer · Taurus</div><div class="astro-planets">☽ ♀</div><div class="astro-rulers">Moon + Venus — the receptive body</div></div>
+      <div class="astro-principle">The Moon governs the interior: what the body knows before the mind arrives. Venus governs what the senses transmit: beauty as information, texture as data, the physical world speaking in frequencies the rational mind cannot decode. Cancer and Taurus hold the two legs of embodied reception — the interior tidal body and the sensual ground.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
       <div class="reg-item reg-item-mythic"><div class="reg-label"><span class="reg-label-dot"></span>Mythic</div><div class="reg-text">The bird that appears at the significant moment is not symbol — it is presence. Raven: Odin's eye, threshold intelligence. Goldfinch: soul-bird, the Passion held lightly. Wren: smallest bird, won by hiding in the eagle. Each creature is a sovereign intelligence with its own frequency.</div></div>
@@ -551,18 +526,18 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
   </svg>
   <div class="card-body">
     <div class="card-top">
-      <div class="field-number-block"><span class="field-number">V</span><span class="field-numeral-sign">☿♊</span></div>
+      <div class="field-number-block"><span class="field-number">V</span><span class="field-numeral-sign">☿♃</span></div>
       <div class="card-title-block">
         <div class="card-title">Resonance in Language</div>
-        <div class="card-tagline">Mercury's swift transmission. The word arriving in the sign of duality. The three registers as the three ways Gemini moves.</div>
+        <div class="card-tagline">The messenger and the meaning-maker. Mercury's swift naming and Jupiter's expansive transmission — the Gemini–Sagittarius axis held within a single Field.</div>
       </div>
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">The three registers · Signal · Frequency · Compression · Descent · Emergence · Mirror · Container · Threshold · Teaching · Mentorship · Writing · Conversation</div>
     <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
-      <div class="astro-glyphs-block"><div class="astro-sign">Gemini</div><div class="astro-planets">☿ ♊</div><div class="astro-rulers">Mercury · The Twin Registers</div></div>
-      <div class="astro-principle">The word arriving in the sign of duality and swift transmission. Language as the first tool the embodied self reaches for to make sense of the signals it is receiving.</div>
+      <div class="astro-glyphs-block"><div class="astro-sign">Gemini · Sagittarius</div><div class="astro-planets">☿ ♃</div><div class="astro-rulers">Mercury + Jupiter — the axis of meaning</div></div>
+      <div class="astro-principle">This Field holds both legs of the mutable air-fire axis: Gemini's swift naming and Sagittarius's expansive transmission. Language as the first tool the embodied self reaches for, and wisdom as what language becomes when it has been carried far enough. The double rulership is structural — this is the only Field that holds an entire polarity axis within itself.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
       <div class="reg-item reg-item-mythic"><div class="reg-label"><span class="reg-label-dot"></span>Mythic</div><div class="reg-text">The word that creates the field it names. A sentence can be a portal if it is true enough. The vocabulary of this map — signal, frequency, compression, descent, emergence, mirror, container, threshold — is load-bearing structure, not metaphor.</div></div>
@@ -671,8 +646,8 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
   <div class="arc-label-inner">
     <div class="arc-rule"></div>
     <span class="arc-text">The Underworld</span>
-    <span class="arc-glyph">♎ ♏</span>
-    <span class="arc-text">Scorpio · Virgo · Fields VIII – X</span>
+    <span class="arc-glyph">☿ ♀ ♇</span>
+    <span class="arc-text">Virgo · Libra · Scorpio · Fields VIII – X</span>
     <div class="arc-rule"></div>
   </div>
 </div>
@@ -701,18 +676,18 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
   </svg>
   <div class="card-body">
     <div class="card-top">
-      <div class="field-number-block"><span class="field-number">VIII</span><span class="field-numeral-sign">☿♍</span></div>
+      <div class="field-number-block"><span class="field-number">VIII</span><span class="field-numeral-sign">☿♍♊</span></div>
       <div class="card-title-block">
         <div class="card-title">Animal and Nature Medicine</div>
-        <div class="card-tagline">Precise healing intelligence. Service and the body in right relationship with all living things. Virgo's discernment applied to the non-human world.</div>
+        <div class="card-tagline">Mercury as Hermes — the psychopomp between human and non-human worlds. Virgo's healing discernment. Gemini's swift translation between species.</div>
       </div>
       <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
     </div>
     <div class="card-elements">Lion · Owl · Butterfly · Dragon · Hummingbird · Snake · Bear · Turtle · Dolphin · Whale · Wolf · Cat · Dog · Fish · Plant medicine · Trees · Mushrooms · Gardens · Hiking · Bodies of water · Travel</div>
     <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
-      <div class="astro-glyphs-block"><div class="astro-sign">Virgo</div><div class="astro-planets">☿ ♍</div><div class="astro-rulers">Mercury · The discerning healer</div></div>
-      <div class="astro-principle">Service, healing, and the precise intelligence of the plant and animal world. Virgo's exquisite discernment applied to the non-human — the midwife's hands, the herbalist's knowledge, the body in right relationship with all living things.</div>
+      <div class="astro-glyphs-block"><div class="astro-sign">Virgo · Gemini</div><div class="astro-planets">☿ ♍</div><div class="astro-rulers">Mercury as Hermes — the psychopomp</div></div>
+      <div class="astro-principle">Mercury as Hermes — the guide between worlds. In Field V Mercury names; in Field VIII Mercury translates between human and non-human intelligence. Virgo's healing discernment and Gemini's swift code-switching are the two faces of Mercury's underworld function. The midwife's hands, the herbalist's knowledge, the body in right relationship with all living things.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
       <div class="reg-item reg-item-mythic"><div class="reg-label"><span class="reg-label-dot"></span>Mythic</div><div class="reg-text">The non-human intelligence network. Trees as the oldest library, speaking through root and mycelium. Whale song as the earth's deepest memory. Dragon at the border of this field and Field I: the prophetic fire that exceeds every container built to hold it.</div></div>
@@ -925,7 +900,7 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
   </svg>
   <div class="card-body">
     <div class="card-top">
-      <div class="field-number-block"><span class="field-number">XIII</span><span class="field-numeral-sign">♆♓</span></div>
+      <div class="field-number-block"><span class="field-number">XIII</span><span class="field-numeral-sign">♃♆☊☋</span></div>
       <div class="card-title-block">
         <div class="card-title">The Return</div>
         <div class="card-tagline">Full circle to where Field II began — but now carrying everything. The same coordinates, transformed. The dissolution that is chosen rather than undergone. The spiral beginning again.</div>
@@ -935,8 +910,8 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
     <div class="card-elements">Dissolution back into the larger field · Integration · The cycle completing · The stowaway who has crossed the ocean and kneels on the shore · The spiral beginning again at a higher octave</div>
     <div class="subterrains"></div>
     <div class="astro-panel"><div class="astro-panel-inner">
-      <div class="astro-glyphs-block"><div class="astro-sign">Pisces</div><div class="astro-planets">♆ ♓</div><div class="astro-rulers">Neptune · The completion</div></div>
-      <div class="astro-principle">Full circle to where Field II began — but now carrying everything the journey gathered. The boundary between self and cosmos becomes permeable once more, but this time the self knows what it is before it dissolves. The dissolution is chosen.</div>
+      <div class="astro-glyphs-block"><div class="astro-sign">Pisces</div><div class="astro-planets">♃ ♆ ☊☋</div><div class="astro-rulers">Jupiter + Neptune + the nodal axis</div></div>
+      <div class="astro-principle">Jupiter's expansion carries the dissolution beyond private completion into something that feeds back into the world. The nodal axis closes the karmic loop: what the South Node carried as inheritance, the North Node has now aimed forward. The consciousness that knows itself before it dissolves. The spiral that does not close but opens.</div>
     </div></div>
     <div class="registers"><div class="registers-inner">
       <div class="reg-item reg-item-mythic"><div class="reg-label"><span class="reg-label-dot"></span>Mythic</div><div class="reg-text">Christina Young kneeling on the shore of the Salt Lake Valley after crossing the ocean with three pence and the plains with the Danish Saints. Inanna fully returned, wearing new garments, having completed the crossing that her parents began. The two fish of Pisces swim in opposite directions and are joined at the center: completion and beginning are the same moment.</div></div>
@@ -948,65 +923,6 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
   </div>
 </div>
 
-<!-- Aspects — astrological view only -->
-<div class="aspects-section">
-  <div class="aspects-header">Connective threads · The wheel turning</div>
-
-  <div class="aspect-thread">
-    <div class="aspect-row">
-      <span class="aspect-from">Field I — Structural Models</span>
-      <span class="aspect-center"><span class="aspect-glyph">□</span><span class="aspect-name">Square · 90°</span></span>
-      <span class="aspect-to">Field II — Anomalous Reception</span>
-    </div>
-    <div class="aspect-description">Productive friction between knowing the shape and receiving what has no shape yet. Saturn's geometry and Neptune's dissolution do not resolve — they generate. A Wrinkle in Time lives here: the book that gave you the word before you had the experience. Capricorn square Pisces — the structure that cannot hold the water, and the water that cannot hold the structure, and the necessity of both.</div>
-  </div>
-
-  <div class="aspect-thread">
-    <div class="aspect-row">
-      <span class="aspect-from">Field IV — Embodied Signal</span>
-      <span class="aspect-center"><span class="aspect-glyph">△</span><span class="aspect-name">Trine · 120°</span></span>
-      <span class="aspect-to">Field VI — Body as Active Practice</span>
-    </div>
-    <div class="aspect-description">The most natural flow in the descent arc. Receiving the signal and practicing with it are the same river moving in two directions. What the body receives involuntarily through embodied signal is activated and metabolized through intentional practice. Taurus and Cancer — earth and water — feeding each other continuously.</div>
-  </div>
-
-  <div class="aspect-thread">
-    <div class="aspect-row">
-      <span class="aspect-from">Field V — Resonance in Language</span>
-      <span class="aspect-center"><span class="aspect-glyph">☌</span><span class="aspect-name">Conjunction</span></span>
-      <span class="aspect-to">Field XI — The Teaching</span>
-    </div>
-    <div class="aspect-description">Fusion across the wheel. Language and transmission are the same act at different stages of development. Mercury in Gemini and Jupiter in Sagittarius — the word and the wisdom that knows how to aim it. What you found the words for in Field V becomes what you teach in Field XI. The conjunction that bridges the descent and the return.</div>
-  </div>
-
-  <div class="aspect-thread">
-    <div class="aspect-row">
-      <span class="aspect-from">Field VII — Creative Record</span>
-      <span class="aspect-center"><span class="aspect-glyph">⚹</span><span class="aspect-name">Sextile · 60°</span></span>
-      <span class="aspect-to">Field IX — The Mirror</span>
-    </div>
-    <div class="aspect-description">The creative act opens the relational field. What you make in Leo's sovereign fire becomes the thing that Libra offers to the other — the made thing as mirror, the artifact as the surface in which the receiver recognizes something they did not have words for. Leo and Libra: creation and relationship as the natural sequence of the mature self.</div>
-  </div>
-
-  <div class="aspect-thread">
-    <div class="aspect-row">
-      <span class="aspect-from">Field X — The Shadow</span>
-      <span class="aspect-center"><span class="aspect-glyph">□</span><span class="aspect-name">Square · 90°</span></span>
-      <span class="aspect-to">Field XII — Sovereignty</span>
-    </div>
-    <div class="aspect-description">The most necessary friction in the return arc. You cannot arrive at Sovereignty without passing through the Shadow — the square insists on this. Scorpio and Aquarius: the underworld intelligence and the revolutionary self. The shadow work does not produce sovereignty as a reward. It removes the obstacles that were preventing the sovereign from knowing itself.</div>
-  </div>
-
-  <div class="aspect-thread">
-    <div class="aspect-row">
-      <span class="aspect-from">Field I — Structural Models</span>
-      <span class="aspect-center"><span class="aspect-glyph">↺</span><span class="aspect-name">The Spiral</span></span>
-      <span class="aspect-to">Field XII — Sovereignty</span>
-    </div>
-    <div class="aspect-description">Not an aspect but a return. Both fields sit in Capricorn and Aquarius. Field I is the geometry imposed from outside — the architecture of the soul's chosen curriculum before the first breath. Field XII is the same geometry, now chosen from within. The wheel does not close in a circle. It spirals. The coordinates are the same. The consciousness inhabiting them is transformed.</div>
-  </div>
-
-</div>
 
 <div class="map-footer">
   <div class="footer-rule"></div>
@@ -1021,11 +937,6 @@ body.astro-view .aspects-section { max-height: 5000px; opacity: 1; margin-bottom
 
 </div>
 <script>
-function setView(view) {
-  document.body.classList.toggle('astro-view', view === 'astro');
-  document.getElementById('btn-spatial').classList.toggle('active', view === 'spatial');
-  document.getElementById('btn-astro').classList.toggle('active', view === 'astro');
-}
 function toggle(card) {
   var regs = card.querySelector('.registers');
   var isOpen = regs.classList.contains('open');
