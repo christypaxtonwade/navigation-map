@@ -15,11 +15,12 @@
   --border: rgba(201,168,76,0.12);
   --border-hover: rgba(201,168,76,0.26);
   --gold: #d4a84c;
-  --gold-dim: rgba(212,168,76,0.4);
+  --gold-dim: rgba(212,168,76,0.7);
   --gold-wash: rgba(212,168,76,0.06);
   --text: #f2eedd;
   --text-secondary: #ccc4b4;
-  --text-dim: #9a948e;
+  --text-dim: #b3aa9f;
+  --text-faint: #9a9088;
   --tag-bg: rgba(212,168,76,0.1);
   --tag-border: rgba(212,168,76,0.22);
   --weaving-bg: rgba(109,216,178,0.08);
@@ -224,7 +225,7 @@ body::before {
   opacity: 0; animation: fadeUp 0.6s ease 0.2s forwards;
 }
 .loading-glyph {
-  font-size: 1.8rem; color: var(--gold); Noneopacity: 0.88;
+  font-size: 1.8rem; color: var(--gold); opacity: 0.88;
   margin-bottom: 1.25rem; display: block;
   animation: pulse 2s ease-in-out infinite;
 }
@@ -237,7 +238,7 @@ body::before {
   font-family: 'Cormorant Garamond', serif;
   font-style: italic; color: #c07060;
 }
-@keyframes pulse { 0%, 100% { opacity: 0.88; } 50% { opacity: 1.0; } } 50% { Noneopacity: 0.88; } }
+@keyframes pulse { 0%, 100% { opacity: 0.88; } 50% { opacity: 1; } }
 .catalog-card.keynote-card { border-color: rgba(196,190,248,0.2); }
 .catalog-card.keynote-card:hover { border-color: rgba(196,190,248,0.38); }
 </style>
@@ -274,13 +275,8 @@ const ERA_BAR_CLASS = {
 };
 
 async function supabaseFetch(path) {
-  const sep = path.includes('?') ? '&' : '?';
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}${sep}limit=2000`, {
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Prefer': 'count=none'
-    }
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
   });
   if (!res.ok) throw new Error(`Supabase error ${res.status}`);
   return res.json();
@@ -343,6 +339,7 @@ function buildCard(ancestor, freqTags, index) {
     ancestor.location, ancestor.era, ancestor.catalog_preview, ...freqTags]
     .filter(Boolean).join(' ').toLowerCase();
 
+  const isKeynote  = ancestor.status === 'keynote';
   const weavingTag = inWeaving ? `<span class="tag tag-weaving">In Weaving \u2736</span>` : '';
   const freqHtml   = freqTags.map(t => `<span class="tag">${t}</span>`).join('');
 
@@ -357,7 +354,9 @@ function buildCard(ancestor, freqTags, index) {
     : `<div class="card-narrative-preview">${preview}</div>`;
 
   const card = document.createElement('div');
-  card.className = 'catalog-card' + (ancestor.status === 'margin' ? ' margin-ancestor' : '');
+  card.className = 'catalog-card'
+    + (ancestor.status === 'margin' ? ' margin-ancestor' : '')
+    + (isKeynote ? ' keynote-card' : '');
   card.dataset.filterCat    = filterCat;
   card.dataset.weaving      = inWeaving ? 'true' : 'false';
   card.dataset.search       = searchParts;
@@ -368,8 +367,9 @@ function buildCard(ancestor, freqTags, index) {
   card.onclick = function() { toggleCard(this); };
 
   card.innerHTML = `
-    <div class="card-era-bar ${barClass}"></div>
+    <div class="${isKeynote ? 'keynote-era-bar' : `card-era-bar ${barClass}`}"></div>
     <div class="card-body">
+      ${isKeynote ? '<div><span class="keynote-label">Historical Keynote</span></div>' : ''}
       <div class="card-top">
         <div class="card-name">${ancestor.name || '\u2014'}</div>
         ${ancestor.dates ? `<div class="card-date">${ancestor.dates}</div>` : ''}
@@ -386,20 +386,14 @@ function buildCard(ancestor, freqTags, index) {
 async function init() {
   const grid = document.getElementById('catalog-grid');
   try {
-    const [ancestors, freqRows, tagRows] = await Promise.all([
+    const [ancestors, freqRows] = await Promise.all([
       supabaseFetch('ancestors?select=*&order=sort_year.asc'),
-      supabaseFetch('ancestor_frequencies?select=ancestor_id,frequency_tag_id,strength').catch(() => []),
-      supabaseFetch('frequency_tags?select=id,name,type').catch(() => [])
+      supabaseFetch('ancestor_frequencies?select=ancestor_id,frequency_tags(name)').catch(() => [])
     ]);
 
-    // Build tag lookup: id → name
-    const tagById = {};
-    tagRows.forEach(t => { tagById[t.id] = t.name; });
-
-    // Build freqMap: ancestor_id → [tag names]
     const freqMap = {};
     freqRows.forEach(row => {
-      const name = tagById[row.frequency_tag_id];
+      const name = row.frequency_tags?.name;
       if (!name) return;
       if (!freqMap[row.ancestor_id]) freqMap[row.ancestor_id] = [];
       freqMap[row.ancestor_id].push(name);
@@ -414,7 +408,7 @@ async function init() {
   } catch (err) {
     grid.innerHTML = `<div class="error-state" style="grid-column:1/-1">
       <p>The catalog could not be retrieved.</p>
-      <p style="font-size: 15px;margin-top:0.5rem;opacity:0.88">${err.message}</p>
+      <p style="font-size: 15px;margin-top:0.5rem;opacity: 0.88">${err.message}</p>
     </div>`;
   }
 }
