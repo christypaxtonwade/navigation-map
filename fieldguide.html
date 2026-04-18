@@ -296,81 +296,51 @@ body::before {
 
 .field-header {
   display: grid;
-  grid-template-columns: 4.5rem 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 5rem 1fr;
+  gap: 1.75rem;
   align-items: start;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
   padding-bottom: 1.75rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px dashed var(--border);
 }
 
 .field-number-col {
   text-align: right;
-  padding-top: 0.2rem;
-}
-
-.field-number {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(2.8rem, 4vw, 3.8rem);
-  font-weight: 300; font-style: italic;
-  color: var(--gold-light);
-  line-height: 1;
-  display: block;
+  padding-top: 0.15rem;
 }
 
 .field-roman {
-  font-size: 15px; font-weight: 500;
-  letter-spacing: 0.22em; text-transform: uppercase;
-  color: var(--ink-faint); margin-bottom: 0.4rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.8rem, 4vw, 3.8rem);
+  font-weight: 400; font-style: italic;
+  color: var(--gold-bright);
+  line-height: 1;
   display: block;
+  letter-spacing: 0.02em;
 }
 
 .field-name {
   font-family: 'Cormorant Garamond', serif;
   font-size: clamp(1.8rem, 3vw, 2.5rem);
-  font-weight: 400; font-style: italic;
+  font-weight: 500; font-style: italic;
   color: var(--ink); line-height: 1.15;
-  margin-bottom: 0.6rem;
-}
-
-.field-tagline {
-  font-size: 16px; font-weight: 300;
-  color: var(--ink-dim); line-height: 1.8;
-  font-style: italic; margin-bottom: 0.75rem;
-  max-width: 72ch;
-}
-
-.field-rulers {
-  font-size: 15px; font-weight: 300;
-  color: var(--ink-faint); letter-spacing: 0.04em;
-  font-style: italic; margin-top: 0.4rem;
-}
-
-.field-astro {
-  display: flex; align-items: center;
-  gap: 0.75rem; flex-wrap: wrap;
-  margin-top: 0.5rem;
-}
-.field-planets { font-size: 1.2rem; letter-spacing: 0.15em; color: var(--gold); }
-.field-signs { font-size: 15px; font-weight: 400; letter-spacing: 0.12em; color: var(--ink-faint); }
-
-.field-astro-principle {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 17px; font-weight: 400;
-  color: var(--ink-secondary); line-height: 1.8;
-  font-style: italic;
-  margin-top: 0.9rem;
-  max-width: 72ch;
+  margin-bottom: 0.9rem;
 }
 
 .field-elements {
   font-family: 'Jost', sans-serif;
-  font-size: 15px; font-weight: 300;
-  color: var(--ink-faint); letter-spacing: 0.03em;
+  font-size: 15px; font-weight: 500;
+  color: var(--ink-dim); letter-spacing: 0.03em;
   line-height: 1.7;
-  margin-top: 1.1rem;
-  padding-top: 0.9rem;
-  border-top: 1px dashed var(--border);
+  margin-bottom: 0.9rem;
+  max-width: 78ch;
+}
+
+.field-tagline {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; font-weight: 400;
+  color: var(--ink-secondary); line-height: 1.85;
+  font-style: italic;
   max-width: 72ch;
 }
 
@@ -611,6 +581,7 @@ body::before {
   <div class="nav-inner" id="nav-inner">
     <div class="nav-site-links">
       <a class="nav-site-link" href="index.html">Map</a>
+      <a class="nav-site-link" href="astrological-correspondences.html">Sky</a>
       <a class="nav-site-link" href="ancestral-weaving.html">Weaving</a>
       <a class="nav-site-link" href="ancestral-catalog.html">Catalog</a>
     </div>
@@ -633,6 +604,7 @@ body::before {
     <p class="header-sub">Thirteen fields. Every subterrain illuminated across four registers. A guide to carry into the territory — where the map always exceeds itself, and the best discoveries happen in the margins.</p>
     <div class="header-nav-links">
       <a class="header-nav-link" href="index.html">Navigation Map</a>
+      <a class="header-nav-link" href="astrological-correspondences.html">Astrological Correspondences</a>
       <a class="header-nav-link" href="ancestral-weaving.html">Ancestral Weaving</a>
       <a class="header-nav-link" href="ancestral-catalog.html">Ancestral Catalog</a>
       <a class="header-nav-link" href="convergence.html">The Convergence</a>
@@ -716,18 +688,6 @@ function renderField(field, subterrains, passBySubt, isFirst) {
     renderSubterrain(st, passBySubt[st.id], isFirst && i === 0)
   ).join('');
 
-  const astroGlyphsHtml = (field.astro_planets || field.astro_signs) ? `
-    <div class="field-astro">
-      ${field.astro_planets ? `<span class="field-planets">${field.astro_planets}</span>` : ''}
-      ${field.astro_signs   ? `<span class="field-signs">${field.astro_signs}</span>` : ''}
-    </div>` : '';
-
-  const astroPrincipleHtml = field.astro_principle
-    ? `<p class="field-astro-principle">${field.astro_principle}</p>` : '';
-
-  const elementsHtml = field.elements
-    ? `<div class="field-elements">${field.elements}</div>` : '';
-
   // Field-level registers (3 cards: Mythic, Conceptual, Somatic)
   const fieldRegs = [
     field.register_mythic     ? { register:'mythic',     content:field.register_mythic }     : null,
@@ -743,8 +703,6 @@ function renderField(field, subterrains, passBySubt, isFirst) {
       </div>
     </div>` : '';
 
-  const rulersHtml = field.field_rulers
-    ? `<div class="field-rulers">${field.field_rulers}</div>` : '';
   const bridgeHtml = field.bridge_nodes ? `
     <div class="bridge-nodes">
       <div class="bridge-label">Bridge nodes — resonance across the map</div>
@@ -756,19 +714,17 @@ function renderField(field, subterrains, passBySubt, isFirst) {
       <p class="field-note-text">${field.field_note}</p>
     </div>` : '';
 
+  // Field identity: Roman → Name → Elements → Tagline → divider → 3 registers
+  // (Astrological correspondences live on astrological-correspondences.html)
   return `<div class="field-section" id="field-${field.number}">
     <div class="field-header">
       <div class="field-number-col">
-        <span class="field-number">${field.number}</span>
+        <span class="field-roman">${field.roman || ''}</span>
       </div>
       <div class="field-title-block">
-        <span class="field-roman">${field.roman || ''}</span>
         <h2 class="field-name">${field.name}</h2>
+        ${field.elements ? `<div class="field-elements">${field.elements}</div>` : ''}
         ${field.tagline ? `<p class="field-tagline">${field.tagline}</p>` : ''}
-        ${rulersHtml}
-        ${astroGlyphsHtml}
-        ${astroPrincipleHtml}
-        ${elementsHtml}
       </div>
     </div>
     ${fieldRegistersHtml}
