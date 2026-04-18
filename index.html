@@ -62,6 +62,51 @@ body::before {
 
 /* ── (toggle removed — single integrated view) ── */
 
+/* ── Map introduction ── */
+.map-intro {
+  text-align: center; margin-bottom: 3rem;
+  opacity: 0; animation: fadeUp 0.9s ease 0.1s forwards;
+}
+.map-intro-visual {
+  position: relative; margin: 0 auto 2rem; width: 160px; height: 160px;
+}
+.map-intro-text {
+  max-width: 680px; margin: 0 auto;
+  font-size: 17px; font-weight: 300; color: var(--text-secondary);
+  line-height: 1.95; font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+}
+.map-intro-text p { margin-bottom: 1.25rem; }
+.map-intro-text p:last-child { margin-bottom: 0; }
+
+/* ── Bridge nodes ── */
+.bridge-node {
+  border-top: 1px solid rgba(212,168,76,0.1);
+  margin-top: 1.25rem; padding-top: 1.25rem;
+}
+.bridge-node-label {
+  font-size: 13px; font-weight: 500; letter-spacing: 0.18em;
+  color: var(--gold); text-transform: uppercase; margin-bottom: 0.6rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.bridge-node-label::before {
+  content: ''; display: inline-block; width: 18px; height: 1px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+.bridge-node-text {
+  font-size: 15px; font-weight: 300; color: var(--text-dim);
+  line-height: 1.85; font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+}
+
+/* ── Subterrain descriptions ── */
+.subterrain-chip-desc {
+  font-size: 14px; font-weight: 300; color: var(--text-dim);
+  line-height: 1.65; margin-top: 4px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* ── Central axis ── */
 .axis-card {
   background: var(--surface); border: 1px solid var(--border);
@@ -97,12 +142,50 @@ body::before {
 .legend-dot.s { background: var(--somatic); opacity: 0.88; }
 .legend-dot.u { background: #9a6e22; opacity: 0.88; }
 
-/* ── Arc dividers ── */
-.arc-label { text-align: center; margin: 2.5rem 0 1.5rem; opacity: 0; animation: fadeUp 0.9s ease forwards; }
-.arc-label-inner { display: inline-flex; align-items: center; gap: 1rem; }
-.arc-rule { width: 80px; height: 1px; background: var(--border); }
-.arc-text { font-size: 15px; font-weight: 400; letter-spacing: 0.2em; color: var(--text-dim); text-transform: uppercase; }
-.arc-glyph { font-size: 16px; color: var(--gold); opacity: 0.88; }
+/* ── Arc dividers — distinct visual weight ── */
+.arc-label {
+  text-align: center; margin: 3rem 0 2rem;
+  opacity: 0; animation: fadeUp 0.9s ease forwards;
+}
+.arc-label-inner {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  padding: 1.5rem 3rem; border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  position: relative;
+}
+.arc-label-inner::before {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+.arc-label-inner::after {
+  content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+.arc-label-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem; font-weight: 400; font-style: italic;
+  letter-spacing: 0.05em;
+}
+.arc-label-sub {
+  font-size: 14px; font-weight: 300; letter-spacing: 0.12em;
+  color: var(--text-dim); text-transform: uppercase;
+}
+.arc-glyph {
+  font-size: 1.1rem; letter-spacing: 0.15em; margin-bottom: 0.15rem;
+}
+/* arc color coding */
+.arc-label.arc-descent .arc-label-title { color: var(--mythic); }
+.arc-label.arc-descent .arc-glyph { color: var(--mythic); opacity: 0.7; }
+.arc-label.arc-descent .arc-label-inner { border-color: rgba(196,190,248,0.15); background: rgba(196,190,248,0.03); }
+.arc-label.arc-underworld .arc-label-title { color: var(--somatic); }
+.arc-label.arc-underworld .arc-glyph { color: var(--somatic); opacity: 0.7; }
+.arc-label.arc-underworld .arc-label-inner { border-color: rgba(245,170,136,0.15); background: rgba(245,170,136,0.03); }
+.arc-label.arc-return .arc-label-title { color: var(--conceptual); }
+.arc-label.arc-return .arc-glyph { color: var(--conceptual); opacity: 0.7; }
+.arc-label.arc-return .arc-label-inner { border-color: rgba(109,216,178,0.15); background: rgba(109,216,178,0.03); }
 
 /* ── Field cards — FULL WIDTH ── */
 .field-card {
@@ -171,9 +254,9 @@ body::before {
   background: var(--gold-wash);
   border: 1px solid rgba(212,168,76,0.14);
   border-radius: 8px;
-  padding: 0.85rem 1.1rem;
+  padding: 1rem 1.2rem;
   text-decoration: none;
-  display: block;
+  display: flex; flex-direction: column;
   transition: background 0.2s, border-color 0.2s;
 }
 .subterrain-chip:hover {
@@ -245,6 +328,7 @@ body::before {
   .registers-inner { grid-template-columns: 1fr; }
   .card-body { padding: 1.4rem 1.5rem; }
   .astro-panel-inner { flex-direction: column; gap: 1rem; }
+  .arc-label-inner { padding: 1.25rem 2rem; }
 }
 @media (max-width: 640px) {
   .page { padding: 2.5rem 1.25rem 4rem; }
@@ -252,6 +336,10 @@ body::before {
   .birds { flex-direction: column; }
   .bird-divider { width: 40px; height: 1px; }
   .axis-body, .axis-art { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .arc-label-inner { padding: 1rem 1.5rem; }
+  .arc-label-title { font-size: 1.25rem; }
+  .map-intro-visual { width: 120px; height: 120px; }
+  .map-intro-text { font-size: 16px; }
 }
 </style>
 </head>
@@ -272,6 +360,50 @@ body::before {
   </div>
 </header>
 
+
+<!-- Introduction -->
+<div class="map-intro">
+  <div class="map-intro-visual">
+    <svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- outer cube -->
+      <polygon points="80,8 152,44 152,116 80,152 8,116 8,44" stroke="#d4a84c" stroke-width="0.7" stroke-opacity="0.3" fill="none"/>
+      <!-- inner cube -->
+      <polygon points="80,38 118,56 118,98 80,116 42,98 42,56" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.5" fill="rgba(212,168,76,0.03)"/>
+      <!-- connecting edges (tesseract projection) -->
+      <line x1="80" y1="8" x2="80" y2="38" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.22"/>
+      <line x1="152" y1="44" x2="118" y2="56" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.22"/>
+      <line x1="152" y1="116" x2="118" y2="98" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.22"/>
+      <line x1="80" y1="152" x2="80" y2="116" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.22"/>
+      <line x1="8" y1="116" x2="42" y2="98" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.22"/>
+      <line x1="8" y1="44" x2="42" y2="56" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.22"/>
+      <!-- diagonals to center -->
+      <line x1="80" y1="8" x2="80" y2="80" stroke="#d4a84c" stroke-width="0.35" stroke-opacity="0.12"/>
+      <line x1="152" y1="44" x2="80" y2="80" stroke="#d4a84c" stroke-width="0.35" stroke-opacity="0.12"/>
+      <line x1="8" y1="44" x2="80" y2="80" stroke="#d4a84c" stroke-width="0.35" stroke-opacity="0.12"/>
+      <!-- center point -->
+      <circle cx="80" cy="80" r="3" fill="#d4a84c" fill-opacity="0.5"/>
+      <circle cx="80" cy="80" r="8" fill="#d4a84c" fill-opacity="0.08"/>
+      <!-- vertices -->
+      <circle cx="80" cy="8" r="2" fill="#d4a84c" fill-opacity="0.35"/>
+      <circle cx="152" cy="44" r="2" fill="#d4a84c" fill-opacity="0.35"/>
+      <circle cx="152" cy="116" r="2" fill="#d4a84c" fill-opacity="0.35"/>
+      <circle cx="80" cy="152" r="2" fill="#d4a84c" fill-opacity="0.35"/>
+      <circle cx="8" cy="116" r="2" fill="#d4a84c" fill-opacity="0.35"/>
+      <circle cx="8" cy="44" r="2" fill="#d4a84c" fill-opacity="0.35"/>
+      <circle cx="80" cy="38" r="1.5" fill="#d4a84c" fill-opacity="0.55"/>
+      <circle cx="118" cy="56" r="1.5" fill="#d4a84c" fill-opacity="0.55"/>
+      <circle cx="118" cy="98" r="1.5" fill="#d4a84c" fill-opacity="0.55"/>
+      <circle cx="80" cy="116" r="1.5" fill="#d4a84c" fill-opacity="0.55"/>
+      <circle cx="42" cy="98" r="1.5" fill="#d4a84c" fill-opacity="0.55"/>
+      <circle cx="42" cy="56" r="1.5" fill="#d4a84c" fill-opacity="0.55"/>
+    </svg>
+  </div>
+  <div class="map-intro-text">
+    <p>The first word in the first field is <em>tesseract</em> — and that is what this map refers to. A structure that exists in dimensions we cannot directly perceive. When something from a higher dimension is reflected into our world, it appears distorted. We can only see it from a certain angle, in a certain light. But its essence is real and complete in the dimension where it fully expresses.</p>
+    <p>This is a map of that structure as it appears in a human life. Thirteen fields of experience — from the geometry the soul carries before the first breath, through the descent into matter, through shadow and mirror and sovereign return. Every field is an entry point. The wheel does not require you to begin at the beginning. It asks only that you enter where you are standing and follow the terrain as it reveals itself.</p>
+    <p>The fields unfold as we walk them. Each one carries keywords that became paths, subterrains that became landscapes, registers that became doors. What follows is not a theory of consciousness. It is a cartography — drawn from the inside, by a body that has been walking this ground.</p>
+  </div>
+</div>
 
 <!-- Central axis -->
 <div class="axis-card">
@@ -321,13 +453,11 @@ body::before {
 </div>
 
 <!-- ═══════════ THE DESCENT ═══════════ -->
-<div class="arc-label" style="animation-delay:0.3s">
+<div class="arc-label arc-descent" style="animation-delay:0.3s">
   <div class="arc-label-inner">
-    <div class="arc-rule"></div>
-    <span class="arc-text">The Descent</span>
-    <span class="arc-glyph">↓</span>
-    <span class="arc-text">Capricorn through Leo · Fields I – VII</span>
-    <div class="arc-rule"></div>
+    <span class="arc-glyph">♄ ♅ ♆ ☽ ♀ ☿ ♃ ☉</span>
+    <span class="arc-label-title">The Descent</span>
+    <span class="arc-label-sub">Capricorn through Leo · Fields I – VII</span>
   </div>
 </div>
 
@@ -641,14 +771,12 @@ body::before {
   </div>
 </div>
 
-<!-- ═══════════ THE MIRROR · THE SHADOW ═══════════ -->
-<div class="arc-label" style="animation-delay:0.9s">
+<!-- ═══════════ THE UNDERWORLD ═══════════ -->
+<div class="arc-label arc-underworld" style="animation-delay:0.9s">
   <div class="arc-label-inner">
-    <div class="arc-rule"></div>
-    <span class="arc-text">The Underworld</span>
     <span class="arc-glyph">☿ ♀ ♇</span>
-    <span class="arc-text">Virgo · Libra · Scorpio · Fields VIII – X</span>
-    <div class="arc-rule"></div>
+    <span class="arc-label-title">The Underworld</span>
+    <span class="arc-label-sub">Virgo · Libra · Scorpio · Fields VIII – X</span>
   </div>
 </div>
 
@@ -790,13 +918,11 @@ body::before {
 </div>
 
 <!-- ═══════════ THE RETURN ═══════════ -->
-<div class="arc-label" style="animation-delay:1.05s">
+<div class="arc-label arc-return" style="animation-delay:1.05s">
   <div class="arc-label-inner">
-    <div class="arc-rule"></div>
-    <span class="arc-text">The Return</span>
-    <span class="arc-glyph">↑</span>
-    <span class="arc-text">Sagittarius through Pisces · Fields XI – XIII</span>
-    <div class="arc-rule"></div>
+    <span class="arc-glyph">♃ ♄ ♅ ♆ ☊☋</span>
+    <span class="arc-label-title">The Return</span>
+    <span class="arc-label-sub">Sagittarius through Pisces · Fields XI – XIII</span>
   </div>
 </div>
 
@@ -948,11 +1074,11 @@ function toggle(card) {
 const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
 
-async function loadSubterrains() {
+async function loadFieldData() {
   try {
-    // Fetch fields (for id→number mapping) and all subterrains
+    // Fetch fields (for id→number mapping + bridge_nodes) and all subterrains
     const [fields, subterrains] = await Promise.all([
-      fetch(`${SUPABASE_URL}/rest/v1/fields?select=id,number`, {
+      fetch(`${SUPABASE_URL}/rest/v1/fields?select=id,number,bridge_nodes`, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
       }).then(r => r.json()),
       fetch(`${SUPABASE_URL}/rest/v1/subterrains?select=*&order=sort_order.asc`, {
@@ -960,9 +1086,13 @@ async function loadSubterrains() {
       }).then(r => r.json())
     ]);
 
-    // Map field id → field number
+    // Map field id → field number, and field number → bridge_nodes
     const fieldNumById = {};
-    fields.forEach(f => { fieldNumById[f.id] = f.number; });
+    const bridgeByFieldNum = {};
+    fields.forEach(f => {
+      fieldNumById[f.id] = f.number;
+      bridgeByFieldNum[f.number] = f.bridge_nodes;
+    });
 
     // Group subterrains by field number
     const subtsByFieldNum = {};
@@ -973,33 +1103,49 @@ async function loadSubterrains() {
       subtsByFieldNum[num].push(st);
     });
 
-    // For each field card on the page, inject chips
+    // For each field card on the page, inject chips and bridge nodes
     document.querySelectorAll('.field-card[data-field]').forEach(card => {
       const fieldNum = parseInt(card.dataset.field);
+
+      // ── Subterrain chips with descriptions ──
       const subs = subtsByFieldNum[fieldNum] || [];
       const container = card.querySelector('.subterrains');
-      if (!container) return;
-
-      if (subs.length === 0) {
-        container.innerHTML = '';
-        return;
+      if (container && subs.length > 0) {
+        container.innerHTML = subs.map((st, i) => {
+          const desc = st.description
+            ? `<span class="subterrain-chip-desc">${st.description}</span>`
+            : '';
+          return `
+          <a href="fieldguide.html#field-${fieldNum}" class="subterrain-chip">
+            <span class="subterrain-chip-number">Subterrain ${i + 1}</span>
+            <span class="subterrain-chip-name">${st.name}</span>
+            ${desc}
+            <span class="subterrain-chip-link">Explore in Fieldguide →</span>
+          </a>`;
+        }).join('');
       }
 
-      container.innerHTML = subs.map((st, i) => `
-        <a href="fieldguide.html#field-${fieldNum}" class="subterrain-chip">
-          <span class="subterrain-chip-number">Subterrain ${i + 1}</span>
-          <span class="subterrain-chip-name">${st.name}</span>
-          <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-        </a>`).join('');
+      // ── Bridge nodes ──
+      const bridge = bridgeByFieldNum[fieldNum];
+      if (bridge) {
+        const astroPanel = card.querySelector('.astro-panel');
+        if (astroPanel) {
+          const bridgeDiv = document.createElement('div');
+          bridgeDiv.className = 'bridge-node';
+          bridgeDiv.innerHTML = `
+            <div class="bridge-node-label">Connective Tissue</div>
+            <div class="bridge-node-text">${bridge}</div>`;
+          astroPanel.insertAdjacentElement('afterend', bridgeDiv);
+        }
+      }
     });
 
   } catch (err) {
-    console.warn('Subterrain fetch failed:', err.message);
-    // Cards remain without chip content — graceful fallback
+    console.warn('Field data fetch failed:', err.message);
   }
 }
 
-loadSubterrains();
+loadFieldData();
 </script>
 </body>
 </html>
