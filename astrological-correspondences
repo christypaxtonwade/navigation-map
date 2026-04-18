@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astrological Correspondences — Christy Paxton Wade</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* v3 hybrid palette — warm walnut dark frame / hand-pressed vellum reading surface */
+  --bg: #1c1812;
+  --surface: #251f18;
+  --surface-2: #2e261e;
+  --border: rgba(176,128,48,0.18);
+  --border-hover: rgba(176,128,48,0.38);
+  --gold: #b08030;
+  --gold-bright: #c69240;
+  --gold-dim: rgba(176,128,48,0.72);
+  --text: #f0e6cc;
+  --text-secondary: #d4c7a8;
+  --text-dim: #b8a98a;
+  --text-faint: #8f826a;
+
+  --vellum: #e8dcbb;
+  --vellum-dark: #ddd0a8;
+  --vellum-deeper: #d3c599;
+  --ink: #14110a;
+  --ink-secondary: #2b2414;
+  --ink-dim: #4e4228;
+  --ink-faint: #78694a;
+  --ink-gold: #7a5618;
+  --ink-gold-bright: #a07428;
+  --border-ink: rgba(122,86,24,0.30);
+  --border-ink-strong: rgba(122,86,24,0.50);
+
+  --arc-descent: #b8afe8;
+  --arc-underworld: #e09e80;
+  --arc-return: #6ccca8;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Jost', sans-serif; font-weight: 400;
+  font-size: 16px; min-height: 100vh; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(176,128,48,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 90%, rgba(176,128,48,0.03) 0%, transparent 50%);
+  pointer-events: none; z-index: 0;
+}
+.page {
+  position: relative; z-index: 1;
+  max-width: 1100px; margin: 0 auto;
+  padding: 4rem 3rem 6rem;
+}
+
+/* ── Header (dark) ── */
+.header { text-align: center; margin-bottom: 2rem; opacity: 0; animation: fadeUp 0.9s ease forwards; }
+.header-eyebrow { font-size: 15px; font-weight: 500; letter-spacing: 0.22em; color: var(--gold); text-transform: uppercase; margin-bottom: 1rem; }
+.header-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.6rem,6vw,3.8rem); font-weight: 400; font-style: italic; color: var(--text); line-height: 1.1; }
+.header-rule { width: 48px; height: 1px; background: var(--gold-dim); margin: 1.25rem auto; }
+.header-sub { font-size: 17px; font-weight: 400; color: var(--text-secondary); max-width: 640px; margin: 0 auto 0.75rem; line-height: 1.9; font-family: 'Cormorant Garamond', serif; font-style: italic; }
+.header-links { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-top: 0.75rem; }
+.header-link { font-size: 15px; font-weight: 500; color: var(--gold); letter-spacing: 0.08em; text-decoration: none; border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px; transition: color 0.2s; }
+.header-link:hover { color: var(--gold-bright); }
+
+/* ── Intro (dark) ── */
+.intro {
+  margin: 3rem auto 3rem; max-width: 720px; text-align: center;
+  opacity: 0; animation: fadeUp 0.9s ease 0.1s forwards;
+}
+.intro p {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; font-weight: 400; font-style: italic;
+  color: var(--text-secondary); line-height: 1.95;
+  margin-bottom: 1.25rem;
+}
+.intro p:last-child { margin-bottom: 0; }
+
+/* ── Arc dividers (dark) ── */
+.arc-label { text-align: center; margin: 3.5rem 0 2rem; opacity: 0; animation: fadeUp 0.9s ease forwards; }
+.arc-label-inner {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  padding: 1.5rem 3rem; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface);
+  position: relative;
+}
+.arc-label-inner::before,
+.arc-label-inner::after {
+  content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+.arc-label-inner::before { top: 0; }
+.arc-label-inner::after  { bottom: 0; }
+.arc-label-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 500; font-style: italic; letter-spacing: 0.05em; }
+.arc-label-sub { font-size: 14px; font-weight: 400; letter-spacing: 0.12em; color: var(--text-dim); text-transform: uppercase; }
+.arc-glyph { font-size: 1.1rem; letter-spacing: 0.15em; margin-bottom: 0.15rem; }
+.arc-label.arc-descent    .arc-label-title { color: var(--arc-descent); }
+.arc-label.arc-descent    .arc-glyph { color: var(--arc-descent); opacity: 0.85; }
+.arc-label.arc-descent    .arc-label-inner { border-color: rgba(184,175,232,0.22); background: rgba(184,175,232,0.04); }
+.arc-label.arc-underworld .arc-label-title { color: var(--arc-underworld); }
+.arc-label.arc-underworld .arc-glyph { color: var(--arc-underworld); opacity: 0.85; }
+.arc-label.arc-underworld .arc-label-inner { border-color: rgba(224,158,128,0.22); background: rgba(224,158,128,0.04); }
+.arc-label.arc-return     .arc-label-title { color: var(--arc-return); }
+.arc-label.arc-return     .arc-glyph { color: var(--arc-return); opacity: 0.85; }
+.arc-label.arc-return     .arc-label-inner { border-color: rgba(108,204,168,0.22); background: rgba(108,204,168,0.04); }
+
+/* ── Correspondence cards (vellum) ── */
+.corr-card {
+  background: var(--vellum); color: var(--ink);
+  border: 1px solid var(--border-ink);
+  border-radius: 12px; padding: 2.5rem 2.75rem;
+  margin-bottom: 1.5rem;
+  background-image:
+    radial-gradient(ellipse at 18% 12%, rgba(122,86,24,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 82% 88%, rgba(122,50,22,0.04) 0%, transparent 50%);
+  opacity: 0; animation: fadeUp 0.9s ease forwards;
+}
+
+.corr-header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.25rem 1.75rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px dashed var(--border-ink);
+}
+.corr-roman {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.8rem, 4.5vw, 3.6rem); font-weight: 400; font-style: italic;
+  color: var(--ink-gold-bright); line-height: 1;
+  letter-spacing: 0.02em;
+}
+.corr-title-block {}
+.corr-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.8rem, 3vw, 2.3rem); font-weight: 500; font-style: italic;
+  color: var(--ink); line-height: 1.15; margin-bottom: 0.35rem;
+}
+.corr-astro-glyphs {
+  margin-top: 0.6rem;
+  display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;
+}
+.corr-planets {
+  font-size: 1.7rem; color: var(--ink-gold-bright);
+  letter-spacing: 0.18em; line-height: 1;
+}
+.corr-signs {
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--ink-gold);
+}
+
+.corr-rulers-label,
+.corr-principle-label {
+  font-family: 'Jost', sans-serif;
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 0.5rem;
+}
+.corr-rulers {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; font-weight: 400; font-style: italic;
+  color: var(--ink-secondary); line-height: 1.75;
+  margin-bottom: 1.5rem;
+  max-width: 78ch;
+}
+.corr-principle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; font-weight: 400; font-style: italic;
+  color: var(--ink); line-height: 1.85;
+  max-width: 72ch;
+}
+
+.corr-fieldguide-link {
+  display: inline-block; margin-top: 1.75rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 14px; font-weight: 500;
+  color: var(--ink-gold-bright);
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-ink-strong);
+  padding-bottom: 2px;
+  transition: color 0.2s;
+}
+.corr-fieldguide-link:hover { color: var(--ink-gold); }
+
+/* Loading */
+.loading {
+  text-align: center; padding: 4rem 2rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; font-style: italic; color: var(--text-dim);
+}
+.loading-glyph { font-size: 1.5rem; color: var(--gold); opacity: 0.7; display: block; margin-bottom: 0.75rem; }
+
+/* Footer */
+.footer { text-align: center; margin-top: 4rem; opacity: 0; animation: fadeUp 0.9s ease 1.8s forwards; }
+.footer-rule { width: 36px; height: 1px; background: var(--border); margin: 0 auto 1.1rem; }
+.footer-note { font-size: 16px; color: var(--text-dim); font-style: italic; font-family: 'Cormorant Garamond', serif; letter-spacing: 0.03em; margin-bottom: 1rem; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 900px) {
+  .page { padding: 3rem 2rem 5rem; }
+  .corr-card { padding: 2rem 1.75rem; }
+  .corr-header { grid-template-columns: 1fr; gap: 0.5rem; }
+  .corr-roman { font-size: 2.5rem; }
+  .arc-label-inner { padding: 1.25rem 2rem; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="header">
+  <div class="header-eyebrow">Christy Paxton Wade</div>
+  <h1 class="header-title">Astrological Correspondences</h1>
+  <div class="header-rule"></div>
+  <p class="header-sub">The sky structure of an earth map. Consulted when sitting down. The map and Fieldguide help with the earthly terrain; this page names what turns above it.</p>
+  <div class="header-links">
+    <a href="index.html" class="header-link">The Navigation Map ↗</a>
+    <a href="fieldguide.html" class="header-link">The Fieldguide ↗</a>
+    <a href="ancestral-weaving.html" class="header-link">Ancestral Weaving ↗</a>
+    <a href="ancestral-catalog.html" class="header-link">Ancestral Catalog ↗</a>
+    <a href="convergence.html" class="header-link">The Convergence ↗</a>
+  </div>
+</header>
+
+<div class="intro">
+  <p>Thirteen Fields, each with a planetary correspondence, a sign, a hermetic seat, and one or more minor bodies that constitute the feminine architecture of the system. The astrological layer is structural — not decorative — but it is a separate work from walking the Fields themselves.</p>
+  <p>This page holds the correspondences in one place so the Navigation Map and Fieldguide can stay on the ground. You can trip on the terrain if you are looking up at the sky. Come here when the question is about the sky.</p>
+</div>
+
+<div id="correspondence-sections">
+  <div class="loading">
+    <span class="loading-glyph">✦</span>
+    Drawing the sky…
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-rule"></div>
+  <p class="footer-note">The correspondences are a living architecture. They turn with the wheel.</p>
+  <div class="header-links" style="margin-top:1rem">
+    <a href="index.html" class="header-link">The Navigation Map ↗</a>
+    <a href="fieldguide.html" class="header-link">The Fieldguide ↗</a>
+  </div>
+</div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+
+const ARC_META = {
+  descent:    { title: 'The Descent',    glyph: '↓', sub: 'Fields I – VII' },
+  underworld: { title: 'The Underworld', glyph: '◉', sub: 'Fields VIII – X' },
+  return:     { title: 'The Return',     glyph: '↑', sub: 'Fields XI – XIII' }
+};
+
+function arcKeyFor(n) {
+  if (n <= 7) return 'descent';
+  if (n <= 10) return 'underworld';
+  return 'return';
+}
+
+async function supaFetch(path) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  if (!res.ok) throw new Error(`Supabase ${res.status}`);
+  return res.json();
+}
+
+function renderCorrespondenceCard(field, delay) {
+  const glyphsHtml = (field.astro_planets || field.astro_signs) ? `
+    <div class="corr-astro-glyphs">
+      ${field.astro_planets ? `<span class="corr-planets">${field.astro_planets}</span>` : ''}
+      ${field.astro_signs ? `<span class="corr-signs">${field.astro_signs}</span>` : ''}
+    </div>` : '';
+
+  const rulersHtml = field.field_rulers ? `
+    <div class="corr-rulers-label">Rulers</div>
+    <div class="corr-rulers">${field.field_rulers}</div>` : '';
+
+  const principleHtml = field.astro_principle ? `
+    <div class="corr-principle-label">Principle</div>
+    <div class="corr-principle">${field.astro_principle}</div>` : '';
+
+  return `
+    <div class="corr-card" id="corr-${field.number}" style="animation-delay:${delay}s">
+      <div class="corr-header">
+        <div class="corr-roman">${field.roman || field.number}</div>
+        <div class="corr-title-block">
+          <div class="corr-name">${field.name}</div>
+          ${glyphsHtml}
+        </div>
+      </div>
+      ${rulersHtml}
+      ${principleHtml}
+      <a href="fieldguide.html#field-${field.number}" class="corr-fieldguide-link">Walk this field in the Fieldguide →</a>
+    </div>`;
+}
+
+function renderArcLabel(arcKey, delay) {
+  const meta = ARC_META[arcKey];
+  return `
+    <div class="arc-label arc-${arcKey}" style="animation-delay:${delay}s">
+      <div class="arc-label-inner">
+        <span class="arc-glyph">${meta.glyph}</span>
+        <span class="arc-label-title">${meta.title}</span>
+        <span class="arc-label-sub">${meta.sub}</span>
+      </div>
+    </div>`;
+}
+
+async function loadCorrespondences() {
+  try {
+    const fields = await supaFetch('fields?select=*&order=number.asc');
+
+    let html = '';
+    let currentArc = null;
+    fields.forEach((f, i) => {
+      const arc = arcKeyFor(f.number);
+      if (arc !== currentArc) {
+        html += renderArcLabel(arc, 0.2);
+        currentArc = arc;
+      }
+      html += renderCorrespondenceCard(f, 0.25 + i * 0.05);
+    });
+
+    document.getElementById('correspondence-sections').innerHTML = html;
+  } catch (err) {
+    console.error('Correspondences load failed:', err);
+    document.getElementById('correspondence-sections').innerHTML =
+      `<div class="loading"><span class="loading-glyph">⚠</span>Could not draw the sky. ${err.message}</div>`;
+  }
+}
+
+loadCorrespondences();
+</script>
+</body>
+</html>
