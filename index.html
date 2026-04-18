@@ -4,42 +4,65 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Navigation Map — Christy Paxton Wade</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 :root {
-  --bg: #09090f;
-  --surface: #11111c;
-  --surface-2: #181825;
-  --border: rgba(201,168,76,0.12);
-  --border-hover: rgba(201,168,76,0.26);
-  --gold: #d4a84c;
-  --gold-dim: rgba(212,168,76,0.7);
-  --gold-wash: rgba(212,168,76,0.06);
-  --text: #f2eedd;
-  --text-secondary: #ccc4b4;
-  --text-dim: #b3aa9f;
-  --text-faint: #9a9088;
-  --mythic: #c4bef8;
-  --conceptual: #6dd8b2;
-  --somatic: #f5aa88;
-  --mythic-bg: rgba(196,190,248,0.08);
-  --conceptual-bg: rgba(109,216,178,0.08);
-  --somatic-bg: rgba(245,170,136,0.08);
-  --astro-gold: rgba(212,168,76,0.14);
+  /* v3 hybrid palette ─ warm walnut dark + hand-pressed vellum light */
+  --bg: #1c1812;
+  --surface: #251f18;
+  --surface-2: #2e261e;
+  --border: rgba(176,128,48,0.18);
+  --border-hover: rgba(176,128,48,0.38);
+
+  --gold: #b08030;
+  --gold-bright: #c69240;
+  --gold-dim: rgba(176,128,48,0.72);
+  --gold-wash: rgba(176,128,48,0.08);
+
+  --text: #f0e6cc;
+  --text-secondary: #d4c7a8;
+  --text-dim: #b8a98a;
+  --text-faint: #8f826a;
+
+  --vellum: #e8dcbb;
+  --vellum-dark: #ddd0a8;
+  --vellum-deeper: #d3c599;
+
+  --ink: #14110a;
+  --ink-secondary: #2b2414;
+  --ink-dim: #4e4228;
+  --ink-faint: #78694a;
+  --ink-gold: #7a5618;
+  --ink-gold-bright: #a07428;
+  --border-ink: rgba(122,86,24,0.30);
+  --border-ink-strong: rgba(122,86,24,0.50);
+
+  --mythic: #3d2f70;
+  --conceptual: #165a42;
+  --somatic: #7a3216;
+  --mythic-bg: rgba(61,47,112,0.10);
+  --conceptual-bg: rgba(22,90,66,0.10);
+  --somatic-bg: rgba(122,50,22,0.10);
+
+  --arc-descent: #b8afe8;
+  --arc-underworld: #e09e80;
+  --arc-return: #6ccca8;
 }
+
 html { scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--text);
-  font-family: 'Jost', sans-serif; font-weight: 300;
+  font-family: 'Jost', sans-serif; font-weight: 400;
   font-size: 16px; min-height: 100vh; overflow-x: hidden;
 }
 body::before {
   content: ''; position: fixed; inset: 0;
   background-image:
-    linear-gradient(rgba(201,168,76,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(201,168,76,0.02) 1px, transparent 1px);
-  background-size: 52px 52px; pointer-events: none; z-index: 0;
+    radial-gradient(ellipse at 20% 10%, rgba(176,128,48,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 90%, rgba(176,128,48,0.03) 0%, transparent 50%);
+  pointer-events: none; z-index: 0;
 }
 .page {
   position: relative; z-index: 1;
@@ -48,253 +71,255 @@ body::before {
 }
 
 /* ── Header ── */
-.header {
-  text-align: center; margin-bottom: 2rem;
-  opacity: 0; animation: fadeUp 0.9s ease forwards;
-}
-.header-eyebrow { font-size: 15px; font-weight: 400; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 1rem; }
-.header-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.8rem,6.5vw,4.2rem); font-weight: 300; font-style: italic; color: var(--text); line-height: 1.05; }
+.header { text-align: center; margin-bottom: 2rem; opacity: 0; animation: fadeUp 0.9s ease forwards; }
+.header-eyebrow { font-size: 15px; font-weight: 500; letter-spacing: 0.22em; color: var(--gold); text-transform: uppercase; margin-bottom: 1rem; }
+.header-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.8rem,6.5vw,4.2rem); font-weight: 400; font-style: italic; color: var(--text); line-height: 1.05; }
 .header-rule { width: 48px; height: 1px; background: var(--gold-dim); margin: 1.25rem auto; }
-.header-sub { font-size: 16px; font-weight: 300; color: var(--text-secondary); max-width: 560px; margin: 0 auto 0.75rem; line-height: 1.8; }
+.header-sub { font-size: 17px; font-weight: 400; color: var(--text-secondary); max-width: 580px; margin: 0 auto 0.75rem; line-height: 1.85; }
 .header-links { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-top: 0.75rem; }
-.header-link { font-size: 15px; font-weight: 400; color: var(--gold); letter-spacing: 0.08em; text-decoration: none; border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px; transition: color 0.2s, border-color 0.2s; }
-.header-link:hover { color: #dfc090; border-color: var(--gold); }
+.header-link { font-size: 15px; font-weight: 500; color: var(--gold); letter-spacing: 0.08em; text-decoration: none; border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px; transition: color 0.2s, border-color 0.2s; }
+.header-link:hover { color: var(--gold-bright); border-color: var(--gold); }
 
-/* ── (toggle removed — single integrated view) ── */
-
-/* ── Map introduction ── */
-.map-intro {
-  text-align: center; margin-bottom: 3rem;
-  opacity: 0; animation: fadeUp 0.9s ease 0.1s forwards;
-}
-.map-intro-visual {
-  position: relative; margin: 0 auto 2rem; width: 200px; height: 200px;
-}
-.map-intro-text {
-  max-width: 680px; margin: 0 auto;
-  font-size: 17px; font-weight: 300; color: var(--text-secondary);
-  line-height: 1.95; font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-}
+/* ── Map introduction (tesseract + prose) ── */
+.map-intro { text-align: center; margin-bottom: 3rem; opacity: 0; animation: fadeUp 0.9s ease 0.1s forwards; }
+.map-intro-visual { position: relative; margin: 0 auto 2rem; width: 200px; height: 200px; }
+.map-intro-text { max-width: 680px; margin: 0 auto; font-size: 17px; font-weight: 400; color: var(--text-secondary); line-height: 1.95; font-family: 'Cormorant Garamond', serif; font-style: italic; }
 .map-intro-text p { margin-bottom: 1.25rem; }
 .map-intro-text p:last-child { margin-bottom: 0; }
 
-/* ── Bridge nodes ── */
-.bridge-node {
-  border-top: 1px solid rgba(212,168,76,0.1);
-  margin-top: 1.25rem; padding-top: 1.25rem;
+/* ── Central axis card (stays dark) ── */
+.axis-card {
+  background: var(--surface); border: 1px solid rgba(176,128,48,0.24);
+  border-radius: 16px; margin-bottom: 1.5rem; text-align: center;
+  position: relative; overflow: hidden;
+  opacity: 0; animation: fadeUp 0.9s ease 0.15s forwards;
 }
+.axis-card::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 320px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+.axis-art  { padding: 2rem 3rem 0; }
+.axis-body { padding: 1.5rem 3rem 2.5rem; }
+.axis-eyebrow { font-size: 15px; font-weight: 600; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 0.7rem; }
+.axis-title { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 400; color: var(--text); margin-bottom: 0.7rem; }
+.axis-sub { font-size: 17px; color: var(--text-secondary); line-height: 1.85; max-width: 620px; margin: 0 auto 2rem; }
+.birds { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; }
+.bird-item { padding: 0.6rem 2rem; text-align: center; }
+.bird-name { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 500; color: var(--text); display: block; margin-bottom: 5px; }
+.bird-quality { font-size: 15px; font-weight: 400; color: var(--text-dim); letter-spacing: 0.06em; }
+.bird-divider { width: 1px; height: 42px; background: var(--border); flex-shrink: 0; }
+.astro-axis-note { border-top: 1px solid rgba(176,128,48,0.22); margin-top: 1.5rem; }
+.astro-axis-inner { padding: 1.25rem 0 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.astro-axis-glyphs { font-size: 1.8rem; color: var(--gold); letter-spacing: 0.15em; }
+.astro-axis-label { font-size: 15px; color: var(--text-secondary); letter-spacing: 0.07em; }
+.astro-axis-principle { font-size: 16px; font-style: italic; font-family: 'Cormorant Garamond', serif; color: var(--text-dim); line-height: 1.75; max-width: 560px; }
+
+/* ── Arc dividers ── */
+.arc-label { text-align: center; margin: 3rem 0 2rem; opacity: 0; animation: fadeUp 0.9s ease forwards; }
+.arc-label-inner {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  padding: 1.5rem 3rem; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface);
+  position: relative;
+}
+.arc-label-inner::before,
+.arc-label-inner::after {
+  content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+.arc-label-inner::before { top: 0; }
+.arc-label-inner::after  { bottom: 0; }
+.arc-label-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem; font-weight: 500; font-style: italic;
+  letter-spacing: 0.05em;
+}
+.arc-label-sub {
+  font-size: 14px; font-weight: 400; letter-spacing: 0.12em;
+  color: var(--text-dim); text-transform: uppercase;
+}
+.arc-glyph { font-size: 1.1rem; letter-spacing: 0.15em; margin-bottom: 0.15rem; }
+.arc-label.arc-descent    .arc-label-title { color: var(--arc-descent); }
+.arc-label.arc-descent    .arc-glyph { color: var(--arc-descent); opacity: 0.85; }
+.arc-label.arc-descent    .arc-label-inner { border-color: rgba(184,175,232,0.22); background: rgba(184,175,232,0.04); }
+.arc-label.arc-underworld .arc-label-title { color: var(--arc-underworld); }
+.arc-label.arc-underworld .arc-glyph { color: var(--arc-underworld); opacity: 0.85; }
+.arc-label.arc-underworld .arc-label-inner { border-color: rgba(224,158,128,0.22); background: rgba(224,158,128,0.04); }
+.arc-label.arc-return     .arc-label-title { color: var(--arc-return); }
+.arc-label.arc-return     .arc-glyph { color: var(--arc-return); opacity: 0.85; }
+.arc-label.arc-return     .arc-label-inner { border-color: rgba(108,204,168,0.22); background: rgba(108,204,168,0.04); }
+
+/* ════════════════════════════════════════════════════════════
+   FIELD CARDS — HYBRID
+   Collapsed: warm walnut dark
+   Expanded:  hand-pressed vellum reading surface
+   ════════════════════════════════════════════════════════════ */
+.field-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden; cursor: pointer;
+  transition: border-color 0.3s, background 0.3s;
+  opacity: 0; animation: fadeUp 0.9s ease forwards;
+  margin-bottom: 16px; position: relative;
+}
+.field-card:hover, .field-card.open { border-color: var(--border-hover); background: var(--surface-2); }
+.field-card.descent:hover, .field-card.descent.open       { border-color: rgba(184,175,232,0.32); }
+.field-card.underworld:hover, .field-card.underworld.open { border-color: rgba(224,158,128,0.32); }
+.field-card.return-arc:hover, .field-card.return-arc.open { border-color: rgba(108,204,168,0.32); }
+
+.card-topline {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim) 20%, var(--gold-dim) 80%, transparent);
+  opacity: 0.55;
+}
+
+.card-body { padding: 1.85rem 2.5rem 1.6rem; }
+.card-top {
+  display: grid; grid-template-columns: auto 1fr auto;
+  gap: 1.25rem 1.5rem; align-items: start;
+}
+.field-number-block { text-align: center; padding-top: 4px; }
+.field-number { font-family: 'Cormorant Garamond', serif; font-size: 2.3rem; font-weight: 400; font-style: italic; color: var(--gold); line-height: 1; display: block; }
+.field-numeral-sign { font-size: 15px; color: var(--text-dim); letter-spacing: 0.08em; display: block; margin-top: 3px; }
+.card-title { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; font-weight: 500; color: var(--text); line-height: 1.15; margin-bottom: 0.4rem; }
+.card-tagline { font-size: 17px; font-weight: 400; font-style: italic; color: var(--text-secondary); line-height: 1.65; font-family: 'Cormorant Garamond', serif; max-width: 72ch; }
+.card-chevron { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border-hover); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 6px; transition: border-color 0.3s; }
+.card-chevron svg { width: 12px; height: 12px; stroke: var(--gold); fill: none; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+.open .card-chevron svg { transform: rotate(180deg); }
+
+/* ── EXPANDED state: vellum reading surface ── */
+.card-expand {
+  overflow: hidden; max-height: 0; opacity: 0;
+  transition: max-height 0.55s cubic-bezier(0.4,0,0.2,1), opacity 0.45s ease;
+}
+.card-expand.open { max-height: 5000px; opacity: 1; }
+
+.card-seam {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+  opacity: 0.6;
+}
+
+.card-expand-inner {
+  background: var(--vellum); color: var(--ink);
+  padding: 2.5rem 2.75rem 2.25rem;
+  background-image:
+    radial-gradient(ellipse at 18% 12%, rgba(122,86,24,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 82% 88%, rgba(122,50,22,0.04) 0%, transparent 50%);
+}
+
+.card-expand-inner .card-elements {
+  font-family: 'Jost', sans-serif;
+  font-size: 15px; font-weight: 500;
+  color: var(--ink-dim); letter-spacing: 0.03em; line-height: 1.7;
+  margin-bottom: 1.5rem; padding-bottom: 1.1rem;
+  border-bottom: 1px dashed var(--border-ink);
+}
+
+/* Astro panel */
+.astro-panel { border-top: 1px solid var(--border-ink); margin-top: 1.25rem; padding-top: 1.25rem; }
+.astro-panel-inner { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; }
+.astro-glyphs-block { flex-shrink: 0; }
+.astro-sign { font-size: 15px; font-weight: 500; color: var(--ink-gold); letter-spacing: 0.1em; margin-bottom: 4px; }
+.astro-planets { font-size: 1.55rem; color: var(--ink-gold-bright); letter-spacing: 0.14em; line-height: 1; margin-bottom: 4px; }
+.astro-rulers { font-size: 15px; font-weight: 500; color: var(--ink-secondary); letter-spacing: 0.05em; }
+.astro-principle { flex: 1; font-size: 17px; font-weight: 400; font-style: italic; font-family: 'Cormorant Garamond', serif; color: var(--ink); line-height: 1.8; min-width: 220px; max-width: 72ch; }
+
+/* Field-level registers (Palette A, on vellum) */
+.field-registers { margin: 2rem 0 2rem; }
+.field-registers-label {
+  font-size: 14px; font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-dim);
+  font-family: 'Jost', sans-serif;
+  display: flex; align-items: center; justify-content: center; gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.field-registers-label::before,
+.field-registers-label::after {
+  content: ''; flex: 0 1 160px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-ink-strong));
+}
+.field-registers-label::after { background: linear-gradient(90deg, var(--border-ink-strong), transparent); }
+
+.registers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+.register { padding: 1.6rem 1.75rem; border-radius: 3px; }
+.register-label {
+  font-size: 14px; font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.6rem;
+}
+.register-label-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.register-text { font-size: 16px; font-weight: 400; color: var(--ink-secondary); line-height: 1.85; }
+.register-mythic     { background: var(--mythic-bg);     border: 1px solid rgba(61,47,112,0.28); }
+.register-conceptual { background: var(--conceptual-bg); border: 1px solid rgba(22,90,66,0.28); }
+.register-somatic    { background: var(--somatic-bg);    border: 1px solid rgba(122,50,22,0.28); }
+.register-mythic     .register-label { color: var(--mythic); }
+.register-conceptual .register-label { color: var(--conceptual); }
+.register-somatic    .register-label { color: var(--somatic); }
+.register-mythic     .register-label-dot { background: var(--mythic); }
+.register-conceptual .register-label-dot { background: var(--conceptual); }
+.register-somatic    .register-label-dot { background: var(--somatic); }
+
+/* Subterrain chips on vellum */
+.subterrains-label {
+  font-size: 14px; font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-dim);
+  font-family: 'Jost', sans-serif;
+  display: flex; align-items: center; justify-content: center; gap: 1.25rem;
+  margin: 2.25rem 0 1.25rem;
+}
+.subterrains-label::before,
+.subterrains-label::after {
+  content: ''; flex: 0 1 160px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-ink-strong));
+}
+.subterrains-label::after { background: linear-gradient(90deg, var(--border-ink-strong), transparent); }
+.subterrains { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+.subterrain-chip {
+  background: rgba(232,220,187,0.55); border: 1px solid var(--border-ink);
+  border-radius: 8px; padding: 1rem 1.2rem; text-decoration: none;
+  display: flex; flex-direction: column;
+  transition: background 0.2s, border-color 0.2s;
+}
+.subterrain-chip:hover { background: rgba(221,208,168,0.7); border-color: var(--border-ink-strong); }
+.subterrain-chip-number { font-size: 15px; font-weight: 500; color: var(--ink-gold); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; display: block; }
+.subterrain-chip-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 500; color: var(--ink); line-height: 1.25; display: block; margin-bottom: 3px; }
+.subterrain-chip-desc { font-size: 14px; font-weight: 400; color: var(--ink-secondary); line-height: 1.5; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.subterrain-chip-link { font-size: 15px; color: var(--ink-gold); font-weight: 500; letter-spacing: 0.06em; margin-top: 5px; display: block; }
+
+.fieldguide-link {
+  display: inline-block; font-size: 15px; font-weight: 500;
+  color: var(--ink-gold-bright); text-decoration: none;
+  letter-spacing: 0.06em; margin-top: 1rem;
+  border-bottom: 1px solid var(--border-ink-strong); padding-bottom: 2px;
+  transition: color 0.2s;
+}
+.fieldguide-link:hover { color: var(--ink-gold); }
+
+/* Bridge nodes inside vellum card */
+.bridge-node { border-top: 1px solid var(--border-ink); margin-top: 1.75rem; padding-top: 1.25rem; }
 .bridge-node-label {
-  font-size: 13px; font-weight: 500; letter-spacing: 0.18em;
-  color: var(--gold); text-transform: uppercase; margin-bottom: 0.6rem;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.2em;
+  color: var(--ink-gold); text-transform: uppercase; margin-bottom: 0.6rem;
   display: flex; align-items: center; gap: 8px;
 }
 .bridge-node-label::before {
   content: ''; display: inline-block; width: 18px; height: 1px;
-  background: linear-gradient(90deg, var(--gold), transparent);
+  background: linear-gradient(90deg, var(--ink-gold), transparent);
 }
 .bridge-node-text {
-  font-size: 15px; font-weight: 300; color: var(--text-dim);
-  line-height: 1.85; font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
+  font-size: 16px; font-weight: 400; color: var(--ink-secondary);
+  line-height: 1.85; font-family: 'Cormorant Garamond', serif; font-style: italic;
 }
 
-/* ── Subterrain descriptions ── */
-.subterrain-chip-desc {
-  font-size: 14px; font-weight: 300; color: var(--text-dim);
-  line-height: 1.65; margin-top: 4px;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* ── Central axis ── */
-.axis-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 16px; margin-bottom: 1.5rem; text-align: center;
-  position: relative; overflow: hidden;
-  opacity: 0; animation: fadeUp 0.9s ease 0.15s forwards;
-  transition: border-color 0.4s;
-}
-.axis-card { border-color: rgba(212,168,76,0.22); }
-.axis-card::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 320px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
-.axis-art  { padding: 2rem 3rem 0; }
-.axis-body { padding: 1.5rem 3rem 2.5rem; }
-.axis-eyebrow { font-size: 15px; font-weight: 500; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; margin-bottom: 0.7rem; }
-.axis-title { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 400; color: var(--text); margin-bottom: 0.7rem; }
-.axis-sub { font-size: 17px; color: var(--text-secondary); line-height: 1.8; max-width: 620px; margin: 0 auto 2rem; }
-.birds { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; }
-.bird-item { padding: 0.6rem 2rem; text-align: center; }
-.bird-name { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 500; color: var(--text); display: block; margin-bottom: 5px; }
-.bird-quality { font-size: 15px; font-weight: 300; color: var(--text-dim); letter-spacing: 0.06em; }
-.bird-divider { width: 1px; height: 42px; background: var(--border); flex-shrink: 0; }
-.astro-axis-note { border-top: 1px solid var(--astro-gold); margin-top: 1.5rem; }
-.astro-axis-inner { padding: 1.25rem 0 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.astro-axis-glyphs { font-size: 1.8rem; color: var(--gold); letter-spacing: 0.15em; }
-.astro-axis-label { font-size: 15px; color: var(--text-secondary); letter-spacing: 0.07em; }
-.astro-axis-principle { font-size: 16px; font-style: italic; font-family: 'Cormorant Garamond', serif; color: var(--text-dim); line-height: 1.7; max-width: 560px; }
-
-/* ── Legend ── */
-
-/* ── Arc dividers — distinct visual weight ── */
-.arc-label {
-  text-align: center; margin: 3rem 0 2rem;
-  opacity: 0; animation: fadeUp 0.9s ease forwards;
-}
-.arc-label-inner {
-  display: inline-flex; flex-direction: column; align-items: center; gap: 0.5rem;
-  padding: 1.5rem 3rem; border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  position: relative;
-}
-.arc-label-inner::before {
-  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  width: 60px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
-}
-.arc-label-inner::after {
-  content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 60px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
-}
-.arc-label-title {
+/* Loading state */
+.loading {
+  text-align: center; padding: 4rem 2rem;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.5rem; font-weight: 400; font-style: italic;
-  letter-spacing: 0.05em;
+  font-size: 17px; font-style: italic; color: var(--text-dim);
 }
-.arc-label-sub {
-  font-size: 14px; font-weight: 300; letter-spacing: 0.12em;
-  color: var(--text-dim); text-transform: uppercase;
-}
-.arc-glyph {
-  font-size: 1.1rem; letter-spacing: 0.15em; margin-bottom: 0.15rem;
-}
-/* arc color coding */
-.arc-label.arc-descent .arc-label-title { color: var(--mythic); }
-.arc-label.arc-descent .arc-glyph { color: var(--mythic); opacity: 0.7; }
-.arc-label.arc-descent .arc-label-inner { border-color: rgba(196,190,248,0.15); background: rgba(196,190,248,0.03); }
-.arc-label.arc-underworld .arc-label-title { color: var(--somatic); }
-.arc-label.arc-underworld .arc-glyph { color: var(--somatic); opacity: 0.7; }
-.arc-label.arc-underworld .arc-label-inner { border-color: rgba(245,170,136,0.15); background: rgba(245,170,136,0.03); }
-.arc-label.arc-return .arc-label-title { color: var(--conceptual); }
-.arc-label.arc-return .arc-glyph { color: var(--conceptual); opacity: 0.7; }
-.arc-label.arc-return .arc-label-inner { border-color: rgba(109,216,178,0.15); background: rgba(109,216,178,0.03); }
+.loading-glyph { font-size: 1.5rem; color: var(--gold); opacity: 0.7; display: block; margin-bottom: 0.75rem; }
 
-/* ── Field cards — FULL WIDTH ── */
-.field-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 16px; overflow: hidden; cursor: pointer;
-  transition: border-color 0.25s, background 0.25s;
-  opacity: 0; animation: fadeUp 0.9s ease forwards;
-  margin-bottom: 14px;
-}
-.field-card:hover { border-color: var(--border-hover); background: var(--surface-2); }
-.field-card.open  { border-color: var(--border-hover); background: var(--surface-2); }
-.field-card.descent:hover  { border-color: rgba(196,190,248,0.25); }
-.field-card.descent.open   { border-color: rgba(196,190,248,0.25); }
-.field-card.pivot:hover    { border-color: rgba(245,170,136,0.25); }
-.field-card.pivot.open     { border-color: rgba(245,170,136,0.25); }
-.field-card.return-arc:hover { border-color: rgba(109,216,178,0.25); }
-.field-card.return-arc.open  { border-color: rgba(109,216,178,0.25); }
-
-/* ── Art banner — wider for full-width cards ── */
-.card-art { width: 100%; height: 120px; display: block; border-bottom: 1px solid var(--border); }
-
-/* ── Card body layout ── */
-.card-body { padding: 1.75rem 2.5rem 1.5rem; }
-
-.card-top {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 1.25rem 1.5rem;
-  align-items: start;
-  margin-bottom: 1.25rem;
-}
-
-.field-number-block { text-align: center; padding-top: 4px; }
-.field-number {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 2.2rem; font-weight: 300; font-style: italic;
-  color: var(--gold); opacity: 0.88; line-height: 1;
-  display: block;
-}
-.field-numeral-sign {
-  font-size: 15px; color: var(--text-dim);
-  letter-spacing: 0.08em; display: block; margin-top: 2px;
-}
-
-.card-title-block { flex: 1; }
-.card-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 500; color: var(--text); line-height: 1.15; margin-bottom: 0.35rem; }
-.card-tagline { font-size: 15px; font-weight: 300; font-style: italic; color: var(--text-dim); line-height: 1.6; font-family: 'Cormorant Garamond', serif; font-size: 1rem; }
-
-.card-chevron { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-hover); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 6px; transition: border-color 0.3s; }
-.card-chevron svg { width: 11px; height: 11px; stroke: var(--gold); fill: none; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
-.open .card-chevron svg { transform: rotate(180deg); }
-.open .card-chevron     { border-color: var(--gold-dim); }
-
-/* ── Elements ── */
-.card-elements { font-size: 15px; font-weight: 300; color: var(--text-dim); letter-spacing: 0.02em; line-height: 1.65; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
-
-/* ── Subterrains ── */
-.subterrains {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 1.5rem;
-}
-
-.subterrain-chip {
-  background: var(--gold-wash);
-  border: 1px solid rgba(212,168,76,0.14);
-  border-radius: 8px;
-  padding: 1rem 1.2rem;
-  text-decoration: none;
-  display: flex; flex-direction: column;
-  transition: background 0.2s, border-color 0.2s;
-}
-.subterrain-chip:hover {
-  background: rgba(212,168,76,0.1);
-  border-color: rgba(212,168,76,0.3);
-}
-.subterrain-chip-number {
-  font-size: 15px; font-weight: 400;
-  color: var(--gold); letter-spacing: 0.12em;
-  text-transform: uppercase; margin-bottom: 4px; display: block;
-}
-.subterrain-chip-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.05rem; font-weight: 500;
-  color: var(--text); line-height: 1.25; display: block;
-  margin-bottom: 3px;
-}
-.subterrain-chip-elements {
-  font-size: 15px; font-weight: 300;
-  color: var(--text-dim); line-height: 1.5;
-}
-.subterrain-chip-link {
-  font-size: 15px; color: var(--gold);
-  letter-spacing: 0.06em; margin-top: 5px;
-  display: block; opacity: 0.88;
-}
-
-/* ── Astro panel ── */
-.astro-panel { border-top: 1px solid var(--astro-gold); margin-top: 1rem; }
-.astro-panel-inner { padding: 1rem 0 0; display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; }
-.astro-glyphs-block { flex-shrink: 0; }
-.astro-sign { font-size: 15px; font-weight: 500; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 3px; }
-.astro-planets { font-size: 1.5rem; color: var(--gold); letter-spacing: 0.14em; line-height: 1; margin-bottom: 4px; }
-.astro-rulers { font-size: 15px; font-weight: 400; color: var(--text-dim); letter-spacing: 0.05em; }
-.astro-principle { flex: 1; font-size: 16px; font-style: italic; font-family: 'Cormorant Garamond', serif; color: var(--text-secondary); line-height: 1.75; min-width: 200px; }
-
-/* ── Registers ── */
-.card-expand { overflow: hidden; max-height: 0; opacity: 0; transition: max-height 0.55s cubic-bezier(0.4,0,0.2,1), opacity 0.45s ease; }
-.card-expand.open { max-height: 4000px; opacity: 1; }
-.fieldguide-link { display: inline-block; font-size: 15px; color: var(--gold); text-decoration: none; letter-spacing: 0.06em; margin-top: 1rem; border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px; transition: color 0.2s; }
-.fieldguide-link:hover { color: #dfc090; }
-
-/* ── (aspects section removed — connective tissue lives in bridge_nodes / Fieldguide) ── */
-
-/* ── Footer ── */
+/* Footer */
 .map-footer { text-align: center; margin-top: 4rem; opacity: 0; animation: fadeUp 0.9s ease 2s forwards; }
 .footer-rule { width: 36px; height: 1px; background: var(--border); margin: 0 auto 1.1rem; }
 .footer-note { font-size: 16px; color: var(--text-dim); font-style: italic; font-family: 'Cormorant Garamond', serif; letter-spacing: 0.03em; margin-bottom: 1rem; }
@@ -304,7 +329,9 @@ body::before {
 @media (max-width: 900px) {
   .page { padding: 3rem 2rem 5rem; }
   .subterrains { grid-template-columns: 1fr; }
+  .registers-grid { grid-template-columns: 1fr; }
   .card-body { padding: 1.4rem 1.5rem; }
+  .card-expand-inner { padding: 2rem 1.75rem; }
   .astro-panel-inner { flex-direction: column; gap: 1rem; }
   .arc-label-inner { padding: 1.25rem 2rem; }
 }
@@ -338,55 +365,46 @@ body::before {
   </div>
 </header>
 
-
 <!-- Introduction -->
 <div class="map-intro">
   <div class="map-intro-visual">
     <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <radialGradient id="tess-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#d4a84c" stop-opacity="0.18"/>
-          <stop offset="100%" stop-color="#d4a84c" stop-opacity="0"/>
+          <stop offset="0%" stop-color="#b08030" stop-opacity="0.22"/>
+          <stop offset="100%" stop-color="#b08030" stop-opacity="0"/>
         </radialGradient>
       </defs>
-      <!-- ambient glow -->
       <circle cx="100" cy="100" r="90" fill="url(#tess-glow)"/>
-      <!-- outer cube -->
-      <polygon points="100,10 190,55 190,145 100,190 10,145 10,55" stroke="#d4a84c" stroke-width="1.2" stroke-opacity="0.6" fill="none"/>
-      <!-- inner cube -->
-      <polygon points="100,46 148,70 148,122 100,146 52,122 52,70" stroke="#d4a84c" stroke-width="1.6" stroke-opacity="0.85" fill="rgba(212,168,76,0.05)"/>
-      <!-- connecting edges (tesseract projection) -->
-      <line x1="100" y1="10" x2="100" y2="46" stroke="#d4a84c" stroke-width="1" stroke-opacity="0.5"/>
-      <line x1="190" y1="55" x2="148" y2="70" stroke="#d4a84c" stroke-width="1" stroke-opacity="0.5"/>
-      <line x1="190" y1="145" x2="148" y2="122" stroke="#d4a84c" stroke-width="1" stroke-opacity="0.5"/>
-      <line x1="100" y1="190" x2="100" y2="146" stroke="#d4a84c" stroke-width="1" stroke-opacity="0.5"/>
-      <line x1="10" y1="145" x2="52" y2="122" stroke="#d4a84c" stroke-width="1" stroke-opacity="0.5"/>
-      <line x1="10" y1="55" x2="52" y2="70" stroke="#d4a84c" stroke-width="1" stroke-opacity="0.5"/>
-      <!-- diagonals to center -->
-      <line x1="100" y1="10" x2="100" y2="100" stroke="#d4a84c" stroke-width="0.6" stroke-opacity="0.28"/>
-      <line x1="190" y1="55" x2="100" y2="100" stroke="#d4a84c" stroke-width="0.6" stroke-opacity="0.28"/>
-      <line x1="10" y1="55" x2="100" y2="100" stroke="#d4a84c" stroke-width="0.6" stroke-opacity="0.28"/>
-      <line x1="190" y1="145" x2="100" y2="100" stroke="#d4a84c" stroke-width="0.6" stroke-opacity="0.28"/>
-      <line x1="10" y1="145" x2="100" y2="100" stroke="#d4a84c" stroke-width="0.6" stroke-opacity="0.28"/>
-      <line x1="100" y1="190" x2="100" y2="100" stroke="#d4a84c" stroke-width="0.6" stroke-opacity="0.28"/>
-      <!-- center point with glow -->
-      <circle cx="100" cy="100" r="12" fill="#d4a84c" fill-opacity="0.1"/>
-      <circle cx="100" cy="100" r="6" fill="#d4a84c" fill-opacity="0.25"/>
-      <circle cx="100" cy="100" r="3" fill="#d4a84c" fill-opacity="0.8"/>
-      <!-- outer vertices -->
-      <circle cx="100" cy="10" r="3" fill="#d4a84c" fill-opacity="0.65"/>
-      <circle cx="190" cy="55" r="3" fill="#d4a84c" fill-opacity="0.65"/>
-      <circle cx="190" cy="145" r="3" fill="#d4a84c" fill-opacity="0.65"/>
-      <circle cx="100" cy="190" r="3" fill="#d4a84c" fill-opacity="0.65"/>
-      <circle cx="10" cy="145" r="3" fill="#d4a84c" fill-opacity="0.65"/>
-      <circle cx="10" cy="55" r="3" fill="#d4a84c" fill-opacity="0.65"/>
-      <!-- inner vertices -->
-      <circle cx="100" cy="46" r="2.5" fill="#d4a84c" fill-opacity="0.9"/>
-      <circle cx="148" cy="70" r="2.5" fill="#d4a84c" fill-opacity="0.9"/>
-      <circle cx="148" cy="122" r="2.5" fill="#d4a84c" fill-opacity="0.9"/>
-      <circle cx="100" cy="146" r="2.5" fill="#d4a84c" fill-opacity="0.9"/>
-      <circle cx="52" cy="122" r="2.5" fill="#d4a84c" fill-opacity="0.9"/>
-      <circle cx="52" cy="70" r="2.5" fill="#d4a84c" fill-opacity="0.9"/>
+      <polygon points="100,10 190,55 190,145 100,190 10,145 10,55" stroke="#b08030" stroke-width="1.2" stroke-opacity="0.65" fill="none"/>
+      <polygon points="100,46 148,70 148,122 100,146 52,122 52,70" stroke="#b08030" stroke-width="1.6" stroke-opacity="0.9" fill="rgba(176,128,48,0.06)"/>
+      <line x1="100" y1="10"  x2="100" y2="46"  stroke="#b08030" stroke-width="1" stroke-opacity="0.55"/>
+      <line x1="190" y1="55"  x2="148" y2="70"  stroke="#b08030" stroke-width="1" stroke-opacity="0.55"/>
+      <line x1="190" y1="145" x2="148" y2="122" stroke="#b08030" stroke-width="1" stroke-opacity="0.55"/>
+      <line x1="100" y1="190" x2="100" y2="146" stroke="#b08030" stroke-width="1" stroke-opacity="0.55"/>
+      <line x1="10"  y1="145" x2="52"  y2="122" stroke="#b08030" stroke-width="1" stroke-opacity="0.55"/>
+      <line x1="10"  y1="55"  x2="52"  y2="70"  stroke="#b08030" stroke-width="1" stroke-opacity="0.55"/>
+      <line x1="100" y1="10"  x2="100" y2="100" stroke="#b08030" stroke-width="0.6" stroke-opacity="0.32"/>
+      <line x1="190" y1="55"  x2="100" y2="100" stroke="#b08030" stroke-width="0.6" stroke-opacity="0.32"/>
+      <line x1="10"  y1="55"  x2="100" y2="100" stroke="#b08030" stroke-width="0.6" stroke-opacity="0.32"/>
+      <line x1="190" y1="145" x2="100" y2="100" stroke="#b08030" stroke-width="0.6" stroke-opacity="0.32"/>
+      <line x1="10"  y1="145" x2="100" y2="100" stroke="#b08030" stroke-width="0.6" stroke-opacity="0.32"/>
+      <line x1="100" y1="190" x2="100" y2="100" stroke="#b08030" stroke-width="0.6" stroke-opacity="0.32"/>
+      <circle cx="100" cy="100" r="12" fill="#b08030" fill-opacity="0.12"/>
+      <circle cx="100" cy="100" r="6"  fill="#b08030" fill-opacity="0.3"/>
+      <circle cx="100" cy="100" r="3"  fill="#b08030" fill-opacity="0.9"/>
+      <circle cx="100" cy="10"  r="3" fill="#b08030" fill-opacity="0.7"/>
+      <circle cx="190" cy="55"  r="3" fill="#b08030" fill-opacity="0.7"/>
+      <circle cx="190" cy="145" r="3" fill="#b08030" fill-opacity="0.7"/>
+      <circle cx="100" cy="190" r="3" fill="#b08030" fill-opacity="0.7"/>
+      <circle cx="10"  cy="145" r="3" fill="#b08030" fill-opacity="0.7"/>
+      <circle cx="10"  cy="55"  r="3" fill="#b08030" fill-opacity="0.7"/>
+      <circle cx="100" cy="46"  r="2.5" fill="#b08030" fill-opacity="0.95"/>
+      <circle cx="148" cy="70"  r="2.5" fill="#b08030" fill-opacity="0.95"/>
+      <circle cx="148" cy="122" r="2.5" fill="#b08030" fill-opacity="0.95"/>
+      <circle cx="100" cy="146" r="2.5" fill="#b08030" fill-opacity="0.95"/>
+      <circle cx="52"  cy="122" r="2.5" fill="#b08030" fill-opacity="0.95"/>
+      <circle cx="52"  cy="70"  r="2.5" fill="#b08030" fill-opacity="0.95"/>
     </svg>
   </div>
   <div class="map-intro-text">
@@ -400,19 +418,17 @@ body::before {
 <div class="axis-card">
   <div class="axis-art">
     <svg width="100%" viewBox="0 0 900 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <line x1="40" y1="74" x2="860" y2="74" stroke="#d4a84c" stroke-width="0.4" stroke-opacity="0.15"/>
-      <path d="M 160 58 C 140 46 118 42 98 46 C 118 51 138 55 160 58 Z" fill="#d4a84c" fill-opacity="0.58"/>
-      <path d="M 160 58 C 140 67 126 72 106 72 C 124 67 141 63 160 58 Z" fill="#d4a84c" fill-opacity="0.32"/>
-      <line x1="160" y1="58" x2="188" y2="49" stroke="#d4a84c" stroke-width="1.3" stroke-opacity="0.5" stroke-linecap="round"/>
-      <path d="M 432 46 C 418 38 406 35 396 37 C 406 41 418 44 432 46 Z" fill="#d4a84c" fill-opacity="0.48"/>
-      <path d="M 432 46 C 420 53 412 57 402 57 C 412 53 421 50 432 46 Z" fill="#d4a84c" fill-opacity="0.26"/>
-      <line x1="432" y1="46" x2="450" y2="40" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.4" stroke-linecap="round"/>
-      <path d="M 720 40 C 704 30 690 26 680 28 C 690 32 704 37 720 40 Z" fill="#f5aa88" fill-opacity="0.62"/>
-      <path d="M 720 40 C 708 48 700 52 690 52 C 699 48 709 45 720 40 Z" fill="#f5aa88" fill-opacity="0.34"/>
-      <line x1="720" y1="40" x2="738" y2="33" stroke="#f5aa88" stroke-width="0.9" stroke-opacity="0.45" stroke-linecap="round"/>
-      <path d="M 188 52 Q 300 24 396 40 Q 520 60 680 32" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.18" stroke-dasharray="4 8"/>
-      <circle cx="62" cy="44" r="0.8" fill="#d4a84c" fill-opacity="0.18"/>
-      <circle cx="820" cy="54" r="1" fill="#f5aa88" fill-opacity="0.2"/>
+      <line x1="40" y1="74" x2="860" y2="74" stroke="#b08030" stroke-width="0.5" stroke-opacity="0.2"/>
+      <path d="M 160 58 C 140 46 118 42 98 46 C 118 51 138 55 160 58 Z" fill="#b08030" fill-opacity="0.65"/>
+      <path d="M 160 58 C 140 67 126 72 106 72 C 124 67 141 63 160 58 Z" fill="#b08030" fill-opacity="0.38"/>
+      <line x1="160" y1="58" x2="188" y2="49" stroke="#b08030" stroke-width="1.3" stroke-opacity="0.55" stroke-linecap="round"/>
+      <path d="M 432 46 C 418 38 406 35 396 37 C 406 41 418 44 432 46 Z" fill="#b08030" fill-opacity="0.55"/>
+      <path d="M 432 46 C 420 53 412 57 402 57 C 412 53 421 50 432 46 Z" fill="#b08030" fill-opacity="0.3"/>
+      <line x1="432" y1="46" x2="450" y2="40" stroke="#b08030" stroke-width="0.9" stroke-opacity="0.45" stroke-linecap="round"/>
+      <path d="M 720 40 C 704 30 690 26 680 28 C 690 32 704 37 720 40 Z" fill="#e09e80" fill-opacity="0.62"/>
+      <path d="M 720 40 C 708 48 700 52 690 52 C 699 48 709 45 720 40 Z" fill="#e09e80" fill-opacity="0.35"/>
+      <line x1="720" y1="40" x2="738" y2="33" stroke="#e09e80" stroke-width="0.9" stroke-opacity="0.48" stroke-linecap="round"/>
+      <path d="M 188 52 Q 300 24 396 40 Q 520 60 680 32" stroke="#b08030" stroke-width="0.5" stroke-opacity="0.22" stroke-dasharray="4 8"/>
     </svg>
   </div>
   <div class="axis-body">
@@ -436,552 +452,13 @@ body::before {
   </div>
 </div>
 
-
-<!-- ═══════════ THE DESCENT ═══════════ -->
-<div class="arc-label arc-descent" style="animation-delay:0.3s">
-  <div class="arc-label-inner">
-    <span class="arc-glyph">↓</span>
-    <span class="arc-label-title">The Descent</span>
-    <span class="arc-label-sub">Fields I – VII</span>
+<!-- Field sections (rendered dynamically from Supabase) -->
+<div id="field-sections">
+  <div class="loading">
+    <span class="loading-glyph">✦</span>
+    Drawing from the field…
   </div>
 </div>
-
-<!-- FIELD I -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.35s" data-field="1">
-  <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <polygon points="550,10 616,48 616,104 550,120 484,104 484,48" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.42" fill="none"/>
-    <polygon points="550,36 580,53 580,87 550,104 520,87 520,53" stroke="#d4a84c" stroke-width="0.7" stroke-opacity="0.28" fill="none"/>
-    <line x1="550" y1="10"  x2="550" y2="36"  stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
-    <line x1="616" y1="48"  x2="580" y2="53"  stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
-    <line x1="616" y1="104" x2="580" y2="87"  stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
-    <line x1="550" y1="120" x2="550" y2="104" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
-    <line x1="484" y1="104" x2="520" y2="87"  stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
-    <line x1="484" y1="48"  x2="520" y2="53"  stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.2"/>
-    <line x1="550" y1="10"  x2="550" y2="65"  stroke="#d4a84c" stroke-width="0.35" stroke-opacity="0.14"/>
-    <line x1="616" y1="48"  x2="550" y2="65"  stroke="#d4a84c" stroke-width="0.35" stroke-opacity="0.14"/>
-    <line x1="484" y1="48"  x2="550" y2="65"  stroke="#d4a84c" stroke-width="0.35" stroke-opacity="0.14"/>
-    <circle cx="550" cy="65"  r="3.5" fill="#d4a84c" fill-opacity="0.55"/>
-    <circle cx="550" cy="10"  r="2"   fill="#d4a84c" fill-opacity="0.38"/>
-    <circle cx="616" cy="48"  r="2"   fill="#d4a84c" fill-opacity="0.38"/>
-    <circle cx="616" cy="104" r="2"   fill="#d4a84c" fill-opacity="0.38"/>
-    <circle cx="550" cy="120" r="2"   fill="#d4a84c" fill-opacity="0.38"/>
-    <circle cx="484" cy="104" r="2"   fill="#d4a84c" fill-opacity="0.38"/>
-    <circle cx="484" cy="48"  r="2"   fill="#d4a84c" fill-opacity="0.38"/>
-    <circle cx="180" cy="60"  r="1"   fill="#d4a84c" fill-opacity="0.16"/>
-    <circle cx="920" cy="40"  r="1"   fill="#d4a84c" fill-opacity="0.16"/>
-    <circle cx="100" cy="90"  r="0.8" fill="#d4a84c" fill-opacity="0.12"/>
-    <circle cx="1000" cy="80" r="0.8" fill="#d4a84c" fill-opacity="0.12"/>
-  </svg>
-  <div class="card-body">
-    <div class="card-top">
-      <div class="field-number-block">
-        <span class="field-number">I</span>
-        <span class="field-numeral-sign">♄♅</span>
-      </div>
-      <div class="card-title-block">
-        <div class="card-title">Structural Models</div>
-        <div class="card-tagline">Pre-incarnation geometry. The architecture before the first breath. The soul's coordinates before entry into matter.</div>
-      </div>
-      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
-    </div>
-    <div class="card-elements">Tesseract · Merkaba · Sacred geometry · Multidimensional awareness · Quantum leaping · A Wrinkle in Time · Time travel · Memory · Astrology in full</div>
-    <div class="card-expand">
-      <div class="subterrains"></div>
-      <div class="astro-panel"><div class="astro-panel-inner">
-        <div class="astro-glyphs-block">
-          <div class="astro-sign">Capricorn · Aquarius</div>
-          <div class="astro-planets">♄ ♅</div>
-          <div class="astro-rulers">Saturn · Uranus</div>
-        </div>
-        <div class="astro-principle">Pre-incarnation geometry. Saturn builds the container, Uranus ensures it cannot become a cage. The architecture of the soul's chosen curriculum before the first breath.</div>
-      </div></div>
-      <a href="fieldguide.html#field-i" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
-    </div>
-  </div>
-</div>
-
-<!-- FIELD II -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.42s" data-field="2">
-  <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <polyline points="20,82 100,82 118,78 136,82 164,82 196,82 212,80 228,82 252,82" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.32"/>
-    <polyline points="252,82 267,72 277,52 282,30 285,16 288,8 291,6 295,6 299,10 302,20 306,38 310,58 316,74 330,82" stroke="#c4bef8" stroke-width="1.4" stroke-opacity="0.75"/>
-    <polyline points="288,8 295,6 302,20" stroke="#c4bef8" stroke-width="3" stroke-opacity="1"/>
-    <polyline points="330,82 352,82 372,80 390,82 424,82 456,80 472,82 506,82 540,82 574,80 590,82 624,82 658,80 674,82 708,82 742,80 758,82 792,82 826,80 842,82 876,82 910,80 942,82 980,82 1020,80 1060,82 1090,82" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.32"/>
-    <path d="M 295 82 A 48 30 0 0 0 247 82" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.14" fill="none"/>
-    <path d="M 295 82 A 86 54 0 0 0 209 82" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.09" fill="none"/>
-    <circle cx="295" cy="6"   r="4"   fill="#c4bef8" fill-opacity="0.32"/>
-    <circle cx="100" cy="42"  r="1"   fill="#c4bef8" fill-opacity="0.18"/>
-    <circle cx="700" cy="38"  r="0.9" fill="#c4bef8" fill-opacity="0.18"/>
-    <circle cx="950" cy="52"  r="1"   fill="#c4bef8" fill-opacity="0.14"/>
-    <circle cx="60"  cy="62"  r="0.7" fill="#c4bef8" fill-opacity="0.14"/>
-  </svg>
-  <div class="card-body">
-    <div class="card-top">
-      <div class="field-number-block"><span class="field-number">II</span><span class="field-numeral-sign">♆☊⚷</span></div>
-      <div class="card-title-block">
-        <div class="card-title">Anomalous Reception</div>
-        <div class="card-tagline">Dissolution at the threshold of incarnation. The field pours in before the self has formed to filter it.</div>
-      </div>
-      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
-    </div>
-    <div class="card-elements">WOW signal · Telepathic awareness · Akashic records · Angels · Ancestors speaking · Spirit guides · Free will · Intuition · The discernment layer</div>
-    <div class="card-expand">
-      <div class="subterrains"></div>
-      <div class="astro-panel"><div class="astro-panel-inner">
-        <div class="astro-glyphs-block"><div class="astro-sign">Pisces</div><div class="astro-planets">♆ ☊ ⚷</div><div class="astro-rulers">Neptune · North Node · Chiron</div></div>
-        <div class="astro-principle">Neptune's dissolution at the crown. The karmic direction set at the moment of arrival. Chiron's wound is the break in the personal field that allows reception to enter. What arrives that you did not generate — and the rigorous practice of knowing the difference between genuine reception and projection.</div>
-      </div></div>
-      <a href="fieldguide.html#field-ii" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
-    </div>
-  </div>
-</div>
-
-<!-- FIELD III -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.49s" data-field="3">
-  <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <line x1="380" y1="116" x2="380" y2="60" stroke="#6dd8b2" stroke-width="1.2" stroke-opacity="0.58"/>
-    <line x1="720" y1="116" x2="720" y2="60" stroke="#6dd8b2" stroke-width="1.2" stroke-opacity="0.58"/>
-    <path d="M 380 60 A 170 90 0 0 1 720 60" stroke="#6dd8b2" stroke-width="1.2" stroke-opacity="0.58"/>
-    <line x1="380" y1="110" x2="720" y2="110" stroke="#6dd8b2" stroke-width="0.9" stroke-opacity="0.35"/>
-    <line x1="550" y1="60" x2="550" y2="16" stroke="#6dd8b2" stroke-width="0.8" stroke-opacity="0.32"/>
-    <line x1="550" y1="60" x2="494" y2="28" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.2"/>
-    <line x1="550" y1="60" x2="606" y2="28" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.2"/>
-    <line x1="550" y1="60" x2="436" y2="40" stroke="#6dd8b2" stroke-width="0.5" stroke-opacity="0.13"/>
-    <line x1="550" y1="60" x2="664" y2="40" stroke="#6dd8b2" stroke-width="0.5" stroke-opacity="0.13"/>
-    <circle cx="550" cy="16"  r="3.5" fill="#6dd8b2" fill-opacity="0.45"/>
-    <circle cx="550" cy="60"  r="3"   fill="#6dd8b2" fill-opacity="0.58"/>
-    <line x1="100" y1="110" x2="380" y2="110" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.14"/>
-    <line x1="720" y1="110" x2="1000" y2="110" stroke="#6dd8b2" stroke-width="0.4" stroke-opacity="0.14"/>
-    <circle cx="160" cy="72" r="1" fill="#6dd8b2" fill-opacity="0.18"/>
-    <circle cx="940" cy="66" r="1" fill="#6dd8b2" fill-opacity="0.18"/>
-  </svg>
-  <div class="card-body">
-    <div class="card-top">
-      <div class="field-number-block"><span class="field-number">III</span><span class="field-numeral-sign">♇☋</span></div>
-      <div class="card-title-block">
-        <div class="card-title">Threshold Events</div>
-        <div class="card-tagline">The crossing point between worlds. Pluto opens the threshold. The South Node carries the karmic inheritance that determines which thresholds a life will meet.</div>
-      </div>
-      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
-    </div>
-    <div class="card-elements">Dream state · Astral travel · Breathwork visions · Meditation · Time travel · Memory · Photographs as portals · Ancestral visits · Portals · Quantum leaping · Sovereign descent · Inanna's descent</div>
-    <div class="card-expand">
-      <div class="subterrains"></div>
-      <div class="astro-panel"><div class="astro-panel-inner">
-        <div class="astro-glyphs-block"><div class="astro-sign">Scorpio</div><div class="astro-planets">♇ ☋</div><div class="astro-rulers">Pluto · South Node</div></div>
-        <div class="astro-principle">Pluto at the abyss — the crossing point between the known and the underworld. The South Node carries the karmic inheritance that determines which thresholds a life will cross. Every threshold event is both personal and ancestral: the crossing you make was prepared by crossings made before you.</div>
-      </div></div>
-      <a href="fieldguide.html#field-iii" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
-    </div>
-  </div>
-</div>
-
-<!-- FIELD IV -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.56s" data-field="4">
-  <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M 160 90 Q 340 30 550 52 Q 760 74 940 38" stroke="#d4a84c" stroke-width="0.6" stroke-opacity="0.18" stroke-dasharray="4 8"/>
-    <path d="M 230 80 C 196 62 164 58 132 62 C 164 68 194 74 230 80 Z" fill="#d4a84c" fill-opacity="0.58"/>
-    <path d="M 230 80 C 196 92 178 98 148 98 C 176 93 204 88 230 80 Z" fill="#d4a84c" fill-opacity="0.32"/>
-    <line x1="230" y1="80" x2="268" y2="70" stroke="#d4a84c" stroke-width="1.4" stroke-opacity="0.48" stroke-linecap="round"/>
-    <path d="M 556 56 C 530 46 510 43 496 46 C 510 50 530 54 556 56 Z" fill="#d4a84c" fill-opacity="0.48"/>
-    <path d="M 556 56 C 532 64 518 68 502 68 C 518 64 534 61 556 56 Z" fill="#d4a84c" fill-opacity="0.26"/>
-    <line x1="556" y1="56" x2="582" y2="49" stroke="#d4a84c" stroke-width="1" stroke-opacity="0.38" stroke-linecap="round"/>
-    <path d="M 882 44 C 852 32 828 28 812 30 C 828 35 852 40 882 44 Z" fill="#f5aa88" fill-opacity="0.62"/>
-    <path d="M 882 44 C 858 54 842 58 826 58 C 842 54 860 50 882 44 Z" fill="#f5aa88" fill-opacity="0.34"/>
-    <line x1="882" y1="44" x2="908" y2="36" stroke="#f5aa88" stroke-width="1" stroke-opacity="0.45" stroke-linecap="round"/>
-    <circle cx="90"  cy="50" r="1" fill="#d4a84c" fill-opacity="0.18"/>
-    <circle cx="1020" cy="58" r="1" fill="#f5aa88" fill-opacity="0.18"/>
-  </svg>
-  <div class="card-body">
-    <div class="card-top">
-      <div class="field-number-block"><span class="field-number">IV</span><span class="field-numeral-sign">☽♀</span></div>
-      <div class="card-title-block">
-        <div class="card-title">Embodied Signal</div>
-        <div class="card-tagline">The receptive body. The Moon governs what the body knows before the mind arrives. Venus governs what the senses transmit. Beauty and signal as the same phenomenon.</div>
-      </div>
-      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
-    </div>
-    <div class="card-elements">Ravens · Goldfinch · Wren · Wings · Saltwater · Minerals · Crystals · Wind currents · Ocean currents · Vibration · Resonance</div>
-    <div class="card-expand">
-      <div class="subterrains"></div>
-      <div class="astro-panel"><div class="astro-panel-inner">
-        <div class="astro-glyphs-block"><div class="astro-sign">Cancer · Taurus</div><div class="astro-planets">☽ ♀</div><div class="astro-rulers">Moon + Venus — the receptive body</div></div>
-        <div class="astro-principle">The Moon governs the interior: what the body knows before the mind arrives. Venus governs what the senses transmit: beauty as information, texture as data, the physical world speaking in frequencies the rational mind cannot decode. Cancer and Taurus hold the two legs of embodied reception — the interior tidal body and the sensual ground.</div>
-      </div></div>
-      <a href="fieldguide.html#field-iv" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
-    </div>
-  </div>
-</div>
-
-<!-- FIELD V -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.63s" data-field="5">
-  <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M 0,60 C 30,34 30,34 60,60 C 90,86 90,86 120,60 C 150,34 150,34 180,60 C 210,86 210,86 240,60 C 270,34 270,34 300,60 C 330,86 330,86 360,60 C 390,34 390,34 420,60 C 444,74 452,80 474,74" stroke="#c4bef8" stroke-width="1.2" stroke-opacity="0.45" stroke-linecap="round"/>
-    <path d="M 1100,60 C 1070,34 1070,34 1040,60 C 1010,86 1010,86 980,60 C 950,34 950,34 920,60 C 890,86 890,86 860,60 C 830,34 830,34 800,60 C 770,86 770,86 740,60 C 710,34 710,34 680,60 C 656,74 648,80 626,74" stroke="#f5aa88" stroke-width="1.2" stroke-opacity="0.45" stroke-linecap="round"/>
-    <path d="M 460,60 C 484,28 484,28 550,60 C 616,92 616,92 640,60" stroke="#d4a84c" stroke-width="2.5" stroke-opacity="0.88" stroke-linecap="round"/>
-    <circle cx="550" cy="60" r="6"  fill="#d4a84c" fill-opacity="0.42"/>
-    <circle cx="550" cy="60" r="14" fill="#d4a84c" fill-opacity="0.12"/>
-    <circle cx="550" cy="60" r="24" fill="#d4a84c" fill-opacity="0.05"/>
-  </svg>
-  <div class="card-body">
-    <div class="card-top">
-      <div class="field-number-block"><span class="field-number">V</span><span class="field-numeral-sign">☿♃</span></div>
-      <div class="card-title-block">
-        <div class="card-title">Resonance in Language</div>
-        <div class="card-tagline">The messenger and the meaning-maker. Mercury's swift naming and Jupiter's expansive transmission — the Gemini–Sagittarius axis held within a single Field.</div>
-      </div>
-      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
-    </div>
-    <div class="card-elements">The three registers · Signal · Frequency · Compression · Descent · Emergence · Mirror · Container · Threshold · Teaching · Mentorship · Writing · Conversation</div>
-    <div class="card-expand">
-      <div class="subterrains"></div>
-      <div class="astro-panel"><div class="astro-panel-inner">
-        <div class="astro-glyphs-block"><div class="astro-sign">Gemini · Sagittarius</div><div class="astro-planets">☿ ♃</div><div class="astro-rulers">Mercury + Jupiter — the axis of meaning</div></div>
-        <div class="astro-principle">This Field holds both legs of the mutable air-fire axis: Gemini's swift naming and Sagittarius's expansive transmission. Language as the first tool the embodied self reaches for, and wisdom as what language becomes when it has been carried far enough. The double rulership is structural — this is the only Field that holds an entire polarity axis within itself.</div>
-      </div></div>
-      <a href="fieldguide.html#field-v" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
-    </div>
-  </div>
-</div>
-
-<!-- FIELD VI -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.70s" data-field="6">
-  <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="110" cy="60" r="28" stroke="#f5aa88" stroke-width="0.8" stroke-opacity="0.4" fill="none"/>
-    <path d="M 282 38 A 22 22 0 1 0 282 82 A 12 12 0 1 1 282 38 Z" fill="#f5aa88" fill-opacity="0.28"/>
-    <circle cx="440" cy="60" r="22" stroke="#f5aa88" stroke-width="0.6" stroke-opacity="0.35" fill="none"/>
-    <path d="M 440 38 A 22 22 0 0 1 440 82 Z" fill="#f5aa88" fill-opacity="0.35"/>
-    <circle cx="660" cy="60" r="22" stroke="#f5aa88" stroke-width="0.6" stroke-opacity="0.3" fill="rgba(245,170,136,0.08)"/>
-    <path d="M 660 38 A 22 22 0 0 1 660 82 A 8 8 0 0 0 660 38 Z" fill="#f5aa88" fill-opacity="0.3"/>
-    <circle cx="880" cy="60" r="22" fill="#f5aa88" fill-opacity="0.28"/>
-    <circle cx="880" cy="60" r="22" stroke="#f5aa88" stroke-width="0.8" stroke-opacity="0.48" fill="none"/>
-    <circle cx="1050" cy="60" r="16" stroke="#f5aa88" stroke-width="0.6" stroke-opacity="0.2" fill="none" stroke-dasharray="3 5"/>
-    <path d="M 138 60 Q 210 42 260 60 Q 360 88 420 60 Q 500 26 540 60 Q 600 96 640 60 Q 682 28 720 60 Q 780 90 820 60 Q 850 40 858 60" stroke="#f5aa88" stroke-width="0.5" stroke-opacity="0.22" fill="none"/>
-  </svg>
-  <div class="card-body">
-    <div class="card-top">
-      <div class="field-number-block"><span class="field-number">VI</span><span class="field-numeral-sign">☽♋</span></div>
-      <div class="card-title-block">
-        <div class="card-title">Body as Active Practice</div>
-        <div class="card-tagline">The Moon's domain. The body's tidal, cyclic, rhythmic intelligence. What we need. What nurtures. The mother field — received somatically first.</div>
-      </div>
-      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
-    </div>
-    <div class="card-elements">Breathwork · Meditation · Movement · Dance · Laughter · Tears · Mirror work · Lymphatic drainage · Moon cycles · Compassion as the soothing balm · The body as sacred vessel</div>
-    <div class="card-expand">
-      <div class="subterrains"></div>
-      <div class="astro-panel"><div class="astro-panel-inner">
-        <div class="astro-glyphs-block"><div class="astro-sign">Cancer</div><div class="astro-planets">☽ ♋</div><div class="astro-rulers">Moon · The tidal body</div></div>
-        <div class="astro-principle">The Moon's domain — the body's cyclic, rhythmic intelligence. What we need. What nurtures. Compassion flows here as the soothing balm and the flowing water. Received somatically before it becomes emotion or thought.</div>
-      </div></div>
-      <a href="fieldguide.html#field-vi" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
-    </div>
-  </div>
-</div>
-
-<!-- FIELD VII -->
-<div class="field-card descent" onclick="toggle(this)" style="animation-delay:0.77s" data-field="7">
-  <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="550" cy="60" r="36" stroke="#d4a84c" stroke-width="1.1" stroke-opacity="0.5" fill="rgba(212,168,76,0.07)"/>
-    <circle cx="550" cy="60" r="20" fill="#d4a84c" fill-opacity="0.24"/>
-    <line x1="550" y1="18" x2="550" y2="4"   stroke="#d4a84c" stroke-width="1" stroke-opacity="0.45"/>
-    <line x1="550" y1="102" x2="550" y2="116" stroke="#d4a84c" stroke-width="1" stroke-opacity="0.45"/>
-    <line x1="512" y1="29" x2="500" y2="18"   stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.38"/>
-    <line x1="588" y1="29" x2="600" y2="18"   stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.38"/>
-    <line x1="512" y1="91" x2="500" y2="102"  stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.38"/>
-    <line x1="588" y1="91" x2="600" y2="102"  stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.38"/>
-    <line x1="514" y1="60" x2="498" y2="60"   stroke="#d4a84c" stroke-width="1" stroke-opacity="0.45"/>
-    <line x1="586" y1="60" x2="602" y2="60"   stroke="#d4a84c" stroke-width="1" stroke-opacity="0.45"/>
-    <!-- Journal left -->
-    <rect x="130" y="38" width="74" height="46" rx="2" stroke="#c4bef8" stroke-width="0.8" stroke-opacity="0.4" fill="rgba(196,190,248,0.05)"/>
-    <line x1="144" y1="54" x2="192" y2="54" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.3"/>
-    <line x1="144" y1="63" x2="192" y2="63" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.25"/>
-    <line x1="144" y1="72" x2="172" y2="72" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.2"/>
-    <!-- Musical notes right -->
-    <circle cx="750" cy="72" r="7" fill="#f5aa88" fill-opacity="0.38"/>
-    <line x1="757" y1="72" x2="757" y2="44" stroke="#f5aa88" stroke-width="1" stroke-opacity="0.5"/>
-    <circle cx="790" cy="62" r="7" fill="#f5aa88" fill-opacity="0.32"/>
-    <line x1="797" y1="62" x2="797" y2="34" stroke="#f5aa88" stroke-width="1" stroke-opacity="0.45"/>
-    <!-- Camera far right -->
-    <rect x="900" y="42" width="60" height="40" rx="4" stroke="#6dd8b2" stroke-width="0.7" stroke-opacity="0.38" fill="none"/>
-    <circle cx="930" cy="62" r="11" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.42" fill="none"/>
-    <circle cx="930" cy="62" r="5"  fill="#6dd8b2" fill-opacity="0.28"/>
-  </svg>
-  <div class="card-body">
-    <div class="card-top">
-      <div class="field-number-block"><span class="field-number">VII</span><span class="field-numeral-sign">☉♌</span></div>
-      <div class="card-title-block">
-        <div class="card-title">The Creative Record</div>
-        <div class="card-tagline">The sovereign creative force at the height of summer. The act of making as sovereign expression. The sun at its zenith — Leo's fire as the engine of creation.</div>
-      </div>
-      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
-    </div>
-    <div class="card-elements">Art · Music · Dance as creative fire · Journals · Photographs as portals · Visual art · Story · Myth · Narrative · The Ancestral Weaving</div>
-    <div class="card-expand">
-      <div class="subterrains"></div>
-      <div class="astro-panel"><div class="astro-panel-inner">
-        <div class="astro-glyphs-block"><div class="astro-sign">Leo</div><div class="astro-planets">☉ ♌</div><div class="astro-rulers">Sun · The sovereign fire</div></div>
-        <div class="astro-principle">The sovereign creative force at the height of summer. Not the artifact as record but the act of making as sovereign expression. Christina Young writing poems on the ship. Eleanor governing through the troubadour tradition from her prison.</div>
-      </div></div>
-      <a href="fieldguide.html#field-vii" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ THE UNDERWORLD ═══════════ -->
-<div class="arc-label arc-underworld" style="animation-delay:0.9s">
-  <div class="arc-label-inner">
-    <span class="arc-glyph">↓↑</span>
-    <span class="arc-label-title">The Underworld</span>
-    <span class="arc-label-sub">Fields VIII – X</span>
-  </div>
-</div>
-
-
-<!-- FIELD VIII -->
-<div class="field-card underworld" onclick="toggle(this)" style="animation-delay:0.84s" data-field="8">
-  <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <line x1="550" y1="10" x2="550" y2="110" stroke="#6dd8b2" stroke-width="0.9" stroke-opacity="0.5"/>
-    <path d="M 550 28 C 530 20 506 16 484 20" stroke="#6dd8b2" stroke-width="0.9" stroke-opacity="0.45" fill="none"/>
-    <path d="M 550 28 C 570 20 594 16 616 20" stroke="#6dd8b2" stroke-width="0.9" stroke-opacity="0.45" fill="none"/>
-    <path d="M 550 46 C 518 36 484 30 452 34" stroke="#6dd8b2" stroke-width="0.8" stroke-opacity="0.38" fill="none"/>
-    <path d="M 550 46 C 582 36 616 30 648 34" stroke="#6dd8b2" stroke-width="0.8" stroke-opacity="0.38" fill="none"/>
-    <path d="M 550 18 C 538 8 524 4 510 4"   stroke="#6dd8b2" stroke-width="0.7" stroke-opacity="0.3" fill="none"/>
-    <path d="M 550 18 C 562 8 576 4 590 4"   stroke="#6dd8b2" stroke-width="0.7" stroke-opacity="0.3" fill="none"/>
-    <path d="M 550 88 C 530 96 506 100 484 96" stroke="#6dd8b2" stroke-width="0.9" stroke-opacity="0.38" fill="none"/>
-    <path d="M 550 88 C 570 96 594 100 616 96" stroke="#6dd8b2" stroke-width="0.9" stroke-opacity="0.38" fill="none"/>
-    <path d="M 550 100 C 518 110 484 116 452 112" stroke="#6dd8b2" stroke-width="0.7" stroke-opacity="0.28" fill="none"/>
-    <path d="M 550 100 C 582 110 616 116 648 112" stroke="#6dd8b2" stroke-width="0.7" stroke-opacity="0.28" fill="none"/>
-    <path d="M 400 110 Q 476 120 550 112 Q 624 120 700 110" stroke="#6dd8b2" stroke-width="0.5" stroke-opacity="0.2" fill="none" stroke-dasharray="2 4"/>
-    <circle cx="550" cy="60" r="4" fill="#6dd8b2" fill-opacity="0.4"/>
-    <circle cx="240" cy="50" r="5" stroke="#6dd8b2" stroke-width="0.7" stroke-opacity="0.35" fill="none"/>
-    <circle cx="860" cy="50" r="5" stroke="#6dd8b2" stroke-width="0.7" stroke-opacity="0.35" fill="none"/>
-    <circle cx="120" cy="80" r="4" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.28" fill="none"/>
-    <circle cx="980" cy="80" r="4" stroke="#6dd8b2" stroke-width="0.6" stroke-opacity="0.28" fill="none"/>
-  </svg>
-  <div class="card-body">
-    <div class="card-top">
-      <div class="field-number-block"><span class="field-number">VIII</span><span class="field-numeral-sign">☿♍♊</span></div>
-      <div class="card-title-block">
-        <div class="card-title">Animal and Nature Medicine</div>
-        <div class="card-tagline">Mercury as Hermes — the psychopomp between human and non-human worlds. Virgo's healing discernment. Gemini's swift translation between species.</div>
-      </div>
-      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
-    </div>
-    <div class="card-elements">Lion · Owl · Butterfly · Dragon · Hummingbird · Snake · Bear · Turtle · Dolphin · Whale · Wolf · Cat · Dog · Fish · Plant medicine · Trees · Mushrooms · Gardens · Hiking · Bodies of water · Travel</div>
-    <div class="card-expand">
-      <div class="subterrains"></div>
-      <div class="astro-panel"><div class="astro-panel-inner">
-        <div class="astro-glyphs-block"><div class="astro-sign">Virgo · Gemini</div><div class="astro-planets">☿ ♍</div><div class="astro-rulers">Mercury as Hermes — the psychopomp</div></div>
-        <div class="astro-principle">Mercury as Hermes — the guide between worlds. In Field V Mercury names; in Field VIII Mercury translates between human and non-human intelligence. Virgo's healing discernment and Gemini's swift code-switching are the two faces of Mercury's underworld function. The midwife's hands, the herbalist's knowledge, the body in right relationship with all living things.</div>
-      </div></div>
-      <a href="fieldguide.html#field-viii" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
-    </div>
-  </div>
-</div>
-
-<!-- FIELD IX -->
-<div class="field-card pivot" onclick="toggle(this)" style="animation-delay:0.94s" data-field="9">
-  <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="550" cy="60" rx="100" ry="52" stroke="#f5aa88" stroke-width="1" stroke-opacity="0.45" fill="rgba(245,170,136,0.04)"/>
-    <ellipse cx="550" cy="60" rx="84"  ry="42" stroke="#f5aa88" stroke-width="0.5" stroke-opacity="0.25" fill="none"/>
-    <line x1="550" y1="8"  x2="550" y2="112" stroke="#f5aa88" stroke-width="0.5" stroke-opacity="0.2" stroke-dasharray="3 5"/>
-    <circle cx="480" cy="32" r="9" stroke="#f5aa88" stroke-width="0.8" stroke-opacity="0.5" fill="none"/>
-    <path d="M 480 41 L 476 62 L 470 80" stroke="#f5aa88" stroke-width="0.8" stroke-opacity="0.45" fill="none" stroke-linecap="round"/>
-    <path d="M 480 41 L 484 62 L 490 80" stroke="#f5aa88" stroke-width="0.8" stroke-opacity="0.45" fill="none" stroke-linecap="round"/>
-    <line x1="472" y1="52" x2="462" y2="46" stroke="#f5aa88" stroke-width="0.8" stroke-opacity="0.4" stroke-linecap="round"/>
-    <line x1="488" y1="52" x2="498" y2="46" stroke="#f5aa88" stroke-width="0.8" stroke-opacity="0.4" stroke-linecap="round"/>
-    <circle cx="620" cy="32" r="9" stroke="#f5aa88" stroke-width="0.7" stroke-opacity="0.35" fill="none"/>
-    <path d="M 620 41 L 624 62 L 630 80" stroke="#f5aa88" stroke-width="0.7" stroke-opacity="0.35" fill="none" stroke-linecap="round"/>
-    <path d="M 620 41 L 616 62 L 610 80" stroke="#f5aa88" stroke-width="0.7" stroke-opacity="0.35" fill="none" stroke-linecap="round"/>
-    <line x1="628" y1="52" x2="638" y2="46" stroke="#f5aa88" stroke-width="0.7" stroke-opacity="0.32" stroke-linecap="round"/>
-    <line x1="612" y1="52" x2="602" y2="46" stroke="#f5aa88" stroke-width="0.7" stroke-opacity="0.32" stroke-linecap="round"/>
-    <circle cx="200" cy="48" r="1.2" fill="#f5aa88" fill-opacity="0.3"/>
-    <circle cx="900" cy="48" r="1.2" fill="#f5aa88" fill-opacity="0.3"/>
-    <circle cx="120" cy="78" r="1"   fill="#f5aa88" fill-opacity="0.22"/>
-    <circle cx="980" cy="78" r="1"   fill="#f5aa88" fill-opacity="0.22"/>
-  </svg>
-  <div class="card-body">
-    <div class="card-top">
-      <div class="field-number-block"><span class="field-number">IX</span><span class="field-numeral-sign">♀♎</span></div>
-      <div class="card-title-block">
-        <div class="card-title">The Mirror</div>
-        <div class="card-tagline">The first field of the return arc. The self that has been through the descent meets the other and finds itself reflected. Libra as the moment of first recognition after the crossing.</div>
-      </div>
-      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
-    </div>
-    <div class="card-elements">Relationship · The other as teacher · Mirror work · Witnessing · Compassion in relationship · Beauty as information · The self meeting itself in another face</div>
-    <div class="card-expand">
-      <div class="subterrains"></div>
-      <div class="astro-panel"><div class="astro-panel-inner">
-        <div class="astro-glyphs-block"><div class="astro-sign">Libra</div><div class="astro-planets">♀ ♎</div><div class="astro-rulers">Venus · The relational field</div></div>
-        <div class="astro-principle">The self that has been through the shadow meets the other and finds itself reflected. Libra as the moment of first recognition: I am seen, therefore I exist differently than I did before the crossing.</div>
-      </div></div>
-      <a href="fieldguide.html#field-ix" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
-    </div>
-  </div>
-</div>
-
-<!-- FIELD X -->
-<div class="field-card pivot" onclick="toggle(this)" style="animation-delay:1.01s" data-field="10">
-  <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <line x1="0"    y1="22" x2="1100" y2="22" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.15" stroke-dasharray="6 8"/>
-    <line x1="0"    y1="44" x2="1100" y2="44" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.22" stroke-dasharray="4 6"/>
-    <line x1="0"    y1="64" x2="1100" y2="64" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.28" stroke-dasharray="3 5"/>
-    <line x1="0"    y1="84" x2="1100" y2="84" stroke="#c4bef8" stroke-width="0.6" stroke-opacity="0.35"/>
-    <path d="M 380 84 C 410 62 460 56 510 62 C 560 68 580 82 600 74 C 620 66 634 52 646 40" stroke="#c4bef8" stroke-width="1.3" stroke-opacity="0.55" fill="none"/>
-    <polygon points="646,40 638,54 650,50" fill="#c4bef8" fill-opacity="0.55"/>
-    <line x1="280" y1="84" x2="268" y2="96"  stroke="#c4bef8" stroke-width="0.8" stroke-opacity="0.4" stroke-linecap="round"/>
-    <line x1="280" y1="84" x2="292" y2="96"  stroke="#c4bef8" stroke-width="0.8" stroke-opacity="0.4" stroke-linecap="round"/>
-    <line x1="280" y1="84" x2="280" y2="100" stroke="#c4bef8" stroke-width="0.8" stroke-opacity="0.4" stroke-linecap="round"/>
-    <line x1="820" y1="84" x2="808" y2="96"  stroke="#c4bef8" stroke-width="0.8" stroke-opacity="0.4" stroke-linecap="round"/>
-    <line x1="820" y1="84" x2="832" y2="96"  stroke="#c4bef8" stroke-width="0.8" stroke-opacity="0.4" stroke-linecap="round"/>
-    <circle cx="550" cy="50" r="5" fill="#c4bef8" fill-opacity="0.25"/>
-    <circle cx="550" cy="50" r="2" fill="#c4bef8" fill-opacity="0.5"/>
-    <circle cx="160" cy="54" r="1" fill="#c4bef8" fill-opacity="0.3"/>
-    <circle cx="940" cy="34" r="1" fill="#c4bef8" fill-opacity="0.25"/>
-  </svg>
-  <div class="card-body">
-    <div class="card-top">
-      <div class="field-number-block"><span class="field-number">X</span><span class="field-numeral-sign">♇♏</span></div>
-      <div class="card-title-block">
-        <div class="card-title">The Shadow</div>
-        <div class="card-tagline">The underworld proper. What lies beneath. The field that makes Sovereignty possible — you cannot claim the self you actually are until you have been in the underground of the self you were given.</div>
-      </div>
-      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
-    </div>
-    <div class="card-elements">The unconscious · The disowned self · Unlived life · Bloodline patterns · The unresolved · Ancestral underground · Death as intelligence · The alchemical process · Shadow work</div>
-    <div class="card-expand">
-      <div class="subterrains"></div>
-      <div class="astro-panel"><div class="astro-panel-inner">
-        <div class="astro-glyphs-block"><div class="astro-sign">Scorpio</div><div class="astro-planets">♇ ♏</div><div class="astro-rulers">Pluto · The underworld intelligence</div></div>
-        <div class="astro-principle">The Ancestral Weaving lives here astrologically — death, inheritance, what is passed through the bloodline. The shadow work does not produce sovereignty as a reward. It removes the obstacles preventing the sovereign from knowing itself.</div>
-      </div></div>
-      <a href="fieldguide.html#field-x" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ THE RETURN ═══════════ -->
-<div class="arc-label arc-return" style="animation-delay:1.05s">
-  <div class="arc-label-inner">
-    <span class="arc-glyph">↑</span>
-    <span class="arc-label-title">The Return</span>
-    <span class="arc-label-sub">Fields XI – XIII</span>
-  </div>
-</div>
-
-<!-- FIELD XI -->
-<div class="field-card return-arc" onclick="toggle(this)" style="animation-delay:1.09s" data-field="11">
-  <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <line x1="120" y1="90" x2="840" y2="30" stroke="#d4a84c" stroke-width="1.1" stroke-opacity="0.5"/>
-    <polygon points="840,30 820,36 828,48" fill="#d4a84c" fill-opacity="0.55"/>
-    <path d="M 120 90 C 108 72 108 50 120 34" stroke="#d4a84c" stroke-width="0.9" stroke-opacity="0.4" fill="none"/>
-    <line x1="120" y1="90" x2="120" y2="34" stroke="#d4a84c" stroke-width="0.5" stroke-opacity="0.25"/>
-    <line x1="0"   y1="102" x2="1100" y2="102" stroke="#d4a84c" stroke-width="0.4" stroke-opacity="0.18"/>
-    <circle cx="300" cy="70" r="1.5" fill="#d4a84c" fill-opacity="0.45"/>
-    <circle cx="480" cy="55" r="1.3" fill="#d4a84c" fill-opacity="0.4"/>
-    <circle cx="660" cy="42" r="1.5" fill="#d4a84c" fill-opacity="0.45"/>
-    <path d="M 120 90 C 110 80 112 68 120 62 C 114 70 116 80 120 90 Z" fill="#d4a84c" fill-opacity="0.4"/>
-    <circle cx="900" cy="98" r="4" stroke="#d4a84c" stroke-width="0.7" stroke-opacity="0.4" fill="none"/>
-    <circle cx="950" cy="98" r="4" stroke="#d4a84c" stroke-width="0.7" stroke-opacity="0.4" fill="none"/>
-    <circle cx="1000" cy="98" r="4" stroke="#d4a84c" stroke-width="0.7" stroke-opacity="0.4" fill="none"/>
-  </svg>
-  <div class="card-body">
-    <div class="card-top">
-      <div class="field-number-block"><span class="field-number">XI</span><span class="field-numeral-sign">♃♐</span></div>
-      <div class="card-title-block">
-        <div class="card-title">The Teaching</div>
-        <div class="card-tagline">The philosopher-archer. What was gathered in the descent now aimed at the horizon for others to find. Jupiter's abundance applied to the act of sharing what was hard-won.</div>
-      </div>
-      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
-    </div>
-    <div class="card-elements">Transmission as sacred practice · The teacher who has been through the territory · Astrology as offering · Ancestral weaving as offering · Coaching · Mentorship · The expanding flame</div>
-    <div class="card-expand">
-      <div class="subterrains"></div>
-      <div class="astro-panel"><div class="astro-panel-inner">
-        <div class="astro-glyphs-block"><div class="astro-sign">Sagittarius</div><div class="astro-planets">♃ ♐</div><div class="astro-rulers">Jupiter · The expanding flame</div></div>
-        <div class="astro-principle">The transmission at scale. What was gathered in the descent, witnessed in the shadow, and reflected in the mirror — now aimed at the horizon for others to find. The teaching that transforms both teacher and student.</div>
-      </div></div>
-      <a href="fieldguide.html#field-xi" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
-    </div>
-  </div>
-</div>
-
-<!-- FIELD XII -->
-<div class="field-card return-arc" onclick="toggle(this)" style="animation-delay:1.16s" data-field="12">
-  <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M 380 50 L 376 90 Q 376 100 420 100 Q 464 100 464 90 L 460 50 Z" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.5" fill="rgba(196,190,248,0.05)"/>
-    <path d="M 380 50 Q 420 38 460 50" stroke="#c4bef8" stroke-width="0.8" stroke-opacity="0.45" fill="none"/>
-    <path d="M 464 68 C 510 58 540 74 570 64 C 600 54 630 70 660 62 C 690 54 720 68 760 60 C 800 52 840 64 880 56" stroke="#c4bef8" stroke-width="1.2" stroke-opacity="0.55" fill="none"/>
-    <path d="M 464 80 C 510 70 540 84 570 76 C 600 68 630 80 660 74 C 690 66 720 78 760 72 C 800 64 840 76 880 68" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.38" fill="none"/>
-    <circle cx="160" cy="48" r="1.8" fill="#c4bef8" fill-opacity="0.45"/>
-    <line x1="160" y1="44" x2="160" y2="52" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.35"/>
-    <line x1="156" y1="48" x2="164" y2="48" stroke="#c4bef8" stroke-width="0.5" stroke-opacity="0.35"/>
-    <circle cx="220" cy="78" r="1.4" fill="#c4bef8" fill-opacity="0.38"/>
-    <line x1="220" y1="74" x2="220" y2="82" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.3"/>
-    <line x1="216" y1="78" x2="224" y2="78" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.3"/>
-    <path d="M 384 46 L 384 36 L 392 42 L 420 34 L 448 42 L 456 36 L 456 46" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.5" fill="none"/>
-  </svg>
-  <div class="card-body">
-    <div class="card-top">
-      <div class="field-number-block"><span class="field-number">XII</span><span class="field-numeral-sign">♄♅</span></div>
-      <div class="card-title-block">
-        <div class="card-title">Sovereignty</div>
-        <div class="card-tagline">The higher octave of Field I. The same coordinates — Capricorn and Aquarius — but now inhabited from within. Structure chosen rather than inherited. The Royal Gatekeeper fully known.</div>
-      </div>
-      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
-    </div>
-    <div class="card-elements">The claimed self · The Royal Gatekeeper fully inhabited · The Water Bearer · Moon cycles as navigation · Structure chosen not inherited · The sovereign cycle · The revolutionary self</div>
-    <div class="card-expand">
-      <div class="subterrains"></div>
-      <div class="astro-panel"><div class="astro-panel-inner">
-        <div class="astro-glyphs-block"><div class="astro-sign">Capricorn · Aquarius</div><div class="astro-planets">♄ ♅</div><div class="astro-rulers">Saturn chosen · Uranus liberated</div></div>
-        <div class="astro-principle">The wheel returns to the opening signs at a higher octave. Field I was geometry imposed from outside. Field XII is the same geometry, now chosen from within. The spiral completes — same coordinates, transformed consciousness.</div>
-      </div></div>
-      <a href="fieldguide.html#field-xii" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
-    </div>
-  </div>
-</div>
-
-<!-- FIELD XIII -->
-<div class="field-card return-arc" onclick="toggle(this)" style="animation-delay:1.23s" data-field="13">
-  <svg class="card-art" viewBox="0 0 1100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M 320 52 C 360 36 440 34 500 48 C 540 56 560 68 548 78 C 528 92 444 88 380 72 C 336 60 316 56 320 52 Z" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.45" fill="rgba(196,190,248,0.06)"/>
-    <path d="M 320 52 C 298 44 276 52 286 62 C 294 70 320 68 320 52 Z" fill="#c4bef8" fill-opacity="0.22"/>
-    <circle cx="358" cy="46" r="2" fill="#c4bef8" fill-opacity="0.5"/>
-    <path d="M 780 68 C 740 84 660 86 600 72 C 560 64 540 52 552 42 C 572 28 656 32 720 48 C 764 60 784 64 780 68 Z" stroke="#c4bef8" stroke-width="0.9" stroke-opacity="0.38" fill="rgba(196,190,248,0.04)"/>
-    <path d="M 780 68 C 802 76 824 68 814 58 C 806 50 780 52 780 68 Z" fill="#c4bef8" fill-opacity="0.18"/>
-    <circle cx="742" cy="74" r="2" fill="#c4bef8" fill-opacity="0.42"/>
-    <path d="M 543 44 Q 550 60 557 76" stroke="#c4bef8" stroke-width="0.7" stroke-opacity="0.35" fill="none" stroke-dasharray="2 3"/>
-    <circle cx="550" cy="60" r="50" stroke="#c4bef8" stroke-width="0.4" stroke-opacity="0.1" fill="none"/>
-    <circle cx="550" cy="60" r="72" stroke="#c4bef8" stroke-width="0.3" stroke-opacity="0.06" fill="none"/>
-    <circle cx="160" cy="36" r="1" fill="#c4bef8" fill-opacity="0.3"/>
-    <circle cx="940" cy="36" r="1" fill="#c4bef8" fill-opacity="0.3"/>
-    <circle cx="100" cy="80" r="0.8" fill="#c4bef8" fill-opacity="0.2"/>
-    <circle cx="1000" cy="80" r="0.8" fill="#c4bef8" fill-opacity="0.2"/>
-  </svg>
-  <div class="card-body">
-    <div class="card-top">
-      <div class="field-number-block"><span class="field-number">XIII</span><span class="field-numeral-sign">♃♆☊☋</span></div>
-      <div class="card-title-block">
-        <div class="card-title">The Return</div>
-        <div class="card-tagline">Full circle to where Field II began — but now carrying everything. The same coordinates, transformed. The dissolution that is chosen rather than undergone. The spiral beginning again.</div>
-      </div>
-      <span class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></span>
-    </div>
-    <div class="card-elements">Dissolution back into the larger field · Integration · The cycle completing · The stowaway who has crossed the ocean and kneels on the shore · The spiral beginning again at a higher octave</div>
-    <div class="card-expand">
-      <div class="subterrains"></div>
-      <div class="astro-panel"><div class="astro-panel-inner">
-        <div class="astro-glyphs-block"><div class="astro-sign">Pisces</div><div class="astro-planets">♃ ♆ ☊☋</div><div class="astro-rulers">Jupiter + Neptune + the nodal axis</div></div>
-        <div class="astro-principle">Jupiter's expansion carries the dissolution beyond private completion into something that feeds back into the world. The nodal axis closes the karmic loop: what the South Node carried as inheritance, the North Node has now aimed forward. The consciousness that knows itself before it dissolves. The spiral that does not close but opens.</div>
-      </div></div>
-      <a href="fieldguide.html#field-xiii" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
-    </div>
-  </div>
-</div>
-
 
 <div class="map-footer">
   <div class="footer-rule"></div>
@@ -995,91 +472,164 @@ body::before {
 </div>
 
 </div>
+
 <script>
+const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+
+const ARC_META = {
+  descent:    { label: 'Arc I',   title: 'The Descent',    glyph: '↓', sub: 'Fields I – VII' },
+  underworld: { label: 'Arc II',  title: 'The Underworld', glyph: '◉', sub: 'Fields VIII – X' },
+  return:     { label: 'Arc III', title: 'The Return',     glyph: '↑', sub: 'Fields XI – XIII' }
+};
+
+function arcKeyFor(num) {
+  if (num <= 7) return 'descent';
+  if (num <= 10) return 'underworld';
+  return 'return';
+}
+function arcCssClass(num) {
+  if (num <= 7) return 'descent';
+  if (num <= 10) return 'underworld';
+  return 'return-arc';
+}
+
+async function supaFetch(path) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  if (!res.ok) throw new Error(`Supabase ${res.status}`);
+  return res.json();
+}
+
+function renderField(field, subterrains) {
+  const arcClass = arcCssClass(field.number);
+  const delay = 0.3 + (field.number * 0.04);
+
+  const subtsHtml = (subterrains || []).map((st, i) => `
+    <a href="fieldguide.html#field-${field.number}" class="subterrain-chip">
+      <span class="subterrain-chip-number">Subterrain ${i + 1}</span>
+      <span class="subterrain-chip-name">${st.name}</span>
+      ${st.description ? `<span class="subterrain-chip-desc">${st.description}</span>` : ''}
+      <span class="subterrain-chip-link">Explore in Fieldguide →</span>
+    </a>`).join('');
+
+  const registersHtml = `
+    <div class="field-registers">
+      <div class="field-registers-label">The three registers at the field</div>
+      <div class="registers-grid">
+        ${field.register_mythic     ? `<div class="register register-mythic"><div class="register-label"><span class="register-label-dot"></span>Mythic</div><div class="register-text">${field.register_mythic}</div></div>` : ''}
+        ${field.register_conceptual ? `<div class="register register-conceptual"><div class="register-label"><span class="register-label-dot"></span>Conceptual</div><div class="register-text">${field.register_conceptual}</div></div>` : ''}
+        ${field.register_somatic    ? `<div class="register register-somatic"><div class="register-label"><span class="register-label-dot"></span>Somatic</div><div class="register-text">${field.register_somatic}</div></div>` : ''}
+      </div>
+    </div>`;
+
+  const astroInnerParts = [
+    field.astro_signs   ? `<div class="astro-sign">${field.astro_signs}</div>` : '',
+    field.astro_planets ? `<div class="astro-planets">${field.astro_planets}</div>` : '',
+    field.field_rulers  ? `<div class="astro-rulers">${field.field_rulers}</div>` : ''
+  ].filter(Boolean).join('');
+
+  const astroHtml = (astroInnerParts || field.astro_principle) ? `
+    <div class="astro-panel">
+      <div class="astro-panel-inner">
+        ${astroInnerParts ? `<div class="astro-glyphs-block">${astroInnerParts}</div>` : ''}
+        ${field.astro_principle ? `<div class="astro-principle">${field.astro_principle}</div>` : ''}
+      </div>
+    </div>` : '';
+
+  const bridgeHtml = field.bridge_nodes ? `
+    <div class="bridge-node">
+      <div class="bridge-node-label">Between the Fields</div>
+      <div class="bridge-node-text">${field.bridge_nodes}</div>
+    </div>` : '';
+
+  return `
+    <div class="field-card ${arcClass}" onclick="toggle(this)" data-field="${field.number}" style="animation-delay:${delay}s">
+      <div class="card-topline"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <div class="field-number-block">
+            <span class="field-number">${field.roman || field.number}</span>
+            ${field.astro_planets ? `<span class="field-numeral-sign">${field.astro_planets}</span>` : ''}
+          </div>
+          <div>
+            <div class="card-title">${field.name}</div>
+            ${field.tagline ? `<div class="card-tagline">${field.tagline}</div>` : ''}
+          </div>
+          <div class="card-chevron"><svg viewBox="0 0 10 6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 5,5 9,1"/></svg></div>
+        </div>
+      </div>
+      <div class="card-seam"></div>
+      <div class="card-expand">
+        <div class="card-expand-inner">
+          ${field.elements ? `<div class="card-elements">${field.elements}</div>` : ''}
+          ${astroHtml}
+          ${registersHtml}
+          <div class="subterrains-label">Subterrains</div>
+          <div class="subterrains">${subtsHtml || '<div style="color:var(--ink-faint);font-style:italic;grid-column:1/-1;text-align:center">Subterrain detail in the Fieldguide.</div>'}</div>
+          <a href="fieldguide.html#field-${field.number}" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
+          ${bridgeHtml}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderArcLabel(arcKey, delay) {
+  const meta = ARC_META[arcKey];
+  return `
+    <div class="arc-label arc-${arcKey}" style="animation-delay:${delay}s">
+      <div class="arc-label-inner">
+        <span class="arc-glyph">${meta.glyph}</span>
+        <span class="arc-label-title">${meta.title}</span>
+        <span class="arc-label-sub">${meta.sub}</span>
+      </div>
+    </div>`;
+}
+
+async function loadMap() {
+  try {
+    const [fields, subterrains] = await Promise.all([
+      supaFetch('fields?select=*&order=number.asc'),
+      supaFetch('subterrains?select=*&order=sort_order.asc')
+    ]);
+
+    // Group subterrains by field_id
+    const stByFieldId = {};
+    subterrains.forEach(st => {
+      if (!stByFieldId[st.field_id]) stByFieldId[st.field_id] = [];
+      stByFieldId[st.field_id].push(st);
+    });
+
+    // Build sections: arc label, followed by that arc's fields
+    let html = '';
+    let currentArc = null;
+    fields.forEach(f => {
+      const arc = arcKeyFor(f.number);
+      if (arc !== currentArc) {
+        html += renderArcLabel(arc, 0.3);
+        currentArc = arc;
+      }
+      html += renderField(f, stByFieldId[f.id]);
+    });
+
+    document.getElementById('field-sections').innerHTML = html;
+  } catch (err) {
+    console.error('Map load failed:', err);
+    document.getElementById('field-sections').innerHTML =
+      `<div class="loading"><span class="loading-glyph">⚠</span>Could not draw the field. ${err.message}</div>`;
+  }
+}
+
 function toggle(card) {
-  var expand = card.querySelector('.card-expand');
+  const expand = card.querySelector('.card-expand');
   if (!expand) return;
-  var isOpen = expand.classList.contains('open');
+  const isOpen = expand.classList.contains('open');
   expand.classList.toggle('open', !isOpen);
   card.classList.toggle('open', !isOpen);
 }
 
-// ── Supabase subterrain population ──────────────────────────────
-const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
-
-async function loadFieldData() {
-  try {
-    // Fetch fields (for id→number mapping + bridge_nodes) and all subterrains
-    const [fields, subterrains] = await Promise.all([
-      fetch(`${SUPABASE_URL}/rest/v1/fields?select=id,number,bridge_nodes`, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-      }).then(r => r.json()),
-      fetch(`${SUPABASE_URL}/rest/v1/subterrains?select=*&order=sort_order.asc`, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-      }).then(r => r.json())
-    ]);
-
-    // Map field id → field number, and field number → bridge_nodes
-    const fieldNumById = {};
-    const bridgeByFieldNum = {};
-    fields.forEach(f => {
-      fieldNumById[f.id] = f.number;
-      bridgeByFieldNum[f.number] = f.bridge_nodes;
-    });
-
-    // Group subterrains by field number
-    const subtsByFieldNum = {};
-    subterrains.forEach(st => {
-      const num = fieldNumById[st.field_id];
-      if (!num) return;
-      if (!subtsByFieldNum[num]) subtsByFieldNum[num] = [];
-      subtsByFieldNum[num].push(st);
-    });
-
-    // For each field card on the page, inject chips and bridge nodes
-    document.querySelectorAll('.field-card[data-field]').forEach(card => {
-      const fieldNum = parseInt(card.dataset.field);
-
-      // ── Subterrain chips with descriptions ──
-      const subs = subtsByFieldNum[fieldNum] || [];
-      const container = card.querySelector('.subterrains');
-      if (container && subs.length > 0) {
-        container.innerHTML = subs.map((st, i) => {
-          const desc = st.description
-            ? `<span class="subterrain-chip-desc">${st.description}</span>`
-            : '';
-          return `
-          <a href="fieldguide.html#field-${fieldNum}" class="subterrain-chip">
-            <span class="subterrain-chip-number">Subterrain ${i + 1}</span>
-            <span class="subterrain-chip-name">${st.name}</span>
-            ${desc}
-            <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-          </a>`;
-        }).join('');
-      }
-
-      // ── Bridge nodes ──
-      const bridge = bridgeByFieldNum[fieldNum];
-      if (bridge) {
-        const astroPanel = card.querySelector('.astro-panel');
-        if (astroPanel) {
-          const bridgeDiv = document.createElement('div');
-          bridgeDiv.className = 'bridge-node';
-          bridgeDiv.innerHTML = `
-            <div class="bridge-node-label">Between the Fields</div>
-            <div class="bridge-node-text">${bridge}</div>`;
-          astroPanel.insertAdjacentElement('afterend', bridgeDiv);
-        }
-      }
-    });
-
-  } catch (err) {
-    console.warn('Field data fetch failed:', err.message);
-  }
-}
-
-loadFieldData();
+loadMap();
 </script>
 </body>
 </html>
