@@ -483,19 +483,35 @@ async function sbPatch(table, id, body) {
   if (!res.ok) throw new Error(`Supabase PATCH ${res.status}`);
 }
 
-// ── Auth helper — reads the portal session from sessionStorage ──
-// The portal stores { access_token, refresh_token, expires_at, user } under
+// ── Auth helper — reads the portal session ──
+// The portal writes { access_token, refresh_token, expires_at, user } under
 // the 'portal_session' key after login (see portal.html ensureFreshToken
-// pattern, decisions.md 2026-04-28). Convergence.html is reached from the
-// authenticated portal context, so the session should be present here.
+// pattern, decisions.md 2026-04-28). It uses sessionStorage by convention.
+// We check localStorage as a fallback so cross-tab reads on the same origin
+// still find the session (sessionStorage is per-tab; localStorage is per-origin).
+//
+// Note: this does NOT cross origin boundaries. Each Vercel preview URL is
+// its own origin; portal login must happen on the SAME hostname as this page.
 function getPortalAccessToken() {
-  try {
-    const raw = sessionStorage.getItem('portal_session');
-    if (!raw) return null;
-    const session = JSON.parse(raw);
-    return session?.access_token || null;
-  } catch {
-    return null;
+  for (const store of [sessionStorage, localStorage]) {
+    try {
+      const raw = store.getItem('portal_session');
+      if (!raw) continue;
+      const session = JSON.parse(raw);
+      if (session?.access_token) return session.access_token;
+    } catch {
+      // ignore parse errors and try the next store
+    }
+  }
+  return null;
+}
+
+// Sentinel error so the catch block in startGeneration can render a portal
+// link instead of plain text.
+class NotAuthenticatedError extends Error {
+  constructor() {
+    super('Not authenticated. Please log in via the portal first.');
+    this.name = 'NotAuthenticatedError';
   }
 }
 
@@ -506,7 +522,7 @@ function getPortalAccessToken() {
 async function callClaude(systemPrompt, userMessage) {
   const accessToken = getPortalAccessToken();
   if (!accessToken) {
-    throw new Error('Not authenticated. Please log in via the portal first.');
+    throw new NotAuthenticatedError();
   }
   const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-convergence`, {
     method: 'POST',
@@ -1092,11 +1108,20 @@ async function startGeneration() {
     main.innerHTML = renderConvergence(enriched, globalClientData, globalHistory);
     window.scrollTo({ top: 0, behavior: 'instant' });
   } catch(err) {
-    main.innerHTML = `<div style="text-align:center;padding:4rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:#c07060">
-      <p>The convergence could not be generated.</p>
-      <p style="font-size:15px;margin-top:0.5rem;opacity:0.88">${err.message}</p>
-      <button class="btn-regen" style="margin-top:1.5rem" onclick="init()">Try again</button>
-    </div>`;
+    if (err instanceof NotAuthenticatedError) {
+      main.innerHTML = `<div style="text-align:center;padding:4rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:#c07060">
+        <p style="font-size:17px">Not authenticated.</p>
+        <p style="font-size:15px;margin-top:0.5rem;opacity:0.88;color:#c8c0b0">Generating a Convergence requires a logged-in portal session.</p>
+        <a href="/portal.html" class="btn-regen" style="margin-top:1.5rem;display:inline-block;text-decoration:none">Log in to the Portal →</a>
+        <p style="font-size:14px;margin-top:1.5rem;opacity:0.88;color:#9a9088">After logging in, return to this page and click + NEW.</p>
+      </div>`;
+    } else {
+      main.innerHTML = `<div style="text-align:center;padding:4rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:#c07060">
+        <p>The convergence could not be generated.</p>
+        <p style="font-size:15px;margin-top:0.5rem;opacity:0.88">${err.message}</p>
+        <button class="btn-regen" style="margin-top:1.5rem" onclick="init()">Try again</button>
+      </div>`;
+    }
   }
 }
 
