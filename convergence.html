@@ -232,19 +232,88 @@ body::before {
   font-family: 'Cormorant Garamond', serif;
 }
 
-/* ── Regenerate ── */
+/* ── Regenerate / Download ── */
 .regen-bar {
   text-align: center; margin-top: 3rem; padding-top: 2rem;
   border-top: 1px solid var(--border);
+  display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;
 }
-.btn-regen {
+.btn-regen, .btn-pdf {
   font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
   letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--gold); background: none;
   border: 1px solid var(--gold-dim); border-radius: 6px;
   padding: 10px 24px; cursor: pointer; transition: all 0.2s;
 }
-.btn-regen:hover { border-color: var(--gold); background: var(--accent); }
+.btn-regen:hover, .btn-pdf:hover {
+  border-color: var(--gold); background: var(--accent);
+}
+
+/* ── Convergence history navigation strip ── */
+.history-nav {
+  margin: 0 0 2.5rem 0; padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: rgba(0,0,0,0.18);
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+}
+.history-label {
+  font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-dim);
+}
+.history-list {
+  display: flex; gap: 0.5rem; flex-wrap: wrap; flex: 1;
+}
+.history-item {
+  font-family: 'Jost', sans-serif; font-size: 13px;
+  letter-spacing: 0.05em;
+  color: var(--text-dim); background: none;
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 6px 12px; cursor: pointer; transition: all 0.2s;
+}
+.history-item:hover { border-color: var(--gold-dim); color: var(--gold); }
+.history-item.active {
+  border-color: var(--gold); color: var(--gold); background: var(--accent);
+}
+.history-new {
+  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--gold); background: none;
+  border: 1px solid var(--gold-dim); border-radius: 4px;
+  padding: 6px 14px; cursor: pointer; transition: all 0.2s;
+  white-space: nowrap;
+}
+.history-new:hover { border-color: var(--gold); background: var(--accent); }
+
+/* ── Print / PDF stylesheet ──
+   Triggered by window.print(). Hides nav, buttons, progress, history strip;
+   forces a clean light-on-cream layout suitable for print/PDF.
+*/
+@media print {
+  body { background: #f8f4ec !important; color: #2a2218 !important; }
+  .nav, header, footer,
+  .regen-bar, .history-nav,
+  .progress-wrap, .generate-panel,
+  #progress-wrap,
+  .btn-regen, .btn-pdf, .btn-generate,
+  button {
+    display: none !important;
+  }
+  .container, main, #main-content {
+    background: #f8f4ec !important; color: #2a2218 !important;
+    max-width: 100% !important; padding: 0 !important;
+  }
+  h1, h2, h3, h4, .section-title, .frequency-name {
+    color: #6a4a18 !important;
+  }
+  p, .body, .section-body, .evidence-snippet {
+    color: #2a2218 !important;
+  }
+  .section-header-line { background: #c9a87c !important; }
+  a { color: #6a4a18 !important; text-decoration: none !important; }
+  .section { page-break-inside: avoid; }
+  @page { margin: 0.75in; }
+}
 
 /* ── Loading ── */
 .loading-state {
@@ -396,9 +465,28 @@ async function loadClientData() {
 }
 
 async function loadExistingConvergence(clientId) {
+  // Backwards-compatible: returns the most recent convergence (used by init flow).
+  // For full history, use loadConvergenceHistory instead.
   const convs = await sb(
     `convergences?client_id=eq.${clientId}&order=created_at.desc&limit=1`
   );
+  if (!convs.length) return null;
+  const conv = convs[0];
+  const sections = await sb(
+    `convergence_sections?convergence_id=eq.${conv.id}&order=sort_order.asc`
+  );
+  return { ...conv, sections };
+}
+
+async function loadConvergenceHistory(clientId) {
+  // All convergences for this client, newest first. Sections loaded lazily on view.
+  return await sb(
+    `convergences?client_id=eq.${clientId}&order=created_at.desc&select=id,title,status,created_at,version`
+  );
+}
+
+async function loadConvergenceById(convId) {
+  const convs = await sb(`convergences?id=eq.${convId}&limit=1`);
   if (!convs.length) return null;
   const conv = convs[0];
   const sections = await sb(
@@ -784,7 +872,29 @@ function renderSection(sec, freqAncestors) {
     </div>`;
 }
 
-function renderConvergence(conv, clientData) {
+/**
+ * Render the convergence-history navigation strip (past convergences,
+ * each clickable to load that one; plus a "New" button to generate a fresh one).
+ * Returns empty string when no history exists.
+ */
+function renderHistoryNav(history, currentConvId) {
+  if (!history || history.length === 0) return '';
+  const fmt = d => new Date(d).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric'
+  });
+  const items = history.map(h => {
+    const isActive = h.id === currentConvId ? 'active' : '';
+    return `<button class="history-item ${isActive}" onclick="viewConvergence('${h.id}')">${fmt(h.created_at)}</button>`;
+  }).join('');
+  return `
+    <div class="history-nav">
+      <span class="history-label">Past Convergences</span>
+      <div class="history-list">${items}</div>
+      <button class="history-new" onclick="startGeneration()">+ New</button>
+    </div>`;
+}
+
+function renderConvergence(conv, clientData, history) {
   const freqAncestors = clientData?.freqAncestors || {};
   const topFreqs = clientData?.sortedFreqs || conv.dominant_frequencies?.map(f=>[f,0]) || [];
   const maxCount = topFreqs[0]?.[1] || 1;
@@ -803,6 +913,7 @@ function renderConvergence(conv, clientData) {
 
   return `
     <div class="convergence-output">
+      ${renderHistoryNav(history, conv.id)}
       ${renderSnapshot(convWithMeta)}
       <div class="section-header">
         <div class="section-header-line"></div>
@@ -811,7 +922,8 @@ function renderConvergence(conv, clientData) {
       </div>
       ${sectionsHtml}
       <div class="regen-bar">
-        <button class="btn-regen" onclick="startGeneration()">Regenerate Convergence</button>
+        <button class="btn-pdf" onclick="window.print()">Download as PDF</button>
+        <button class="btn-regen" onclick="startGeneration()">Generate New Convergence</button>
       </div>
     </div>`;
 }
@@ -869,7 +981,9 @@ async function startGeneration() {
           : []
       }))
     };
-    main.innerHTML = renderConvergence(enriched, globalClientData);
+    await refreshHistory();  // pick up the new convergence in the nav strip
+    main.innerHTML = renderConvergence(enriched, globalClientData, globalHistory);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   } catch(err) {
     main.innerHTML = `<div style="text-align:center;padding:4rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:#c07060">
       <p>The convergence could not be generated.</p>
@@ -879,14 +993,43 @@ async function startGeneration() {
   }
 }
 
+// Convergence history (lightweight rows: id, title, status, created_at, version).
+// Loaded once on init; refreshed after each new generation.
+let globalHistory = [];
+
+async function refreshHistory() {
+  if (!globalClientData) return [];
+  globalHistory = await loadConvergenceHistory(globalClientData.client.id);
+  return globalHistory;
+}
+
+/** Render a specific past convergence (by id), keeping the history nav active. */
+async function viewConvergence(convId) {
+  const main = document.getElementById('main-content');
+  try {
+    main.innerHTML = `<div class="loading-state"><span class="loading-glyph">◇</span><div class="loading-text">Loading convergence…</div></div>`;
+    const conv = await loadConvergenceById(convId);
+    if (!conv) throw new Error('Convergence not found.');
+    main.innerHTML = renderConvergence(conv, globalClientData, globalHistory);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  } catch (err) {
+    main.innerHTML = `<div style="text-align:center;padding:4rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:#c07060">
+      <p>${err.message}</p>
+    </div>`;
+  }
+}
+
 async function init() {
   const main = document.getElementById('main-content');
   try {
     globalClientData = await loadClientData();
-    const existing = await loadExistingConvergence(globalClientData.client.id);
+    await refreshHistory();
 
-    if (existing && existing.sections?.length) {
-      main.innerHTML = renderConvergence(existing, globalClientData);
+    if (globalHistory.length > 0) {
+      // Render the most recent convergence by default; history nav lets the user
+      // jump to any past one. "+ New" inside the nav generates a fresh one.
+      const latest = await loadConvergenceById(globalHistory[0].id);
+      main.innerHTML = renderConvergence(latest, globalClientData, globalHistory);
     } else {
       main.innerHTML = renderGeneratePanel(globalClientData);
     }
