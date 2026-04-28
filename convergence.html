@@ -410,19 +410,29 @@ async function sbPatch(table, id, body) {
 }
 
 // ── Claude API helper ───────────────────────────────────────
+// Routes through the generate-convergence Supabase Edge Function (Claude API
+// proxy with the Anthropic key in server-side env vars). Direct api.anthropic.com
+// calls don't work from the browser — CORS + missing key — so this proxy is
+// required for all client-side Claude use.
 async function callClaude(systemPrompt, userMessage) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-convergence`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`
+    },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userMessage }]
+      system_prompt: systemPrompt,
+      user_message: userMessage
     })
   });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Claude proxy error: ${res.status} ${errText}`);
+  }
   const data = await res.json();
-  return data.content?.[0]?.text || '';
+  return data.text || '';
 }
 
 // ── Data loading ────────────────────────────────────────────
