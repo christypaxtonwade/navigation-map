@@ -900,6 +900,8 @@ const ADMIN_EMAIL = 'christypaxtonwade@gmail.com';
 // ── State ─────────────────────────────────────────────
 let currentUser = null;
 let accessToken = null;
+let refreshToken = null;
+let tokenExpiresAt = 0; // epoch ms; 0 means unknown
 let isAdmin = false;
 let isPreviewingAsClient = false;
 let previewClientId = null;
@@ -907,16 +909,27 @@ let allClients = [];
 let allAncestors = [];
 
 // ── Bootstrap ─────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   // Check for existing session in storage
   const stored = sessionStorage.getItem('portal_session');
   if (stored) {
     try {
       const s = JSON.parse(stored);
-      accessToken = s.access_token;
-      currentUser = s.user;
-      enterApp();
-      return;
+      accessToken     = s.access_token  || null;
+      refreshToken    = s.refresh_token || null;
+      tokenExpiresAt  = s.expires_at    || 0;
+      currentUser     = s.user          || null;
+
+      // Refresh now if the access token is expired or close to it.
+      // If there's no refresh token (older session shape), force re-login.
+      const ok = await ensureFreshToken();
+      if (ok && currentUser) {
+        enterApp();
+        return;
+      }
+      // Session unrecoverable — fall through to login screen
+      sessionStorage.removeItem('portal_session');
+      accessToken = null; refreshToken = null; tokenExpiresAt = 0; currentUser = null;
     } catch(e) { sessionStorage.removeItem('portal_session'); }
   }
   showView('view-login');
@@ -954,9 +967,11 @@ async function handleLogin() {
     const data = await res.json();
 
     if (data.access_token) {
-      accessToken = data.access_token;
-      currentUser = data.user;
-      sessionStorage.setItem('portal_session', JSON.stringify({ access_token: accessToken, user: currentUser }));
+      accessToken    = data.access_token;
+      refreshToken   = data.refresh_token || null;
+      tokenExpiresAt = Date.now() + ((data.expires_in || 3600) * 1000);
+      currentUser    = data.user;
+      persistSession();
       enterApp();
     } else {
       errEl.textContent = data.error_description || data.msg || 'Login failed. Check your credentials.';
@@ -977,13 +992,77 @@ async function handleSignOut() {
     }).catch(() => {});
   }
   sessionStorage.removeItem('portal_session');
-  accessToken = null; currentUser = null; isAdmin = false;
+  accessToken = null; refreshToken = null; tokenExpiresAt = 0;
+  currentUser = null; isAdmin = false;
   isPreviewingAsClient = false; previewClientId = null;
   showView('view-login');
   document.getElementById('login-email').value = '';
   document.getElementById('login-password').value = '';
   document.getElementById('btn-login').disabled = false;
   document.getElementById('btn-login').textContent = 'Enter →';
+}
+
+// ── Token refresh ─────────────────────────────────────
+function persistSession() {
+  sessionStorage.setItem('portal_session', JSON.stringify({
+    access_token:  accessToken,
+    refresh_token: refreshToken,
+    expires_at:    tokenExpiresAt,
+    user:          currentUser
+  }));
+}
+
+// Returns true when accessToken is valid (or was successfully refreshed),
+// false when the session is unrecoverable and the user should log in again.
+let _refreshInflight = null;
+async function ensureFreshToken() {
+  if (!accessToken) return false;
+  // Refresh if we'll expire in the next 60 seconds (or expiry is unknown)
+  const needsRefresh = !tokenExpiresAt || (Date.now() > tokenExpiresAt - 60_000);
+  if (!needsRefresh) return true;
+  if (!refreshToken) return false; // older session shape, can't refresh
+
+  // De-dupe concurrent refreshes
+  if (!_refreshInflight) {
+    _refreshInflight = (async () => {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ refresh_token: refreshToken })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.access_token) return false;
+        accessToken    = data.access_token;
+        refreshToken   = data.refresh_token || refreshToken;
+        tokenExpiresAt = Date.now() + ((data.expires_in || 3600) * 1000);
+        if (data.user) currentUser = data.user;
+        persistSession();
+        return true;
+      } catch (e) {
+        return false;
+      } finally {
+        _refreshInflight = null;
+      }
+    })();
+  }
+  return _refreshInflight;
+}
+
+// Hard auth failure — clear session and bounce to the login screen with a message.
+function forceReauth(reason) {
+  sessionStorage.removeItem('portal_session');
+  accessToken = null; refreshToken = null; tokenExpiresAt = 0;
+  currentUser = null; isAdmin = false;
+  isPreviewingAsClient = false; previewClientId = null;
+  showView('view-login');
+  const errEl = document.getElementById('login-error');
+  if (errEl) errEl.textContent = reason || 'Your session has expired — please sign in again.';
+  const emailEl = document.getElementById('login-email');
+  if (emailEl) emailEl.focus();
 }
 
 // ── Enter app ────────────────────────────────────────
@@ -1566,7 +1645,14 @@ async function generateAncestorAI() {
   document.getElementById('ar-review').style.display = 'none';
 
   try {
-    const res = await fetch(
+    // Refresh the JWT if it's expired or close to expiring before we call the function.
+    const fresh = await ensureFreshToken();
+    if (!fresh) {
+      forceReauth('Your session has expired — please sign in again.');
+      return;
+    }
+
+    const callGenerate = () => fetch(
       `${SUPABASE_URL}/functions/v1/generate-ancestor`,
       {
         method: 'POST',
@@ -1578,9 +1664,27 @@ async function generateAncestorAI() {
         body: JSON.stringify({ name, dates, location, notes, level })
       }
     );
+
+    let res = await callGenerate();
+
+    // If the JWT was rejected mid-flight, try one refresh-and-retry; otherwise bounce to login.
+    if (res.status === 401) {
+      const refreshed = await ensureFreshToken();
+      if (refreshed) {
+        res = await callGenerate();
+      }
+      if (res.status === 401) {
+        forceReauth('Your session has expired — please sign in again.');
+        return;
+      }
+    }
+
     const data = await res.json();
 
-    if (data.error) throw new Error(data.error);
+    // Surface non-OK responses (e.g. 500 from the function, or gateway errors with {message,code} shape)
+    if (!res.ok || data.error || data.message) {
+      throw new Error(data.error || data.message || `Request failed (${res.status})`);
+    }
 
     arReviewData = data;
     arChips = matchFrequencyTags(data.frequency_tags || []);
