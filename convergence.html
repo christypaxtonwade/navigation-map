@@ -476,6 +476,78 @@ Write a single paragraph (150-180 words) that opens the document. Name the scope
   sections.push({ ...snapSection, freqName: null, freqCount: null, ancestors: [] });
   setProgress('snapshot', 'done');
 
+  // ── Section: Purpose (chart-driven) ──
+  // Reads chart_gene_keys + lineage_resonance_check, writes a Purpose section.
+  // Silently skipped if the client has no chart yet — backwards compatible.
+  setProgress('purpose', 'active');
+  try {
+    const chartGK = await sb(`chart_gene_keys?client_id=eq.${client.id}&limit=1`);
+    if (chartGK.length > 0) {
+      const purposeKey = chartGK[0].gk_purpose;
+      const purposeLine = chartGK[0].gk_purpose_line;
+      const ref = await sb(`gene_keys_reference?number=eq.${purposeKey}&limit=1`);
+
+      if (ref.length > 0) {
+        const r = ref[0];
+        const fieldId = r.shadow_field_id || r.primary_field_id;
+        const fieldData = fieldId
+          ? await sb(`fields?id=eq.${fieldId}&limit=1`)
+          : [];
+        const field = fieldData[0];
+
+        // Lineage-resonance: ancestors carrying the field of this Purpose key
+        const matchesResp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/lineage_resonance_check`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify({ p_client_id: client.id })
+        });
+        const allMatches = matchesResp.ok ? await matchesResp.json() : [];
+        const purposeMatches = (allMatches || []).filter(m => m.sphere === 'purpose');
+
+        const matchSummary = purposeMatches.slice(0, 5).map(m =>
+          `${m.ancestor_name} (${m.ancestor_dates || '—'}, ${m.match_strength}): ${(m.layer_unresolved || '').slice(0, 200)}`
+        ).join('\n\n');
+
+        const purposePrompt = `Write the Purpose section of The Convergence for ${CLIENT_NAME}.
+
+This section reads the structural assignment her body inherited — the deepest pattern transmitted through the lineage that her body was built to metabolize and transmute.
+
+ANALYTICAL FRAME (do NOT mention this vocabulary in the rendered prose — it is for your structural understanding only):
+- The Purpose key carries the frequency arc: ${r.shadow} → ${r.gift} → ${r.siddhi}
+- It lands on ${field ? `Field ${field.number} · ${field.name}` : 'a primary Map field'}
+${field?.tagline ? `- Field tagline: ${field.tagline}` : ''}
+${field?.register_mythic ? `- Mythic register: ${field.register_mythic}` : ''}
+
+LINEAGE MATCHES (ancestors in her weaving who carry this field-level frequency):
+${matchSummary || 'No specific ancestor matches surfaced; speak to the structural inheritance more generally.'}
+
+Write TWO paragraphs (total 250-320 words):
+
+1. Name the structural assignment — what pattern her body was given to carry forward, framed as the unfinished work of the line that came before her. Reference matched ancestors by name, narratively, anchored in their specific historical detail. Use the Map's vocabulary (frequency, threshold, descent, transmission, thread, register) where it lands precisely. Do not name Gene Keys, Human Design, or chart vocabulary explicitly. Stay primarily in the conceptual register with mythic threading.
+
+2. Speak directly to ${CLIENT_NAME}: name what her body knows how to do that the line could not, name the work as recognition rather than instruction, end with a sentence quiet enough to land. Stay primarily in the conceptual register; close with mythic if it lands cleanly.`;
+
+        const purposeText = await callClaude(SYSTEM, purposePrompt);
+        const [purposeSection] = await sbPost('convergence_sections', {
+          convergence_id: conv.id,
+          section_type: 'purpose',
+          title: 'Your Assignment, Surfaced',
+          ai_draft: purposeText,
+          final_text: purposeText,
+          sort_order: 0.5
+        });
+        sections.push({ ...purposeSection, freqName: null, freqCount: null, ancestors: [] });
+      }
+    }
+  } catch (e) {
+    console.warn('Purpose section skipped:', e?.message || e);
+  }
+  setProgress('purpose', 'done');
+
   // ── Sections 2–6: Dominant frequency analyses ──
   for (let i = 0; i < Math.min(5, topFreqs.length); i++) {
     const [freqName, freqCount] = topFreqs[i];
@@ -758,6 +830,7 @@ function renderProgressPanel() {
   const steps = [
     { id:'init',       label:'Initialising convergence record' },
     { id:'snapshot',   label:'Writing the lineage snapshot' },
+    { id:'purpose',    label:'Reading the inherited assignment' },
     { id:'freq_0',     label:'Analysing dominant frequency 1' },
     { id:'freq_1',     label:'Analysing dominant frequency 2' },
     { id:'freq_2',     label:'Analysing dominant frequency 3' },
