@@ -286,33 +286,107 @@ body::before {
 .history-new:hover { border-color: var(--gold); background: var(--accent); }
 
 /* ── Print / PDF stylesheet ──
-   Triggered by window.print(). Hides nav, buttons, progress, history strip;
-   forces a clean light-on-cream layout suitable for print/PDF.
+   Triggered by window.print(). Conforms to readability-standard.md
+   (vellum + ink palette, addendum 2026-04-18) and readability-parameters.md
+   (font size ≥ 15px, opacity ≥ 0.88, body weight 400+ on light surfaces).
+
+   Vellum / ink reference values (from readability-standard.md):
+     --vellum     #e8dcbb    background
+     --ink        #14110a    primary body / headings    (13.4:1 contrast)
+     --ink-secondary #2b2414  body register text         (9.5:1)
+     --ink-dim    #4e4228    labels, meta               (5.8:1)
+     --ink-gold   #7a5618    accents, gold on vellum    (5.6:1)
+     --ink-gold-bright #a07428  links, hover            (3.9:1)
 */
 @media print {
-  body { background: #f8f4ec !important; color: #2a2218 !important; }
+  /* Hide all interactive / navigational chrome */
   .nav, header, footer,
   .regen-bar, .history-nav,
   .progress-wrap, .generate-panel,
   #progress-wrap,
-  .btn-regen, .btn-pdf, .btn-generate,
+  .btn-regen, .btn-pdf, .btn-generate, .history-item, .history-new,
   button {
     display: none !important;
   }
-  .container, main, #main-content {
-    background: #f8f4ec !important; color: #2a2218 !important;
-    max-width: 100% !important; padding: 0 !important;
+
+  /* Full-page vellum surface */
+  html, body {
+    background: #e8dcbb !important;
+    color: #14110a !important;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
   }
-  h1, h2, h3, h4, .section-title, .frequency-name {
-    color: #6a4a18 !important;
+  .container, main, #main-content, .convergence-output {
+    background: #e8dcbb !important;
+    color: #14110a !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
-  p, .body, .section-body, .evidence-snippet {
-    color: #2a2218 !important;
+
+  /* Body text — ink on vellum, weight 400, full contrast */
+  p, .body, .section-body, .section-text, .evidence-snippet,
+  .convergence-section, .layer-text {
+    color: #14110a !important;
+    font-weight: 400 !important;
+    opacity: 1 !important;
+    font-size: 12pt !important;          /* 16px — well above 15px floor */
+    line-height: 1.55 !important;
   }
-  .section-header-line { background: #c9a87c !important; }
-  a { color: #6a4a18 !important; text-decoration: none !important; }
-  .section { page-break-inside: avoid; }
-  @page { margin: 0.75in; }
+
+  /* Headings — ink (not gold) for maximum readability on print */
+  h1, h2, h3, h4 {
+    color: #14110a !important;
+    opacity: 1 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Section titles + frequency names — ink-gold for register, full contrast */
+  .section-title, .frequency-name, .section-type-label {
+    color: #7a5618 !important;
+    opacity: 1 !important;
+    font-weight: 500 !important;
+    font-size: 13pt !important;
+  }
+
+  /* Eyebrow / label / meta text — ink-dim, never below 11pt */
+  .section-type-label, .field-note, .snapshot-label,
+  .layer-label, .layer-meta, .meta-row {
+    color: #4e4228 !important;
+    opacity: 1 !important;
+    font-size: 11pt !important;
+    letter-spacing: 0.08em;
+  }
+
+  /* Decorative lines — ink-gold-bright, kept clearly visible */
+  .section-header-line {
+    background: #a07428 !important;
+    opacity: 1 !important;
+  }
+  .section-header-label {
+    color: #7a5618 !important;
+    opacity: 1 !important;
+    font-weight: 500 !important;
+  }
+
+  /* Snapshot card on print */
+  .snapshot-card, .snapshot-item {
+    background: transparent !important;
+    border: 1px solid #a07428 !important;
+    color: #14110a !important;
+  }
+  .snapshot-value { color: #7a5618 !important; font-weight: 600 !important; }
+
+  /* Links retain ink-gold for visibility, no underline noise */
+  a { color: #7a5618 !important; text-decoration: none !important; }
+
+  /* Force full color rendering in browsers that strip print color by default */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* Avoid breaking sections across pages where possible */
+  .convergence-section, .snapshot-card { page-break-inside: avoid; }
+
+  /* Page margins */
+  @page { margin: 0.75in 0.65in; }
 }
 
 /* ── Loading ── */
@@ -409,18 +483,37 @@ async function sbPatch(table, id, body) {
   if (!res.ok) throw new Error(`Supabase PATCH ${res.status}`);
 }
 
+// ── Auth helper — reads the portal session from sessionStorage ──
+// The portal stores { access_token, refresh_token, expires_at, user } under
+// the 'portal_session' key after login (see portal.html ensureFreshToken
+// pattern, decisions.md 2026-04-28). Convergence.html is reached from the
+// authenticated portal context, so the session should be present here.
+function getPortalAccessToken() {
+  try {
+    const raw = sessionStorage.getItem('portal_session');
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    return session?.access_token || null;
+  } catch {
+    return null;
+  }
+}
+
 // ── Claude API helper ───────────────────────────────────────
-// Routes through the generate-convergence Supabase Edge Function (Claude API
-// proxy with the Anthropic key in server-side env vars). Direct api.anthropic.com
-// calls don't work from the browser — CORS + missing key — so this proxy is
-// required for all client-side Claude use.
+// Routes through the generate-convergence Supabase Edge Function. The function
+// uses gateway-disabled JWT + in-function JWKS verification (decisions.md
+// 2026-04-28), so we MUST send the user's session token, not the anon key.
 async function callClaude(systemPrompt, userMessage) {
+  const accessToken = getPortalAccessToken();
+  if (!accessToken) {
+    throw new Error('Not authenticated. Please log in via the portal first.');
+  }
   const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-convergence`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`
+      'Authorization': `Bearer ${accessToken}`
     },
     body: JSON.stringify({
       system_prompt: systemPrompt,
