@@ -582,9 +582,13 @@ async function loadExistingConvergence(clientId) {
 }
 
 async function loadConvergenceHistory(clientId) {
-  // All convergences for this client, newest first. Sections loaded lazily on view.
+  // All FINISHED convergences for this client, newest first.
+  // Excludes 'generating' status so partial/orphaned rows from failed runs
+  // don't show up in the history strip or get auto-loaded by init().
   return await sb(
-    `convergences?client_id=eq.${clientId}&order=created_at.desc&select=id,title,status,created_at,version`
+    `convergences?client_id=eq.${clientId}` +
+    `&status=in.(complete,published,in_review,draft)` +
+    `&order=created_at.desc&select=id,title,status,created_at,version`
   );
 }
 
