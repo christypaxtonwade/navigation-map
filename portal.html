@@ -910,8 +910,11 @@ let allAncestors = [];
 
 // ── Bootstrap ─────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-  // Check for existing session in storage
-  const stored = sessionStorage.getItem('portal_session');
+  // Check for existing session in storage. Read from sessionStorage first
+  // (per-tab — preferred when present), fall back to localStorage (shared
+  // across tabs of the same origin — required for convergence.html and any
+  // other page reached in a different tab from the login).
+  const stored = sessionStorage.getItem('portal_session') || localStorage.getItem('portal_session');
   if (stored) {
     try {
       const s = JSON.parse(stored);
@@ -928,9 +931,9 @@ window.addEventListener('DOMContentLoaded', async () => {
         return;
       }
       // Session unrecoverable — fall through to login screen
-      sessionStorage.removeItem('portal_session');
+      sessionStorage.removeItem('portal_session'); localStorage.removeItem('portal_session');
       accessToken = null; refreshToken = null; tokenExpiresAt = 0; currentUser = null;
-    } catch(e) { sessionStorage.removeItem('portal_session'); }
+    } catch(e) { sessionStorage.removeItem('portal_session'); localStorage.removeItem('portal_session'); }
   }
   showView('view-login');
   document.getElementById('login-email').focus();
@@ -991,7 +994,7 @@ async function handleSignOut() {
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${accessToken}` }
     }).catch(() => {});
   }
-  sessionStorage.removeItem('portal_session');
+  sessionStorage.removeItem('portal_session'); localStorage.removeItem('portal_session');
   accessToken = null; refreshToken = null; tokenExpiresAt = 0;
   currentUser = null; isAdmin = false;
   isPreviewingAsClient = false; previewClientId = null;
@@ -1004,12 +1007,17 @@ async function handleSignOut() {
 
 // ── Token refresh ─────────────────────────────────────
 function persistSession() {
-  sessionStorage.setItem('portal_session', JSON.stringify({
+  // Mirror the session into BOTH sessionStorage (per-tab, preferred) and
+  // localStorage (per-origin, required for cross-tab access from convergence.html
+  // and other pages opened in separate tabs). Both clear on signOut().
+  const payload = JSON.stringify({
     access_token:  accessToken,
     refresh_token: refreshToken,
     expires_at:    tokenExpiresAt,
     user:          currentUser
-  }));
+  });
+  sessionStorage.setItem('portal_session', payload);
+  localStorage.setItem('portal_session', payload);
 }
 
 // Returns true when accessToken is valid (or was successfully refreshed),
@@ -1054,7 +1062,7 @@ async function ensureFreshToken() {
 
 // Hard auth failure — clear session and bounce to the login screen with a message.
 function forceReauth(reason) {
-  sessionStorage.removeItem('portal_session');
+  sessionStorage.removeItem('portal_session'); localStorage.removeItem('portal_session');
   accessToken = null; refreshToken = null; tokenExpiresAt = 0;
   currentUser = null; isAdmin = false;
   isPreviewingAsClient = false; previewClientId = null;
