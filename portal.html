@@ -630,6 +630,45 @@ body::before {
   display: flex; align-items: center; justify-content: flex-end;
   gap: 1rem; margin: 2rem -2rem -2.5rem;
 }
+
+/* ── Client Detail panel (per-client admin dashboard) ── */
+.cd-grid { display: grid; gap: 1.25rem; margin-bottom: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); }
+.cd-card { background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 1.5rem; }
+.cd-card.full { grid-column: 1 / -1; }
+.cd-card-title { font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold);
+  margin: 0 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+.cd-row { display: grid; grid-template-columns: 140px 1fr;
+  gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+.cd-row:last-child { border-bottom: none; }
+.cd-row.stack { grid-template-columns: 1fr; gap: 0.4rem; }
+.cd-label { font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint);
+  align-self: center; }
+.cd-value { font-size: 15px; color: var(--text); }
+.cd-value.muted { color: var(--text-faint); font-style: italic; }
+.cd-pre { white-space: pre-wrap; font-size: 15px; color: var(--text-secondary);
+  line-height: 1.6; font-family: 'Cormorant Garamond', serif; }
+.cd-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.cd-status { font-family: 'Jost', sans-serif; font-size: 12px; color: var(--text-dim);
+  letter-spacing: 0.05em; }
+.cd-list { display: flex; flex-direction: column; gap: 0.4rem; }
+.cd-list-row { padding: 0.6rem 0.75rem; background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 4px;
+  display: grid; grid-template-columns: 1fr auto auto; gap: 1rem;
+  align-items: center; font-size: 14px; }
+.cd-list-row .name { color: var(--text); font-weight: 500; }
+.cd-list-row .meta { color: var(--text-dim); font-size: 13px; }
+.cd-list-row .status-pill { font-family: 'Jost', sans-serif; font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim);
+  padding: 2px 8px; border: 1px solid var(--border); border-radius: 3px; white-space: nowrap; }
+.cd-collapsible { cursor: pointer; user-select: none; }
+.cd-collapsible::after { content: ' ▸'; font-size: 10px; opacity: 0.7; }
+.cd-collapsible.open::after { content: ' ▾'; }
+.cd-collapsed-content { display: none; }
+.cd-collapsed-content.open { display: block; }
 </style>
 </head>
 <body>
@@ -734,6 +773,19 @@ body::before {
           </div>
         </div>
         <div class="client-list" id="clients-list"></div>
+      </div>
+
+      <!-- ══ ADMIN: Client Detail (per-client dashboard) ══ -->
+      <div class="panel" id="panel-client-detail">
+        <div class="panel-header">
+          <button class="btn btn-outline btn-sm" onclick="showPanel('panel-clients');renderClientList()" style="margin-bottom:1rem">← All Clients</button>
+          <div class="eyebrow">Client · Admin</div>
+          <div class="panel-title" id="cd-title">—</div>
+          <p class="panel-sub" id="cd-subtitle">—</p>
+        </div>
+        <div id="client-detail-content">
+          <div class="empty">No client selected.</div>
+        </div>
       </div>
 
       <!-- ══ ADMIN: Weaving Builder ══ -->
@@ -1214,6 +1266,373 @@ function startPreview(clientId) {
   loadMyWeaving();
 }
 
+// ════════════════════════════════════════════════════
+// ADMIN — CLIENT DETAIL (per-client dashboard)
+// ════════════════════════════════════════════════════
+let currentDetailClient = null;
+let currentDetailData = null;
+
+async function showClientDetail(clientId) {
+  showPanel('panel-client-detail');
+  currentDetailClient = clientId;
+  document.getElementById('cd-title').textContent = '—';
+  document.getElementById('cd-subtitle').textContent = '—';
+  document.getElementById('client-detail-content').innerHTML =
+    '<div class="empty">Loading…</div>';
+  await loadClientDetail();
+}
+
+async function loadClientDetail() {
+  const id = currentDetailClient;
+  if (!id) return;
+  const wrap = document.getElementById('client-detail-content');
+  try {
+    const [clientArr, birthArr, hdArr, gkArr, ancestors, convs] = await Promise.all([
+      rest(`clients?id=eq.${id}&limit=1`),
+      rest(`chart_birth_data?client_id=eq.${id}&limit=1`),
+      rest(`chart_human_design?client_id=eq.${id}&limit=1`),
+      rest(`chart_gene_keys?client_id=eq.${id}&limit=1`),
+      rest(`client_ancestors?client_id=eq.${id}&select=id,name,status,sort_year,dates,relation_to_client&order=sort_year.asc`),
+      rest(`convergences?client_id=eq.${id}&order=created_at.desc&select=id,title,status,created_at`)
+    ]);
+    const client = clientArr[0];
+    if (!client) { wrap.innerHTML = '<div class="empty">Client not found.</div>'; return; }
+    const birth = birthArr[0] || null;
+    const hd = hdArr[0] || null;
+    const gk = gkArr[0] || null;
+
+    let refByNum = {}, fieldById = {};
+    if (gk) {
+      const [refs, fs] = await Promise.all([
+        rest(`gene_keys_reference?select=number,shadow,gift,siddhi,primary_field_id,shadow_field_id,hd_center`),
+        rest(`fields?select=id,number,name`)
+      ]);
+      refByNum = Object.fromEntries(refs.map(r => [r.number, r]));
+      fieldById = Object.fromEntries(fs.map(f => [f.id, f]));
+    }
+
+    currentDetailData = { client, birth, hd, gk, ancestors, convs, refByNum, fieldById };
+
+    document.getElementById('cd-title').textContent = client.name || '—';
+    document.getElementById('cd-subtitle').textContent =
+      [client.email, client.entry_offering, client.client_tier].filter(Boolean).join(' · ');
+
+    wrap.innerHTML = renderClientDetail(currentDetailData);
+    wireClientDetail();
+  } catch (err) {
+    wrap.innerHTML = `<div class="msg msg-error">Failed to load: ${err.message}</div>`;
+  }
+}
+
+function cdEsc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderClientDetail(d) {
+  return `
+    ${cdQuickActions(d)}
+    <div class="cd-grid">
+      ${cdIdentityCard(d)}
+      ${cdLifecycleCard(d)}
+    </div>
+    ${cdIntakePatternsCard(d)}
+    ${cdMirrorAppCard(d)}
+    <div class="cd-grid">
+      ${cdBirthDataCard(d)}
+      ${cdChartSummaryCard(d)}
+    </div>
+    ${cdWeavingCard(d)}
+    ${cdConvergencesCard(d)}
+    ${cdAdminNotesCard(d)}
+  `;
+}
+
+function cdQuickActions(d) {
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <div class="cd-actions">
+        <button class="btn btn-gold btn-sm" onclick="startPreview('${d.client.id}')">Preview as Client</button>
+        <a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${d.client.id}" target="_blank">Open Full Chart ↗</a>
+        <a class="btn btn-outline btn-sm" href="convergence.html" target="_blank">Open Convergence Page ↗</a>
+      </div>
+    </div>`;
+}
+
+function cdIdentityCard(d) {
+  const c = d.client;
+  return `
+    <div class="cd-card">
+      <h3 class="cd-card-title">Identity &amp; Contact</h3>
+      <div class="form-group"><label class="form-label">Name</label>
+        <input class="form-input" id="cd-f-name" value="${cdEsc(c.name)}"></div>
+      <div class="form-group" style="margin-top:0.75rem"><label class="form-label">Email</label>
+        <input class="form-input" id="cd-f-email" type="email" value="${cdEsc(c.email)}"></div>
+      <div class="form-group" style="margin-top:0.75rem"><label class="form-label">Phone</label>
+        <input class="form-input" id="cd-f-phone" value="${cdEsc(c.phone)}"></div>
+      <div class="form-group" style="margin-top:0.75rem"><label class="form-label">Current address</label>
+        <input class="form-input" id="cd-f-addr" value="${cdEsc(c.current_address)}"></div>
+      <div class="cd-actions" style="margin-top:1rem">
+        <button class="btn btn-gold btn-sm" onclick="cdSaveIdentity()">Save</button>
+        <span class="cd-status" id="cd-identity-status"></span>
+      </div>
+    </div>`;
+}
+
+function cdLifecycleCard(d) {
+  const c = d.client;
+  const tierOpts = ['tier_1','tier_3','tier_4','tier_5'].map(t =>
+    `<option value="${t}"${c.client_tier===t?' selected':''}>${t}</option>`).join('');
+  const statusOpts = ['pending','application_submitted','application_accepted','application_declined','submitted','reviewed','activated'].map(s =>
+    `<option value="${s}"${c.intake_status===s?' selected':''}>${s.replace(/_/g,' ')}</option>`).join('');
+  return `
+    <div class="cd-card">
+      <h3 class="cd-card-title">Lifecycle</h3>
+      <div class="cd-row"><div class="cd-label">Entry offering</div>
+        <div class="cd-value">${cdEsc(c.entry_offering) || '—'}</div></div>
+      <div class="cd-row"><div class="cd-label">Submitted at</div>
+        <div class="cd-value">${c.intake_submitted_at ? new Date(c.intake_submitted_at).toLocaleString() : '—'}</div></div>
+      <div class="cd-row stack"><div class="cd-label">Client tier</div>
+        <select class="form-select" id="cd-f-tier">${tierOpts}</select></div>
+      <div class="cd-row stack"><div class="cd-label">Intake status</div>
+        <select class="form-select" id="cd-f-status">${statusOpts}</select></div>
+      <div class="cd-actions" style="margin-top:1rem">
+        <button class="btn btn-gold btn-sm" onclick="cdSaveLifecycle()">Save</button>
+        <span class="cd-status" id="cd-lifecycle-status"></span>
+      </div>
+    </div>`;
+}
+
+function cdIntakeBlock(label, val) {
+  if (!val || !String(val).trim()) {
+    return `<div class="cd-row stack"><div class="cd-label">${label}</div>
+      <div class="cd-value muted">— not provided —</div></div>`;
+  }
+  return `<div class="cd-row stack"><div class="cd-label">${label}</div>
+    <div class="cd-pre">${cdEsc(val)}</div></div>`;
+}
+
+function cdIntakePatternsCard(d) {
+  const c = d.client;
+  const any = c.pattern_repeating || c.pattern_somatic || c.pattern_inherited || c.pattern_threshold || c.pattern_unreceived || c.open_remarks;
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title">Intake — Patterns Submitted</h3>
+      ${any ? `
+        ${cdIntakeBlock('Repeating', c.pattern_repeating)}
+        ${cdIntakeBlock('Somatic', c.pattern_somatic)}
+        ${cdIntakeBlock('Inherited', c.pattern_inherited)}
+        ${cdIntakeBlock('Threshold', c.pattern_threshold)}
+        ${cdIntakeBlock('Unreceived', c.pattern_unreceived)}
+        ${cdIntakeBlock('Open remarks', c.open_remarks)}
+      ` : '<div class="cd-value muted">No intake submitted yet.</div>'}
+    </div>`;
+}
+
+function cdMirrorAppCard(d) {
+  const c = d.client;
+  const any = c.mirror_app_arrival || c.mirror_app_descent_position || c.mirror_app_compression || c.mirror_app_ready_to_stop || c.mirror_app_container_need;
+  if (!any) return '';
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title cd-collapsible" id="cd-mirror-toggle">Mirror Work Application</h3>
+      <div class="cd-collapsed-content" id="cd-mirror-body">
+        ${cdIntakeBlock('Q1 — What brought you here', c.mirror_app_arrival)}
+        ${cdIntakeBlock('Q2 — Where in the descent', c.mirror_app_descent_position)}
+        ${cdIntakeBlock('Q3 — What has been compressed', c.mirror_app_compression)}
+        ${cdIntakeBlock('Q4 — What you are ready to stop managing', c.mirror_app_ready_to_stop)}
+        ${cdIntakeBlock('Q5 — What you need the container to hold', c.mirror_app_container_need)}
+      </div>
+    </div>`;
+}
+
+function cdBirthDataCard(d) {
+  const b = d.birth;
+  if (!b) {
+    return `
+      <div class="cd-card">
+        <h3 class="cd-card-title">Birth Data</h3>
+        <div class="cd-value muted">No birth data on file.</div>
+        <div class="cd-actions" style="margin-top:1rem">
+          <a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${d.client.id}" target="_blank">Enter in Chart Admin ↗</a>
+        </div>
+      </div>`;
+  }
+  // Format date as local (avoid UTC shift)
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(b.birth_date));
+  const dateStr = m
+    ? new Date(Number(m[1]), Number(m[2])-1, Number(m[3])).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})
+    : (b.birth_date || '—');
+  return `
+    <div class="cd-card">
+      <h3 class="cd-card-title">Birth Data</h3>
+      <div class="cd-row"><div class="cd-label">Date</div><div class="cd-value">${dateStr}</div></div>
+      <div class="cd-row"><div class="cd-label">Time</div><div class="cd-value">${cdEsc(b.birth_time) || '—'}</div></div>
+      <div class="cd-row"><div class="cd-label">Place</div><div class="cd-value">${cdEsc(b.birth_place) || '—'}</div></div>
+      <div class="cd-row"><div class="cd-label">Coordinates</div><div class="cd-value">${b.latitude}°, ${b.longitude}°</div></div>
+      <div class="cd-row"><div class="cd-label">Timezone</div><div class="cd-value">${cdEsc(b.timezone) || '—'}</div></div>
+      <div class="cd-row"><div class="cd-label">Last computed</div><div class="cd-value">${b.computed_at ? new Date(b.computed_at).toLocaleString() : '—'}</div></div>
+      <div class="cd-actions" style="margin-top:1rem">
+        <a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${d.client.id}" target="_blank">Edit in Chart Admin ↗</a>
+      </div>
+    </div>`;
+}
+
+function cdChartSummaryCard(d) {
+  const { hd, gk, refByNum, fieldById } = d;
+  if (!hd && !gk) {
+    return `
+      <div class="cd-card">
+        <h3 class="cd-card-title">Chart Summary</h3>
+        <div class="cd-value muted">No chart computed yet.</div>
+      </div>`;
+  }
+  const sphereLine = (label, num, line) => {
+    if (!num) return '';
+    const r = refByNum[num];
+    const f = r ? fieldById[r.shadow_field_id || r.primary_field_id] : null;
+    const arc = r ? `${r.shadow} → ${r.gift} → ${r.siddhi}` : '';
+    const fStr = f ? `Field ${f.number} · ${f.name}` : '';
+    return `<div class="cd-row stack"><div class="cd-label">${label}</div>
+      <div class="cd-value">GK ${num}.${line} · <i>${arc}</i></div>
+      ${fStr ? `<div class="cd-value muted" style="font-size:13px">${fStr}</div>` : ''}</div>`;
+  };
+  return `
+    <div class="cd-card">
+      <h3 class="cd-card-title">Chart Summary</h3>
+      ${hd ? `
+        <div class="cd-row"><div class="cd-label">Type</div><div class="cd-value">${(hd.type||'—').replace(/_/g,' ')}</div></div>
+        <div class="cd-row"><div class="cd-label">Authority</div><div class="cd-value">${(hd.authority||'—').replace(/_/g,' ')}</div></div>
+        <div class="cd-row"><div class="cd-label">Profile</div><div class="cd-value">${cdEsc(hd.profile)||'—'}</div></div>
+      ` : ''}
+      ${gk ? `
+        ${sphereLine("Life's Work", gk.gk_lifes_work, gk.gk_lifes_work_line)}
+        ${sphereLine('Evolution',  gk.gk_evolution,  gk.gk_evolution_line)}
+        ${sphereLine('Radiance',   gk.gk_radiance,   gk.gk_radiance_line)}
+        ${sphereLine('Purpose',    gk.gk_purpose,    gk.gk_purpose_line)}
+        ${sphereLine('Core Wound', gk.gk_core,       gk.gk_core_line)}
+      ` : ''}
+      <div class="cd-actions" style="margin-top:1rem">
+        <a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${d.client.id}" target="_blank">Full chart ↗</a>
+      </div>
+    </div>`;
+}
+
+function cdWeavingCard(d) {
+  const a = d.ancestors || [];
+  if (!a.length) {
+    return `
+      <div class="cd-card full" style="margin-bottom:1.25rem">
+        <h3 class="cd-card-title">Weaving · ${a.length} ancestors</h3>
+        <div class="cd-value muted">No ancestors woven yet. Use the Weaving Builder panel to add.</div>
+      </div>`;
+  }
+  const rows = a.slice(0, 30).map(ax => `
+    <div class="cd-list-row">
+      <div>
+        <div class="name">${cdEsc(ax.name)}</div>
+        <div class="meta">${cdEsc(ax.dates) || '—'}${ax.relation_to_client ? ' · ' + cdEsc(ax.relation_to_client) : ''}</div>
+      </div>
+      <span class="status-pill">${cdEsc(ax.status)}</span>
+    </div>`).join('');
+  const note = a.length > 30 ? `<div class="cd-status" style="margin-top:0.5rem">Showing 30 of ${a.length}. Manage all in the Weaving Builder.</div>` : '';
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title">Weaving · ${a.length} ancestor${a.length===1?'':'s'}</h3>
+      <div class="cd-list">${rows}</div>
+      ${note}
+    </div>`;
+}
+
+function cdConvergencesCard(d) {
+  const cs = d.convs || [];
+  if (!cs.length) {
+    return `
+      <div class="cd-card full" style="margin-bottom:1.25rem">
+        <h3 class="cd-card-title">Convergences · 0</h3>
+        <div class="cd-value muted">No Convergences generated yet.</div>
+      </div>`;
+  }
+  const rows = cs.map(cv => `
+    <div class="cd-list-row">
+      <div>
+        <div class="name">${cdEsc(cv.title || 'Convergence')}</div>
+        <div class="meta">${new Date(cv.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})}</div>
+      </div>
+      <span class="status-pill">${cdEsc(cv.status)}</span>
+      <a class="btn btn-outline btn-sm" href="convergence.html" target="_blank">View ↗</a>
+    </div>`).join('');
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title">Convergences · ${cs.length}</h3>
+      <div class="cd-list">${rows}</div>
+    </div>`;
+}
+
+function cdAdminNotesCard(d) {
+  return `
+    <div class="cd-card full">
+      <h3 class="cd-card-title">Admin Notes</h3>
+      <textarea class="form-textarea" id="cd-f-notes" rows="5" placeholder="Private admin notes — observations, follow-up questions, threads to watch.">${cdEsc(d.client.notes)}</textarea>
+      <div class="cd-actions" style="margin-top:0.75rem">
+        <button class="btn btn-gold btn-sm" onclick="cdSaveNotes()">Save</button>
+        <span class="cd-status" id="cd-notes-status"></span>
+      </div>
+    </div>`;
+}
+
+function wireClientDetail() {
+  const t = document.getElementById('cd-mirror-toggle');
+  const b = document.getElementById('cd-mirror-body');
+  if (t && b) {
+    t.addEventListener('click', () => {
+      t.classList.toggle('open');
+      b.classList.toggle('open');
+    });
+  }
+}
+
+async function cdSaveIdentity() {
+  const status = document.getElementById('cd-identity-status');
+  status.textContent = 'saving…';
+  try {
+    await restPatch('clients', currentDetailClient, {
+      name:    document.getElementById('cd-f-name').value.trim(),
+      email:   document.getElementById('cd-f-email').value.trim() || null,
+      phone:   document.getElementById('cd-f-phone').value.trim() || null,
+      current_address: document.getElementById('cd-f-addr').value.trim() || null
+    });
+    await loadClients();  // refresh allClients in memory
+    status.textContent = 'saved · ' + new Date().toLocaleTimeString();
+    document.getElementById('cd-title').textContent = document.getElementById('cd-f-name').value.trim();
+  } catch (e) { status.textContent = 'failed: ' + e.message; }
+}
+
+async function cdSaveLifecycle() {
+  const status = document.getElementById('cd-lifecycle-status');
+  status.textContent = 'saving…';
+  try {
+    await restPatch('clients', currentDetailClient, {
+      client_tier:   document.getElementById('cd-f-tier').value,
+      intake_status: document.getElementById('cd-f-status').value
+    });
+    await loadClients();
+    status.textContent = 'saved · ' + new Date().toLocaleTimeString();
+  } catch (e) { status.textContent = 'failed: ' + e.message; }
+}
+
+async function cdSaveNotes() {
+  const status = document.getElementById('cd-notes-status');
+  status.textContent = 'saving…';
+  try {
+    await restPatch('clients', currentDetailClient, {
+      notes: document.getElementById('cd-f-notes').value
+    });
+    await loadClients();
+    status.textContent = 'saved · ' + new Date().toLocaleTimeString();
+  } catch (e) { status.textContent = 'failed: ' + e.message; }
+}
+
 function stopPreview() {
   isPreviewingAsClient = false; previewClientId = null;
   document.getElementById('preview-banner').classList.remove('visible');
@@ -1327,12 +1746,12 @@ function renderClientList() {
   const el = document.getElementById('clients-list');
   if (!allClients.length) { el.innerHTML = '<div class="empty">No clients yet.</div>'; return; }
   el.innerHTML = allClients.map(c => `
-    <div class="client-row">
+    <div class="client-row" style="cursor:pointer" onclick="showClientDetail('${c.id}')">
       <div><div class="client-name">${c.name}</div><div class="client-meta">${c.email || '—'}${c.notes ? ' · ' + c.notes.slice(0,60) + '…' : ''}</div></div>
-      <div style="display:flex;gap:0.5rem;flex-shrink:0">
-        <button class="btn btn-outline btn-sm" onclick="startPreview('${c.id}')">Preview as Client</button>
+      <div style="display:flex;gap:0.5rem;flex-shrink:0" onclick="event.stopPropagation()">
+        <button class="btn btn-gold btn-sm" onclick="showClientDetail('${c.id}')">Open</button>
+        <button class="btn btn-outline btn-sm" onclick="startPreview('${c.id}')">Preview</button>
         <a href="chart-admin.html?client_id=${c.id}" class="btn btn-outline btn-sm" target="_blank">Chart ↗</a>
-        <a href="convergence.html" class="btn btn-outline btn-sm" target="_blank">Convergence ↗</a>
       </div>
     </div>`).join('');
 }
