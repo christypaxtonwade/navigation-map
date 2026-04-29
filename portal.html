@@ -1331,6 +1331,7 @@ function renderClientList() {
       <div><div class="client-name">${c.name}</div><div class="client-meta">${c.email || '—'}${c.notes ? ' · ' + c.notes.slice(0,60) + '…' : ''}</div></div>
       <div style="display:flex;gap:0.5rem;flex-shrink:0">
         <button class="btn btn-outline btn-sm" onclick="startPreview('${c.id}')">Preview as Client</button>
+        <a href="chart-admin.html?client_id=${c.id}" class="btn btn-outline btn-sm" target="_blank">Chart ↗</a>
         <a href="convergence.html" class="btn btn-outline btn-sm" target="_blank">Convergence ↗</a>
       </div>
     </div>`).join('');
