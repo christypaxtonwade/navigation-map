@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chart · Admin · Navigation Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── readability-standard.md — warm walnut frame + vellum reading surfaces ── */
+:root {
+  --bg: #1c1812;
+  --surface: #251f18;
+  --surface-2: #2e261e;
+  --text: #f0e6cc;
+  --text-secondary: #d4c7a8;
+  --text-dim: #b8a98a;
+  --text-faint: #8f826a;
+  --gold: #b08030;
+  --gold-bright: #c9a04a;
+  --gold-dim: rgba(176,128,48,0.72);
+  --border: rgba(176,128,48,0.18);
+  --accent: rgba(176,128,48,0.08);
+  /* vellum / ink for reading surfaces */
+  --vellum: #e8dcbb;
+  --vellum-deeper: #d3c599;
+  --ink: #14110a;
+  --ink-secondary: #2b2414;
+  --ink-dim: #4e4228;
+  --ink-faint: #78694a;
+  --ink-gold: #7a5618;
+  --ink-gold-bright: #a07428;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 16px; line-height: 1.55;
+  min-height: 100vh;
+}
+.page { max-width: 1200px; margin: 0 auto; padding: 3rem 2.5rem 6rem; }
+
+/* ── Header ── */
+.header { margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+.eyebrow {
+  font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 0.75rem;
+}
+.client-name {
+  font-size: 2.25rem; font-weight: 500; color: var(--text);
+  letter-spacing: -0.01em; margin-bottom: 0.5rem;
+}
+.birth-line {
+  font-size: 16px; color: var(--text-dim); font-style: italic;
+}
+.header-actions { margin-top: 1.25rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.btn {
+  font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gold); background: none;
+  border: 1px solid var(--gold-dim); border-radius: 6px;
+  padding: 9px 18px; cursor: pointer; transition: all 0.2s;
+  text-decoration: none; display: inline-block;
+}
+.btn:hover { border-color: var(--gold); background: var(--accent); color: var(--gold-bright); }
+.btn-back { color: var(--text-dim); border-color: var(--border); }
+.btn-back:hover { color: var(--text); border-color: var(--gold-dim); }
+.last-computed {
+  font-family: 'Jost', sans-serif; font-size: 12px; color: var(--text-faint);
+  letter-spacing: 0.05em;
+}
+
+/* ── Sections ── */
+.section { margin-top: 3rem; }
+.section-title {
+  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+}
+
+/* ── HD Bodygraph block ── */
+.hd-block {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1.5rem 1.75rem; display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem;
+}
+.hd-cell { display: flex; flex-direction: column; gap: 0.3rem; }
+.hd-label {
+  font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-faint);
+}
+.hd-value { font-size: 17px; color: var(--text); font-weight: 500; text-transform: capitalize; }
+.hd-list-value { font-size: 15px; color: var(--text-secondary); }
+
+/* ── Sequence cards (vellum surface, ink type) ── */
+.seq-grid { display: grid; gap: 1rem; }
+.seq-grid.activation { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.seq-grid.venus      { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.seq-grid.pearl      { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+.seq-card {
+  background: var(--vellum); color: var(--ink);
+  border: 1px solid var(--vellum-deeper); border-radius: 8px;
+  padding: 1.1rem 1.25rem; min-height: 130px;
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.seq-card.core { border-color: var(--ink-gold); border-width: 2px; }
+.seq-sphere {
+  font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-gold);
+}
+.seq-gk {
+  font-size: 26px; color: var(--ink); font-weight: 500;
+  letter-spacing: -0.01em; line-height: 1;
+}
+.seq-arc {
+  font-size: 14px; color: var(--ink-secondary); font-style: italic;
+  line-height: 1.4;
+}
+.seq-meta {
+  font-family: 'Jost', sans-serif; font-size: 11px; color: var(--ink-dim);
+  letter-spacing: 0.05em;
+}
+.seq-field {
+  font-size: 13px; color: var(--ink-gold);
+  border-top: 1px solid var(--vellum-deeper); padding-top: 0.5rem; margin-top: auto;
+}
+
+/* ── Planet positions table ── */
+.planets-table {
+  width: 100%; border-collapse: collapse;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden;
+}
+.planets-table th, .planets-table td {
+  padding: 0.55rem 0.85rem; text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.planets-table th {
+  background: var(--surface-2); color: var(--text-dim);
+  font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.planets-table td { color: var(--text-secondary); }
+.planets-table td.body-name { color: var(--text); font-weight: 500; text-transform: capitalize; }
+.planets-table td.gate { color: var(--gold); font-weight: 500; }
+.planets-table tr.design td { background: rgba(176,128,48,0.04); }
+.planets-table .retrograde { color: var(--ink-gold-bright); font-style: italic; }
+
+/* ── Lineage resonance matches ── */
+.matches-empty {
+  background: var(--surface); border: 1px dashed var(--border); border-radius: 8px;
+  padding: 1.25rem; color: var(--text-dim); font-style: italic; font-size: 15px;
+}
+.match-group { margin-bottom: 1.5rem; }
+.match-group-header {
+  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold);
+  margin-bottom: 0.6rem;
+}
+.match-group-arc {
+  font-family: 'Cormorant Garamond', serif; font-size: 14px;
+  color: var(--text-secondary); font-style: italic; margin-bottom: 0.85rem;
+}
+.match-row {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+  padding: 0.85rem 1rem; margin-bottom: 0.5rem;
+  display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center;
+}
+.match-name { font-size: 16px; color: var(--text); font-weight: 500; }
+.match-meta { font-size: 13px; color: var(--text-dim); }
+.match-strength {
+  font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 4px; white-space: nowrap;
+}
+.match-strength.dominant { background: rgba(176,128,48,0.18); color: var(--gold-bright); }
+.match-strength.emerging { background: rgba(176,128,48,0.10); color: var(--gold); }
+.match-strength.noted    { background: rgba(176,128,48,0.05); color: var(--text-dim); }
+
+/* ── Private notes ── */
+.notes-wrap {
+  background: var(--vellum); color: var(--ink);
+  border: 1px solid var(--vellum-deeper); border-radius: 8px;
+  padding: 1.25rem;
+}
+.notes-textarea {
+  width: 100%; min-height: 160px; resize: vertical;
+  background: transparent; color: var(--ink);
+  border: none; outline: none;
+  font-family: 'Cormorant Garamond', serif; font-size: 16px; line-height: 1.55;
+}
+.notes-status {
+  font-family: 'Jost', sans-serif; font-size: 11px; color: var(--ink-dim);
+  margin-top: 0.5rem; letter-spacing: 0.05em;
+}
+
+/* ── Loading / empty ── */
+.loading {
+  text-align: center; padding: 5rem 2rem; color: var(--text-dim);
+  font-style: italic; font-size: 1.1rem;
+}
+.error-box {
+  background: rgba(192,112,96,0.08); border: 1px solid rgba(192,112,96,0.4);
+  border-radius: 8px; padding: 1.5rem;
+  color: #e09a8c; font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<div class="page" id="page">
+  <div class="loading">Loading chart…</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+
+// ── Auth helpers (mirrors convergence.html — same portal session shape) ──
+function readPortalSession() {
+  for (const store of [sessionStorage, localStorage]) {
+    try {
+      const raw = store.getItem('portal_session');
+      if (!raw) continue;
+      const session = JSON.parse(raw);
+      if (session?.access_token) return { session, store };
+    } catch {}
+  }
+  return { session: null, store: null };
+}
+function writePortalSession(session) {
+  const payload = JSON.stringify(session);
+  try { sessionStorage.setItem('portal_session', payload); } catch {}
+  try { localStorage.setItem('portal_session', payload); } catch {}
+}
+let _refreshInflight = null;
+async function getFreshAccessToken() {
+  const { session } = readPortalSession();
+  if (!session) return null;
+  const now = Date.now();
+  const needsRefresh = !session.expires_at || (now > session.expires_at - 60_000);
+  if (!needsRefresh) return session.access_token;
+  if (!session.refresh_token) return session.access_token;
+  if (!_refreshInflight) {
+    _refreshInflight = (async () => {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: session.refresh_token })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.access_token) return null;
+        const fresh = {
+          access_token: data.access_token,
+          refresh_token: data.refresh_token || session.refresh_token,
+          expires_at: Date.now() + ((data.expires_in || 3600) * 1000),
+          user: data.user || session.user
+        };
+        writePortalSession(fresh);
+        return fresh.access_token;
+      } catch { return null; }
+      finally { _refreshInflight = null; }
+    })();
+  }
+  return await _refreshInflight;
+}
+
+// ── Supabase REST helpers ──
+async function sb(path) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+async function sbPatch(table, idCol, idVal, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idCol}=eq.${idVal}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`Supabase PATCH ${res.status}: ${await res.text()}`);
+}
+
+// ── Page state ──
+const params = new URLSearchParams(window.location.search);
+const CLIENT_ID = params.get('client_id');
+
+const SPHERE_LABELS = {
+  // Activation
+  lifes_work: "Life's Work",
+  evolution:  'Evolution',
+  radiance:   'Radiance',
+  purpose:    'Purpose',
+  // Venus
+  attraction: 'Attraction',
+  iq:         'IQ',
+  eq:         'EQ',
+  sq:         'SQ',
+  core:       'Core Wound',
+  // Pearl
+  vocation:   'Vocation',
+  brand:      'Brand',
+  culture:    'Culture',
+  pearl:      'Pearl'
+};
+
+// ── Main ──
+async function init() {
+  const page = document.getElementById('page');
+  if (!CLIENT_ID) {
+    page.innerHTML = `<div class="error-box">No client_id provided. Use ?client_id=&lt;uuid&gt; in the URL.</div>`;
+    return;
+  }
+  try {
+    const [client] = await sb(`clients?id=eq.${CLIENT_ID}&limit=1`);
+    if (!client) throw new Error('Client not found');
+
+    const [birth]   = await sb(`chart_birth_data?client_id=eq.${CLIENT_ID}&limit=1`);
+    const [hd]      = await sb(`chart_human_design?client_id=eq.${CLIENT_ID}&limit=1`);
+    const [gk]      = await sb(`chart_gene_keys?client_id=eq.${CLIENT_ID}&limit=1`);
+    const planets   = await sb(`chart_planets?client_id=eq.${CLIENT_ID}&order=side.asc,body.asc`);
+
+    // GK reference for shadow/gift/siddhi/field-name lookup
+    const gkRefs    = await sb(`gene_keys_reference?select=*`);
+    const refByNum  = Object.fromEntries(gkRefs.map(r => [r.number, r]));
+
+    const fields    = await sb(`fields?select=id,number,name`);
+    const fieldById = Object.fromEntries(fields.map(f => [f.id, f]));
+
+    // Lineage resonance via RPC
+    let matches = [];
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/lineage_resonance_check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        body: JSON.stringify({ p_client_id: CLIENT_ID })
+      });
+      if (r.ok) matches = await r.json();
+    } catch (e) { console.warn('lineage_resonance_check failed:', e); }
+
+    page.innerHTML = render({ client, birth, hd, gk, planets, refByNum, fieldById, matches });
+    wireNotes(birth);
+    wireRecompute(client, birth);
+  } catch (err) {
+    page.innerHTML = `<div class="error-box">${err.message}</div>`;
+  }
+}
+
+function fmtDate(d) { try { return new Date(d).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' }); } catch { return d || '—'; } }
+function fmtTime(t) { return t || '—'; }
+
+function render({ client, birth, hd, gk, planets, refByNum, fieldById, matches }) {
+  return `
+    ${renderHeader(client, birth)}
+    ${renderHD(hd)}
+    ${renderActivation(gk, refByNum, fieldById)}
+    ${renderVenus(gk, refByNum, fieldById)}
+    ${renderPearl(gk, refByNum, fieldById)}
+    ${renderPlanets(planets)}
+    ${renderMatches(matches)}
+    ${renderNotes(birth)}
+  `;
+}
+
+function renderHeader(client, birth) {
+  const computed = birth?.computed_at ? new Date(birth.computed_at).toLocaleString() : 'never';
+  const birthLine = birth
+    ? `${fmtDate(birth.birth_date)} · ${fmtTime(birth.birth_time)} · ${birth.birth_place} · ${birth.timezone} · ${birth.latitude}°, ${birth.longitude}°`
+    : 'No birth data on file. Compute requires birth_date / birth_time / birth_place / latitude / longitude / timezone.';
+  return `
+    <div class="header">
+      <div class="eyebrow">Chart · Admin</div>
+      <div class="client-name">${client.name}</div>
+      <div class="birth-line">${birthLine}</div>
+      <div class="header-actions">
+        <a href="/portal.html" class="btn btn-back">← Portal</a>
+        <button class="btn" id="btn-recompute"${birth ? '' : ' disabled'}>Recompute Chart</button>
+        <span class="last-computed">Last computed: ${computed}</span>
+      </div>
+    </div>`;
+}
+
+function renderHD(hd) {
+  if (!hd) return `
+    <div class="section">
+      <div class="section-title">Human Design</div>
+      <div class="matches-empty">No HD data yet. Compute the chart to populate.</div>
+    </div>`;
+  const list = arr => (arr || []).join(' · ').replace(/_/g, ' ');
+  const channels = (hd.defined_channels || []).map(([a, b]) => `${a}–${b}`).join(' · ') || '—';
+  return `
+    <div class="section">
+      <div class="section-title">Human Design · at a glance</div>
+      <div class="hd-block">
+        <div class="hd-cell"><div class="hd-label">Type</div>      <div class="hd-value">${(hd.type || '—').replace(/_/g, ' ')}</div></div>
+        <div class="hd-cell"><div class="hd-label">Authority</div> <div class="hd-value">${(hd.authority || '—').replace(/_/g, ' ')}</div></div>
+        <div class="hd-cell"><div class="hd-label">Profile</div>   <div class="hd-value">${hd.profile || '—'}</div></div>
+        <div class="hd-cell"><div class="hd-label">Definition</div><div class="hd-value">${(hd.definition_type || '—').replace(/_/g, ' ')}</div></div>
+        <div class="hd-cell" style="grid-column: span 2;"><div class="hd-label">Defined centers</div><div class="hd-list-value">${list(hd.defined_centers)}</div></div>
+        <div class="hd-cell" style="grid-column: span 2;"><div class="hd-label">Open centers</div><div class="hd-list-value">${list(hd.open_centers)}</div></div>
+        <div class="hd-cell" style="grid-column: 1 / -1;"><div class="hd-label">Defined channels</div><div class="hd-list-value">${channels}</div></div>
+      </div>
+    </div>`;
+}
+
+function renderSequence(title, klass, gk, refByNum, fieldById, sphereKeys) {
+  if (!gk) return `
+    <div class="section">
+      <div class="section-title">${title}</div>
+      <div class="matches-empty">No GK data yet.</div>
+    </div>`;
+  const cards = sphereKeys.map(({ k, label, isCore }) => {
+    const num  = gk[`gk_${k}`];
+    const line = gk[`gk_${k}_line`];
+    if (!num) return '';
+    const ref = refByNum[num];
+    const field = ref ? fieldById[ref.shadow_field_id || ref.primary_field_id] : null;
+    const arc = ref ? `${ref.shadow} → ${ref.gift} → ${ref.siddhi}` : '';
+    const fieldStr = field ? `Field ${field.number} · ${field.name}` : '—';
+    const center = ref?.hd_center ? `${ref.hd_center.replace(/_/g,' ')} center` : '';
+    return `
+      <div class="seq-card${isCore ? ' core' : ''}">
+        <div class="seq-sphere">${label}</div>
+        <div class="seq-gk">${num}.${line}</div>
+        <div class="seq-arc">${arc}</div>
+        <div class="seq-meta">${center}</div>
+        <div class="seq-field">${fieldStr}</div>
+      </div>`;
+  }).join('');
+  return `
+    <div class="section">
+      <div class="section-title">${title}</div>
+      <div class="seq-grid ${klass}">${cards}</div>
+    </div>`;
+}
+
+function renderActivation(gk, refByNum, fieldById) {
+  return renderSequence('Activation Sequence', 'activation', gk, refByNum, fieldById, [
+    { k: 'lifes_work', label: "Life's Work" },
+    { k: 'evolution',  label: 'Evolution' },
+    { k: 'radiance',   label: 'Radiance' },
+    { k: 'purpose',    label: 'Purpose' },
+  ]);
+}
+function renderVenus(gk, refByNum, fieldById) {
+  return renderSequence('Venus Sequence', 'venus', gk, refByNum, fieldById, [
+    { k: 'purpose',    label: 'Purpose (shared)' },
+    { k: 'attraction', label: 'Attraction' },
+    { k: 'iq',         label: 'IQ' },
+    { k: 'eq',         label: 'EQ' },
+    { k: 'sq',         label: 'SQ' },
+    { k: 'core',       label: 'Core Wound', isCore: true },
+  ]);
+}
+function renderPearl(gk, refByNum, fieldById) {
+  return renderSequence('Pearl Sequence', 'pearl', gk, refByNum, fieldById, [
+    { k: 'vocation', label: 'Vocation' },
+    { k: 'brand',    label: 'Brand' },
+    { k: 'culture',  label: 'Culture' },
+    { k: 'pearl',    label: 'Pearl' },
+  ]);
+}
+
+function renderPlanets(planets) {
+  if (!planets || !planets.length) return `
+    <div class="section">
+      <div class="section-title">Planetary Positions</div>
+      <div class="matches-empty">No planetary data. Compute the chart to populate.</div>
+    </div>`;
+  const sortedSides = ['personality', 'design'];
+  const bodyOrder = ['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','earth'];
+  planets.sort((a, b) => {
+    const sa = sortedSides.indexOf(a.side) - sortedSides.indexOf(b.side);
+    if (sa !== 0) return sa;
+    return bodyOrder.indexOf(a.body) - bodyOrder.indexOf(b.body);
+  });
+  const rows = planets.map(p => `
+    <tr class="${p.side}">
+      <td class="body-name">${p.body.replace(/_/g, ' ')}</td>
+      <td>${p.side === 'personality' ? '☉ P' : '⊕ D'}</td>
+      <td>${p.zodiac_sign || '—'}</td>
+      <td>${p.zodiac_degree != null ? Number(p.zodiac_degree).toFixed(2) + '°' : '—'}</td>
+      <td class="gate">${p.hd_gate || '—'}.${p.hd_line || '—'}</td>
+      <td class="${p.retrograde ? 'retrograde' : ''}">${p.retrograde ? '℞' : ''}</td>
+    </tr>`).join('');
+  return `
+    <div class="section">
+      <div class="section-title">Planetary Positions</div>
+      <table class="planets-table">
+        <thead><tr><th>Body</th><th>Side</th><th>Sign</th><th>Degree</th><th>Gate.Line</th><th>℞</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderMatches(matches) {
+  if (!matches || !matches.length) return `
+    <div class="section">
+      <div class="section-title">Lineage Resonance</div>
+      <div class="matches-empty">No ancestor matches surfaced for this chart's Purpose or Core key fields. Either no ancestors are tagged with those fields' frequencies yet, or the chart isn't yet populated.</div>
+    </div>`;
+  const groups = {};
+  for (const m of matches) (groups[m.sphere] ||= []).push(m);
+  const sphereOrder = ['purpose', 'core'];
+  const html = sphereOrder.filter(s => groups[s]).map(sphere => {
+    const arr = groups[sphere];
+    const head = arr[0];
+    const arc = `${head.gk_shadow} → ${head.gk_gift} → ${head.gk_siddhi}`;
+    const sphereLabel = sphere === 'purpose' ? 'Purpose match' : 'Core Wound match';
+    const rows = arr.map(m => `
+      <div class="match-row">
+        <div>
+          <div class="match-name">${m.ancestor_name}</div>
+          <div class="match-meta">${m.ancestor_dates || '—'} · ${m.ancestor_era || ''} · matched via ${m.matched_tag_name}</div>
+        </div>
+        <span class="match-strength ${m.match_strength}">${m.match_strength}</span>
+      </div>`).join('');
+    return `
+      <div class="match-group">
+        <div class="match-group-header">${sphereLabel} · GK ${head.gk_number} → ${head.match_field_name}</div>
+        <div class="match-group-arc">${arc}</div>
+        ${rows}
+      </div>`;
+  }).join('');
+  return `
+    <div class="section">
+      <div class="section-title">Lineage Resonance</div>
+      ${html}
+    </div>`;
+}
+
+function renderNotes(birth) {
+  const value = birth?.notes || '';
+  return `
+    <div class="section">
+      <div class="section-title">Private Notes (admin)</div>
+      <div class="notes-wrap">
+        <textarea class="notes-textarea" id="notes-area" placeholder="Reading observations, follow-up questions, threads to watch.">${escapeHtml(value)}</textarea>
+        <div class="notes-status" id="notes-status">${birth ? 'saved' : 'no birth data row yet — notes will save once chart is computed'}</div>
+      </div>
+    </div>`;
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ── Notes autosave ──
+function wireNotes(birth) {
+  const ta = document.getElementById('notes-area');
+  const status = document.getElementById('notes-status');
+  if (!ta || !birth) return;
+  let timer = null;
+  ta.addEventListener('input', () => {
+    status.textContent = 'editing…';
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      try {
+        await sbPatch('chart_birth_data', 'client_id', CLIENT_ID, { notes: ta.value });
+        status.textContent = 'saved · ' + new Date().toLocaleTimeString();
+      } catch (e) {
+        status.textContent = 'save failed: ' + e.message;
+      }
+    }, 800);
+  });
+}
+
+// ── Recompute button ──
+function wireRecompute(client, birth) {
+  const btn = document.getElementById('btn-recompute');
+  if (!btn || !birth) return;
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = 'Computing…';
+    try {
+      const token = await getFreshAccessToken();
+      if (!token) throw new Error('Not authenticated. Please log in via the portal.');
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/compute-chart`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          client_id: CLIENT_ID,
+          birth_date: birth.birth_date,
+          birth_time: birth.birth_time,
+          birth_place: birth.birth_place,
+          latitude: Number(birth.latitude),
+          longitude: Number(birth.longitude),
+          timezone: birth.timezone
+        })
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`compute-chart ${res.status}: ${err}`);
+      }
+      btn.textContent = 'Computed · refreshing…';
+      setTimeout(() => location.reload(), 600);
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = original;
+      alert('Recompute failed: ' + e.message);
+    }
+  });
+}
+
+init();
+</script>
+</body>
+</html>
