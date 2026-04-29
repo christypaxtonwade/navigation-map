@@ -483,27 +483,81 @@ async function sbPatch(table, id, body) {
   if (!res.ok) throw new Error(`Supabase PATCH ${res.status}`);
 }
 
-// ── Auth helper — reads the portal session ──
+// ── Auth helpers — reads + refreshes the portal session ──
 // The portal writes { access_token, refresh_token, expires_at, user } under
 // the 'portal_session' key after login (see portal.html ensureFreshToken
-// pattern, decisions.md 2026-04-28). It uses sessionStorage by convention.
-// We check localStorage as a fallback so cross-tab reads on the same origin
-// still find the session (sessionStorage is per-tab; localStorage is per-origin).
-//
-// Note: this does NOT cross origin boundaries. Each Vercel preview URL is
-// its own origin; portal login must happen on the SAME hostname as this page.
-function getPortalAccessToken() {
+// pattern, decisions.md 2026-04-28). Mirrored to both sessionStorage and
+// localStorage so it's available across tabs of the same origin.
+
+function readPortalSession() {
   for (const store of [sessionStorage, localStorage]) {
     try {
       const raw = store.getItem('portal_session');
       if (!raw) continue;
       const session = JSON.parse(raw);
-      if (session?.access_token) return session.access_token;
+      if (session?.access_token) return { session, store };
     } catch {
       // ignore parse errors and try the next store
     }
   }
-  return null;
+  return { session: null, store: null };
+}
+
+function writePortalSession(session) {
+  // Mirror to both stores, matching portal.html persistSession()
+  const payload = JSON.stringify(session);
+  try { sessionStorage.setItem('portal_session', payload); } catch {}
+  try { localStorage.setItem('portal_session', payload); } catch {}
+}
+
+// Returns a non-expired access_token, refreshing via refresh_token if needed.
+// Returns null if no session exists or refresh fails (caller should treat as
+// "not authenticated, needs portal login").
+let _refreshInflight = null;
+async function getFreshAccessToken() {
+  const { session } = readPortalSession();
+  if (!session) return null;
+
+  // Refresh if expires within 60 seconds (or expiry is unknown)
+  const now = Date.now();
+  const needsRefresh = !session.expires_at || (now > session.expires_at - 60_000);
+  if (!needsRefresh) return session.access_token;
+
+  if (!session.refresh_token) {
+    // Older session shape without refresh_token — can't refresh, fall back to
+    // returning the stored token; the proxy will reject if it's expired.
+    return session.access_token;
+  }
+
+  if (!_refreshInflight) {
+    _refreshInflight = (async () => {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ refresh_token: session.refresh_token })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.access_token) return null;
+        const fresh = {
+          access_token:  data.access_token,
+          refresh_token: data.refresh_token || session.refresh_token,
+          expires_at:    Date.now() + ((data.expires_in || 3600) * 1000),
+          user:          data.user || session.user
+        };
+        writePortalSession(fresh);
+        return fresh.access_token;
+      } catch {
+        return null;
+      } finally {
+        _refreshInflight = null;
+      }
+    })();
+  }
+  return await _refreshInflight;
 }
 
 // Sentinel error so the catch block in startGeneration can render a portal
@@ -520,7 +574,7 @@ class NotAuthenticatedError extends Error {
 // uses gateway-disabled JWT + in-function JWKS verification (decisions.md
 // 2026-04-28), so we MUST send the user's session token, not the anon key.
 async function callClaude(systemPrompt, userMessage) {
-  const accessToken = getPortalAccessToken();
+  const accessToken = await getFreshAccessToken();
   if (!accessToken) {
     throw new NotAuthenticatedError();
   }
