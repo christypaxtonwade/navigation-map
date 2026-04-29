@@ -90,23 +90,40 @@ body {
   padding: 1.5rem; display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;
 }
-.field { display: flex; flex-direction: column; gap: 0.35rem; }
+.field { display: flex; flex-direction: column; gap: 0.35rem; position: relative; }
+.field.span-2 { grid-column: span 2; }
 .field-label {
   font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 500;
   letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint);
 }
-.field-input {
+.field-input, .field-select {
   background: rgba(0,0,0,0.25); color: var(--text);
   border: 1px solid var(--border); border-radius: 4px;
   padding: 9px 11px; font-family: 'Jost', sans-serif; font-size: 15px;
   outline: none; transition: border-color 0.15s;
 }
-.field-input:focus { border-color: var(--gold-dim); }
+.field-select { cursor: pointer; }
+.field-select option { background: var(--surface); color: var(--text); }
+.field-input:focus, .field-select:focus { border-color: var(--gold-dim); }
 .field-input::placeholder { color: var(--text-faint); }
 .field-hint {
   font-family: 'Jost', sans-serif; font-size: 11px; color: var(--text-faint);
   letter-spacing: 0.04em;
 }
+.field-readout {
+  font-family: 'Jost', sans-serif; font-size: 12px; color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+.coord-toggle {
+  background: none; border: none; cursor: pointer;
+  font-family: 'Jost', sans-serif; font-size: 11px; color: var(--gold-dim);
+  letter-spacing: 0.08em; text-transform: uppercase; padding: 0;
+  margin-left: 0.4rem;
+}
+.coord-toggle:hover { color: var(--gold); }
+.coord-fields { display: none; grid-column: 1 / -1; gap: 1rem;
+  grid-template-columns: 1fr 1fr; }
+.coord-fields.show { display: grid; }
 .form-actions {
   grid-column: 1 / -1; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;
   margin-top: 0.5rem;
@@ -118,6 +135,36 @@ body {
 .form-status {
   font-family: 'Jost', sans-serif; font-size: 12px; color: var(--text-dim);
   letter-spacing: 0.05em;
+}
+
+/* ── City autocomplete dropdown ── */
+.autocomplete-wrap { position: relative; }
+.autocomplete-list {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+  background: var(--surface); border: 1px solid var(--gold-dim);
+  border-top: none; border-radius: 0 0 4px 4px;
+  max-height: 280px; overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  display: none;
+}
+.autocomplete-list.show { display: block; }
+.autocomplete-item {
+  padding: 10px 12px; cursor: pointer;
+  font-family: 'Jost', sans-serif; font-size: 14px; color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  line-height: 1.35;
+}
+.autocomplete-item:hover, .autocomplete-item.active {
+  background: var(--accent); color: var(--text);
+}
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item .ac-coords {
+  font-size: 11px; color: var(--text-faint); margin-top: 2px;
+  letter-spacing: 0.05em;
+}
+.autocomplete-loading {
+  padding: 10px 12px; font-family: 'Jost', sans-serif; font-size: 13px;
+  color: var(--text-dim); font-style: italic;
 }
 
 /* ── HD Bodygraph block ── */
@@ -396,12 +443,26 @@ async function init() {
     page.innerHTML = render({ client, birth, hd, gk, refByNum, fieldById, matches });
     wireNotes(birth);
     wireSaveAndRecompute(client);
+    wireCityAutocomplete();
+    rewireCoordToggle();
   } catch (err) {
     page.innerHTML = `<div class="error-box">${err.message}</div>`;
   }
 }
 
-function fmtDate(d) { try { return new Date(d).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' }); } catch { return d || '—'; } }
+// Parse YYYY-MM-DD as a LOCAL date (not UTC). Avoids the timezone-shift bug
+// where new Date('1974-06-15') shows as June 14 west of UTC.
+function fmtDate(d) {
+  if (!d) return '—';
+  try {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(d));
+    if (m) {
+      const dt = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      return dt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+    return new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  } catch { return d; }
+}
 function fmtTime(t) { return t || '—'; }
 
 function render({ client, birth, hd, gk, refByNum, fieldById, matches }) {
@@ -434,12 +495,56 @@ function renderHeader(client, birth) {
     </div>`;
 }
 
+// Curated IANA timezone dropdown — the common ones for Christy's likely clientele
+// plus the major world regions. Admin can pick from this list; manual override is
+// available via the "Edit coords / tz" toggle (which exposes a free-text tz input).
+const TIMEZONE_OPTIONS = [
+  { group: 'United States', zones: [
+    'America/New_York', 'America/Detroit', 'America/Indiana/Indianapolis',
+    'America/Chicago', 'America/Denver', 'America/Phoenix',
+    'America/Los_Angeles', 'America/Anchorage', 'Pacific/Honolulu',
+    'America/Puerto_Rico'
+  ]},
+  { group: 'Canada', zones: [
+    'America/Toronto', 'America/Winnipeg', 'America/Edmonton', 'America/Vancouver',
+    'America/Halifax', 'America/St_Johns'
+  ]},
+  { group: 'Europe', zones: [
+    'Europe/London', 'Europe/Dublin', 'Europe/Paris', 'Europe/Berlin',
+    'Europe/Madrid', 'Europe/Rome', 'Europe/Amsterdam', 'Europe/Stockholm',
+    'Europe/Helsinki', 'Europe/Athens', 'Europe/Moscow'
+  ]},
+  { group: 'Americas (other)', zones: [
+    'America/Mexico_City', 'America/Bogota', 'America/Lima', 'America/Santiago',
+    'America/Buenos_Aires', 'America/Sao_Paulo'
+  ]},
+  { group: 'Asia & Pacific', zones: [
+    'Asia/Tokyo', 'Asia/Seoul', 'Asia/Shanghai', 'Asia/Hong_Kong',
+    'Asia/Singapore', 'Asia/Bangkok', 'Asia/Kolkata', 'Asia/Dubai',
+    'Australia/Sydney', 'Australia/Melbourne', 'Pacific/Auckland'
+  ]},
+  { group: 'Africa', zones: [
+    'Africa/Cairo', 'Africa/Lagos', 'Africa/Johannesburg', 'Africa/Nairobi'
+  ]},
+  { group: 'UTC', zones: ['UTC'] }
+];
+
+function renderTimezoneOptions(selected) {
+  return TIMEZONE_OPTIONS.map(g => {
+    const opts = g.zones.map(z =>
+      `<option value="${z}"${z === selected ? ' selected' : ''}>${z}</option>`
+    ).join('');
+    return `<optgroup label="${g.group}">${opts}</optgroup>`;
+  }).join('');
+}
+
 function renderBirthForm(birth) {
   const v = (k, fallback = '') => escapeHtml(birth?.[k] ?? fallback);
+  const tz = birth?.timezone || '';
   return `
     <div class="section">
       <div class="section-title">Birth Data</div>
-      <div class="section-intro">Edit and re-save to recompute the chart. All fields required. Latitude and longitude are decimal degrees (negative west, negative south); timezone is the IANA identifier active at the birth moment (e.g. <em>America/Denver</em>).</div>
+      <div class="section-intro">Edit and re-save to recompute the chart. Birth place autocompletes via OpenStreetMap — pick a result and latitude / longitude / timezone fill in automatically. All four are admin-overridable via <i>Edit coords / tz</i>.</div>
       <div class="birth-form">
         <div class="field">
           <label class="field-label">Birth date</label>
@@ -450,25 +555,33 @@ function renderBirthForm(birth) {
           <input class="field-input" id="f-time" type="time" step="1" value="${v('birth_time')}">
           <div class="field-hint">Local time at birth place</div>
         </div>
-        <div class="field" style="grid-column: span 2;">
+
+        <div class="field span-2 autocomplete-wrap">
           <label class="field-label">Birth place</label>
-          <input class="field-input" id="f-place" type="text" placeholder="Provo, Utah, USA" value="${v('birth_place')}">
+          <input class="field-input" id="f-place" type="text" placeholder="Start typing a city — e.g. Provo, Utah" value="${v('birth_place')}" autocomplete="off">
+          <div class="autocomplete-list" id="ac-list"></div>
+          <div class="field-hint" id="place-readout">${birth?.latitude != null ? `${Number(birth.latitude).toFixed(4)}°, ${Number(birth.longitude).toFixed(4)}° · ${tz || '—'}` : 'Pick a city to auto-fill coordinates and timezone'} <button type="button" class="coord-toggle" id="coord-toggle">Edit coords / tz ▸</button></div>
         </div>
-        <div class="field">
-          <label class="field-label">Latitude</label>
-          <input class="field-input" id="f-lat" type="number" step="0.000001" placeholder="40.2338" value="${v('latitude')}">
-          <div class="field-hint">Decimal degrees · north positive</div>
-        </div>
-        <div class="field">
-          <label class="field-label">Longitude</label>
-          <input class="field-input" id="f-lon" type="number" step="0.000001" placeholder="-111.6585" value="${v('longitude')}">
-          <div class="field-hint">Decimal degrees · west negative</div>
-        </div>
-        <div class="field">
+
+        <div class="field span-2">
           <label class="field-label">Timezone (IANA)</label>
-          <input class="field-input" id="f-tz" type="text" placeholder="America/Denver" value="${v('timezone')}">
-          <div class="field-hint">Active at birth date · DST-aware</div>
+          <select class="field-select" id="f-tz">${renderTimezoneOptions(tz)}</select>
+          <div class="field-hint">Auto-suggested from birth place; DST handled by the calculator for the actual birth date.</div>
         </div>
+
+        <div class="coord-fields" id="coord-fields">
+          <div class="field">
+            <label class="field-label">Latitude</label>
+            <input class="field-input" id="f-lat" type="number" step="0.000001" placeholder="40.2338" value="${v('latitude')}">
+            <div class="field-hint">Decimal degrees · north positive</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Longitude</label>
+            <input class="field-input" id="f-lon" type="number" step="0.000001" placeholder="-111.6585" value="${v('longitude')}">
+            <div class="field-hint">Decimal degrees · west negative</div>
+          </div>
+        </div>
+
         <div class="form-actions">
           <button class="btn btn-primary" id="btn-save">Save &amp; Recompute</button>
           <span class="form-status" id="form-status"></span>
@@ -647,6 +760,145 @@ function wireNotes(birth) {
         status.textContent = 'save failed: ' + e.message;
       }
     }, 800);
+  });
+}
+
+// ── US state → IANA timezone (admin-suggest only; user can override) ──
+const US_STATE_TZ = {
+  // Eastern
+  'connecticut':'America/New_York','delaware':'America/New_York','district of columbia':'America/New_York',
+  'florida':'America/New_York','georgia':'America/New_York','maine':'America/New_York',
+  'maryland':'America/New_York','massachusetts':'America/New_York','new hampshire':'America/New_York',
+  'new jersey':'America/New_York','new york':'America/New_York','north carolina':'America/New_York',
+  'ohio':'America/New_York','pennsylvania':'America/New_York','rhode island':'America/New_York',
+  'south carolina':'America/New_York','vermont':'America/New_York','virginia':'America/New_York',
+  'west virginia':'America/New_York',
+  // Central
+  'alabama':'America/Chicago','arkansas':'America/Chicago','illinois':'America/Chicago',
+  'iowa':'America/Chicago','kansas':'America/Chicago','kentucky':'America/New_York',
+  'louisiana':'America/Chicago','minnesota':'America/Chicago','mississippi':'America/Chicago',
+  'missouri':'America/Chicago','nebraska':'America/Chicago','north dakota':'America/Chicago',
+  'oklahoma':'America/Chicago','south dakota':'America/Chicago','tennessee':'America/Chicago',
+  'texas':'America/Chicago','wisconsin':'America/Chicago',
+  // Mountain
+  'colorado':'America/Denver','idaho':'America/Denver','montana':'America/Denver',
+  'new mexico':'America/Denver','utah':'America/Denver','wyoming':'America/Denver',
+  // Phoenix (no DST)
+  'arizona':'America/Phoenix',
+  // Pacific
+  'california':'America/Los_Angeles','nevada':'America/Los_Angeles','oregon':'America/Los_Angeles',
+  'washington':'America/Los_Angeles',
+  // Alaska / Hawaii
+  'alaska':'America/Anchorage','hawaii':'Pacific/Honolulu',
+  // Indiana / Michigan — most counties are Eastern
+  'indiana':'America/Indiana/Indianapolis','michigan':'America/Detroit',
+};
+
+// Best-effort country-code → default timezone for a few common countries.
+const COUNTRY_TZ = {
+  'gb':'Europe/London','ie':'Europe/Dublin','fr':'Europe/Paris','de':'Europe/Berlin',
+  'es':'Europe/Madrid','it':'Europe/Rome','nl':'Europe/Amsterdam','se':'Europe/Stockholm',
+  'fi':'Europe/Helsinki','gr':'Europe/Athens','ru':'Europe/Moscow',
+  'ca':'America/Toronto','mx':'America/Mexico_City','br':'America/Sao_Paulo',
+  'ar':'America/Buenos_Aires','jp':'Asia/Tokyo','kr':'Asia/Seoul','cn':'Asia/Shanghai',
+  'hk':'Asia/Hong_Kong','sg':'Asia/Singapore','th':'Asia/Bangkok','in':'Asia/Kolkata',
+  'ae':'Asia/Dubai','au':'Australia/Sydney','nz':'Pacific/Auckland',
+  'eg':'Africa/Cairo','ng':'Africa/Lagos','za':'Africa/Johannesburg','ke':'Africa/Nairobi',
+};
+
+function suggestTimezone(addr) {
+  if (!addr) return null;
+  const cc = (addr.country_code || '').toLowerCase();
+  if (cc === 'us') {
+    const state = (addr.state || '').toLowerCase();
+    if (US_STATE_TZ[state]) return US_STATE_TZ[state];
+    return 'America/New_York'; // generic US fallback
+  }
+  return COUNTRY_TZ[cc] || null;
+}
+
+// ── City autocomplete via Nominatim ──
+let _acTimer = null;
+let _acAbort = null;
+let _acResults = [];
+
+function wireCityAutocomplete() {
+  const input = document.getElementById('f-place');
+  const list  = document.getElementById('ac-list');
+  if (!input || !list) return;
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim();
+    clearTimeout(_acTimer);
+    if (q.length < 3) { hideList(); return; }
+    _acTimer = setTimeout(() => searchCity(q), 350);
+  });
+
+  document.addEventListener('click', e => {
+    if (!input.contains(e.target) && !list.contains(e.target)) hideList();
+  });
+
+  function hideList() { list.classList.remove('show'); list.innerHTML = ''; }
+
+  async function searchCity(q) {
+    if (_acAbort) _acAbort.abort();
+    _acAbort = new AbortController();
+    list.classList.add('show');
+    list.innerHTML = `<div class="autocomplete-loading">Searching…</div>`;
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&addressdetails=1&accept-language=en`;
+      const res = await fetch(url, { signal: _acAbort.signal });
+      if (!res.ok) throw new Error('Nominatim ' + res.status);
+      const data = await res.json();
+      _acResults = data;
+      if (!data.length) { list.innerHTML = `<div class="autocomplete-loading">No matches.</div>`; return; }
+      list.innerHTML = data.map((d, i) => `
+        <div class="autocomplete-item" data-idx="${i}">
+          <div>${escapeHtml(d.display_name)}</div>
+          <div class="ac-coords">${Number(d.lat).toFixed(4)}°, ${Number(d.lon).toFixed(4)}°${d.address?.country_code ? ' · ' + d.address.country_code.toUpperCase() : ''}</div>
+        </div>`).join('');
+      list.querySelectorAll('.autocomplete-item').forEach(el => {
+        el.addEventListener('click', () => pick(_acResults[Number(el.dataset.idx)]));
+      });
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        list.innerHTML = `<div class="autocomplete-loading">Search failed: ${e.message}</div>`;
+      }
+    }
+  }
+
+  function pick(result) {
+    if (!result) return;
+    // Build a clean readable place name
+    const a = result.address || {};
+    const cityName = a.city || a.town || a.village || a.municipality || a.hamlet || a.county;
+    const region   = a.state || a.region;
+    const country  = a.country;
+    const cleaned  = [cityName, region, country].filter(Boolean).join(', ') || result.display_name;
+    input.value = cleaned;
+    document.getElementById('f-lat').value = Number(result.lat).toFixed(6);
+    document.getElementById('f-lon').value = Number(result.lon).toFixed(6);
+    const suggestedTz = suggestTimezone(a);
+    if (suggestedTz) {
+      const select = document.getElementById('f-tz');
+      if ([...select.options].some(o => o.value === suggestedTz)) {
+        select.value = suggestedTz;
+      }
+    }
+    document.getElementById('place-readout').innerHTML =
+      `${Number(result.lat).toFixed(4)}°, ${Number(result.lon).toFixed(4)}° · ${suggestedTz || document.getElementById('f-tz').value} <button type="button" class="coord-toggle" id="coord-toggle">Edit coords / tz ▸</button>`;
+    rewireCoordToggle();
+    hideList();
+  }
+}
+
+function rewireCoordToggle() {
+  const btn = document.getElementById('coord-toggle');
+  const fields = document.getElementById('coord-fields');
+  if (!btn || !fields) return;
+  btn.addEventListener('click', () => {
+    fields.classList.toggle('show');
+    btn.textContent = fields.classList.contains('show') ? 'Hide coords / tz ▾' : 'Edit coords / tz ▸';
   });
 }
 
