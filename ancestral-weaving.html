@@ -494,7 +494,7 @@ async function init() {
   const timeline = document.getElementById('weaving-timeline');
   try {
     const [ancestors, freqRows] = await Promise.all([
-      supabaseFetch('ancestors?select=*&order=sort_year.asc'),
+      supabaseFetch('ancestors?select=*&status=eq.weaving&order=sort_year.asc'),
       supabaseFetch('ancestor_frequencies?select=ancestor_id,frequency_tags(name)').catch(() => [])
     ]);
 
