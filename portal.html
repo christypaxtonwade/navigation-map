@@ -2252,6 +2252,13 @@ function renderAncestorReview(d) {
             <input class="form-input" id="rv-sigil-description" value="${esc(d.sigil_description)}">
           </div>
         </div>
+        <div class="form-group" style="margin-top:1.25rem;margin-bottom:0">
+          <label class="form-label">Sigil SVG <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">draft from AI — review the preview, edit the markup, or replace entirely before confirming</span></label>
+          <div class="sigil-preview-wrap">
+            <div class="sigil-preview-box" id="rv-sigil-preview">${d.sigil_svg || ''}</div>
+            <textarea class="form-textarea" id="rv-sigil-svg" rows="6" style="flex:1" oninput="updateSigilPreview(this.value, 'rv-sigil-preview')">${esc(d.sigil_svg)}</textarea>
+          </div>
+        </div>
       </div>
 
       <!-- Frequency Tags -->
@@ -2416,6 +2423,7 @@ async function confirmAncestorToDatabase() {
     layer_lineage:     document.getElementById('rv-layer-lineage').value.trim() || null,
     sigil_name:        document.getElementById('rv-sigil-name').value.trim() || null,
     sigil_description: document.getElementById('rv-sigil-description').value.trim() || null,
+    sigil_svg:         (document.getElementById('rv-sigil-svg')?.value || '').trim() || null,
   };
 
   btn.disabled = true; btn.textContent = 'Saving…';
@@ -2442,15 +2450,24 @@ async function confirmAncestorToDatabase() {
     if (clientId) {
       const ancestor = result[0];
       const caPayload = {
-        client_id:   clientId,
-        ancestor_id: ancestorId,
-        slug:        payload.slug,
-        name:        payload.name,
-        epithet:     payload.epithet || null,
-        dates:       payload.dates || null,
-        era:         payload.era || null,
-        sort_year:   payload.sort_year || 0,
-        status:      payload.status || 'catalog',
+        client_id:         clientId,
+        ancestor_id:       ancestorId,
+        slug:              payload.slug,
+        name:              payload.name,
+        epithet:           payload.epithet || null,
+        dates:             payload.dates || null,
+        location:          payload.location || null,
+        era:               payload.era || null,
+        sort_year:         payload.sort_year || 0,
+        status:            payload.status || 'catalog',
+        catalog_preview:   payload.catalog_preview || null,
+        layer_terroir:     payload.layer_terroir || null,
+        layer_unresolved:  payload.layer_unresolved || null,
+        layer_thread:      payload.layer_thread || null,
+        layer_lineage:     payload.layer_lineage || null,
+        sigil_name:        payload.sigil_name || null,
+        sigil_description: payload.sigil_description || null,
+        sigil_svg:         payload.sigil_svg || null,
       };
       const caResult = await restPost('client_ancestors', caPayload);
       if (Array.isArray(caResult) && caResult[0]?.id) {
@@ -2804,8 +2821,12 @@ function updateStatusCards() {
   });
 }
 
-function updateSigilPreview(svg) {
-  if (box) box.innerHTML = svg;
+function updateSigilPreview(svg, previewId) {
+  // Fall back to whichever preview box exists (editor or review form)
+  const id = previewId
+    || (document.getElementById('ed-sigil-preview') ? 'ed-sigil-preview' : 'rv-sigil-preview');
+  const box = document.getElementById(id);
+  if (box) box.innerHTML = svg || '';
 }
 
 // ── Editor chip management ─────────────────────────────
