@@ -908,12 +908,14 @@ body::before {
         <!-- Mode toggle -->
         <div class="mode-toggle">
           <button class="mode-btn active" id="mode-btn-generate" onclick="showGenerateMode()">✦ Generate New</button>
+          <button class="mode-btn" id="mode-btn-triage" onclick="showTriageMode()">⤴ Triage Intake</button>
           <button class="mode-btn" id="mode-btn-augment" onclick="showAugmentMode()">⊕ Augment Existing</button>
           <button class="mode-btn" id="mode-btn-edit" onclick="showEditMode()">✎ Edit Existing</button>
         </div>
 
         <!-- ═══ GENERATE MODE ═══ -->
         <div id="ar-generate-mode">
+          <div id="ar-promote-banner" style="display:none;max-width:720px;margin-bottom:1rem;padding:0.75rem 1rem;border-radius:6px;border:1px solid rgba(201,168,124,0.4);background:rgba(201,168,124,0.06);color:var(--gold);font-size:14px;line-height:1.5"></div>
           <p class="panel-sub" style="margin-bottom:1.5rem">Enter a name and context. The AI verifies identity, determines catalog vs weaving status, and generates the full record. Review and edit all fields before confirming to the database.</p>
 
           <div class="card" id="ancestor-research-form" style="max-width:720px;margin-bottom:2rem">
@@ -965,6 +967,18 @@ body::before {
           </div>
 
           <div id="ar-review" style="display:none"></div>
+        </div>
+
+        <!-- ═══ TRIAGE INTAKE MODE ═══ -->
+        <div id="ar-triage-mode" style="display:none">
+          <p class="panel-sub" style="margin-bottom:1.5rem">Ancestors clients submitted via the intake form sit here as <em>intake stubs</em> — names + relation + dates + intake notes, but no research yet. Promoting a stub runs the AI Generate flow with the client's intake notes as primary context, then updates the stub in place: it gains all four layers and a sigil, links to the canonical ancestor record, and preserves the client's relation and intake notes. No duplicates created.</p>
+          <div class="card" style="margin-bottom:1.5rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+              <div class="eyebrow">Unlinked intake stubs</div>
+              <button class="btn btn-outline btn-sm" onclick="populateTriageList()">Refresh</button>
+            </div>
+            <div id="ar-triage-list"><div class="loading"><span class="loading-glyph">✦</span>Loading…</div></div>
+          </div>
         </div>
 
         <!-- ═══ AUGMENT MODE ═══ -->
@@ -2192,6 +2206,8 @@ let arReviewData = null;      // raw AI result
 let arChips = [];             // [{ tagId, tagName, tagType, strength }]
 let arAugmentExistingId = null;     // when set, Confirm PATCHes this id instead of inserting
 let arAugmentExistingRecord = null; // full pre-augment snapshot, used for diff highlights
+let arPromoteStubId = null;         // when set, Confirm inserts canonical + updates this client_ancestors stub in place
+let arPromoteStubData = null;       // full client_ancestors row + client name (for banner + payload composition)
 
 // PDF attachments per mode. Each entry: { id, file, filename, size, base64, media_type, log, date, type, label, url }
 const arPdfState = { ar: [], aug: [] };
@@ -2588,6 +2604,7 @@ async function confirmAncestorToDatabase() {
   try {
     let ancestorId;
     const isAugment = !!arAugmentExistingId;
+    const isPromote = !!arPromoteStubId;
 
     if (isAugment) {
       // PATCH the existing ancestor in place. Don't overwrite slug (can change canonical URLs).
@@ -2607,14 +2624,14 @@ async function confirmAncestorToDatabase() {
         });
       }
     } else {
-      // INSERT a new ancestor (original generate flow)
+      // INSERT a new ancestor (Generate New flow — also used by Promote since promote creates a new canonical row)
       const result = await restPost('ancestors', payload);
       if (!Array.isArray(result) || !result[0]?.id) {
         throw new Error(result?.message || result?.details || result?.code || 'Failed to save ancestor');
       }
       ancestorId = result[0].id;
 
-      // Save frequency tags
+      // Save frequency tags on the canonical ancestor
       for (const chip of arChips) {
         await restPost('ancestor_frequencies', {
           ancestor_id:       ancestorId,
@@ -2624,8 +2641,44 @@ async function confirmAncestorToDatabase() {
       }
     }
 
-    // 3. Optionally assign to client (only on fresh insert, not on augment of existing record)
-    if (clientId && !isAugment) {
+    // 3. Client linking — three mutually-exclusive paths:
+    //    (a) Promote: UPDATE the existing intake_stub in place (preserve client_id / relation / intake_notes; copy layers; flip status; link ancestor_id)
+    //    (b) Augment: skip — caller already has the ancestor + client wiring
+    //    (c) Generate + clientId selected: INSERT a new client_ancestors row (existing assign-to-client behavior)
+    if (isPromote) {
+      const stubPatchPayload = {
+        ancestor_id:       ancestorId,
+        slug:              payload.slug,
+        name:              payload.name,
+        epithet:           payload.epithet || null,
+        dates:             payload.dates || null,
+        location:          payload.location || null,
+        era:               payload.era || null,
+        sort_year:         payload.sort_year || 0,
+        status:            payload.status || 'catalog',
+        catalog_preview:   payload.catalog_preview || null,
+        layer_terroir:     payload.layer_terroir || null,
+        layer_unresolved:  payload.layer_unresolved || null,
+        layer_thread:      payload.layer_thread || null,
+        layer_lineage:     payload.layer_lineage || null,
+        sigil_name:        payload.sigil_name || null,
+        sigil_description: payload.sigil_description || null,
+        sigil_svg:         payload.sigil_svg || null,
+        // NOTE: client_id, relation_to_client, occupation, intake_notes intentionally NOT in payload — preserved
+      };
+      const ok = await restPatch('client_ancestors', arPromoteStubId, stubPatchPayload);
+      if (!ok) throw new Error('Failed to update intake stub in place');
+
+      // Resync client_ancestor_frequencies for the stub
+      await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${arPromoteStubId}`);
+      for (const chip of arChips) {
+        await restPost('client_ancestor_frequencies', {
+          client_ancestor_id: arPromoteStubId,
+          frequency_tag_id:   chip.tagId,
+          strength:           chip.strength,
+        });
+      }
+    } else if (clientId && !isAugment) {
       const caPayload = {
         client_id:         clientId,
         ancestor_id:       ancestorId,
@@ -2667,13 +2720,26 @@ async function confirmAncestorToDatabase() {
 
     // Reload ancestors cache
     await loadAncestors();
-    const verb = isAugment ? 'updated' : 'saved';
-    const tail = !isAugment && clientId ? ' and assigned to client' : '';
+    let verb, tail = '';
+    if (isAugment) {
+      verb = 'updated';
+    } else if (isPromote) {
+      verb = 'researched and linked';
+      tail = ` to ${esc(arPromoteStubData?.clients?.name || 'client')}'s weaving`;
+    } else {
+      verb = 'saved';
+      tail = clientId ? ' and assigned to client' : '';
+    }
     const pdfTail = pdfsToLog ? ` · ${pdfsToLog} PDF${pdfsToLog===1?'':'s'} logged to findings` : '';
     const note = isAugment ? ' <span style="color:var(--text-faint);font-size:14px">(client weaving copies remain unchanged — re-assign or edit individually if you want them refreshed)</span>' : '';
-    msgEl.innerHTML = `<span style="color:var(--teal)">✓ ${payload.name} ${verb}${tail}${pdfTail}.</span>${note}`;
-    // Clear augment context so next Confirm starts clean
+    msgEl.innerHTML = `<span style="color:var(--teal)">✓ ${esc(payload.name)} ${verb}${tail}${pdfTail}.</span>${note}`;
+    // Clear contextual state so next Confirm starts clean
     if (isAugment) { arAugmentExistingId = null; arAugmentExistingRecord = null; }
+    if (isPromote) {
+      arPromoteStubId = null; arPromoteStubData = null;
+      const banner = document.getElementById('ar-promote-banner');
+      if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
+    }
     btn.textContent = '✓ Saved';
 
     // Offer to start another after a pause
@@ -2733,39 +2799,153 @@ const LOCKABLE_FIELDS = [
   'sigil_name', 'sigil_description', 'sigil_svg'
 ];
 
-function showGenerateMode() {
+function _setActiveMode(activeBtnId) {
+  ['mode-btn-generate','mode-btn-triage','mode-btn-augment','mode-btn-edit'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.toggle('active', id === activeBtnId);
+  });
+}
+
+function _hideAllModePanels() {
+  ['ar-generate-mode','ar-triage-mode','ar-augment-mode','ar-edit-mode'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+}
+
+function showGenerateMode(opts) {
+  _hideAllModePanels();
   document.getElementById('ar-generate-mode').style.display = 'block';
-  document.getElementById('ar-augment-mode').style.display = 'none';
-  document.getElementById('ar-edit-mode').style.display = 'none';
-  document.getElementById('mode-btn-generate').classList.add('active');
-  document.getElementById('mode-btn-augment')?.classList.remove('active');
-  document.getElementById('mode-btn-edit').classList.remove('active');
-  // Clear augment state so a subsequent Generate Confirm inserts new (not patches)
+  _setActiveMode('mode-btn-generate');
+  // Default: clear all secondary state (so a Confirm becomes a fresh insert).
+  // If opts.preservePromote is set (called from promoteStub), keep the promote state.
   arAugmentExistingId = null;
   arAugmentExistingRecord = null;
+  if (!opts || !opts.preservePromote) {
+    arPromoteStubId = null;
+    arPromoteStubData = null;
+    const banner = document.getElementById('ar-promote-banner');
+    if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
+  }
+}
+
+function showTriageMode() {
+  _hideAllModePanels();
+  document.getElementById('ar-triage-mode').style.display = 'block';
+  _setActiveMode('mode-btn-triage');
+  arAugmentExistingId = null;
+  arAugmentExistingRecord = null;
+  // Don't clear promote state here — Triage shouldn't reset an in-flight promotion mid-review
+  populateTriageList();
 }
 
 function showAugmentMode() {
-  document.getElementById('ar-generate-mode').style.display = 'none';
+  _hideAllModePanels();
   document.getElementById('ar-augment-mode').style.display = 'block';
-  document.getElementById('ar-edit-mode').style.display = 'none';
-  document.getElementById('mode-btn-generate').classList.remove('active');
-  document.getElementById('mode-btn-augment').classList.add('active');
-  document.getElementById('mode-btn-edit').classList.remove('active');
+  _setActiveMode('mode-btn-augment');
+  arPromoteStubId = null;
+  arPromoteStubData = null;
+  const banner = document.getElementById('ar-promote-banner');
+  if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
   populateAugmentSelector();
 }
 
 function showEditMode() {
-  document.getElementById('ar-generate-mode').style.display = 'none';
-  document.getElementById('ar-augment-mode').style.display = 'none';
+  _hideAllModePanels();
   document.getElementById('ar-edit-mode').style.display = 'block';
-  document.getElementById('mode-btn-edit').classList.add('active');
-  document.getElementById('mode-btn-augment')?.classList.remove('active');
-  document.getElementById('mode-btn-generate').classList.remove('active');
+  _setActiveMode('mode-btn-edit');
   populateAncestorEditorSelector();
-  // Clear augment state
   arAugmentExistingId = null;
   arAugmentExistingRecord = null;
+  arPromoteStubId = null;
+  arPromoteStubData = null;
+  const banner = document.getElementById('ar-promote-banner');
+  if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
+}
+
+// ════════════════════════════════════════════════════
+// TRIAGE INTAKE STUBS
+// ════════════════════════════════════════════════════
+
+async function populateTriageList() {
+  const el = document.getElementById('ar-triage-list');
+  if (!el) return;
+  el.innerHTML = `<div class="loading"><span class="loading-glyph">✦</span>Loading…</div>`;
+
+  try {
+    // intake_stub rows joined with their client name, newest first
+    const rows = await rest(
+      `client_ancestors?status=eq.intake_stub&select=id,client_id,name,dates,location,occupation,relation_to_client,intake_notes,created_at,clients(name,email,entry_offering)&order=created_at.desc`
+    );
+    const list = Array.isArray(rows) ? rows : [];
+    if (!list.length) {
+      el.innerHTML = `<div class="empty" style="padding:2rem;text-align:center;font-style:italic;color:var(--text-faint)">No intake stubs awaiting triage.</div>`;
+      return;
+    }
+
+    el.innerHTML = list.map(r => {
+      const clientName = esc(r.clients?.name || '—');
+      const clientMeta = [r.clients?.entry_offering, r.clients?.email].filter(Boolean).map(esc).join(' · ');
+      const ancestorMeta = [r.dates, r.relation_to_client, r.location, r.occupation].filter(Boolean).map(esc).join(' · ');
+      const notesPreview = r.intake_notes ? esc(r.intake_notes.slice(0, 200) + (r.intake_notes.length > 200 ? '…' : '')) : '';
+      return `<div style="border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:0.75rem;background:rgba(201,168,124,0.03)">
+        <div style="display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;margin-bottom:0.5rem">
+          <div style="flex:1">
+            <div style="font-size:16px;font-weight:500;color:var(--text);margin-bottom:0.15rem">${esc(r.name)}</div>
+            <div style="font-size:13px;color:var(--text-faint)">From <strong style="font-weight:500;color:var(--gold)">${clientName}</strong>${clientMeta ? ' · ' + clientMeta : ''}</div>
+          </div>
+          <button class="btn btn-gold btn-sm" onclick="promoteStub('${esc(r.id)}')">Promote →</button>
+        </div>
+        ${ancestorMeta ? `<div style="font-size:14px;color:var(--text-dim);margin-bottom:0.4rem">${ancestorMeta}</div>` : ''}
+        ${notesPreview ? `<div style="font-size:14px;color:var(--text-dim);font-style:italic;line-height:1.5;padding:0.5rem 0.75rem;border-left:2px solid rgba(201,168,124,0.25);background:rgba(201,168,124,0.03)">${notesPreview}</div>` : ''}
+      </div>`;
+    }).join('');
+  } catch (err) {
+    el.innerHTML = `<div class="msg msg-error">Failed to load intake stubs: ${esc(err.message)}</div>`;
+  }
+}
+
+async function promoteStub(stubId) {
+  // Load the stub (fresh, in case it changed)
+  const rows = await rest(`client_ancestors?id=eq.${encodeURIComponent(stubId)}&select=*,clients(name)`);
+  const stub = Array.isArray(rows) && rows.length ? rows[0] : null;
+  if (!stub) { alert('Could not load that intake stub. Refresh and try again.'); return; }
+  if (stub.status !== 'intake_stub') { alert('That row is no longer an intake stub.'); return; }
+
+  arPromoteStubId   = stubId;
+  arPromoteStubData = stub;
+
+  // Switch to Generate New mode and pre-fill the form, preserving promote state
+  showGenerateMode({ preservePromote: true });
+
+  document.getElementById('ar-name').value     = stub.name || '';
+  document.getElementById('ar-dates').value    = stub.dates || '';
+  document.getElementById('ar-location').value = stub.location || '';
+
+  // Compose Context Notes from the client's intake info
+  const noteParts = [];
+  if (stub.relation_to_client) noteParts.push(`Relation to client: ${stub.relation_to_client}`);
+  if (stub.occupation)         noteParts.push(`Occupation: ${stub.occupation}`);
+  if (stub.intake_notes)       noteParts.push(`Client's intake notes: ${stub.intake_notes}`);
+  document.getElementById('ar-notes').value = noteParts.join('\n\n');
+
+  document.getElementById('ar-level').value = 'auto';
+
+  // Banner
+  const banner = document.getElementById('ar-promote-banner');
+  if (banner) {
+    banner.style.display = 'block';
+    banner.innerHTML = `Promoting intake stub: <strong style="font-weight:500">${esc(stub.name)}</strong> (from <strong style="font-weight:500">${esc(stub.clients?.name || 'client')}</strong>) · <a href="#" onclick="event.preventDefault();showTriageMode()" style="color:var(--gold);text-decoration:underline">cancel and return to triage</a>`;
+  }
+
+  // Reset any previous review/PDFs/loading
+  document.getElementById('ar-review').style.display = 'none';
+  document.getElementById('ar-review').innerHTML = '';
+  document.getElementById('ar-form-msg').innerHTML = '';
+  clearPdfState('ar');
+
+  // Scroll the form into view
+  document.getElementById('ancestor-research-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ════════════════════════════════════════════════════
