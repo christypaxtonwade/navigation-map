@@ -285,11 +285,15 @@ body {
 }
 .profile-close:hover { color: var(--gold); border-color: var(--gold-dim); }
 
-/* Reading-mode toggle in the modal header */
+/* Top toolbar — holds the mode toggle in document flow so it doesn't overlap content */
+.profile-toolbar {
+  display: flex; justify-content: flex-end;
+  padding: 0.7rem 4rem 0.4rem 1.75rem;
+}
 .profile-mode-toggle {
-  position: absolute; top: 0.7rem; right: 4rem;
-  display: flex; gap: 0; border: 1px solid var(--border); border-radius: 6px;
-  background: rgba(10,12,31,0.65); overflow: hidden; z-index: 5;
+  display: inline-flex; gap: 0;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: rgba(255,255,255,0.02); overflow: hidden;
 }
 .profile-mode-btn {
   font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
@@ -1093,7 +1097,7 @@ function openProfile(id) {
   const cardsBlock = `<div class="profile-cards">${cards.join('')}</div>`;
 
   const c = document.getElementById('profile-content');
-  c.innerHTML = modeToggle + identityCard + navBar + cardsBlock;
+  c.innerHTML = `<div class="profile-toolbar">${modeToggle}</div>` + identityCard + navBar + cardsBlock;
 
   document.getElementById('profile-modal').classList.toggle('long-form', profileViewMode === 'long');
   document.getElementById('profile-overlay').classList.add('open');
