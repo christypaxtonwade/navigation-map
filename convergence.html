@@ -692,7 +692,29 @@ async function loadClientData() {
   const sortedFreqs = Object.entries(freqCounts)
     .sort((a,b) => b[1] - a[1]);
 
-  return { client, ancestors, freqCounts, freqAncestors, sortedFreqs };
+  // ── Mythic Tapestry: chosen-resonance figures, distinct from blood lineage ──
+  const tapestryAssignments = await sb(
+    `client_tapestry_archetypes?client_id=eq.${client.id}&select=id,resonance_note,strength,tapestry_archetypes(id,name,tradition,epithet,description,register_mythic,register_conceptual,register_somatic,register_unreceived)`
+  ).catch(() => []);
+  const tapestry = (Array.isArray(tapestryAssignments) ? tapestryAssignments : [])
+    .map(a => ({ ...a, archetype: a.tapestry_archetypes }))
+    .filter(a => a.archetype);
+
+  let tapestryFreqMap = {};
+  if (tapestry.length) {
+    const archetypeIds = tapestry.map(a => a.archetype.id);
+    const tapFreqRows = await sb(
+      `tapestry_archetype_frequencies?tapestry_archetype_id=in.(${archetypeIds.join(',')})&select=tapestry_archetype_id,strength,frequency_tags(name)`
+    ).catch(() => []);
+    (Array.isArray(tapFreqRows) ? tapFreqRows : []).forEach(r => {
+      const name = r.frequency_tags?.name; if (!name) return;
+      if (!tapestryFreqMap[name]) tapestryFreqMap[name] = [];
+      const t = tapestry.find(x => x.archetype.id === r.tapestry_archetype_id);
+      if (t) tapestryFreqMap[name].push(t.archetype.name);
+    });
+  }
+
+  return { client, ancestors, freqCounts, freqAncestors, sortedFreqs, tapestry, tapestryFreqMap };
 }
 
 async function loadExistingConvergence(clientId) {
@@ -749,10 +771,47 @@ function setProgress(stepId, state) {
 }
 
 // ── Generate convergence ────────────────────────────────────
+function clientPatternsBlock(client) {
+  // Format the client's intake-form pattern responses as a context block for the AI.
+  // Returns empty string when nothing is captured so the prompt stays clean.
+  const fields = [
+    ['pattern_repeating',  '01 — Repeating pattern (named in their own words)'],
+    ['pattern_somatic',    '02 — Somatic pattern (what the body carries)'],
+    ['pattern_inherited',  '03 — Inherited pattern (what the lineage transmits)'],
+    ['pattern_threshold',  '04 — Threshold (what they are at the edge of)'],
+    ['pattern_unreceived', '05 — Unreceived (what has not yet been named)'],
+    ['open_remarks',       'Open remarks'],
+  ];
+  const parts = fields
+    .map(([k, label]) => {
+      const v = (client?.[k] || '').toString().trim();
+      return v ? `${label}:\n${v}` : null;
+    })
+    .filter(Boolean);
+  if (!parts.length) return '';
+  return `\n\n---\n\nTHE DESCENDANT'S OWN SELF-REPORT (from intake — their lived patterns named before any analysis):\n\n${parts.join('\n\n')}\n\nCross-reference these against the ancestral frequencies and layers as you write. Where do the lineage's carried patterns and the descendant's named experience converge? Where do they diverge in revealing ways? Speak from the meeting point of what the lineage carries and what the descendant has named.`;
+}
+
+function tapestryBlock(tapestry, tapestryFreqMap) {
+  if (!tapestry || !tapestry.length) return '';
+  const figureLines = tapestry.map(t => {
+    const a = t.archetype;
+    const meta = [a.tradition, a.epithet].filter(Boolean).join(' · ');
+    const note = t.resonance_note ? `\n  Resonance note (descendant's words): "${t.resonance_note}"` : '';
+    return `- ${a.name}${meta ? ' (' + meta + ')' : ''} [${t.strength || 'noted'}]${note}`;
+  }).join('\n');
+  const tagSummary = Object.entries(tapestryFreqMap || {})
+    .map(([name, figs]) => `${name} (${figs.join(', ')})`)
+    .join('; ');
+  return `\n\n---\n\nCHOSEN MYTHIC RESONANCE (the descendant has named these figures as conscious recognition — distinct from blood lineage):\n\n${figureLines}${tagSummary ? `\n\nTapestry frequency activations: ${tagSummary}` : ''}\n\nDistinguish carefully in your writing: the lineage frequencies are what the descendant carries unchosen, through the body. The tapestry resonances are what the descendant has recognized and claimed. Where lineage and tapestry name the same frequency, that convergence is a strong signal. Where the tapestry names a frequency the lineage does not carry, treat it as the descendant's emerging direction. Do not collapse the categories — keep blood and chosen distinct.`;
+}
+
 async function generateConvergence(clientData) {
-  const { client, ancestors, freqCounts, freqAncestors, sortedFreqs } = clientData;
+  const { client, ancestors, freqCounts, freqAncestors, sortedFreqs, tapestry, tapestryFreqMap } = clientData;
   const topFreqs = sortedFreqs.slice(0, 6);
   const maxCount = topFreqs[0]?.[1] || 1;
+  const patternsBlock = clientPatternsBlock(client);
+  const resonanceBlock = tapestryBlock(tapestry, tapestryFreqMap);
 
   // Create convergence record
   setProgress('init', 'active');
@@ -767,9 +826,9 @@ async function generateConvergence(clientData) {
 
   const SYSTEM = `You are writing a section of The Convergence — a structured ancestral frequency analysis for ${CLIENT_NAME}.
 
-The Convergence reads the dominant patterns in an ancestral lineage and surfaces what is carried, what remains unresolved, and what calls forward into the present descendant. 
+The Convergence reads the dominant patterns in an ancestral lineage and surfaces what is carried, what remains unresolved, and what calls forward into the present descendant.
 
-Your voice is: precise, mythically grounded, embodied. Not academic. Not sentimental. Write in complete paragraphs of 120–200 words. No bullet points. No headers within the text. Present tense where the pattern is still active. Speak directly to the living descendant when addressing "the living thread." Use the language of the Navigation Map: frequency, field, subterrain, threshold, signal, the unresolved, the thread.`;
+Your voice is: precise, mythically grounded, embodied. Not academic. Not sentimental. Write in complete paragraphs of 120–200 words. No bullet points. No headers within the text. Present tense where the pattern is still active. Speak directly to the living descendant when addressing "the living thread." Use the language of the Navigation Map: frequency, field, subterrain, threshold, signal, the unresolved, the thread.${patternsBlock}${resonanceBlock}`;
 
   const sections = [];
 
