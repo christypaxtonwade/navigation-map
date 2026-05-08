@@ -519,8 +519,7 @@ body {
 footer { text-align: center; padding: 3rem 2rem; color: var(--text-faint); font-size: 12px; letter-spacing: 0.1em; }
 
 /* ── Print stylesheet ─────────────────────────────────
-   When the user prints (Cmd+P / Print button), only the open profile is rendered.
-   Switches from indigo/gold dark palette to ink-on-vellum so it's printable.
+   White background, ink type, gold accents. Compacted to fit a typical profile in ~3 pages.
 */
 @media print {
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box !important; }
@@ -534,12 +533,11 @@ footer { text-align: center; padding: 3rem 2rem; color: var(--text-faint); font-
   .profile-mode-toggle,
   .profile-nav { display: none !important; }
 
-  /* If no profile is open, nothing to print — show a friendly message and bail */
   .profile-overlay:not(.open) { display: none !important; }
 
-  /* Detach the modal from its overlay; print as the whole page */
+  /* White surface, no cream — saves ink, prints crisp at any margin */
   html, body {
-    background: #f5ecd6 !important;
+    background: #ffffff !important;
     color: #14110a !important;
     margin: 0 !important; padding: 0 !important;
     font-family: 'Cormorant Garamond', 'Georgia', serif !important;
@@ -559,53 +557,66 @@ footer { text-align: center; padding: 3rem 2rem; color: var(--text-faint); font-
     overflow: visible !important;
   }
 
-  /* Identity — image left, text right; allow it to break to a new page only at boundaries */
+  /* Identity — compact image column + tighter text */
   .profile-identity {
-    grid-template-columns: 280px 1fr !important;
-    gap: 1.2rem !important;
-    padding: 0 0 1rem 0 !important;
+    display: grid !important;
+    grid-template-columns: 220px 1fr !important;
+    gap: 0.8rem !important;
+    padding: 0 0 0.5rem 0 !important;
     background: transparent !important;
-    border-bottom: 1px solid #a07428 !important;
+    border-bottom: 0.5pt solid #a07428 !important;
     page-break-after: avoid !important;
     break-after: avoid !important;
   }
   .profile-image-wrap {
     background: transparent !important;
-    border: 1px solid #a07428 !important;
+    border: 0.5pt solid #a07428 !important;
     min-height: auto !important;
   }
-  .profile-image-img { max-height: 380px !important; }
-  .profile-image-attribution { color: #4e4228 !important; }
-  .profile-eyebrow { color: #7a5618 !important; font-size: 11pt !important; }
+  .profile-image-img {
+    max-height: 240px !important;
+    width: 100% !important; height: auto !important;
+    object-fit: contain !important;
+  }
+  .profile-image-attribution { color: #4e4228 !important; font-size: 8pt !important; margin-top: 0.25rem !important; }
+  .profile-eyebrow { color: #7a5618 !important; font-size: 9pt !important; letter-spacing: 0.18em !important; margin-bottom: 0.2rem !important; }
   .profile-name {
     color: #14110a !important; font-weight: 500 !important;
-    font-size: 28pt !important; line-height: 1.05 !important; margin-bottom: 0.3rem !important;
+    font-size: 22pt !important; line-height: 1.05 !important;
+    margin-bottom: 0.2rem !important;
   }
-  .profile-epithet { color: #7a5618 !important; font-size: 14pt !important; }
+  .profile-epithet {
+    color: #7a5618 !important; font-size: 12pt !important;
+    line-height: 1.25 !important; margin-bottom: 0.4rem !important;
+  }
   .profile-archetype-text {
-    color: #2a2418 !important; font-size: 11pt !important; line-height: 1.55 !important; margin-top: 0.6rem !important;
+    color: #14110a !important; font-size: 10pt !important;
+    line-height: 1.45 !important; margin-top: 0.35rem !important; margin-bottom: 0 !important;
   }
+  .profile-archetype-text p { margin-bottom: 0.4rem !important; }
   .profile-resonance-note {
-    color: #4e4228 !important; background: rgba(160,116,40,0.08) !important;
-    border-left-color: #a07428 !important; font-size: 10pt !important;
+    color: #4e4228 !important; background: transparent !important;
+    border-left: 1pt solid #a07428 !important;
+    font-size: 9pt !important; padding: 0.25rem 0.5rem !important; margin: 0.4rem 0 !important;
   }
-  .profile-tags-inline { margin-top: 0.6rem !important; }
+  .profile-tags-inline { margin-top: 0.4rem !important; gap: 3px !important; }
   .profile-tag-chip {
-    background: rgba(160,116,40,0.10) !important; border-color: rgba(160,116,40,0.4) !important;
-    color: #7a5618 !important; font-size: 9pt !important;
+    background: transparent !important; border: 0.5pt solid #a07428 !important;
+    color: #7a5618 !important; font-size: 8pt !important;
+    padding: 1px 5px !important;
   }
 
-  /* Cards collapse to single-column flow for print, in long-form style — clean linear read */
+  /* Card flow — tight single column */
   .profile-cards {
     display: block !important;
-    padding: 1.2rem 0 0 0 !important;
+    padding: 0.5rem 0 0 0 !important;
   }
   .profile-card {
     background: transparent !important;
     border: none !important;
-    border-left: 2px solid var(--print-accent, #a07428) !important;
-    padding: 0.4rem 0 0.4rem 0.85rem !important;
-    margin-bottom: 1.4rem !important;
+    border-left: 1.5pt solid var(--print-accent, #a07428) !important;
+    padding: 0.1rem 0 0.1rem 0.55rem !important;
+    margin-bottom: 0.7rem !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
@@ -616,40 +627,42 @@ footer { text-align: center; padding: 3rem 2rem; color: var(--text-faint); font-
 
   .profile-card-header {
     border-bottom: none !important; padding-bottom: 0 !important;
-    margin-bottom: 0.4rem !important;
+    margin-bottom: 0.2rem !important;
   }
   .profile-card-title {
     color: #7a5618 !important; font-weight: 600 !important;
-    font-size: 13pt !important; letter-spacing: 0.16em !important;
+    font-size: 10pt !important; letter-spacing: 0.16em !important;
   }
   .profile-card-text {
     color: #14110a !important;
-    font-size: 11pt !important; line-height: 1.6 !important;
+    font-size: 10pt !important; line-height: 1.42 !important;
   }
-  .profile-card-text p { margin-bottom: 0.7rem !important; }
+  .profile-card-text p { margin-bottom: 0.4rem !important; }
+  .profile-card-text p:last-child { margin-bottom: 0 !important; }
 
-  /* Sigil card on print — keep the SVG visible but as ink-gold */
+  /* Sigil card */
+  .profile-sigil-card { gap: 0.6rem !important; }
   .profile-sigil-svg-box {
-    background: transparent !important; border: 1px solid #a07428 !important;
-    width: 90px !important; height: 90px !important;
+    background: transparent !important; border: 0.5pt solid #a07428 !important;
+    width: 70px !important; height: 70px !important; padding: 4px !important;
   }
   .profile-sigil-svg-box svg { filter: none !important; }
-  .profile-sigil-name { color: #7a5618 !important; }
-  .profile-sigil-description { color: #14110a !important; font-size: 10pt !important; }
+  .profile-sigil-name { color: #7a5618 !important; font-size: 11pt !important; margin-bottom: 0.2rem !important; }
+  .profile-sigil-description { color: #14110a !important; font-size: 9.5pt !important; line-height: 1.4 !important; }
 
-  /* Signatures on print — show as inline list of names so links don't render as buttons */
+  /* Signatures inline */
   .profile-related-link {
     color: #7a5618 !important; border: none !important;
     padding: 0 !important; text-decoration: none !important;
-    display: inline !important; font-size: 10pt !important;
+    display: inline !important; font-size: 9.5pt !important;
   }
   .profile-related-link::after { content: ' · '; color: #4e4228; opacity: 0.5; }
   .profile-related-link:last-child::after { content: ''; }
+  .profile-related-link span { display: none !important; }
 
-  /* Page margins */
-  @page { margin: 0.85in 0.85in 0.95in 0.85in; }
+  /* Tighter page margins for more usable area */
+  @page { margin: 0.6in 0.7in 0.7in 0.7in; }
 
-  /* Don't break the identity card across pages */
   .profile-identity, .profile-image-wrap { page-break-inside: avoid !important; break-inside: avoid !important; }
 }
 </style>
