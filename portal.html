@@ -1695,6 +1695,7 @@ function cdWeavingCard(d) {
         <div class="meta">${cdEsc(ax.dates) || '—'}${ax.relation_to_client ? ' · ' + cdEsc(ax.relation_to_client) : ''}</div>
       </div>
       <span class="status-pill">${cdEsc(ax.status)}</span>
+      <button class="btn btn-outline btn-sm" onclick="cdRemoveClientAncestor('${cdEsc(ax.id)}','${cdEsc(ax.name)}')" title="Remove from this client's weaving" style="color:var(--red);border-color:rgba(192,112,96,0.3);margin-left:0.5rem">Remove</button>
     </div>`).join('');
   const note = a.length > 30 ? `<div class="cd-status" style="margin-top:0.5rem">Showing 30 of ${a.length}. Manage all in the Weaving Builder.</div>` : '';
   return `
@@ -1703,6 +1704,17 @@ function cdWeavingCard(d) {
       <div class="cd-list">${rows}</div>
       ${note}
     </div>`;
+}
+
+async function cdRemoveClientAncestor(caId, ancestorName) {
+  if (!confirm(`Remove "${ancestorName}" from this client's weaving?\n\nThis unlinks the per-client copy. Any canonical ancestor record (and its other client weavings) is unaffected.`)) return;
+  try {
+    await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${caId}`);
+    await restDelete(`client_ancestors?id=eq.${caId}`);
+    loadClientDetail();
+  } catch (err) {
+    alert('Remove failed: ' + err.message);
+  }
 }
 
 function cdConvergencesCard(d) {
@@ -2896,7 +2908,10 @@ async function populateTriageList() {
             <div style="font-size:16px;font-weight:500;color:var(--text);margin-bottom:0.15rem">${esc(r.name)}</div>
             <div style="font-size:13px;color:var(--text-faint)">From <strong style="font-weight:500;color:var(--gold)">${clientName}</strong>${clientMeta ? ' · ' + clientMeta : ''}</div>
           </div>
-          <button class="btn btn-gold btn-sm" onclick="promoteStub('${esc(r.id)}')">Promote →</button>
+          <div style="display:flex;gap:0.4rem;align-items:center">
+            <button class="btn btn-gold btn-sm" onclick="promoteStub('${esc(r.id)}')">Promote →</button>
+            <button class="btn btn-outline btn-sm" onclick="deleteIntakeStub('${esc(r.id)}','${esc(r.name)}','${esc(r.clients?.name || 'this client')}')" title="Dismiss this intake stub" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Delete</button>
+          </div>
         </div>
         ${ancestorMeta ? `<div style="font-size:14px;color:var(--text-dim);margin-bottom:0.4rem">${ancestorMeta}</div>` : ''}
         ${notesPreview ? `<div style="font-size:14px;color:var(--text-dim);font-style:italic;line-height:1.5;padding:0.5rem 0.75rem;border-left:2px solid rgba(201,168,124,0.25);background:rgba(201,168,124,0.03)">${notesPreview}</div>` : ''}
@@ -2904,6 +2919,18 @@ async function populateTriageList() {
     }).join('');
   } catch (err) {
     el.innerHTML = `<div class="msg msg-error">Failed to load intake stubs: ${esc(err.message)}</div>`;
+  }
+}
+
+async function deleteIntakeStub(stubId, ancestorName, clientName) {
+  if (!confirm(`Delete the intake stub "${ancestorName}" from ${clientName}'s weaving?\n\nThis will not touch any canonical ancestor record. The intake notes and relation will be lost.`)) return;
+  try {
+    // Cascades client_ancestor_frequencies; intake_stub typically has none anyway
+    await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${stubId}`);
+    await restDelete(`client_ancestors?id=eq.${stubId}`);
+    populateTriageList();
+  } catch (err) {
+    alert('Delete failed: ' + err.message);
   }
 }
 
@@ -3480,6 +3507,7 @@ function renderEditorForm(a) {
     <!-- Save bar -->
     <div class="editor-save-bar">
       <div id="ed-save-msg" style="font-size:15px"></div>
+      <button class="btn btn-outline" onclick="deleteAncestor()" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Delete this ancestor</button>
       <button class="btn btn-outline" onclick="loadAncestorForEdit()">Discard Changes</button>
       <button class="btn btn-gold" onclick="saveAncestorEdits()">Save All Changes →</button>
     </div>
@@ -3976,6 +4004,66 @@ async function saveAncestorEdits() {
   } catch(err) {
     msgEl.innerHTML = `<span style="color:var(--red)">${err.message}</span>`;
     btn.disabled = false; btn.textContent = 'Save All Changes →';
+  }
+}
+
+// ── Delete a canonical ancestor (with safety) ──────────
+async function deleteAncestor() {
+  if (!editorAncestorId) return;
+  const ancestor = allAncestors.find(a => a.id === editorAncestorId);
+  const ancestorName = ancestor?.name || 'this ancestor';
+  const msgEl = document.getElementById('ed-save-msg');
+
+  // Look up everything that references this canonical
+  const [clientCopies, findings] = await Promise.all([
+    rest(`client_ancestors?ancestor_id=eq.${editorAncestorId}&select=id,client_id,clients(name)`).catch(() => []),
+    rest(`ancestor_research_findings?ancestor_id=eq.${editorAncestorId}&select=id`).catch(() => [])
+  ]);
+  const clientList = Array.isArray(clientCopies) ? clientCopies : [];
+  const findingCount = Array.isArray(findings) ? findings.length : 0;
+
+  let warning;
+  if (clientList.length === 0) {
+    warning =
+      `Permanently delete "${ancestorName}"?\n\n` +
+      `No clients have this ancestor in their weaving.\n` +
+      `Will also remove: ${findingCount} research finding${findingCount===1?'':'s'} and all frequency tag assignments.\n\n` +
+      `This cannot be undone.`;
+  } else {
+    const clientNames = clientList.map(c => c.clients?.name || 'unnamed client').join(', ');
+    warning =
+      `Permanently delete "${ancestorName}" AND remove from ${clientList.length} client weaving${clientList.length===1?'':'s'}?\n\n` +
+      `Clients affected: ${clientNames}\n` +
+      `Will also remove: ${findingCount} research finding${findingCount===1?'':'s'}, all frequency tag assignments, and all per-client weaving copies (including any client-specific intake notes / relations on those copies).\n\n` +
+      `This cannot be undone.`;
+  }
+  if (!confirm(warning)) return;
+
+  msgEl.innerHTML = '<span style="color:var(--text-dim)">Deleting…</span>';
+
+  try {
+    // 1. Delete client_ancestors copies first (FK to ancestors is NO ACTION; this also cascade-deletes their frequencies)
+    for (const c of clientList) {
+      await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${c.id}`);
+      await restDelete(`client_ancestors?id=eq.${c.id}`);
+    }
+    // 2. Delete the canonical ancestor (cascades ancestor_frequencies, ancestor_research_findings, ancestor_connections)
+    await restDelete(`ancestors?id=eq.${editorAncestorId}`);
+
+    // 3. Reset editor state and reload caches
+    editorAncestorId = null;
+    editorChips = [];
+    editorClientAssignments = [];
+    editorResearchPrompts = [];
+    editorFindings = [];
+    editorLockedFields = new Set();
+    editorEditorialGuidance = '';
+    await loadAncestors();
+    populateAncestorEditorSelector();
+    document.getElementById('ed-ancestor-select').value = '';
+    document.getElementById('ar-editor-form').style.display = 'none';
+  } catch (err) {
+    msgEl.innerHTML = `<span style="color:var(--red)">Delete failed: ${err.message}</span>`;
   }
 }
 </script>
