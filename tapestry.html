@@ -313,90 +313,164 @@ body {
 .profile-modal {
   background: var(--surface);
   border: 1px solid var(--border); border-radius: 12px;
-  width: 100%; max-width: 920px;
+  width: 100%; max-width: 1080px;
   margin: 1rem auto; overflow: hidden;
+  position: relative;
 }
 .profile-close {
-  position: sticky; top: 0; right: 0;
-  float: right; margin: 0.6rem 0.6rem 0 0;
-  background: transparent; border: none; cursor: pointer;
-  font-size: 1.6rem; color: var(--text-faint); padding: 0.3rem 0.6rem;
-  z-index: 5;
+  position: absolute; top: 0.6rem; right: 0.6rem;
+  background: rgba(10,12,31,0.65); border: 1px solid var(--border); border-radius: 50%;
+  cursor: pointer; width: 36px; height: 36px;
+  font-size: 1.4rem; color: var(--text-faint);
+  z-index: 5; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
 }
-.profile-close:hover { color: var(--gold); }
-.profile-image {
-  width: 100%; max-height: 480px; aspect-ratio: 16/9;
-  background: var(--surface-2);
-  background-size: cover; background-position: center;
+.profile-close:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+/* Reading-mode toggle in the modal header */
+.profile-mode-toggle {
+  position: absolute; top: 0.7rem; right: 4rem;
+  display: flex; gap: 0; border: 1px solid var(--border); border-radius: 6px;
+  background: rgba(10,12,31,0.65); overflow: hidden; z-index: 5;
+}
+.profile-mode-btn {
+  font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 400;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.4rem 0.7rem; border: none; background: transparent;
+  color: var(--text-faint); cursor: pointer; transition: all 0.15s;
+}
+.profile-mode-btn + .profile-mode-btn { border-left: 1px solid var(--border); }
+.profile-mode-btn.active { background: rgba(201,168,124,0.10); color: var(--gold); }
+.profile-mode-btn:hover:not(.active) { color: var(--text-dim); }
+
+/* Identity card — image upper-left, meta right */
+.profile-identity {
+  display: grid; grid-template-columns: 320px 1fr; gap: 1.75rem;
+  padding: 1.75rem 1.75rem 1.5rem;
   border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(140,120,210,0.06) 0%, transparent 100%);
 }
-.profile-image.no-image::before {
-  content: '◈'; position: absolute; inset: 0;
+@media (max-width: 720px) { .profile-identity { grid-template-columns: 1fr; gap: 1rem; padding: 1.25rem; } }
+.profile-image-wrap {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 4rem; color: var(--gold-dim); opacity: 0.4;
+  overflow: hidden; min-height: 280px;
+}
+.profile-image-img {
+  width: 100%; height: auto; max-height: 480px;
+  object-fit: contain; display: block;
+}
+.profile-image-empty {
+  font-size: 3.4rem; color: var(--gold-dim); opacity: 0.35; text-align: center;
 }
 .profile-image-attribution {
-  font-size: 12px; color: var(--text-faint);
-  padding: 0.4rem 1.5rem 0.6rem; font-style: italic;
-  border-bottom: 1px solid var(--border);
+  font-size: 11px; color: var(--text-faint);
+  margin-top: 0.5rem; font-style: italic; line-height: 1.4;
 }
-.profile-body { padding: 1.5rem 2rem 2rem; }
+.profile-meta-col { display: flex; flex-direction: column; }
 .profile-eyebrow {
   font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
   color: var(--gold); margin-bottom: 0.5rem;
 }
 .profile-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 2.4rem; font-weight: 400; color: var(--text);
-  line-height: 1.1; margin-bottom: 0.4rem;
+  font-size: 2.6rem; font-weight: 400; color: var(--text);
+  line-height: 1.05; margin-bottom: 0.5rem;
 }
 .profile-epithet {
   font-family: 'Cormorant Garamond', serif;
-  font-style: italic; font-size: 1.3rem; color: var(--gold-bright);
-  margin-bottom: 0.5rem;
+  font-style: italic; font-size: 1.4rem; color: var(--gold-bright);
+  margin-bottom: 0.85rem; line-height: 1.3;
 }
-.profile-meta {
-  font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--text-faint); margin-bottom: 1.5rem;
+.profile-resonance-note {
+  font-style: italic; color: var(--text-dim);
+  padding: 0.7rem 0.85rem; border-left: 2px solid var(--gold-dim);
+  background: rgba(201,168,124,0.04); margin-bottom: 1rem;
+  font-size: 14px; line-height: 1.5;
 }
-.profile-section { margin-bottom: 1.75rem; }
-.profile-section-label {
-  font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--gold); margin-bottom: 0.6rem;
-}
-.profile-section-text {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.05rem; line-height: 1.7; color: var(--text-dim);
-}
-.profile-section-text p { margin-bottom: 1rem; }
-.profile-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-@media (max-width: 720px) { .profile-grid-2 { grid-template-columns: 1fr; } }
-.profile-sigil-wrap {
-  display: flex; gap: 1rem; align-items: flex-start;
-  background: rgba(201,168,124,0.04);
-  border: 1px solid var(--border); border-radius: 8px;
-  padding: 1rem;
-}
-.profile-sigil-svg {
-  width: 80px; height: 80px; flex-shrink: 0;
-}
-.profile-sigil-svg svg { width: 100%; height: 100%; }
-.profile-sigil-text { flex: 1; }
-.profile-sigil-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic; font-size: 15px; color: var(--gold); margin-bottom: 0.3rem;
-}
-.profile-sigil-description {
-  font-size: 13px; color: var(--text-dim); line-height: 1.5;
-}
-.profile-tags {
-  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.5rem;
+.profile-tags-inline {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto;
 }
 .profile-tag-chip {
   font-size: 12px; padding: 3px 9px; border-radius: 12px;
   background: rgba(201,168,124,0.08); border: 1px solid rgba(201,168,124,0.22);
+  color: var(--gold); cursor: default;
+}
+
+/* Quick-jump nav bar */
+.profile-nav {
+  display: flex; gap: 0.4rem; flex-wrap: wrap;
+  padding: 0.8rem 1.75rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(20,23,46,0.5); backdrop-filter: blur(4px);
+  position: sticky; top: 0; z-index: 4;
+}
+.profile-nav-link {
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.35rem 0.7rem; border-radius: 4px;
+  color: var(--text-faint); text-decoration: none; cursor: pointer;
+  transition: all 0.15s; border: 1px solid transparent;
+}
+.profile-nav-link:hover { color: var(--gold); border-color: var(--border); }
+
+/* Card grid for sections */
+.profile-cards {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+  padding: 1.5rem 1.75rem 2rem;
+}
+.profile-cards .full-width { grid-column: 1 / -1; }
+@media (max-width: 720px) { .profile-cards { grid-template-columns: 1fr; padding: 1.25rem; } }
+
+.profile-card {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: 8px; padding: 1.1rem 1.25rem; position: relative;
+}
+.profile-card.accent-somatic    { border-left-color: #c98870; }   /* warm earth — terroir/somatic */
+.profile-card.accent-mythic     { border-left-color: var(--gold); }
+.profile-card.accent-conceptual { border-left-color: #8aa0d6; }   /* cool indigo */
+.profile-card.accent-unreceived { border-left-color: #b690d4; }   /* violet */
+.profile-card-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 0.75rem; margin-bottom: 0.6rem;
+}
+.profile-card-title {
+  font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--gold);
 }
+.profile-card-register {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 13px; color: var(--text-faint);
+  letter-spacing: normal; text-transform: none;
+}
+.profile-card-meta {
+  font-size: 11px; color: var(--text-faint); letter-spacing: 0.06em;
+}
+.profile-card-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.02rem; line-height: 1.7; color: var(--text-dim);
+}
+.profile-card-text p { margin-bottom: 0.85rem; }
+.profile-card-text p:last-child { margin-bottom: 0; }
+
+/* Sigil card */
+.profile-sigil-card { display: flex; gap: 1rem; align-items: flex-start; }
+.profile-sigil-svg-box {
+  width: 100px; height: 100px; flex-shrink: 0;
+  background: rgba(201,168,124,0.04); border: 1px solid var(--border); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; padding: 6px;
+}
+.profile-sigil-svg-box svg { width: 100%; height: 100%; }
+.profile-sigil-meta-text { flex: 1; }
+.profile-sigil-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 16px; color: var(--gold-bright); margin-bottom: 0.4rem;
+}
+.profile-sigil-description {
+  font-size: 13px; color: var(--text-dim); line-height: 1.55;
+}
+
+/* Related figures card */
 .profile-related {
   display: flex; flex-wrap: wrap; gap: 8px;
 }
@@ -406,6 +480,16 @@ body {
   text-decoration: none; cursor: pointer; transition: all 0.15s;
 }
 .profile-related-link:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+/* Long-form (single-scroll) layout */
+.profile-modal.long-form .profile-cards { display: block; padding: 1.5rem 1.75rem 2rem; }
+.profile-modal.long-form .profile-card {
+  border-left: none; border: none; padding: 0; margin-bottom: 2rem; background: transparent;
+}
+.profile-modal.long-form .profile-card-header {
+  border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; margin-bottom: 0.9rem;
+}
+.profile-modal.long-form .profile-card-text { font-size: 1.05rem; }
 
 /* ── Empty / loading states ── */
 .empty-state {
@@ -888,64 +972,133 @@ function renderCatalog(visible, content) {
 }
 
 // ── Profile modal ──
+let profileViewMode = 'cards'; // 'cards' or 'long'
+
+function wordCount(text) {
+  if (!text) return 0;
+  return String(text).trim().split(/\s+/).filter(Boolean).length;
+}
+
+function profileCard({ id, title, register, text, accent, fullWidth, html }) {
+  const wc = text ? wordCount(text) : 0;
+  const meta = wc ? `<span class="profile-card-meta">${wc} word${wc===1?'':'s'}</span>` : '';
+  const accentCls = accent ? ` accent-${accent}` : '';
+  const widthCls  = fullWidth ? ' full-width' : '';
+  const registerHtml = register ? `<span class="profile-card-register">${esc(register)}</span>` : '';
+  const body = html || (text ? `<div class="profile-card-text">${formatPara(text)}</div>` : '');
+  return `<section class="profile-card${accentCls}${widthCls}" id="${id || ''}">
+    <div class="profile-card-header">
+      <div class="profile-card-title">${esc(title)}${registerHtml ? ' ' + registerHtml : ''}</div>
+      ${meta}
+    </div>
+    ${body}
+  </section>`;
+}
+
 function openProfile(id) {
   const f = figures.find(x => x.id === id);
   if (!f) return;
-  // Update URL hash for shareable link
   history.replaceState(null, '', `#figure/${slugify(f.name)}`);
 
   const related = figures
     .filter(x => x.id !== f.id && x.frequencies.some(t => f.frequencies.includes(t)))
     .map(x => ({ ...x, shared: x.frequencies.filter(t => f.frequencies.includes(t)) }))
     .sort((a,b) => b.shared.length - a.shared.length)
-    .slice(0, 8);
+    .slice(0, 12);
 
-  const imgStyle = f.image_url ? `style="background-image:url('${esc(f.image_url)}')"` : '';
-  const noImg = f.image_url ? '' : ' no-image';
+  // Identity card
+  const imageBlock = f.image_url
+    ? `<img class="profile-image-img" src="${esc(f.image_url)}" alt="${esc(f.image_alt || f.name)}">`
+    : `<div class="profile-image-empty">◈</div>`;
+
+  const inlineTags = f.frequencies.length
+    ? `<div class="profile-tags-inline">${f.frequencies.map(t => `<span class="profile-tag-chip">${esc(t)}</span>`).join('')}</div>`
+    : '';
+
+  const identityCard = `
+    <div class="profile-identity">
+      <div>
+        <div class="profile-image-wrap">${imageBlock}</div>
+        ${f.image_attribution ? `<div class="profile-image-attribution">${esc(f.image_attribution)}</div>` : ''}
+      </div>
+      <div class="profile-meta-col">
+        <div class="profile-eyebrow">${esc(f.tradition || '')}${f.emergence_period ? ' · ' + esc(f.emergence_period) : ''}</div>
+        <h2 class="profile-name">${esc(f.name)}</h2>
+        ${f.epithet ? `<div class="profile-epithet">${esc(f.epithet)}</div>` : ''}
+        ${f.resonance_note ? `<div class="profile-resonance-note">Resonance note: ${esc(f.resonance_note)}</div>` : ''}
+        ${inlineTags}
+      </div>
+    </div>`;
+
+  // Quick-jump nav (only shows for sections that have content)
+  const navItems = [];
+  if (f.catalog_preview)  navItems.push({ id: 'sec-preview',    label: 'Preview' });
+  if (f.layer_terroir)    navItems.push({ id: 'sec-terroir',    label: 'Culture & Origin' });
+  if (f.layer_unresolved) navItems.push({ id: 'sec-unresolved', label: 'Unresolved' });
+  if (f.layer_thread)     navItems.push({ id: 'sec-thread',     label: 'Thread' });
+  if (f.layer_lineage)    navItems.push({ id: 'sec-lineage',    label: 'Lineage' });
+  if (f.catalog_full)     navItems.push({ id: 'sec-telling',    label: 'The Telling' });
+  if (f.sigil_svg || f.sigil_name) navItems.push({ id: 'sec-sigil', label: 'Sigil' });
+  if (related.length)     navItems.push({ id: 'sec-related',    label: 'Related' });
+
+  const navBar = `<nav class="profile-nav">${navItems.map(n => `<a class="profile-nav-link" onclick="document.getElementById('${n.id}')?.scrollIntoView({behavior:'smooth',block:'start'})">${esc(n.label)}</a>`).join('')}</nav>`;
+
+  // Mode toggle
+  const modeToggle = `
+    <div class="profile-mode-toggle">
+      <button class="profile-mode-btn ${profileViewMode==='cards'?'active':''}" onclick="setProfileViewMode('cards','${f.id}')">Cards</button>
+      <button class="profile-mode-btn ${profileViewMode==='long'?'active':''}"  onclick="setProfileViewMode('long','${f.id}')">Long form</button>
+    </div>`;
+
+  // Cards
+  const cards = [];
+  if (f.catalog_preview) cards.push(profileCard({
+    id: 'sec-preview', title: 'Preview', text: f.catalog_preview, fullWidth: true
+  }));
+  if (f.layer_terroir) cards.push(profileCard({
+    id: 'sec-terroir', title: 'Culture & Origin', register: 'somatic', text: f.layer_terroir, accent: 'somatic'
+  }));
+  if (f.layer_unresolved) cards.push(profileCard({
+    id: 'sec-unresolved', title: 'Unresolved', register: 'unreceived', text: f.layer_unresolved, accent: 'unreceived'
+  }));
+  if (f.layer_thread) cards.push(profileCard({
+    id: 'sec-thread', title: 'Thread', register: 'mythic', text: f.layer_thread, accent: 'mythic'
+  }));
+  if (f.layer_lineage) cards.push(profileCard({
+    id: 'sec-lineage', title: 'Lineage', register: 'conceptual', text: f.layer_lineage, accent: 'conceptual'
+  }));
+  if (f.catalog_full) cards.push(profileCard({
+    id: 'sec-telling', title: 'The Telling', register: 'long-form narrative', text: f.catalog_full, fullWidth: true
+  }));
+  if (f.sigil_svg || f.sigil_name || f.sigil_description) cards.push(profileCard({
+    id: 'sec-sigil', title: 'Sigil', fullWidth: true,
+    html: `<div class="profile-sigil-card">
+      <div class="profile-sigil-svg-box">${f.sigil_svg || '<span style="color:var(--text-faint);font-size:13px;font-style:italic">no sigil</span>'}</div>
+      <div class="profile-sigil-meta-text">
+        ${f.sigil_name ? `<div class="profile-sigil-name">${esc(f.sigil_name)}</div>` : ''}
+        ${f.sigil_description ? `<div class="profile-sigil-description">${esc(f.sigil_description)}</div>` : ''}
+      </div>
+    </div>`
+  }));
+  if (related.length) cards.push(profileCard({
+    id: 'sec-related', title: `Related figures · ${related.length}`, fullWidth: true,
+    html: `<div class="profile-related">${related.map(r => `<a class="profile-related-link" onclick="openProfile('${r.id}')" title="Shared: ${esc(r.shared.join(' · '))}">${esc(r.name)} <span style="opacity:0.55;font-size:11px">${r.shared.length}</span></a>`).join('')}</div>`
+  }));
+
+  const cardsBlock = `<div class="profile-cards">${cards.join('')}</div>`;
+
   const c = document.getElementById('profile-content');
-  c.innerHTML = `
-    <div class="profile-image${noImg}" ${imgStyle}></div>
-    ${f.image_attribution ? `<div class="profile-image-attribution">${esc(f.image_attribution)}</div>` : ''}
-    <div class="profile-body">
-      <div class="profile-eyebrow">${esc(f.tradition || '')}${f.emergence_period ? ' · ' + esc(f.emergence_period) : ''}</div>
-      <h2 class="profile-name">${esc(f.name)}</h2>
-      ${f.epithet ? `<div class="profile-epithet">${esc(f.epithet)}</div>` : ''}
-      ${f.resonance_note ? `<div style="font-style:italic;color:var(--text-dim);padding:0.6rem 0.75rem;border-left:2px solid var(--gold-dim);background:rgba(201,168,124,0.04);margin-bottom:1rem">Resonance note: ${esc(f.resonance_note)}</div>` : ''}
+  c.innerHTML = modeToggle + identityCard + navBar + cardsBlock;
 
-      ${f.catalog_preview ? `<div class="profile-section"><div class="profile-section-text">${formatPara(f.catalog_preview)}</div></div>` : ''}
-
-      ${(f.layer_terroir || f.layer_unresolved || f.layer_thread || f.layer_lineage) ? `
-        ${f.layer_terroir   ? `<div class="profile-section"><div class="profile-section-label">Culture &amp; Origin</div><div class="profile-section-text">${formatPara(f.layer_terroir)}</div></div>` : ''}
-        ${f.layer_unresolved ? `<div class="profile-section"><div class="profile-section-label">Unresolved</div><div class="profile-section-text">${formatPara(f.layer_unresolved)}</div></div>` : ''}
-        ${f.layer_thread    ? `<div class="profile-section"><div class="profile-section-label">Thread (Mythic)</div><div class="profile-section-text">${formatPara(f.layer_thread)}</div></div>` : ''}
-        ${f.layer_lineage   ? `<div class="profile-section"><div class="profile-section-label">Lineage</div><div class="profile-section-text">${formatPara(f.layer_lineage)}</div></div>` : ''}
-      ` : ''}
-
-      ${f.catalog_full ? `<div class="profile-section"><div class="profile-section-label">Long-form profile</div><div class="profile-section-text">${formatPara(f.catalog_full)}</div></div>` : ''}
-
-      ${f.sigil_svg || f.sigil_name ? `<div class="profile-section"><div class="profile-section-label">Sigil</div>
-        <div class="profile-sigil-wrap">
-          <div class="profile-sigil-svg">${f.sigil_svg || ''}</div>
-          <div class="profile-sigil-text">
-            ${f.sigil_name ? `<div class="profile-sigil-name">${esc(f.sigil_name)}</div>` : ''}
-            ${f.sigil_description ? `<div class="profile-sigil-description">${esc(f.sigil_description)}</div>` : ''}
-          </div>
-        </div></div>` : ''}
-
-      ${f.frequencies.length ? `<div class="profile-section">
-        <div class="profile-section-label">Frequency tags</div>
-        <div class="profile-tags">${f.frequencies.map(t => `<span class="profile-tag-chip">${esc(t)}</span>`).join('')}</div>
-      </div>` : ''}
-
-      ${related.length ? `<div class="profile-section">
-        <div class="profile-section-label">Related figures (shared frequency)</div>
-        <div class="profile-related">${related.map(r => `<a class="profile-related-link" onclick="openProfile('${r.id}')" title="Shared: ${esc(r.shared.join(' · '))}">${esc(r.name)}</a>`).join('')}</div>
-      </div>` : ''}
-    </div>
-  `;
+  document.getElementById('profile-modal').classList.toggle('long-form', profileViewMode === 'long');
   document.getElementById('profile-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
   document.getElementById('profile-modal').scrollTop = 0;
+}
+
+function setProfileViewMode(mode, figureId) {
+  profileViewMode = mode;
+  if (figureId) openProfile(figureId);
 }
 
 function formatPara(text) {
