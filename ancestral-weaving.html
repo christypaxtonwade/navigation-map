@@ -354,9 +354,142 @@ body::before {
   .sigil-inner { flex-direction: column; }
   .layer-sigil-full { grid-column: 1; }
 }
+
+/* ── Print stylesheet — white bg, ink type, each ancestor on its own page ── */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box !important; }
+
+  /* Hide everything that isn't the ancestor records themselves */
+  .header, .legend, .footer, .weaving-footer, footer,
+  .triquetra-wrap, .triquetra-note, .header-link,
+  .ancestor-chevron, #client-banner, .btn-print { display: none !important; }
+
+  html, body {
+    background: #ffffff !important; color: #14110a !important;
+    margin: 0 !important; padding: 0 !important;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+  }
+  .page { background: transparent !important; padding: 0 !important; max-width: 100% !important; }
+  .timeline { padding: 0 !important; }
+
+  /* Era dividers as light section markers */
+  .era-divider {
+    border: none !important; padding: 0.4rem 0 0.2rem !important; margin: 0 0 0.4rem !important;
+    text-align: left !important;
+    page-break-after: avoid !important; break-after: avoid !important;
+  }
+  .era-label {
+    background: transparent !important; padding: 0 !important;
+    color: #7a5618 !important; font-size: 11pt !important;
+    letter-spacing: 0.18em !important; text-transform: uppercase !important;
+    font-style: normal !important;
+  }
+
+  /* Each ancestor starts on a new page; force layers visible regardless of .open state */
+  .ancestor {
+    background: transparent !important;
+    margin: 0 !important; padding: 0 !important;
+    page-break-before: always !important; break-before: page !important;
+    page-break-inside: avoid !important; break-inside: avoid-page !important;
+  }
+  .ancestor:first-of-type { page-break-before: auto !important; break-before: auto !important; }
+  .ancestor-date {
+    color: #7a5618 !important; font-size: 10pt !important;
+    background: transparent !important; padding: 0 !important; margin-bottom: 0.3rem !important;
+    letter-spacing: 0.12em !important;
+  }
+  .ancestor-card {
+    background: transparent !important;
+    border: none !important; border-top: 1pt solid #a07428 !important;
+    border-radius: 0 !important; padding: 0.5rem 0 0 0 !important;
+  }
+  .ancestor-header {
+    padding: 0 0 0.4rem !important; border-bottom: 0.5pt solid #a07428 !important;
+    background: transparent !important;
+  }
+  .ancestor-name {
+    color: #14110a !important; font-weight: 500 !important;
+    font-size: 22pt !important; line-height: 1.05 !important; margin-bottom: 0.2rem !important;
+  }
+  .ancestor-epithet {
+    color: #7a5618 !important; font-size: 12pt !important; font-style: italic !important;
+    line-height: 1.3 !important; margin-bottom: 0.2rem !important;
+  }
+  .ancestor-meta {
+    color: #4e4228 !important; font-size: 9.5pt !important;
+    letter-spacing: 0.06em !important;
+  }
+
+  /* Force layer cards visible for print regardless of toggle state */
+  .ancestor-layers {
+    max-height: none !important; opacity: 1 !important;
+    overflow: visible !important; transition: none !important;
+  }
+  .ancestor-layers-inner {
+    border-top: none !important;
+    padding: 0.5rem 0 0 0 !important;
+    display: block !important; gap: 0 !important;
+  }
+
+  .layer {
+    background: transparent !important;
+    border: none !important;
+    border-left: 1.5pt solid var(--print-accent, #a07428) !important;
+    padding: 0.1rem 0 0.1rem 0.6rem !important;
+    margin-bottom: 0.7rem !important;
+    page-break-inside: avoid !important; break-inside: avoid !important;
+  }
+  .layer-terroir   { --print-accent: #a86e4a !important; }    /* warm earth — somatic */
+  .layer-thread    { --print-accent: #a07428 !important; }    /* gold — mythic */
+  .layer-lineage   { --print-accent: #5874a0 !important; }    /* indigo — conceptual */
+  .layer-unresolved{ --print-accent: #7d5d9c !important; }    /* violet — unreceived */
+
+  .layer-label {
+    color: #7a5618 !important; font-size: 10pt !important;
+    letter-spacing: 0.16em !important; font-weight: 600 !important;
+    text-transform: uppercase !important; padding: 0 !important;
+    margin-bottom: 0.2rem !important;
+  }
+  .layer-label-dot { display: none !important; }
+  .layer-text {
+    color: #14110a !important; font-size: 10pt !important; line-height: 1.42 !important;
+    background: transparent !important; padding: 0 !important;
+  }
+
+  /* Sigil card */
+  .layer-sigil-full {
+    grid-column: 1 / -1 !important;
+    border-left: 1.5pt solid #a07428 !important;
+  }
+  .sigil-inner {
+    flex-direction: row !important; gap: 0.75rem !important; padding: 0 !important;
+    background: transparent !important; align-items: flex-start !important;
+  }
+  .sigil-art {
+    width: 80px !important; height: 80px !important;
+    background: transparent !important; border: 0.5pt solid #a07428 !important;
+    padding: 4px !important;
+  }
+  .sigil-name { color: #7a5618 !important; font-size: 10pt !important; font-style: italic !important; }
+  .sigil-text { color: #14110a !important; font-size: 9.5pt !important; line-height: 1.4 !important; }
+
+  /* Page margins */
+  @page { margin: 0.6in 0.7in 0.7in 0.7in; }
+}
+
+/* Print button (only visible on screen) */
+.btn-print {
+  position: fixed; top: 1rem; right: 1rem; z-index: 50;
+  font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 0.4rem 0.8rem; border-radius: 5px;
+  background: rgba(201,168,124,0.08); border: 1px solid var(--gold-dim, rgba(201,168,124,0.4));
+  color: var(--gold, #c9a87c); cursor: pointer; transition: all 0.15s;
+}
+.btn-print:hover { background: rgba(201,168,124,0.18); color: var(--gold-bright, #dfc090); }
 </style>
 </head>
 <body>
+<button class="btn-print" onclick="window.print()" title="Print or save as PDF — each ancestor on its own page">Print</button>
 <div class="page">
 
 <header class="header">
