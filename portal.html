@@ -2203,7 +2203,12 @@ function renderTapestryList() {
 function newTapestryArchetype() {
   tapestryEditingId = null;
   tapestryEditorChips = [];
-  renderTapestryEditor({ name: '', tradition: '', epithet: '', description: '', register_mythic: '', register_conceptual: '', register_somatic: '', register_unreceived: '' }, /*isNew*/true);
+  renderTapestryEditor({
+    name: '', tradition: '', epithet: '', description: '',
+    catalog_preview: '', catalog_full: '',
+    layer_terroir: '', layer_unresolved: '', layer_thread: '', layer_lineage: '',
+    sigil_name: '', sigil_description: '', sigil_svg: ''
+  }, /*isNew*/true);
   renderTapestryList();
 }
 
@@ -2228,6 +2233,7 @@ function renderTapestryEditor(t, isNew) {
   const el = document.getElementById('tapestry-editor');
   if (!el) return;
   el.innerHTML = `
+    <!-- Identity -->
     <div class="card" style="margin-bottom:1.5rem">
       <div class="editor-section-title">${isNew ? 'New archetype' : 'Edit archetype'}</div>
       <div class="editor-grid-2" style="margin-bottom:1rem">
@@ -2240,37 +2246,71 @@ function renderTapestryEditor(t, isNew) {
           <input class="form-input" id="tap-tradition" value="${esc(t.tradition)}">
         </div>
       </div>
-      <div class="form-group">
+      <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Epithet <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">3–6 word evocative descriptor naming the frequency</span></label>
         <input class="form-input" id="tap-epithet" value="${esc(t.epithet)}">
       </div>
+    </div>
+
+    <!-- Catalog content -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="editor-section-title">Catalog Content</div>
+      <p style="font-size:15px;color:var(--text-faint);margin-bottom:1rem;line-height:1.6">Catalog Preview is the short entry point (100–150 words, factual). Catalog Full is the longer mythic narrative (300+ words) — the story as it has come down, with the significant motifs named.</p>
+      <div class="form-group">
+        <label class="form-label">Catalog Preview <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">100–150 words · factual entry · what a reader needs to immediately grasp</span></label>
+        <textarea class="form-textarea" id="tap-catalog-preview" rows="4">${esc(t.catalog_preview)}</textarea>
+      </div>
       <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Description <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">a paragraph that introduces this figure as archetypal operation</span></label>
-        <textarea class="form-textarea" id="tap-description" rows="4">${esc(t.description)}</textarea>
+        <label class="form-label">Catalog Full <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">300+ words · the mythic narrative in long form</span></label>
+        <textarea class="form-textarea" id="tap-catalog-full" rows="9">${esc(t.catalog_full)}</textarea>
       </div>
     </div>
 
+    <!-- Layers -->
     <div class="card" style="margin-bottom:1.5rem;border-color:rgba(109,216,178,0.15)">
-      <div class="editor-section-title">Four Registers</div>
-      <p style="font-size:15px;color:var(--text-faint);margin-bottom:1.25rem;line-height:1.6">Each register holds the figure's signature in that voice. Same length spec as ancestor layers (Mythic 200–280 · Conceptual 150–200 · Somatic 150–220 · Unreceived 150–220).</p>
+      <div class="editor-section-title">Four Layers <span style="color:var(--teal);font-size:15px;letter-spacing:0.1em">PARALLEL TO ANCESTOR LAYERS</span></div>
+      <p style="font-size:15px;color:var(--text-faint);margin-bottom:1.25rem;line-height:1.6">Same registers as ancestor weaving entries. Terroir adapted as Culture &amp; Origin — the geographical and cultural ground the figure arose from. Length spec: Terroir 150–220 · Unresolved 150–220 · Thread 200–280 · Lineage 150–200.</p>
       <div class="form-group">
-        <label class="form-label">Mythic Register <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">archetypal pattern, signal, through-line</span></label>
-        <textarea class="form-textarea" id="tap-r-mythic" rows="5">${esc(t.register_mythic)}</textarea>
+        <label class="form-label">Culture &amp; Origin <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">somatic register applied to the myth's land &amp; tradition · the ground the figure arose from</span></label>
+        <textarea class="form-textarea" id="tap-layer-terroir" rows="5">${esc(t.layer_terroir)}</textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">Conceptual Register <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">structural mechanism, framework</span></label>
-        <textarea class="form-textarea" id="tap-r-conceptual" rows="5">${esc(t.register_conceptual)}</textarea>
+        <label class="form-label">Unresolved <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">unreceived register · what the myth leaves unmetabolized · the unnamed pattern</span></label>
+        <textarea class="form-textarea" id="tap-layer-unresolved" rows="5">${esc(t.layer_unresolved)}</textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">Somatic Register <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">the body's direct knowing</span></label>
-        <textarea class="form-textarea" id="tap-r-somatic" rows="5">${esc(t.register_somatic)}</textarea>
+        <label class="form-label">Thread <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">mythic register · archetypal through-line · the signal carried forward · feeds The Convergence most heavily</span></label>
+        <textarea class="form-textarea" id="tap-layer-thread" rows="5">${esc(t.layer_thread)}</textarea>
       </div>
       <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Unreceived Register <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">the unnamed pattern carried forward</span></label>
-        <textarea class="form-textarea" id="tap-r-unreceived" rows="5">${esc(t.register_unreceived)}</textarea>
+        <label class="form-label">Lineage <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">conceptual register · structural transmission · what passes through cultural inheritance</span></label>
+        <textarea class="form-textarea" id="tap-layer-lineage" rows="5">${esc(t.layer_lineage)}</textarea>
       </div>
     </div>
 
+    <!-- Sigil -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="editor-section-title">Sigil</div>
+      <div class="editor-grid-2" style="margin-bottom:1rem">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Sigil Name</label>
+          <input class="form-input" id="tap-sigil-name" value="${esc(t.sigil_name)}">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Sigil Description</label>
+          <input class="form-input" id="tap-sigil-description" value="${esc(t.sigil_description)}">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Sigil SVG <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">house style: 80×80 viewBox · single #c9a87c · 5–12 elements</span></label>
+        <div class="sigil-preview-wrap">
+          <div class="sigil-preview-box" id="tap-sigil-preview">${t.sigil_svg || ''}</div>
+          <textarea class="form-textarea" id="tap-sigil-svg" rows="6" style="flex:1" oninput="updateSigilPreview(this.value, 'tap-sigil-preview')">${esc(t.sigil_svg)}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Frequency Tags -->
     <div class="card" style="margin-bottom:1.5rem">
       <div class="editor-section-title">Frequency Tags</div>
       <div class="chip-field" id="tap-chip-display"></div>
@@ -2339,13 +2379,17 @@ async function saveTapestryArchetype() {
   if (!name) { msgEl.innerHTML = '<span style="color:var(--red)">Name is required.</span>'; return; }
   const payload = {
     name,
-    tradition:           document.getElementById('tap-tradition').value.trim() || null,
-    epithet:             document.getElementById('tap-epithet').value.trim() || null,
-    description:         document.getElementById('tap-description').value.trim() || null,
-    register_mythic:     document.getElementById('tap-r-mythic').value.trim() || null,
-    register_conceptual: document.getElementById('tap-r-conceptual').value.trim() || null,
-    register_somatic:    document.getElementById('tap-r-somatic').value.trim() || null,
-    register_unreceived: document.getElementById('tap-r-unreceived').value.trim() || null,
+    tradition:         document.getElementById('tap-tradition').value.trim() || null,
+    epithet:           document.getElementById('tap-epithet').value.trim() || null,
+    catalog_preview:   document.getElementById('tap-catalog-preview').value.trim() || null,
+    catalog_full:      document.getElementById('tap-catalog-full').value.trim() || null,
+    layer_terroir:     document.getElementById('tap-layer-terroir').value.trim() || null,
+    layer_unresolved:  document.getElementById('tap-layer-unresolved').value.trim() || null,
+    layer_thread:      document.getElementById('tap-layer-thread').value.trim() || null,
+    layer_lineage:     document.getElementById('tap-layer-lineage').value.trim() || null,
+    sigil_name:        document.getElementById('tap-sigil-name').value.trim() || null,
+    sigil_description: document.getElementById('tap-sigil-description').value.trim() || null,
+    sigil_svg:         document.getElementById('tap-sigil-svg').value.trim() || null,
   };
   try {
     let id;
