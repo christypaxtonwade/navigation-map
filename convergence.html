@@ -297,37 +297,32 @@ body::before {
    element regardless of dark-mode color leakage from the parent stylesheet.
 */
 @media print {
-  /* Force color rendering even when "Background graphics" is off */
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box !important; }
 
-  /* Hide all interactive / navigational chrome */
+  /* Hide chrome */
   .nav, header, footer,
   .regen-bar, .history-nav, .history-list, .history-label,
-  .progress-wrap, .generate-panel,
-  #progress-wrap,
+  .progress-wrap, .generate-panel, #progress-wrap,
   .btn-regen, .btn-pdf, .btn-generate, .history-item, .history-new,
   button, [role="button"] {
     display: none !important;
   }
 
-  /* Full-page vellum surface */
+  /* White surface — no cream, no parchment. Saves ink. */
   html, body {
-    background: #e8dcbb !important;
+    background: #ffffff !important;
     color: #14110a !important;
     font-family: 'Cormorant Garamond', 'Georgia', serif !important;
     margin: 0 !important; padding: 0 !important;
   }
   .container, main, #main-content, .convergence-output, .page,
   div[class*="container"], div[class*="content"] {
-    background: #e8dcbb !important;
+    background: transparent !important;
     color: #14110a !important;
-    max-width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    max-width: 100% !important; padding: 0 !important; margin: 0 !important;
   }
 
-  /* UNIVERSAL — every text element is ink on vellum unless re-overridden below.
-     This is the catch-all that prevents inherited dark-mode colors from leaking. */
+  /* Universal ink-on-white catch-all — prevents dark-mode color leakage */
   body, body *,
   p, span, div, li, td, th, em, strong, i, b,
   .body, .section-body, .section-text, .evidence-snippet,
@@ -340,105 +335,108 @@ body::before {
     text-shadow: none !important;
   }
 
-  /* Body text — readable size, weight 400 */
+  /* Body text — compacted to 10pt, line-height 1.42 */
   p, .body, .section-body, .section-text, .evidence-snippet,
   .convergence-section, .layer-text {
-    font-size: 12pt !important;
-    line-height: 1.55 !important;
+    font-size: 10pt !important;
+    line-height: 1.42 !important;
     font-weight: 400 !important;
+    margin-bottom: 0.5rem !important;
   }
+  p:last-child { margin-bottom: 0 !important; }
 
-  /* Headings — bolded ink */
+  /* Headings */
   h1, h2, h3, h4, h5, h6 {
-    color: #14110a !important;
-    font-weight: 600 !important;
-    opacity: 1 !important;
+    color: #14110a !important; font-weight: 600 !important; opacity: 1 !important;
+    margin-top: 0.4rem !important; margin-bottom: 0.3rem !important;
   }
-  h1 { font-size: 22pt !important; }
-  h2 { font-size: 17pt !important; }
-  h3 { font-size: 14pt !important; }
+  h1 { font-size: 18pt !important; line-height: 1.1 !important; }
+  h2 { font-size: 14pt !important; line-height: 1.15 !important; }
+  h3 { font-size: 12pt !important; }
 
-  /* Section titles + frequency names — ink-gold for register accent */
+  /* Section titles + frequency names */
   .section-title, .frequency-name {
     color: #7a5618 !important;
     font-weight: 600 !important;
-    font-size: 13pt !important;
+    font-size: 11pt !important;
     letter-spacing: 0.04em !important;
   }
 
-  /* Eyebrow / label / meta text — ink-dim, but never below 11pt */
+  /* Eyebrow / label / meta text */
   .section-type-label, .snapshot-label,
   .layer-label, .layer-meta, .meta-row {
     color: #4e4228 !important;
-    font-size: 11pt !important;
+    font-size: 9pt !important;
     letter-spacing: 0.08em !important;
     font-weight: 500 !important;
   }
 
-  /* Decorative lines and section-header bars — kept visible */
   .section-header-line {
-    background: #a07428 !important;
-    height: 1px !important;
-    opacity: 1 !important;
+    background: #a07428 !important; height: 0.5pt !important; opacity: 1 !important;
   }
   .section-header-label {
-    color: #7a5618 !important;
-    font-weight: 500 !important;
-    font-size: 11pt !important;
-    letter-spacing: 0.18em !important;
+    color: #7a5618 !important; font-weight: 500 !important;
+    font-size: 9pt !important; letter-spacing: 0.16em !important;
   }
 
-  /* Snapshot card on print: thin gold border, no fill, ink text */
+  /* Snapshot card */
   .snapshot-card {
     background: transparent !important;
-    border: 1px solid #a07428 !important;
-    padding: 0.75rem !important;
+    border: 0.5pt solid #a07428 !important;
+    padding: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
   }
   .snapshot-value {
-    color: #7a5618 !important;
-    font-weight: 600 !important;
-    font-size: 14pt !important;
+    color: #7a5618 !important; font-weight: 600 !important; font-size: 11pt !important;
   }
+  .snapshot-item { padding: 0.2rem 0.4rem !important; }
 
-  /* Links: ink-gold, no underline noise on print */
+  /* Links */
   a { color: #7a5618 !important; text-decoration: none !important; }
 
-  /* Avoid breaking sections across pages where possible */
-  .convergence-section, .snapshot-card,
-  .section, .match-row { page-break-inside: avoid; }
-
-  /* Page margins — increased for proper book-style breathing room.
-     Side margins go from 0.65in → 0.85in so content is never flush against the printable edge. */
-  @page { margin: 0.85in 0.85in 0.95in 0.85in; }
-
-  /* Box-sizing safety: keep every container inside the printable width */
-  *, *::before, *::after { box-sizing: border-box !important; }
-
-  /* Content breathing room inside the cream surface — also keeps the right column
-     of any flex row (e.g. frequency counts) from sitting flush against the margin */
-  .container, main, #main-content, .convergence-output, .page {
-    padding: 0 6pt !important;
+  /* Tighter section spacing + page-break behaviour */
+  .convergence-section {
+    page-break-inside: avoid !important; break-inside: avoid !important;
+    margin-bottom: 0.9rem !important; padding: 0 !important;
+  }
+  .snapshot-card, .section, .match-row {
+    page-break-inside: avoid !important; break-inside: avoid !important;
   }
 
-  /* Dominant-frequencies row specifically — tightened so the count never overflows */
+  /* Page margins — book-grade book-page reduced for usable density */
+  @page { margin: 0.55in 0.65in 0.6in 0.65in; }
+
+  /* Content padding — small interior margin only on the right so frequency counts don't kiss the cream edge */
+  .container, main, #main-content, .convergence-output, .page {
+    padding: 0 4pt !important;
+  }
+
+  /* Dominant frequencies row — kept tight */
   .frequency-bar-row {
     width: 100% !important;
-    column-gap: 12pt !important;
-    padding-right: 4pt !important;
+    column-gap: 10pt !important;
+    padding-right: 2pt !important;
+    margin-bottom: 0.18rem !important;
   }
   .freq-name {
-    width: 200px !important; flex-shrink: 1 !important; min-width: 0 !important;
+    width: 180px !important; flex-shrink: 1 !important; min-width: 0 !important;
     word-break: break-word !important;
+    font-size: 10pt !important;
   }
   .freq-count {
-    width: 32px !important; flex-shrink: 0 !important;
+    width: 28px !important; flex-shrink: 0 !important;
     padding-left: 4pt !important;
+    font-size: 10pt !important;
   }
-  .freq-bar-wrap { flex: 1 1 auto !important; min-width: 0 !important; }
+  .freq-bar-wrap { flex: 1 1 auto !important; min-width: 0 !important; height: 3px !important; }
 
-  /* Frequency-bars reduced to a faint gold line on print — keeps the page calm */
+  /* Frequency bar — faint gold line on white */
   .freq-bar { background: #a07428 !important; opacity: 0.55 !important; }
-  .freq-bar-wrap { background: rgba(160,116,40,0.12) !important; }
+  .freq-bar-wrap { background: rgba(160,116,40,0.10) !important; }
+
+  /* Reduce vertical spacing on common containers */
+  .convergence-output > * { margin-top: 0.5rem !important; }
+  .convergence-output > *:first-child { margin-top: 0 !important; }
 }
 
 /* ── Loading ── */
