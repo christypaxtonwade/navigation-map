@@ -4573,11 +4573,20 @@ async function saveAncestorEdits() {
       });
     }
 
+    // 2b. Propagate tag changes to every client_ancestors copy linked to this canonical.
+    //     Mirrors the canonical TAG SET (adds new, removes deleted), but preserves any
+    //     per-client `strength` value already on the snapshot for tags that exist on both
+    //     sides. New tags inherit canonical strength.
+    const syncedCount = await syncClientFrequenciesFromCanonical(editorAncestorId, editorChips);
+
     // 3. Reload local cache
     await loadAncestors();
     populateAncestorEditorSelector();
 
-    msgEl.innerHTML = '<span style="color:var(--teal)">✓ All changes saved.</span>';
+    const syncSuffix = syncedCount > 0
+      ? ` <span style="color:var(--text-dim);font-size:13px">· synced tags to ${syncedCount} client weaving${syncedCount===1?'':'s'}</span>`
+      : '';
+    msgEl.innerHTML = `<span style="color:var(--teal)">✓ All changes saved.</span>${syncSuffix}`;
     btn.textContent = '✓ Saved';
     setTimeout(() => {
       btn.disabled = false; btn.textContent = 'Save All Changes →';
@@ -4588,6 +4597,51 @@ async function saveAncestorEdits() {
     msgEl.innerHTML = `<span style="color:var(--red)">${err.message}</span>`;
     btn.disabled = false; btn.textContent = 'Save All Changes →';
   }
+}
+
+// ── Sync helper: propagate canonical ancestor_frequencies → client_ancestor_frequencies ──
+// Called from saveEditorAncestor and (optionally) anywhere canonical tags change.
+// Semantics:
+//   • Mirrors the canonical TAG SET on every linked client_ancestors copy
+//   • Adds tags newly present on canonical (using canonical strength for new rows)
+//   • Removes tags no longer on canonical
+//   • For tags present on BOTH sides: leaves the existing client-side row untouched,
+//     so any per-client strength customization is preserved.
+// Returns the number of client copies touched.
+async function syncClientFrequenciesFromCanonical(ancestorId, canonicalChips) {
+  if (!ancestorId || !Array.isArray(canonicalChips)) return 0;
+  const linkedCopies = await rest(`client_ancestors?ancestor_id=eq.${ancestorId}&select=id`).catch(() => []);
+  if (!Array.isArray(linkedCopies) || !linkedCopies.length) return 0;
+  const newTagIds = new Set(canonicalChips.map(c => c.tagId));
+
+  let touched = 0;
+  for (const copy of linkedCopies) {
+    const existing = await rest(`client_ancestor_frequencies?client_ancestor_id=eq.${copy.id}&select=id,frequency_tag_id`).catch(() => []);
+    const existingMap = new Map((Array.isArray(existing) ? existing : []).map(r => [r.frequency_tag_id, r]));
+
+    let changed = false;
+
+    // Remove tags no longer on canonical
+    for (const [tagId, row] of existingMap.entries()) {
+      if (!newTagIds.has(tagId)) {
+        await restDelete(`client_ancestor_frequencies?id=eq.${row.id}`);
+        changed = true;
+      }
+    }
+    // Add tags newly on canonical (preserve per-client rows that already exist)
+    for (const chip of canonicalChips) {
+      if (!existingMap.has(chip.tagId)) {
+        await restPost('client_ancestor_frequencies', {
+          client_ancestor_id: copy.id,
+          frequency_tag_id: chip.tagId,
+          strength: chip.strength
+        });
+        changed = true;
+      }
+    }
+    if (changed) touched++;
+  }
+  return touched;
 }
 
 // ── Delete a canonical ancestor (with safety) ──────────
