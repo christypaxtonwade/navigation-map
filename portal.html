@@ -908,6 +908,15 @@ body::before {
                 <option value="keynote">Keynote</option>
               </select>
             </div>
+            <div class="form-group" style="margin-bottom:1.5rem">
+              <label class="form-label">Source PDFs <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">optional · up to 5 files · census, will, baptism, ship manifest, oral history transcript, etc. Claude reads typed and scanned PDFs natively.</span></label>
+              <div class="upload-area" onclick="document.getElementById('ar-pdf-input').click()">
+                <input type="file" id="ar-pdf-input" accept="application/pdf,.pdf" multiple style="display:none" onchange="onPdfPicked(this,'ar')">
+                <span class="upload-label">Click to attach PDFs</span>
+              </div>
+              <div id="ar-pdf-list" style="margin-top:0.5rem"></div>
+              <div id="ar-pdf-msg" style="margin-top:0.4rem;font-size:14px"></div>
+            </div>
             <button class="btn btn-gold" id="ar-generate-btn" onclick="generateAncestorAI()">✦ Generate Record</button>
             <div id="ar-form-msg" style="margin-top:0.75rem"></div>
           </div>
@@ -936,6 +945,15 @@ body::before {
             <div class="form-group" id="aug-findings-wrap" style="display:none">
               <label class="form-label">New Findings <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">paste sources, transcripts, dates, names, places, anything you've located</span></label>
               <textarea class="form-textarea" id="aug-new-findings" rows="8" placeholder="e.g. 1851 UK Census, Liverpool ED 12, Household 47: John Detton, age 38, journeyman cooper, b. Birkenhead; wife Mary, 35, b. Glasgow; sons Robert (12), James (8) — confirms 1849 arrival in Liverpool from Glasgow, contradicting earlier assumption of Edinburgh origin. Also: Glasgow Trades House records show John apprenticed to Andrew McTavish 1825–1832."></textarea>
+            </div>
+            <div class="form-group" id="aug-pdfs-wrap" style="display:none">
+              <label class="form-label">Source PDFs <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">optional · up to 5 files · attach scanned records and Claude reads them directly</span></label>
+              <div class="upload-area" onclick="document.getElementById('aug-pdf-input').click()">
+                <input type="file" id="aug-pdf-input" accept="application/pdf,.pdf" multiple style="display:none" onchange="onPdfPicked(this,'aug')">
+                <span class="upload-label">Click to attach PDFs</span>
+              </div>
+              <div id="aug-pdf-list" style="margin-top:0.5rem"></div>
+              <div id="aug-pdf-msg" style="margin-top:0.4rem;font-size:14px"></div>
             </div>
             <div id="aug-also-log" style="display:none;margin-bottom:1rem;padding:0.75rem 0.875rem;border:1px dashed var(--border);border-radius:6px;background:rgba(201,168,124,0.02)">
               <label style="display:flex;gap:0.5rem;align-items:center;font-size:15px;cursor:pointer;margin-bottom:0.5rem">
@@ -2100,6 +2118,11 @@ let arReviewData = null;      // raw AI result
 let arChips = [];             // [{ tagId, tagName, tagType, strength }]
 let arAugmentExistingId = null;     // when set, Confirm PATCHes this id instead of inserting
 let arAugmentExistingRecord = null; // full pre-augment snapshot, used for diff highlights
+
+// PDF attachments per mode. Each entry: { id, file, filename, size, base64, media_type, log, date, type, label, url }
+const arPdfState = { ar: [], aug: [] };
+const PDF_MAX_FILES = 5;
+const PDF_MAX_BYTES_PER_FILE = 30 * 1024 * 1024; // 30 MB safety margin under Anthropic's 32 MB
 let allFrequencyTags = [];    // loaded from DB
 
 async function initAncestorResearch() {
@@ -2137,6 +2160,7 @@ async function generateAncestorAI() {
       return;
     }
 
+    const pdfs = getPdfsForApi('ar');
     const callGenerate = () => fetch(
       `${SUPABASE_URL}/functions/v1/generate-ancestor`,
       {
@@ -2146,7 +2170,7 @@ async function generateAncestorAI() {
           'Authorization': `Bearer ${accessToken}`,
           'apikey': SUPABASE_ANON_KEY,
         },
-        body: JSON.stringify({ name, dates, location, notes, level })
+        body: JSON.stringify({ name, dates, location, notes, level, pdfs })
       }
     );
 
@@ -2561,12 +2585,19 @@ async function confirmAncestorToDatabase() {
       }
     }
 
+    // 4. Auto-log any uploaded PDFs to the research findings table (per-PDF "Log" toggle)
+    const pdfMode = isAugment ? 'aug' : 'ar';
+    const pdfsToLog = arPdfState[pdfMode].filter(p => p.log).length;
+    await logPdfFindingsAfterSave(ancestorId, pdfMode);
+    clearPdfState(pdfMode);
+
     // Reload ancestors cache
     await loadAncestors();
     const verb = isAugment ? 'updated' : 'saved';
     const tail = !isAugment && clientId ? ' and assigned to client' : '';
+    const pdfTail = pdfsToLog ? ` · ${pdfsToLog} PDF${pdfsToLog===1?'':'s'} logged to findings` : '';
     const note = isAugment ? ' <span style="color:var(--text-faint);font-size:14px">(client weaving copies remain unchanged — re-assign or edit individually if you want them refreshed)</span>' : '';
-    msgEl.innerHTML = `<span style="color:var(--teal)">✓ ${payload.name} ${verb}${tail}.</span>${note}`;
+    msgEl.innerHTML = `<span style="color:var(--teal)">✓ ${payload.name} ${verb}${tail}${pdfTail}.</span>${note}`;
     // Clear augment context so next Confirm starts clean
     if (isAugment) { arAugmentExistingId = null; arAugmentExistingRecord = null; }
     btn.textContent = '✓ Saved';
@@ -2691,11 +2722,15 @@ async function loadAncestorForAugment() {
   const log     = document.getElementById('aug-also-log');
   const runBtn  = document.getElementById('aug-run-btn');
 
+  const pdfsWrap = document.getElementById('aug-pdfs-wrap');
+
   if (!id) {
     summary.style.display = 'none';
     wrap.style.display = 'none';
+    if (pdfsWrap) pdfsWrap.style.display = 'none';
     log.style.display = 'none';
     runBtn.style.display = 'none';
+    clearPdfState('aug');
     return;
   }
 
@@ -2737,6 +2772,7 @@ async function loadAncestorForAugment() {
   arAugmentExistingRecord = { ...ancestor, frequency_tags: tagList };
 
   wrap.style.display = 'block';
+  if (pdfsWrap) pdfsWrap.style.display = 'block';
   log.style.display = 'block';
   runBtn.style.display = 'inline-flex';
 }
@@ -2752,8 +2788,9 @@ async function runAugment() {
     msgEl.innerHTML = '<div class="msg msg-error">Pick an ancestor first.</div>';
     return;
   }
-  if (!findings) {
-    msgEl.innerHTML = '<div class="msg msg-error">Paste new findings to integrate.</div>';
+  const pdfs = getPdfsForApi('aug');
+  if (!findings && pdfs.length === 0) {
+    msgEl.innerHTML = '<div class="msg msg-error">Paste findings text or attach at least one PDF to integrate.</div>';
     return;
   }
 
@@ -2779,7 +2816,8 @@ async function runAugment() {
         body: JSON.stringify({
           mode: 'augment',
           existing_record: arAugmentExistingRecord,
-          new_findings: findings
+          new_findings: findings,
+          pdfs
         })
       }
     );
@@ -3266,6 +3304,142 @@ async function deleteFinding(id) {
     const msgEl = document.getElementById('ed-finding-msg');
     if (msgEl) msgEl.innerHTML = `<span style="color:var(--red)">${err.message}</span>`;
   }
+}
+
+// ── PDF attachments (shared by Generate New and Augment Existing) ──
+function fmtBytes(n) {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n/1024).toFixed(1)} KB`;
+  return `${(n/(1024*1024)).toFixed(1)} MB`;
+}
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result || '';
+      // result is "data:application/pdf;base64,XXXX..." — strip the prefix
+      const comma = result.indexOf(',');
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function onPdfPicked(input, mode) {
+  const list = arPdfState[mode];
+  const msgId = mode === 'ar' ? 'ar-pdf-msg' : 'aug-pdf-msg';
+  const msgEl = document.getElementById(msgId);
+  if (msgEl) msgEl.innerHTML = '';
+
+  const incoming = Array.from(input.files || []);
+  for (const file of incoming) {
+    if (list.length >= PDF_MAX_FILES) {
+      if (msgEl) msgEl.innerHTML = `<span style="color:var(--red)">Limit ${PDF_MAX_FILES} PDFs per call. Skipped: ${esc(file.name)}.</span>`;
+      break;
+    }
+    if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
+      if (msgEl) msgEl.innerHTML = `<span style="color:var(--red)">Not a PDF, skipped: ${esc(file.name)}.</span>`;
+      continue;
+    }
+    if (file.size > PDF_MAX_BYTES_PER_FILE) {
+      if (msgEl) msgEl.innerHTML = `<span style="color:var(--red)">${esc(file.name)} is ${fmtBytes(file.size)} — over the 30 MB per-file cap.</span>`;
+      continue;
+    }
+    try {
+      const base64 = await readFileAsBase64(file);
+      list.push({
+        id:    Math.random().toString(36).slice(2, 10),
+        filename: file.name,
+        size:  file.size,
+        base64,
+        media_type: 'application/pdf',
+        log:   true,
+        date:  '',
+        type:  '',
+        label: file.name.replace(/\.[^.]+$/, ''),
+        url:   ''
+      });
+    } catch (err) {
+      if (msgEl) msgEl.innerHTML = `<span style="color:var(--red)">Failed to read ${esc(file.name)}: ${err.message}</span>`;
+    }
+  }
+  // Clear the input so the same file can be re-picked if removed
+  input.value = '';
+  renderPdfList(mode);
+}
+
+function renderPdfList(mode) {
+  const list = arPdfState[mode];
+  const containerId = mode === 'ar' ? 'ar-pdf-list' : 'aug-pdf-list';
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (!list.length) { el.innerHTML = ''; return; }
+
+  el.innerHTML = list.map((p, i) => `
+    <div style="border:1px solid var(--border);border-radius:6px;padding:0.65rem 0.875rem;margin-bottom:0.5rem;background:rgba(201,168,124,0.04)">
+      <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem">
+        <span style="font-size:14px;font-weight:500;color:var(--text);flex:1">${esc(p.filename)}</span>
+        <span style="font-size:13px;color:var(--text-faint)">${fmtBytes(p.size)}</span>
+        <button class="btn-chip-remove" onclick="removePdf('${mode}','${p.id}')" title="Remove">×</button>
+      </div>
+      <label style="display:flex;gap:0.4rem;align-items:center;font-size:14px;color:var(--text-dim);cursor:pointer;margin-bottom:0.5rem">
+        <input type="checkbox" ${p.log ? 'checked' : ''} onchange="updatePdfField('${mode}','${p.id}','log',this.checked)">
+        Log to research findings on save
+      </label>
+      <div style="display:grid;grid-template-columns:120px 160px 1fr;gap:0.4rem;margin-bottom:0.4rem">
+        <input class="form-input" type="date" value="${esc(p.date)}" onchange="updatePdfField('${mode}','${p.id}','date',this.value)" placeholder="Date">
+        <select class="form-select" onchange="updatePdfField('${mode}','${p.id}','type',this.value)">
+          <option value="">— Type —</option>
+          ${['census','will','baptism','marriage','burial','ship-manifest','land','newspaper','oral-history','photo','dna','other']
+            .map(t => `<option value="${t}" ${p.type===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+        <input class="form-input" value="${esc(p.label)}" onchange="updatePdfField('${mode}','${p.id}','label',this.value)" placeholder="Source label">
+      </div>
+      <input class="form-input" value="${esc(p.url)}" onchange="updatePdfField('${mode}','${p.id}','url',this.value)" placeholder="URL (optional)">
+    </div>
+  `).join('');
+}
+
+function updatePdfField(mode, id, field, value) {
+  const item = arPdfState[mode].find(p => p.id === id);
+  if (item) item[field] = value;
+}
+
+function removePdf(mode, id) {
+  arPdfState[mode] = arPdfState[mode].filter(p => p.id !== id);
+  renderPdfList(mode);
+}
+
+function getPdfsForApi(mode) {
+  return arPdfState[mode].map(p => ({
+    filename:   p.filename,
+    media_type: p.media_type,
+    data:       p.base64
+  }));
+}
+
+async function logPdfFindingsAfterSave(ancestorId, mode) {
+  const list = arPdfState[mode];
+  for (const p of list) {
+    if (!p.log) continue;
+    try {
+      await restPost('ancestor_research_findings', {
+        ancestor_id:  ancestorId,
+        finding_date: p.date || null,
+        source_type:  p.type || null,
+        source_label: (p.label || p.filename).slice(0, 500),
+        summary:      `Source PDF attached during ${mode === 'ar' ? 'Generate New' : 'Augment Existing'} flow.`,
+        url:          p.url || null
+      });
+    } catch (_) { /* don't fail the main save on log errors */ }
+  }
+}
+
+function clearPdfState(mode) {
+  arPdfState[mode] = [];
+  renderPdfList(mode);
 }
 
 // ── Editor chip management ─────────────────────────────
