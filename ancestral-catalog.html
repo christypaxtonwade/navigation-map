@@ -174,12 +174,13 @@ body::before {
 <div class="header-rule"></div>
 <p class="header-sub">A seed catalog of the lineage. Every researched ancestor held here — those in full flower in the Weaving and those still germinating in the margins. Sortable by era and place. Searchable by name. Each card holds what is known, what connects, and what remains open.</p>
 <div class="header-links">
-<a class="header-link" href="ancestral-weaving.html">The Ancestral Weaving ↗</a>
-<a class="header-link" href="index.html">Navigation Map ↗</a>
-<a class="header-link" href="fieldguide.html">The Fieldguide ↗</a>
-<a class="header-link" href="convergence.html">The Convergence ↗</a>
+<a class="header-link" href="ancestral-weaving.html" data-link>The Ancestral Weaving ↗</a>
+<a class="header-link" href="index.html" data-link>Navigation Map ↗</a>
+<a class="header-link" href="fieldguide.html" data-link>The Fieldguide ↗</a>
+<a class="header-link" href="convergence.html" data-link>The Convergence ↗</a>
 <a class="header-link" href="portal.html">Portal ↗</a>
 </div>
+<div id="client-banner" style="display:none;margin:1rem auto 0;padding:0.6rem 1rem;border:1px solid rgba(201,168,124,0.35);border-radius:6px;background:rgba(201,168,124,0.06);font-size:14px;color:var(--gold);max-width:680px;text-align:center"></div>
 </header>
 <div class="controls">
 <div class="search-wrap">
@@ -383,24 +384,76 @@ function buildCard(ancestor, freqTags, index) {
   return card;
 }
 
+function escCat(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ── Client context (URL ?client_id=...) ──────────────────────
+const CLIENT_ID = new URLSearchParams(window.location.search).get('client_id');
+
+// Preserve client_id across cross-page links when present
+if (CLIENT_ID) {
+  document.querySelectorAll('a.header-link[data-link]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (!href || href.startsWith('#') || href.startsWith('http')) return;
+    const sep = href.includes('?') ? '&' : '?';
+    a.setAttribute('href', `${href}${sep}client_id=${encodeURIComponent(CLIENT_ID)}`);
+  });
+}
+
 async function init() {
   const grid = document.getElementById('catalog-grid');
   try {
-    const [ancestors, freqRows] = await Promise.all([
-      supabaseFetch('ancestors?select=*&order=sort_year.asc'),
-      supabaseFetch('ancestor_frequencies?select=ancestor_id,frequency_tags(name)').catch(() => [])
-    ]);
+    let ancestors, freqMap;
 
-    const freqMap = {};
-    freqRows.forEach(row => {
-      const name = row.frequency_tags?.name;
-      if (!name) return;
-      if (!freqMap[row.ancestor_id]) freqMap[row.ancestor_id] = [];
-      freqMap[row.ancestor_id].push(name);
-    });
+    if (CLIENT_ID) {
+      // Client-scoped catalog: only the ancestors assigned to this client
+      const client = await supabaseFetch(`clients?id=eq.${encodeURIComponent(CLIENT_ID)}&select=id,name`).then(r => r[0]).catch(() => null);
+      const clientName = client?.name || 'Client';
+
+      const banner = document.getElementById('client-banner');
+      if (banner) {
+        banner.style.display = 'block';
+        banner.innerHTML = `Viewing <strong style="font-weight:500">${escCat(clientName)}</strong>'s exclusive set · <a href="ancestral-catalog.html" style="color:var(--gold);text-decoration:underline">view canonical archive</a>`;
+      }
+
+      const cas = await supabaseFetch(`client_ancestors?client_id=eq.${encodeURIComponent(CLIENT_ID)}&select=*&order=sort_year.asc`);
+      const caIds = cas.map(a => a.id);
+      const freqRows = caIds.length
+        ? await supabaseFetch(`client_ancestor_frequencies?client_ancestor_id=in.(${caIds.join(',')})&select=client_ancestor_id,frequency_tags(name)`).catch(() => [])
+        : [];
+
+      ancestors = cas;
+      freqMap = {};
+      freqRows.forEach(row => {
+        const name = row.frequency_tags?.name;
+        if (!name) return;
+        if (!freqMap[row.client_ancestor_id]) freqMap[row.client_ancestor_id] = [];
+        freqMap[row.client_ancestor_id].push(name);
+      });
+    } else {
+      const [as, freqRows] = await Promise.all([
+        supabaseFetch('ancestors?select=*&order=sort_year.asc'),
+        supabaseFetch('ancestor_frequencies?select=ancestor_id,frequency_tags(name)').catch(() => [])
+      ]);
+      ancestors = as;
+      freqMap = {};
+      freqRows.forEach(row => {
+        const name = row.frequency_tags?.name;
+        if (!name) return;
+        if (!freqMap[row.ancestor_id]) freqMap[row.ancestor_id] = [];
+        freqMap[row.ancestor_id].push(name);
+      });
+    }
 
     grid.innerHTML = '';
-    ancestors.forEach((a, i) => grid.appendChild(buildCard(a, freqMap[a.id] || [], i)));
+    if (!ancestors.length) {
+      grid.innerHTML = `<div class="error-state" style="grid-column:1/-1;font-style:italic">
+        ${CLIENT_ID ? 'No ancestors assigned to this client yet.' : 'No ancestors found.'}
+      </div>`;
+    } else {
+      ancestors.forEach((a, i) => grid.appendChild(buildCard(a, freqMap[a.id] || [], i)));
+    }
 
     const total = ancestors.length;
     document.getElementById('count-note').textContent = total + ' ancestor' + (total !== 1 ? 's' : '');
