@@ -277,7 +277,8 @@ body::before {
 .aprof-close { position: absolute; top: 0.6rem; right: 0.6rem; background: rgba(7,8,13,0.65); border: 1px solid rgba(201,168,124,0.18); border-radius: 50%; cursor: pointer; width: 36px; height: 36px; font-size: 1.4rem; color: var(--text-dim, #b3aa9f); z-index: 5; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
 .aprof-close:hover { color: var(--gold, #c9a87c); border-color: var(--gold-dim, rgba(201,168,124,0.7)); }
 .aprof-close:focus-visible { outline: 2px solid var(--gold, #c9a87c); outline-offset: 2px; }
-.aprof-mode-toggle { position: absolute; top: 0.7rem; right: 4rem; display: flex; gap: 0; border: 1px solid rgba(201,168,124,0.18); border-radius: 6px; background: rgba(7,8,13,0.65); overflow: hidden; z-index: 5; }
+.aprof-toolbar { display: flex; justify-content: flex-end; padding: 0.7rem 4rem 0.4rem 1.75rem; }
+.aprof-mode-toggle { display: inline-flex; gap: 0; border: 1px solid rgba(201,168,124,0.18); border-radius: 6px; background: rgba(255,255,255,0.02); overflow: hidden; }
 .aprof-mode-btn { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0.85rem; border: none; background: transparent; color: var(--text-dim, #b3aa9f); cursor: pointer; transition: all 0.15s; }
 .aprof-mode-btn + .aprof-mode-btn { border-left: 1px solid rgba(201,168,124,0.18); }
 .aprof-mode-btn.active { background: rgba(201,168,124,0.12); color: var(--gold, #c9a87c); }
@@ -779,7 +780,7 @@ function openAncestorProfile(id) {
     html: `<div class="aprof-related">${related.map(r => `<a class="aprof-related-link" onclick="openAncestorProfile('${r.id}')" title="Shared: ${aprofEsc(r.shared.join(' · '))}">${aprofEsc(r.name)}</a>`).join('')}</div>`
   }));
 
-  document.getElementById('aprof-content').innerHTML = modeToggle + identity + navBar + `<div class="aprof-cards">${cards.join('')}</div>`;
+  document.getElementById('aprof-content').innerHTML = `<div class="aprof-toolbar">${modeToggle}</div>` + identity + navBar + `<div class="aprof-cards">${cards.join('')}</div>`;
   document.getElementById('aprof-modal').classList.toggle('long-form', aprofViewMode === 'long');
   document.getElementById('aprof-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
