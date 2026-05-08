@@ -1695,7 +1695,7 @@ function cdWeavingCard(d) {
         <div class="meta">${cdEsc(ax.dates) || '—'}${ax.relation_to_client ? ' · ' + cdEsc(ax.relation_to_client) : ''}</div>
       </div>
       <span class="status-pill">${cdEsc(ax.status)}</span>
-      <button class="btn btn-outline btn-sm" onclick="cdRemoveClientAncestor('${cdEsc(ax.id)}','${cdEsc(ax.name)}')" title="Remove from this client's weaving" style="color:var(--red);border-color:rgba(192,112,96,0.3);margin-left:0.5rem">Remove</button>
+      <button class="btn btn-outline btn-sm" onclick="cdRemoveClientAncestor('${ax.id}')" title="Remove from this client's weaving" style="color:var(--red);border-color:rgba(192,112,96,0.3);margin-left:0.5rem">Remove</button>
     </div>`).join('');
   const note = a.length > 30 ? `<div class="cd-status" style="margin-top:0.5rem">Showing 30 of ${a.length}. Manage all in the Weaving Builder.</div>` : '';
   return `
@@ -1706,7 +1706,9 @@ function cdWeavingCard(d) {
     </div>`;
 }
 
-async function cdRemoveClientAncestor(caId, ancestorName) {
+async function cdRemoveClientAncestor(caId) {
+  const row = (currentDetailData?.ancestors || []).find(x => x.id === caId);
+  const ancestorName = row?.name || 'this ancestor';
   if (!confirm(`Remove "${ancestorName}" from this client's weaving?\n\nThis unlinks the per-client copy. Any canonical ancestor record (and its other client weavings) is unaffected.`)) return;
   try {
     await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${caId}`);
@@ -2881,6 +2883,8 @@ function showEditMode() {
 // TRIAGE INTAKE STUBS
 // ════════════════════════════════════════════════════
 
+let triageStubs = []; // cache so handlers can look up by id without escaping names through onclick
+
 async function populateTriageList() {
   const el = document.getElementById('ar-triage-list');
   if (!el) return;
@@ -2892,6 +2896,7 @@ async function populateTriageList() {
       `client_ancestors?status=eq.intake_stub&select=id,client_id,name,dates,location,occupation,relation_to_client,intake_notes,created_at,clients(name,email,entry_offering)&order=created_at.desc`
     );
     const list = Array.isArray(rows) ? rows : [];
+    triageStubs = list;
     if (!list.length) {
       el.innerHTML = `<div class="empty" style="padding:2rem;text-align:center;font-style:italic;color:var(--text-faint)">No intake stubs awaiting triage.</div>`;
       return;
@@ -2909,8 +2914,8 @@ async function populateTriageList() {
             <div style="font-size:13px;color:var(--text-faint)">From <strong style="font-weight:500;color:var(--gold)">${clientName}</strong>${clientMeta ? ' · ' + clientMeta : ''}</div>
           </div>
           <div style="display:flex;gap:0.4rem;align-items:center">
-            <button class="btn btn-gold btn-sm" onclick="promoteStub('${esc(r.id)}')">Promote →</button>
-            <button class="btn btn-outline btn-sm" onclick="deleteIntakeStub('${esc(r.id)}','${esc(r.name)}','${esc(r.clients?.name || 'this client')}')" title="Dismiss this intake stub" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Delete</button>
+            <button class="btn btn-gold btn-sm" onclick="promoteStub('${r.id}')">Promote →</button>
+            <button class="btn btn-outline btn-sm" onclick="deleteIntakeStub('${r.id}')" title="Dismiss this intake stub" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Delete</button>
           </div>
         </div>
         ${ancestorMeta ? `<div style="font-size:14px;color:var(--text-dim);margin-bottom:0.4rem">${ancestorMeta}</div>` : ''}
@@ -2922,7 +2927,10 @@ async function populateTriageList() {
   }
 }
 
-async function deleteIntakeStub(stubId, ancestorName, clientName) {
+async function deleteIntakeStub(stubId) {
+  const row = triageStubs.find(s => s.id === stubId);
+  const ancestorName = row?.name || 'this stub';
+  const clientName   = row?.clients?.name || 'this client';
   if (!confirm(`Delete the intake stub "${ancestorName}" from ${clientName}'s weaving?\n\nThis will not touch any canonical ancestor record. The intake notes and relation will be lost.`)) return;
   try {
     // Cascades client_ancestor_frequencies; intake_stub typically has none anyway
