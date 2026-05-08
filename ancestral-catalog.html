@@ -164,9 +164,108 @@ body::before {
   .controls { flex-direction: column; }
   .count-note { margin-left: 0; }
 }
+
+/* ── Print stylesheet — white bg, ink type, cards flow with avoid-break ── */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box !important; }
+
+  /* Hide chrome */
+  .header, .header-links, .controls, .catalog-footer,
+  .card-chevron, #client-banner, .btn-print { display: none !important; }
+
+  html, body {
+    background: #ffffff !important; color: #14110a !important;
+    margin: 0 !important; padding: 0 !important;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+  }
+  .page { background: transparent !important; padding: 0 !important; max-width: 100% !important; }
+
+  /* Catalog grid collapses to single column for clean linear print */
+  .catalog-grid {
+    display: block !important; gap: 0 !important; padding: 0 !important;
+  }
+
+  .catalog-card, .keynote-card {
+    background: transparent !important;
+    border: none !important; border-radius: 0 !important;
+    border-top: 1pt solid #a07428 !important;
+    margin: 0 0 1rem 0 !important; padding: 0.5rem 0 0.6rem !important;
+    page-break-inside: avoid !important; break-inside: avoid !important;
+    animation: none !important; opacity: 1 !important;
+  }
+  .keynote-card { border-top-color: #7d5d9c !important; }
+
+  .card-era-bar, .keynote-era-bar { display: none !important; }
+
+  .card-body { padding: 0 !important; }
+
+  .card-top { gap: 0.75rem !important; margin-bottom: 0.3rem !important; }
+  .card-name {
+    color: #14110a !important; font-weight: 500 !important;
+    font-size: 18pt !important; line-height: 1.1 !important;
+  }
+  .card-date {
+    color: #4e4228 !important; font-size: 9.5pt !important;
+    letter-spacing: 0.06em !important; padding-top: 5px !important;
+  }
+  .card-epithet {
+    color: #7a5618 !important; font-size: 11pt !important; font-style: italic !important;
+    margin-bottom: 0.3rem !important;
+  }
+  .card-meta {
+    color: #4e4228 !important; font-size: 9.5pt !important;
+    letter-spacing: 0.04em !important; margin-bottom: 0.5rem !important;
+  }
+
+  .card-tags { gap: 4px !important; margin-bottom: 0.5rem !important; }
+  .tag {
+    background: transparent !important;
+    border: 0.5pt solid #a07428 !important;
+    color: #7a5618 !important; font-size: 8.5pt !important;
+    padding: 1px 5px !important;
+  }
+  .tag-weaving {
+    background: rgba(160,116,40,0.10) !important;
+  }
+  .keynote-label {
+    background: transparent !important;
+    border: 0.5pt solid #7d5d9c !important;
+    color: #7d5d9c !important;
+    font-size: 8.5pt !important; padding: 1px 5px !important;
+    margin-bottom: 0.3rem !important;
+  }
+
+  /* Force the narrative open in print regardless of card-open state */
+  .card-narrative-preview {
+    color: #14110a !important; font-size: 10pt !important; line-height: 1.45 !important;
+    margin-bottom: 0.4rem !important;
+  }
+  .card-narrative-full {
+    max-height: none !important; opacity: 1 !important; overflow: visible !important;
+    color: #14110a !important; font-size: 10pt !important; line-height: 1.45 !important;
+    transition: none !important;
+    border-left: 1.5pt solid #a07428 !important;
+    padding: 0.1rem 0 0.1rem 0.6rem !important;
+    margin: 0.3rem 0 0 !important; background: transparent !important;
+  }
+
+  /* Page margins */
+  @page { margin: 0.6in 0.7in 0.7in 0.7in; }
+}
+
+/* Print button (only visible on screen) */
+.btn-print {
+  position: fixed; top: 1rem; right: 1rem; z-index: 50;
+  font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 0.4rem 0.8rem; border-radius: 5px;
+  background: rgba(201,168,124,0.08); border: 1px solid rgba(201,168,124,0.4);
+  color: var(--gold, #c9a87c); cursor: pointer; transition: all 0.15s;
+}
+.btn-print:hover { background: rgba(201,168,124,0.18); }
 </style>
 </head>
 <body>
+<button class="btn-print" onclick="window.print()" title="Print or save as PDF">Print</button>
 <div class="page">
 <header class="header">
 <div class="header-eyebrow">Christy Paxton Wade</div>
