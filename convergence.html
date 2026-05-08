@@ -694,7 +694,7 @@ async function loadClientData() {
 
   // ── Mythic Tapestry: chosen-resonance figures, distinct from blood lineage ──
   const tapestryAssignments = await sb(
-    `client_tapestry_archetypes?client_id=eq.${client.id}&select=id,resonance_note,strength,tapestry_archetypes(id,name,tradition,epithet,description,register_mythic,register_conceptual,register_somatic,register_unreceived)`
+    `client_tapestry_archetypes?client_id=eq.${client.id}&select=id,resonance_note,strength,tapestry_archetypes(id,name,tradition,epithet,catalog_preview,layer_terroir,layer_unresolved,layer_thread,layer_lineage,sigil_name)`
   ).catch(() => []);
   const tapestry = (Array.isArray(tapestryAssignments) ? tapestryAssignments : [])
     .map(a => ({ ...a, archetype: a.tapestry_archetypes }))
@@ -798,8 +798,12 @@ function tapestryBlock(tapestry, tapestryFreqMap) {
     const a = t.archetype;
     const meta = [a.tradition, a.epithet].filter(Boolean).join(' · ');
     const note = t.resonance_note ? `\n  Resonance note (descendant's words): "${t.resonance_note}"` : '';
-    return `- ${a.name}${meta ? ' (' + meta + ')' : ''} [${t.strength || 'noted'}]${note}`;
-  }).join('\n');
+    // Pull the most signal-dense layer (Thread first, fallback to Unresolved, then catalog_preview)
+    const sig = a.layer_thread || a.layer_unresolved || a.catalog_preview || '';
+    const sigSnippet = sig ? `\n  Mythic signature: ${sig.slice(0, 280)}${sig.length > 280 ? '…' : ''}` : '';
+    const sigilName = a.sigil_name ? `\n  Sigil: ${a.sigil_name}` : '';
+    return `- ${a.name}${meta ? ' (' + meta + ')' : ''} [${t.strength || 'noted'}]${note}${sigSnippet}${sigilName}`;
+  }).join('\n\n');
   const tagSummary = Object.entries(tapestryFreqMap || {})
     .map(([name, figs]) => `${name} (${figs.join(', ')})`)
     .join('; ');
