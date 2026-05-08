@@ -7,17 +7,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
+  /* Tapestry palette — indigo bg variant of the project's near-black standard.
+     All text colors meet the readability-standard.md minimums (4.5:1 against bg).
+     Source palette values are the project standard from readability-standard.md. */
   --bg: #0a0c1f;
-  --surface: #11132a;
-  --surface-2: #1a1d3d;
-  --border: rgba(201,168,124,0.14);
-  --border-hover: rgba(201,168,124,0.28);
+  --surface: #14172e;
+  --surface-2: #1c2046;
+  --border: rgba(201,168,124,0.18);
+  --border-hover: rgba(201,168,124,0.32);
   --gold: #c9a87c;
   --gold-bright: #dfc090;
-  --gold-dim: rgba(201,168,124,0.7);
-  --text: #e7e3d8;
-  --text-dim: #a89e8a;
-  --text-faint: #6e6555;
+  --gold-dim: rgba(201,168,124,0.85);
+  --text: #ede8dc;            /* primary body, headings */
+  --text-secondary: #c8c0b0;  /* secondary body */
+  --text-dim: #b3aa9f;        /* meta, dates, supporting labels */
+  --text-faint: #9a9088;      /* lowest-priority text — still 6.4:1 */
   --indigo-glow: rgba(140,120,210,0.25);
   --teal: #6dd8b2;
   --red: #c07060;
@@ -35,7 +39,7 @@ body {
 /* ── Header ── */
 .header { padding: 4rem 2rem 2.5rem; text-align: center; }
 .header-eyebrow {
-  font-size: 14px; font-weight: 400; letter-spacing: 0.32em;
+  font-size: 15px; font-weight: 400; letter-spacing: 0.32em;
   text-transform: uppercase; color: var(--gold); margin-bottom: 1rem;
 }
 .header-title {
@@ -57,16 +61,17 @@ body {
   flex-wrap: wrap; margin-top: 1.5rem;
 }
 .header-link {
-  font-size: 13px; font-weight: 400; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--gold-dim);
+  font-size: 15px; font-weight: 400; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--gold);
   text-decoration: none; transition: color 0.2s;
 }
 .header-link:hover { color: var(--gold-bright); }
+.header-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .client-banner {
   display: none; margin: 1rem auto 0; padding: 0.6rem 1rem;
-  border: 1px solid rgba(201,168,124,0.35); border-radius: 6px;
-  background: rgba(201,168,124,0.06);
-  font-size: 14px; color: var(--gold);
+  border: 1px solid rgba(201,168,124,0.4); border-radius: 6px;
+  background: rgba(201,168,124,0.08);
+  font-size: 15px; color: var(--gold);
   max-width: 680px; text-align: center;
 }
 
@@ -85,43 +90,47 @@ body {
   flex: 1 1 280px; min-width: 240px;
   background: var(--surface); color: var(--text);
   border: 1px solid var(--border); border-radius: 6px;
-  padding: 0.55rem 0.85rem; font-size: 14px; font-family: inherit;
+  padding: 0.6rem 0.9rem; font-size: 15px; font-family: inherit;
   outline: none; transition: border-color 0.2s;
 }
-.search-input::placeholder { color: var(--text-faint); }
-.search-input:focus { border-color: var(--gold-dim); }
+.search-input::placeholder { color: var(--text-dim); }
+.search-input:focus-visible { border-color: var(--gold); outline: 2px solid var(--gold); outline-offset: 1px; }
 
 .view-toggle { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
 .view-btn {
-  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 400;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
   letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 0.55rem 0.95rem; border: none; background: transparent;
-  color: var(--text-faint); cursor: pointer; transition: all 0.18s; white-space: nowrap;
+  padding: 0.6rem 1rem; border: none; background: transparent;
+  color: var(--text-dim); cursor: pointer; transition: all 0.18s; white-space: nowrap;
 }
 .view-btn + .view-btn { border-left: 1px solid var(--border); }
-.view-btn.active { background: rgba(201,168,124,0.10); color: var(--gold); }
-.view-btn:hover:not(.active) { color: var(--text-dim); }
+.view-btn.active { background: rgba(201,168,124,0.12); color: var(--gold); }
+.view-btn:hover:not(.active) { color: var(--text); }
+.view-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
 
 .filter-row {
   max-width: 1400px; margin: 0.6rem auto 0;
-  display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
-  font-size: 13px;
+  display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;
+  font-size: 15px;
 }
 .filter-row label {
-  color: var(--text-faint); letter-spacing: 0.06em;
-  text-transform: uppercase; font-size: 11px;
+  color: var(--text-dim); letter-spacing: 0.06em;
+  text-transform: uppercase; font-size: 15px; font-weight: 500;
 }
 .filter-select {
   background: var(--surface); color: var(--text);
   border: 1px solid var(--border); border-radius: 5px;
-  padding: 0.35rem 0.6rem; font-size: 13px; font-family: inherit;
+  padding: 0.4rem 0.7rem; font-size: 15px; font-family: inherit;
   outline: none;
 }
+.filter-select:focus-visible { border-color: var(--gold); outline: 2px solid var(--gold); outline-offset: 1px; }
 .filter-clear {
-  background: transparent; border: 1px solid transparent; color: var(--text-faint);
-  font-size: 12px; cursor: pointer; padding: 0.3rem 0.6rem; letter-spacing: 0.06em; text-transform: uppercase;
+  background: transparent; border: 1px solid transparent; color: var(--text-dim);
+  font-size: 15px; cursor: pointer; padding: 0.35rem 0.7rem; letter-spacing: 0.06em; text-transform: uppercase;
 }
 .filter-clear:hover { color: var(--gold); }
+.filter-clear:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; border-radius: 4px; }
+#result-count { font-size: 15px !important; }
 
 /* ── Common card style ── */
 .figure-card {
@@ -152,13 +161,14 @@ body {
   margin-bottom: 0.15rem; line-height: 1.2;
 }
 .figure-card-tradition {
-  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+  font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--gold); margin-bottom: 0.4rem;
 }
 .figure-card-epithet {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 14px; font-style: italic; color: var(--text-dim); line-height: 1.4;
+  font-size: 16px; font-style: italic; color: var(--text-dim); line-height: 1.5;
 }
+.figure-card:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
 /* ── Loom view (by Field) ── */
 .loom-section { padding: 2rem; max-width: 1400px; margin: 0 auto; }
@@ -177,11 +187,11 @@ body {
   font-size: 1.6rem; font-weight: 400; color: var(--text);
 }
 .field-count {
-  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--text-faint); margin-left: auto;
+  font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-dim); margin-left: auto;
 }
 .field-empty {
-  font-style: italic; color: var(--text-faint); padding: 0.5rem 0; font-size: 14px;
+  font-style: italic; color: var(--text-dim); padding: 0.5rem 0; font-size: 15px;
 }
 .figure-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -218,18 +228,18 @@ body {
   border-radius: 8px; padding: 1.25rem;
 }
 .constellation-help {
-  font-size: 13px; color: var(--text-faint); line-height: 1.6; margin-bottom: 1rem;
+  font-size: 15px; color: var(--text-dim); line-height: 1.6; margin-bottom: 1rem;
 }
 .constellation-selected-name {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.5rem; font-weight: 500; color: var(--gold); margin-bottom: 0.25rem;
 }
 .constellation-selected-meta {
-  font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint);
+  font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
   margin-bottom: 0.75rem;
 }
 .constellation-selected-related {
-  font-size: 13px; color: var(--text-dim); line-height: 1.5;
+  font-size: 15px; color: var(--text-dim); line-height: 1.6;
 }
 .constellation-selected-related strong { color: var(--gold); font-weight: 500; display: block; margin-top: 0.5rem; }
 .constellation-svg circle.node {
@@ -249,32 +259,34 @@ body {
 }
 .constellation-svg text.label {
   font-family: 'Cormorant Garamond', serif; font-style: italic;
-  font-size: 12px; fill: var(--text-dim); pointer-events: none;
+  font-size: 15px; fill: var(--text); pointer-events: none;
   transition: fill 0.18s, font-size 0.18s;
 }
 .constellation-svg text.label.selected, .constellation-svg text.label.related {
-  fill: var(--gold-bright); font-size: 13px;
+  fill: var(--gold-bright); font-size: 16px;
 }
 .constellation-svg text.field-label {
-  font-family: 'Jost', sans-serif; font-size: 10px; font-weight: 400;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  fill: rgba(201,168,124,0.30); pointer-events: none;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  fill: var(--text-faint); pointer-events: none;
   transition: fill 0.18s;
 }
-.constellation-svg text.field-label.active { fill: rgba(201,168,124,0.75); }
+.constellation-svg text.field-label.active { fill: var(--gold); }
 
 /* ── Catalog (list) view ── */
 .catalog-section { padding: 2rem; max-width: 1400px; margin: 0 auto; }
-.catalog-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.catalog-table { width: 100%; border-collapse: collapse; font-size: 15px; }
 .catalog-table thead th {
-  text-align: left; padding: 0.7rem 0.85rem; font-weight: 500;
-  letter-spacing: 0.08em; text-transform: uppercase; font-size: 12px;
-  color: var(--text-faint); border-bottom: 1px solid var(--border);
+  text-align: left; padding: 0.75rem 0.9rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; font-size: 15px;
+  color: var(--text-dim); border-bottom: 1px solid var(--border);
   cursor: pointer; user-select: none; white-space: nowrap;
 }
 .catalog-table thead th:hover { color: var(--gold); }
 .catalog-table thead th.sorted { color: var(--gold); }
-.catalog-table thead th.sorted::after { content: ' ↕'; opacity: 0.5; }
+.catalog-table thead th:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.catalog-table tbody tr:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.catalog-table thead th.sorted::after { content: ' ↕'; opacity: 0.88; }
 .catalog-table thead th.sorted-asc::after { content: ' ↑'; opacity: 1; }
 .catalog-table thead th.sorted-desc::after { content: ' ↓'; opacity: 1; }
 .catalog-table tbody tr {
@@ -292,24 +304,24 @@ body {
 }
 .catalog-figure-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 17px; font-weight: 500; color: var(--text);
+  font-size: 18px; font-weight: 500; color: var(--text);
 }
 .catalog-figure-epithet {
   font-family: 'Cormorant Garamond', serif;
-  font-style: italic; font-size: 13px; color: var(--text-dim);
+  font-style: italic; font-size: 15px; color: var(--text-dim);
 }
 .catalog-tradition {
-  font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold);
+  font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold);
 }
 .catalog-period {
-  font-size: 12px; color: var(--text-faint);
+  font-size: 15px; color: var(--text-dim);
 }
 .catalog-tags {
-  display: flex; flex-wrap: wrap; gap: 4px;
+  display: flex; flex-wrap: wrap; gap: 5px;
 }
 .catalog-tag-chip {
-  font-size: 11px; padding: 1px 6px; border-radius: 9px;
-  background: rgba(201,168,124,0.08); border: 1px solid rgba(201,168,124,0.18);
+  font-size: 15px; padding: 2px 8px; border-radius: 11px;
+  background: rgba(201,168,124,0.10); border: 1px solid rgba(201,168,124,0.22);
   color: var(--gold); white-space: nowrap;
 }
 
@@ -345,14 +357,15 @@ body {
   background: rgba(10,12,31,0.65); overflow: hidden; z-index: 5;
 }
 .profile-mode-btn {
-  font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 400;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
   letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 0.4rem 0.7rem; border: none; background: transparent;
-  color: var(--text-faint); cursor: pointer; transition: all 0.15s;
+  padding: 0.5rem 0.85rem; border: none; background: transparent;
+  color: var(--text-dim); cursor: pointer; transition: all 0.15s;
 }
 .profile-mode-btn + .profile-mode-btn { border-left: 1px solid var(--border); }
-.profile-mode-btn.active { background: rgba(201,168,124,0.10); color: var(--gold); }
-.profile-mode-btn:hover:not(.active) { color: var(--text-dim); }
+.profile-mode-btn.active { background: rgba(201,168,124,0.12); color: var(--gold); }
+.profile-mode-btn:hover:not(.active) { color: var(--text); }
+.profile-mode-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
 
 /* Identity card — image upper-left, meta right */
 .profile-identity {
@@ -375,12 +388,12 @@ body {
   font-size: 3.4rem; color: var(--gold-dim); opacity: 0.35; text-align: center;
 }
 .profile-image-attribution {
-  font-size: 11px; color: var(--text-faint);
-  margin-top: 0.5rem; font-style: italic; line-height: 1.4;
+  font-size: 15px; color: var(--text-dim);
+  margin-top: 0.5rem; font-style: italic; line-height: 1.5;
 }
 .profile-meta-col { display: flex; flex-direction: column; }
 .profile-eyebrow {
-  font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
+  font-size: 15px; letter-spacing: 0.2em; text-transform: uppercase;
   color: var(--gold); margin-bottom: 0.5rem;
 }
 .profile-name {
@@ -403,16 +416,16 @@ body {
 
 .profile-resonance-note {
   font-style: italic; color: var(--text-dim);
-  padding: 0.7rem 0.85rem; border-left: 2px solid var(--gold-dim);
-  background: rgba(201,168,124,0.04); margin-bottom: 1rem;
-  font-size: 14px; line-height: 1.5;
+  padding: 0.7rem 0.85rem; border-left: 2px solid var(--gold);
+  background: rgba(201,168,124,0.06); margin-bottom: 1rem;
+  font-size: 15px; line-height: 1.6;
 }
 .profile-tags-inline {
-  display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto;
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto;
 }
 .profile-tag-chip {
-  font-size: 12px; padding: 3px 9px; border-radius: 12px;
-  background: rgba(201,168,124,0.08); border: 1px solid rgba(201,168,124,0.22);
+  font-size: 15px; padding: 3px 10px; border-radius: 12px;
+  background: rgba(201,168,124,0.10); border: 1px solid rgba(201,168,124,0.28);
   color: var(--gold); cursor: default;
 }
 
@@ -425,12 +438,13 @@ body {
   position: sticky; top: 0; z-index: 4;
 }
 .profile-nav-link {
-  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 0.35rem 0.7rem; border-radius: 4px;
-  color: var(--text-faint); text-decoration: none; cursor: pointer;
+  font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.4rem 0.8rem; border-radius: 4px;
+  color: var(--text-dim); text-decoration: none; cursor: pointer;
   transition: all 0.15s; border: 1px solid transparent;
 }
 .profile-nav-link:hover { color: var(--gold); border-color: var(--border); }
+.profile-nav-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
 
 /* Card grid for sections */
 .profile-cards {
@@ -454,16 +468,16 @@ body {
   gap: 0.75rem; margin-bottom: 0.6rem;
 }
 .profile-card-title {
-  font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--gold);
+  font-size: 15px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--gold); font-weight: 500;
 }
 .profile-card-register {
   font-family: 'Cormorant Garamond', serif;
-  font-style: italic; font-size: 13px; color: var(--text-faint);
+  font-style: italic; font-size: 15px; color: var(--text-dim);
   letter-spacing: normal; text-transform: none;
 }
 .profile-card-meta {
-  font-size: 11px; color: var(--text-faint); letter-spacing: 0.06em;
+  font-size: 15px; color: var(--text-dim); letter-spacing: 0.06em;
 }
 .profile-card-text {
   font-family: 'Cormorant Garamond', serif;
@@ -486,7 +500,7 @@ body {
   font-style: italic; font-size: 16px; color: var(--gold-bright); margin-bottom: 0.4rem;
 }
 .profile-sigil-description {
-  font-size: 13px; color: var(--text-dim); line-height: 1.55;
+  font-size: 15px; color: var(--text-dim); line-height: 1.6;
 }
 
 /* Related figures card */
@@ -494,11 +508,12 @@ body {
   display: flex; flex-wrap: wrap; gap: 8px;
 }
 .profile-related-link {
-  font-size: 13px; padding: 4px 10px; border-radius: 14px;
-  border: 1px solid var(--border); color: var(--text-dim);
+  font-size: 15px; padding: 5px 12px; border-radius: 14px;
+  border: 1px solid var(--border); color: var(--text);
   text-decoration: none; cursor: pointer; transition: all 0.15s;
 }
 .profile-related-link:hover { color: var(--gold); border-color: var(--gold-dim); }
+.profile-related-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
 
 /* Long-form (single-scroll) layout */
 .profile-modal.long-form .profile-cards { display: block; padding: 1.5rem 1.75rem 2rem; }
@@ -514,12 +529,12 @@ body {
 .empty-state {
   text-align: center; padding: 4rem 2rem;
   font-family: 'Cormorant Garamond', serif; font-style: italic;
-  font-size: 1.2rem; color: var(--text-faint);
+  font-size: 1.2rem; color: var(--text-dim);
 }
 .loading-state {
   text-align: center; padding: 6rem 2rem;
   font-family: 'Cormorant Garamond', serif; font-style: italic;
-  color: var(--text-dim);
+  font-size: 16px; color: var(--text-dim);
 }
 .loading-state::before {
   content: '✦'; display: block; font-size: 2rem; color: var(--gold);
@@ -527,7 +542,7 @@ body {
 }
 @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
-footer { text-align: center; padding: 3rem 2rem; color: var(--text-faint); font-size: 12px; letter-spacing: 0.1em; }
+footer { text-align: center; padding: 3rem 2rem; color: var(--text-dim); font-size: 15px; letter-spacing: 0.1em; }
 
 /* ── Print stylesheet ─────────────────────────────────
    White background, ink type, gold accents. Compacted to fit a typical profile in ~3 pages.
@@ -716,7 +731,7 @@ footer { text-align: center; padding: 3rem 2rem; color: var(--text-faint); font-
     <label>Frequency</label>
     <select class="filter-select" id="filter-frequency"><option value="">all</option></select>
     <button class="filter-clear" id="filter-clear">Clear filters</button>
-    <span style="margin-left:auto;color:var(--text-faint);font-size:12px" id="result-count"></span>
+    <span style="margin-left:auto;color:var(--text-dim);font-size:15px" id="result-count"></span>
   </div>
 </div>
 
@@ -848,7 +863,7 @@ async function init() {
       if (f) openProfile(f.id);
     }
   } catch (err) {
-    document.getElementById('content').innerHTML = `<div class="empty-state">The tapestry could not be retrieved.<br><span style="font-size:0.95rem;opacity:0.7">${esc(err.message)}</span></div>`;
+    document.getElementById('content').innerHTML = `<div class="empty-state">The tapestry could not be retrieved.<br><span style="font-size:15px;color:var(--text-dim)">${esc(err.message)}</span></div>`;
   }
 }
 
@@ -1174,7 +1189,7 @@ function renderConstellation(visible, content) {
     const relatedList = [...relatedSet].map(idx => {
       const p = positions[idx];
       const sharedTags = edges.find(e => (e.a === i && e.b === idx) || (e.b === i && e.a === idx))?.shared || [];
-      return `<div style="margin-top:0.4rem"><a class="profile-related-link" onclick="openProfile('${p.figure.id}')" style="display:inline-block">${esc(p.figure.name)}</a> <span style="color:var(--text-faint);font-size:11px;letter-spacing:0.06em">${esc(sharedTags.join(' · '))}</span></div>`;
+      return `<div style="margin-top:0.5rem"><a class="profile-related-link" onclick="openProfile('${p.figure.id}')" style="display:inline-block">${esc(p.figure.name)}</a> <div style="color:var(--text-dim);font-size:15px;letter-spacing:0.04em;margin-top:0.2rem">${esc(sharedTags.join(' · '))}</div></div>`;
     }).join('');
     infoContent.innerHTML = `
       <div class="constellation-selected-name">${esc(target.figure.name)}</div>
@@ -1228,7 +1243,7 @@ function renderCatalog(visible, content) {
       <td><span class="catalog-tradition">${esc(f.tradition || '')}</span></td>
       <td><span class="catalog-period">${esc(f.emergence_period || '')}</span></td>
       <td><span class="catalog-period">${f.primaryFields.map(esc).join(' · ')}</span></td>
-      <td><div class="catalog-tags">${f.frequencies.slice(0,5).map(t => `<span class="catalog-tag-chip">${esc(t)}</span>`).join('')}${f.frequencies.length>5?`<span class="catalog-tag-chip" style="opacity:0.6">+${f.frequencies.length-5}</span>`:''}</div></td>
+      <td><div class="catalog-tags">${f.frequencies.slice(0,5).map(t => `<span class="catalog-tag-chip">${esc(t)}</span>`).join('')}${f.frequencies.length>5?`<span class="catalog-tag-chip">+${f.frequencies.length-5}</span>`:''}</div></td>
     </tr>`).join('');
   content.innerHTML = `<div class="catalog-section">
     <table class="catalog-table">
@@ -1339,7 +1354,7 @@ function openProfile(id) {
   if (f.sigil_svg || f.sigil_name || f.sigil_description) cards.push(profileCard({
     id: 'sec-sigil', title: 'The Sigil', fullWidth: true,
     html: `<div class="profile-sigil-card">
-      <div class="profile-sigil-svg-box">${f.sigil_svg || '<span style="color:var(--text-faint);font-size:13px;font-style:italic">no sigil</span>'}</div>
+      <div class="profile-sigil-svg-box">${f.sigil_svg || '<span style="color:var(--text-dim);font-size:15px;font-style:italic">no sigil</span>'}</div>
       <div class="profile-sigil-meta-text">
         ${f.sigil_name ? `<div class="profile-sigil-name">${esc(f.sigil_name)}</div>` : ''}
         ${f.sigil_description ? `<div class="profile-sigil-description">${esc(f.sigil_description)}</div>` : ''}
@@ -1348,7 +1363,7 @@ function openProfile(id) {
   }));
   if (related.length) cards.push(profileCard({
     id: 'sec-related', title: 'Signatures', fullWidth: true,
-    html: `<div class="profile-related">${related.map(r => `<a class="profile-related-link" onclick="openProfile('${r.id}')" title="Shared: ${esc(r.shared.join(' · '))}">${esc(r.name)} <span style="opacity:0.55;font-size:11px">${r.shared.length}</span></a>`).join('')}</div>`
+    html: `<div class="profile-related">${related.map(r => `<a class="profile-related-link" onclick="openProfile('${r.id}')" title="Shared: ${esc(r.shared.join(' · '))}">${esc(r.name)}</a>`).join('')}</div>`
   }));
 
   const cardsBlock = `<div class="profile-cards">${cards.join('')}</div>`;
