@@ -1065,6 +1065,25 @@ body::before {
 
       </div>
 
+      <!-- ══ ADMIN: Tapestry Manager ══ -->
+      <div class="panel" id="panel-tapestry">
+        <div class="panel-header">
+          <div class="eyebrow">Administration</div>
+          <div class="panel-title">Mythic Tapestry</div>
+          <p class="panel-sub">Archetypes — mythic and historical figures the practice can name as <em>chosen resonance</em> for clients. Distinct from the blood-lineage Ancestral Weaving. Tapestry profiles carry the same four registers (Mythic · Conceptual · Somatic · Unreceived) and frequency tags, and feed the Convergence as a parallel input alongside the lineage.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:300px 1fr;gap:1.5rem">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+              <div class="eyebrow">Archetypes</div>
+              <button class="btn btn-gold btn-sm" onclick="newTapestryArchetype()">+ New</button>
+            </div>
+            <div id="tapestry-list"><div class="loading"><span class="loading-glyph">✦</span>Loading…</div></div>
+          </div>
+          <div id="tapestry-editor"><div class="empty" style="padding:3rem;text-align:center;color:var(--text-faint);font-style:italic">Select an archetype to edit, or click + New to create one.</div></div>
+        </div>
+      </div>
+
     </main>
   </div>
 </div>
@@ -1295,6 +1314,7 @@ function buildNav() {
     { id: 'panel-weaving',            label: 'Weaving Builder' },
     { id: 'panel-convergence-admin',  label: 'Convergences' },
     { id: 'panel-ancestor-research',  label: 'Ancestor Research' },
+    { id: 'panel-tapestry',           label: 'Tapestry' },
   ];
   const clientTabs = [
     { id: 'panel-my-weaving',     label: 'My Weaving' },
@@ -1315,6 +1335,7 @@ function buildNav() {
       if (t.id === 'panel-weaving') populateWeavingClientSelect();
       if (t.id === 'panel-clients') renderClientList();
       if (t.id === 'panel-ancestor-research') initAncestorResearch();
+      if (t.id === 'panel-tapestry') loadTapestryManager();
     };
     nav.appendChild(btn);
   });
@@ -1328,6 +1349,7 @@ const ADMIN_HASH_MAP = {
   '#weaving':             'panel-weaving',
   '#convergences':        'panel-convergence-admin',
   '#ancestor-research':   'panel-ancestor-research',
+  '#tapestry':            'panel-tapestry',
 };
 const CLIENT_HASH_MAP = {
   '#my-weaving':    'panel-my-weaving',
@@ -1445,13 +1467,15 @@ async function loadClientDetail() {
   if (!id) return;
   const wrap = document.getElementById('client-detail-content');
   try {
-    const [clientArr, birthArr, hdArr, gkArr, ancestors, convs] = await Promise.all([
+    const [clientArr, birthArr, hdArr, gkArr, ancestors, convs, resonance, allTapestry] = await Promise.all([
       rest(`clients?id=eq.${id}&limit=1`),
       rest(`chart_birth_data?client_id=eq.${id}&limit=1`),
       rest(`chart_human_design?client_id=eq.${id}&limit=1`),
       rest(`chart_gene_keys?client_id=eq.${id}&limit=1`),
       rest(`client_ancestors?client_id=eq.${id}&select=id,name,status,sort_year,dates,relation_to_client&order=sort_year.asc`),
-      rest(`convergences?client_id=eq.${id}&order=created_at.desc&select=id,title,status,created_at`)
+      rest(`convergences?client_id=eq.${id}&order=created_at.desc&select=id,title,status,created_at`),
+      rest(`client_tapestry_archetypes?client_id=eq.${id}&select=id,resonance_note,strength,tapestry_archetypes(id,name,tradition,epithet)`).catch(() => []),
+      rest(`tapestry_archetypes?select=id,name,tradition&order=name`).catch(() => [])
     ]);
     const client = clientArr[0];
     if (!client) { wrap.innerHTML = '<div class="empty">Client not found.</div>'; return; }
@@ -1469,7 +1493,7 @@ async function loadClientDetail() {
       fieldById = Object.fromEntries(fs.map(f => [f.id, f]));
     }
 
-    currentDetailData = { client, birth, hd, gk, ancestors, convs, refByNum, fieldById };
+    currentDetailData = { client, birth, hd, gk, ancestors, convs, refByNum, fieldById, resonance: resonance || [], allTapestry: allTapestry || [] };
 
     document.getElementById('cd-title').textContent = client.name || '—';
     document.getElementById('cd-subtitle').textContent =
@@ -1501,6 +1525,7 @@ function renderClientDetail(d) {
       ${cdChartSummaryCard(d)}
     </div>
     ${cdWeavingCard(d)}
+    ${cdResonanceCard(d)}
     ${cdConvergencesCard(d)}
     ${cdAdminNotesCard(d)}
   `;
@@ -1704,6 +1729,86 @@ function cdWeavingCard(d) {
       <div class="cd-list">${rows}</div>
       ${note}
     </div>`;
+}
+
+function cdResonanceCard(d) {
+  const r = d.resonance || [];
+  const all = d.allTapestry || [];
+  const usedIds = new Set(r.map(x => x.tapestry_archetypes?.id).filter(Boolean));
+  const dropdownOptions = all
+    .filter(t => !usedIds.has(t.id))
+    .map(t => `<option value="${cdEsc(t.id)}">${cdEsc(t.name)}${t.tradition ? ' · ' + cdEsc(t.tradition) : ''}</option>`)
+    .join('');
+
+  const rows = r.length ? r.map(x => {
+    const t = x.tapestry_archetypes || {};
+    const meta = [t.tradition, t.epithet].filter(Boolean).map(cdEsc).join(' · ');
+    return `<div class="cd-list-row" style="align-items:flex-start">
+      <div style="flex:1">
+        <div class="name">${cdEsc(t.name || '—')}</div>
+        ${meta ? `<div class="meta">${meta}</div>` : ''}
+        ${x.resonance_note ? `<div style="font-size:14px;color:var(--text-dim);font-style:italic;margin-top:0.4rem;padding:0.4rem 0.65rem;border-left:2px solid rgba(201,168,124,0.25);background:rgba(201,168,124,0.03)">${cdEsc(x.resonance_note)}</div>` : ''}
+      </div>
+      <span class="status-pill">${cdEsc(x.strength || 'noted')}</span>
+      <button class="btn btn-outline btn-sm" onclick="cdRemoveResonance('${cdEsc(x.id)}')" title="Remove this resonance" style="color:var(--red);border-color:rgba(192,112,96,0.3);margin-left:0.5rem">Remove</button>
+    </div>`;
+  }).join('') : '<div class="cd-value muted" style="font-style:italic">No mythic resonance assigned yet.</div>';
+
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title">Mythic Resonance · ${r.length} figure${r.length===1?'':'s'}</h3>
+      <p style="font-size:14px;color:var(--text-faint);margin-bottom:1rem;line-height:1.5">Chosen archetypal resonance — figures the descendant has named as conscious recognition. Distinct from blood lineage; feeds the Convergence as a parallel input.</p>
+      <div class="cd-list" style="margin-bottom:1rem">${rows}</div>
+      ${all.length === 0
+        ? `<div style="font-size:14px;color:var(--text-faint);font-style:italic">No tapestry archetypes have been authored yet. Create them in the <a href="#tapestry" onclick="showPanel('panel-tapestry');loadTapestryManager();return false;" style="color:var(--gold);text-decoration:underline">Tapestry</a> panel.</div>`
+        : `<div style="display:grid;grid-template-columns:1fr 140px 110px;gap:0.5rem;margin-bottom:0.5rem">
+            <select class="form-select" id="cd-res-archetype">
+              <option value="">— Add a resonance —</option>
+              ${dropdownOptions}
+            </select>
+            <select class="form-select" id="cd-res-strength">
+              <option value="dominant">Dominant</option>
+              <option value="emerging">Emerging</option>
+              <option value="noted" selected>Noted</option>
+            </select>
+            <button class="btn btn-gold btn-sm" onclick="cdAddResonance()">+ Assign</button>
+          </div>
+          <textarea class="form-textarea" id="cd-res-note" rows="2" placeholder="Optional resonance note — the descendant's words about why this figure resonates"></textarea>
+          <div id="cd-res-msg" style="margin-top:0.4rem;font-size:14px"></div>`}
+    </div>`;
+}
+
+async function cdAddResonance() {
+  const archId = document.getElementById('cd-res-archetype').value;
+  const strength = document.getElementById('cd-res-strength').value;
+  const note = document.getElementById('cd-res-note').value.trim() || null;
+  const msgEl = document.getElementById('cd-res-msg');
+  if (!archId) { msgEl.innerHTML = '<span style="color:var(--red)">Pick an archetype.</span>'; return; }
+  if (!currentDetailClient) return;
+  try {
+    const result = await restPost('client_tapestry_archetypes', {
+      client_id: currentDetailClient,
+      tapestry_archetype_id: archId,
+      strength,
+      resonance_note: note
+    });
+    if (!Array.isArray(result) || !result[0]?.id) {
+      throw new Error(result?.message || result?.details || 'Save failed');
+    }
+    loadClientDetail();
+  } catch (err) {
+    msgEl.innerHTML = `<span style="color:var(--red)">${err.message}</span>`;
+  }
+}
+
+async function cdRemoveResonance(id) {
+  if (!confirm('Remove this mythic resonance from the client?')) return;
+  try {
+    await restDelete(`client_tapestry_archetypes?id=eq.${id}`);
+    loadClientDetail();
+  } catch (err) {
+    alert('Remove failed: ' + err.message);
+  }
 }
 
 async function cdRemoveClientAncestor(caId) {
@@ -2060,6 +2165,233 @@ async function removeClientAncestor(clientAncestorId, clientId) {
   await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${clientAncestorId}`);
   await restDelete(`client_ancestors?id=eq.${clientAncestorId}`);
   loadClientWeaving();
+}
+
+// ════════════════════════════════════════════════════
+// ADMIN — TAPESTRY MANAGER
+// ════════════════════════════════════════════════════
+
+let tapestryArchetypes  = [];
+let tapestryEditingId   = null;
+let tapestryEditorChips = []; // [{ recordId, tagId, tagName, tagType, strength }] for current archetype
+
+async function loadTapestryManager() {
+  if (!allFrequencyTags.length) {
+    const tags = await rest('frequency_tags?select=id,slug,name,type&order=name');
+    allFrequencyTags = Array.isArray(tags) ? tags : [];
+  }
+  const list = await rest('tapestry_archetypes?select=*&order=name');
+  tapestryArchetypes = Array.isArray(list) ? list : [];
+  renderTapestryList();
+}
+
+function renderTapestryList() {
+  const el = document.getElementById('tapestry-list');
+  if (!el) return;
+  if (!tapestryArchetypes.length) {
+    el.innerHTML = '<div style="font-size:14px;color:var(--text-faint);font-style:italic;padding:0.75rem 0">No archetypes yet.</div>';
+    return;
+  }
+  el.innerHTML = tapestryArchetypes.map(t => `
+    <div onclick="editTapestryArchetype('${t.id}')" style="cursor:pointer;padding:0.65rem 0.875rem;border:1px solid ${t.id === tapestryEditingId ? 'var(--gold-dim)' : 'var(--border)'};border-radius:6px;margin-bottom:0.4rem;background:${t.id === tapestryEditingId ? 'var(--accent)' : 'transparent'};transition:all 0.15s">
+      <div style="font-size:15px;font-weight:500;color:var(--text)">${esc(t.name)}</div>
+      ${t.tradition ? `<div style="font-size:13px;color:var(--text-faint);margin-top:0.15rem">${esc(t.tradition)}</div>` : ''}
+      ${t.epithet ? `<div style="font-size:13px;color:var(--gold);font-style:italic;margin-top:0.15rem">${esc(t.epithet)}</div>` : ''}
+    </div>`).join('');
+}
+
+function newTapestryArchetype() {
+  tapestryEditingId = null;
+  tapestryEditorChips = [];
+  renderTapestryEditor({ name: '', tradition: '', epithet: '', description: '', register_mythic: '', register_conceptual: '', register_somatic: '', register_unreceived: '' }, /*isNew*/true);
+  renderTapestryList();
+}
+
+async function editTapestryArchetype(id) {
+  const t = tapestryArchetypes.find(x => x.id === id);
+  if (!t) return;
+  tapestryEditingId = id;
+  // Load frequency tag assignments
+  const freqRows = await rest(`tapestry_archetype_frequencies?tapestry_archetype_id=eq.${id}&select=id,strength,frequency_tag_id,frequency_tags(id,name,type)`).catch(() => []);
+  tapestryEditorChips = (Array.isArray(freqRows) ? freqRows : []).map(r => ({
+    recordId: r.id,
+    tagId: r.frequency_tag_id,
+    tagName: r.frequency_tags?.name || '',
+    tagType: r.frequency_tags?.type || '',
+    strength: r.strength || 'noted'
+  }));
+  renderTapestryList();
+  renderTapestryEditor(t, false);
+}
+
+function renderTapestryEditor(t, isNew) {
+  const el = document.getElementById('tapestry-editor');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="editor-section-title">${isNew ? 'New archetype' : 'Edit archetype'}</div>
+      <div class="editor-grid-2" style="margin-bottom:1rem">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Name <span style="color:var(--red)">*</span></label>
+          <input class="form-input" id="tap-name" value="${esc(t.name)}">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Tradition <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">e.g. Sumerian, Greek, Celtic, Yoruba</span></label>
+          <input class="form-input" id="tap-tradition" value="${esc(t.tradition)}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Epithet <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">3–6 word evocative descriptor naming the frequency</span></label>
+        <input class="form-input" id="tap-epithet" value="${esc(t.epithet)}">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Description <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">a paragraph that introduces this figure as archetypal operation</span></label>
+        <textarea class="form-textarea" id="tap-description" rows="4">${esc(t.description)}</textarea>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(109,216,178,0.15)">
+      <div class="editor-section-title">Four Registers</div>
+      <p style="font-size:15px;color:var(--text-faint);margin-bottom:1.25rem;line-height:1.6">Each register holds the figure's signature in that voice. Same length spec as ancestor layers (Mythic 200–280 · Conceptual 150–200 · Somatic 150–220 · Unreceived 150–220).</p>
+      <div class="form-group">
+        <label class="form-label">Mythic Register <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">archetypal pattern, signal, through-line</span></label>
+        <textarea class="form-textarea" id="tap-r-mythic" rows="5">${esc(t.register_mythic)}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Conceptual Register <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">structural mechanism, framework</span></label>
+        <textarea class="form-textarea" id="tap-r-conceptual" rows="5">${esc(t.register_conceptual)}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Somatic Register <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">the body's direct knowing</span></label>
+        <textarea class="form-textarea" id="tap-r-somatic" rows="5">${esc(t.register_somatic)}</textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Unreceived Register <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">the unnamed pattern carried forward</span></label>
+        <textarea class="form-textarea" id="tap-r-unreceived" rows="5">${esc(t.register_unreceived)}</textarea>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="editor-section-title">Frequency Tags</div>
+      <div class="chip-field" id="tap-chip-display"></div>
+      <div class="chip-add-row">
+        <select class="chip-add-select" id="tap-chip-select">
+          <option value="">— Add a frequency tag —</option>
+          ${allFrequencyTags.map(tag => `<option value="${tag.id}" data-name="${esc(tag.name)}" data-type="${tag.type}">${tag.name} (${tag.type})</option>`).join('')}
+        </select>
+        <select class="chip-strength-select" id="tap-chip-strength">
+          <option value="noted">Noted</option>
+          <option value="emerging">Emerging</option>
+          <option value="dominant">Dominant</option>
+        </select>
+        <button class="btn-chip-add" onclick="addTapestryChip()">+ Add</button>
+      </div>
+    </div>
+
+    <div class="editor-save-bar">
+      <div id="tap-save-msg" style="font-size:15px"></div>
+      ${!isNew ? `<button class="btn btn-outline" onclick="deleteTapestryArchetype()" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Delete</button>` : ''}
+      <button class="btn btn-gold" onclick="saveTapestryArchetype()">${isNew ? 'Create archetype →' : 'Save changes →'}</button>
+    </div>
+  `;
+  renderTapestryChips();
+}
+
+function renderTapestryChips() {
+  const el = document.getElementById('tap-chip-display');
+  if (!el) return;
+  if (!tapestryEditorChips.length) {
+    el.innerHTML = '<span style="font-size:15px;color:var(--text-faint);font-style:italic">No tags assigned</span>';
+    return;
+  }
+  el.innerHTML = tapestryEditorChips.map((c, i) => `
+    <span class="chip">
+      ${esc(c.tagName)}
+      <span class="chip-strength-label" onclick="cycleTapestryChipStrength(${i})" title="Click to change strength">${c.strength}</span>
+      <button class="chip-remove" onclick="removeTapestryChip(${i})" title="Remove">×</button>
+    </span>`).join('');
+}
+function addTapestryChip() {
+  const sel = document.getElementById('tap-chip-select');
+  const tagId = sel.value;
+  if (!tagId) return;
+  if (tapestryEditorChips.find(c => c.tagId === tagId)) return;
+  const opt = sel.options[sel.selectedIndex];
+  tapestryEditorChips.push({
+    tagId,
+    tagName: opt.dataset.name || opt.text,
+    tagType: opt.dataset.type || '',
+    strength: document.getElementById('tap-chip-strength').value
+  });
+  sel.value = '';
+  renderTapestryChips();
+}
+function removeTapestryChip(i) { tapestryEditorChips.splice(i, 1); renderTapestryChips(); }
+function cycleTapestryChipStrength(i) {
+  const order = ['noted','emerging','dominant'];
+  tapestryEditorChips[i].strength = order[(order.indexOf(tapestryEditorChips[i].strength) + 1) % order.length];
+  renderTapestryChips();
+}
+
+async function saveTapestryArchetype() {
+  const name = document.getElementById('tap-name').value.trim();
+  const msgEl = document.getElementById('tap-save-msg');
+  if (!name) { msgEl.innerHTML = '<span style="color:var(--red)">Name is required.</span>'; return; }
+  const payload = {
+    name,
+    tradition:           document.getElementById('tap-tradition').value.trim() || null,
+    epithet:             document.getElementById('tap-epithet').value.trim() || null,
+    description:         document.getElementById('tap-description').value.trim() || null,
+    register_mythic:     document.getElementById('tap-r-mythic').value.trim() || null,
+    register_conceptual: document.getElementById('tap-r-conceptual').value.trim() || null,
+    register_somatic:    document.getElementById('tap-r-somatic').value.trim() || null,
+    register_unreceived: document.getElementById('tap-r-unreceived').value.trim() || null,
+  };
+  try {
+    let id;
+    if (tapestryEditingId) {
+      const ok = await restPatch('tapestry_archetypes', tapestryEditingId, payload);
+      if (!ok) throw new Error('Save failed');
+      id = tapestryEditingId;
+    } else {
+      const result = await restPost('tapestry_archetypes', payload);
+      if (!Array.isArray(result) || !result[0]?.id) throw new Error(result?.message || 'Save failed');
+      id = result[0].id;
+      tapestryEditingId = id;
+    }
+    // Resync frequency tags
+    await restDelete(`tapestry_archetype_frequencies?tapestry_archetype_id=eq.${id}`);
+    for (const chip of tapestryEditorChips) {
+      await restPost('tapestry_archetype_frequencies', {
+        tapestry_archetype_id: id,
+        frequency_tag_id: chip.tagId,
+        strength: chip.strength
+      });
+    }
+    msgEl.innerHTML = '<span style="color:var(--teal)">✓ Saved.</span>';
+    setTimeout(() => { msgEl.innerHTML = ''; }, 2500);
+    await loadTapestryManager();
+    editTapestryArchetype(id);
+  } catch (err) {
+    msgEl.innerHTML = `<span style="color:var(--red)">${err.message}</span>`;
+  }
+}
+
+async function deleteTapestryArchetype() {
+  if (!tapestryEditingId) return;
+  const t = tapestryArchetypes.find(x => x.id === tapestryEditingId);
+  if (!confirm(`Delete "${t?.name || 'this archetype'}" and all its frequency tags and client assignments?\n\nThis cannot be undone.`)) return;
+  try {
+    await restDelete(`tapestry_archetype_frequencies?tapestry_archetype_id=eq.${tapestryEditingId}`);
+    await restDelete(`client_tapestry_archetypes?tapestry_archetype_id=eq.${tapestryEditingId}`);
+    await restDelete(`tapestry_archetypes?id=eq.${tapestryEditingId}`);
+    tapestryEditingId = null;
+    tapestryEditorChips = [];
+    await loadTapestryManager();
+    document.getElementById('tapestry-editor').innerHTML = '<div class="empty" style="padding:3rem;text-align:center;color:var(--text-faint);font-style:italic">Select an archetype to edit, or click + New to create one.</div>';
+  } catch (err) {
+    alert('Delete failed: ' + err.message);
+  }
 }
 
 // ════════════════════════════════════════════════════
