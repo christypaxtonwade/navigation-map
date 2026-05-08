@@ -744,6 +744,7 @@ body::before {
           <a class="app-site-link" href="fieldguide.html" target="_blank" rel="noopener">Fieldguide ↗</a>
           <a class="app-site-link" id="site-link-weaving" href="ancestral-weaving.html" target="_blank" rel="noopener">Weaving ↗</a>
           <a class="app-site-link" id="site-link-catalog" href="ancestral-catalog.html" target="_blank" rel="noopener">Catalog ↗</a>
+          <a class="app-site-link" id="site-link-tapestry" href="tapestry.html" target="_blank" rel="noopener">Tapestry ↗</a>
           <a class="app-site-link" id="site-link-convergence" href="convergence.html" target="_blank" rel="noopener" style="display:none">Convergence ↗</a>
         </nav>
       </div>
@@ -1431,14 +1432,17 @@ function activeClientId() {
 
 function updateSiteLinksForActiveClient() {
   const cid = activeClientId();
-  const weavingEl = document.getElementById('site-link-weaving');
-  const catalogEl = document.getElementById('site-link-catalog');
-  const convEl    = document.getElementById('site-link-convergence');
+  const weavingEl  = document.getElementById('site-link-weaving');
+  const catalogEl  = document.getElementById('site-link-catalog');
+  const tapestryEl = document.getElementById('site-link-tapestry');
+  const convEl     = document.getElementById('site-link-convergence');
   const w = cid ? `ancestral-weaving.html?client_id=${encodeURIComponent(cid)}` : 'ancestral-weaving.html';
   const c = cid ? `ancestral-catalog.html?client_id=${encodeURIComponent(cid)}` : 'ancestral-catalog.html';
+  const t = cid ? `tapestry.html?client_id=${encodeURIComponent(cid)}` : 'tapestry.html';
   const v = cid ? `convergence.html?client_id=${encodeURIComponent(cid)}` : 'convergence.html';
-  if (weavingEl) weavingEl.setAttribute('href', w);
-  if (catalogEl) catalogEl.setAttribute('href', c);
+  if (weavingEl)  weavingEl.setAttribute('href', w);
+  if (catalogEl)  catalogEl.setAttribute('href', c);
+  if (tapestryEl) tapestryEl.setAttribute('href', t);
   if (convEl) {
     convEl.setAttribute('href', v);
     // Show the Convergence header link only when there's an active client (admin canonical view doesn't need it inline)
@@ -1540,6 +1544,7 @@ function cdQuickActions(d) {
         <a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${cid}" target="_blank">Open Full Chart ↗</a>
         <a class="btn btn-outline btn-sm" href="ancestral-weaving.html?client_id=${cid}" target="_blank">Open Their Weaving ↗</a>
         <a class="btn btn-outline btn-sm" href="ancestral-catalog.html?client_id=${cid}" target="_blank">Open Their Catalog ↗</a>
+        <a class="btn btn-outline btn-sm" href="tapestry.html?client_id=${cid}" target="_blank">Open Their Tapestry ↗</a>
         <a class="btn btn-outline btn-sm" href="convergence.html?client_id=${cid}" target="_blank">Open Their Convergence ↗</a>
       </div>
     </div>`;
@@ -2325,6 +2330,35 @@ function renderTapestryEditor(t, isNew) {
       </div>
     </div>
 
+    <!-- Image & Period -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="editor-section-title">Image &amp; Period</div>
+      <p style="font-size:14px;color:var(--text-faint);margin-bottom:1rem;line-height:1.5">Public-domain artwork as the figure's primary image. AI provides research leads (titles, collections, where to look); you source the URL and confirm attribution.</p>
+      <div class="editor-grid-2" style="margin-bottom:1rem">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Image URL <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">Wikimedia Commons direct link or Supabase Storage URL</span></label>
+          <input class="form-input" id="tap-image-url" value="${esc(t.image_url)}">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Emergence Period <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">when the cult or earliest text emerged</span></label>
+          <select class="form-select" id="tap-emergence-period">
+            ${['','pre-dynastic','bronze-age','iron-age','classical','late-antique','early-medieval','high-medieval','early-modern','modern','contemporary-revival']
+              .map(p => `<option value="${p}" ${p === (t.emergence_period || '') ? 'selected' : ''}>${p || '— select —'}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Attribution <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">work title, museum/collection, photographer/source, license — always shown beneath the image</span></label>
+        <textarea class="form-textarea" id="tap-image-attribution" rows="2">${esc(t.image_attribution)}</textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Alt text <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">accessibility — short visual description for screen readers</span></label>
+        <input class="form-input" id="tap-image-alt" value="${esc(t.image_alt)}">
+      </div>
+      <div id="tap-image-suggestions" style="margin-top:1rem"></div>
+      ${t.image_url ? `<div style="margin-top:1rem;padding:0.6rem;border:1px solid var(--border);border-radius:6px;text-align:center"><img src="${esc(t.image_url)}" alt="${esc(t.image_alt)}" style="max-width:100%;max-height:300px;display:inline-block"></div>` : ''}
+    </div>
+
     <!-- Sigil -->
     <div class="card" style="margin-bottom:1.5rem">
       <div class="editor-section-title">Sigil</div>
@@ -2410,6 +2444,45 @@ function cycleTapestryChipStrength(i) {
   renderTapestryChips();
 }
 
+// Image-suggestion rendering for the Tapestry editor
+let lastImageSuggestions = [];
+function renderImageSuggestions(suggestions) {
+  lastImageSuggestions = Array.isArray(suggestions) ? suggestions : [];
+  const el = document.getElementById('tap-image-suggestions');
+  if (!el) return;
+  if (!lastImageSuggestions.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem">AI image leads — research these, then paste the URL above</div>
+    ${lastImageSuggestions.map((s, i) => `
+      <div style="border:1px solid var(--border);border-radius:6px;padding:0.65rem 0.875rem;margin-bottom:0.5rem;background:rgba(201,168,124,0.03)">
+        <div style="display:flex;justify-content:space-between;gap:0.5rem;align-items:flex-start;margin-bottom:0.4rem">
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:500;color:var(--text)">${esc(s.title || 'Untitled work')}</div>
+            <div style="font-size:13px;color:var(--text-faint);margin-top:0.15rem">${[s.period, s.collection].filter(Boolean).map(esc).join(' · ')}</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="useImageSuggestion(${i})" title="Pre-fill the attribution and alt fields with this lead. You still need to source and paste the URL.">Use as lead</button>
+        </div>
+        ${s.where_to_find ? `<div style="font-size:13px;color:var(--text-dim);margin-bottom:0.3rem"><strong style="font-weight:500;color:var(--text-faint)">Where to find:</strong> ${esc(s.where_to_find)}</div>` : ''}
+        ${s.why ? `<div style="font-size:13px;color:var(--text-dim);font-style:italic;line-height:1.5">${esc(s.why)}</div>` : ''}
+      </div>`).join('')}
+  `;
+}
+
+function useImageSuggestion(i) {
+  const s = lastImageSuggestions[i];
+  if (!s) return;
+  const attribParts = [s.title, s.period, s.collection, s.where_to_find].filter(Boolean);
+  const attribution = attribParts.join(' · ');
+  const altText = s.title ? `${s.title}${s.period ? ' (' + s.period + ')' : ''}` : '';
+  const attribEl = document.getElementById('tap-image-attribution');
+  const altEl    = document.getElementById('tap-image-alt');
+  if (attribEl && !attribEl.value.trim()) attribEl.value = attribution;
+  if (altEl    && !altEl.value.trim())    altEl.value = altText;
+  // Visual confirmation
+  const btn = event?.target;
+  if (btn) { btn.textContent = '✓ Filled — paste URL above'; btn.disabled = true; }
+}
+
 async function draftTapestryWithAI() {
   const name      = document.getElementById('tap-ai-name').value.trim();
   const tradition = document.getElementById('tap-ai-tradition').value.trim();
@@ -2466,9 +2539,13 @@ async function draftTapestryWithAI() {
     set('tap-sigil-name',        data.sigil_name);
     set('tap-sigil-description', data.sigil_description);
     set('tap-sigil-svg',         data.sigil_svg);
+    set('tap-emergence-period',  data.emergence_period);
 
     // Render the SVG preview
     updateSigilPreview(data.sigil_svg || '', 'tap-sigil-preview');
+
+    // Render image suggestions as cards Christy can click to set as primary
+    renderImageSuggestions(Array.isArray(data.image_suggestions) ? data.image_suggestions : []);
 
     // Match AI-suggested frequency tags to known tags and render chips
     tapestryEditorChips = matchFrequencyTags(data.frequency_tags || []).map(c => ({ ...c, recordId: null }));
@@ -2508,6 +2585,10 @@ async function saveTapestryArchetype() {
     sigil_name:        document.getElementById('tap-sigil-name').value.trim() || null,
     sigil_description: document.getElementById('tap-sigil-description').value.trim() || null,
     sigil_svg:         document.getElementById('tap-sigil-svg').value.trim() || null,
+    image_url:         document.getElementById('tap-image-url')?.value.trim() || null,
+    image_attribution: document.getElementById('tap-image-attribution')?.value.trim() || null,
+    image_alt:         document.getElementById('tap-image-alt')?.value.trim() || null,
+    emergence_period:  document.getElementById('tap-emergence-period')?.value || null,
   };
   try {
     let id;
