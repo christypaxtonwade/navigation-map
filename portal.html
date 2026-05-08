@@ -871,6 +871,7 @@ body::before {
         <!-- Mode toggle -->
         <div class="mode-toggle">
           <button class="mode-btn active" id="mode-btn-generate" onclick="showGenerateMode()">✦ Generate New</button>
+          <button class="mode-btn" id="mode-btn-augment" onclick="showAugmentMode()">⊕ Augment Existing</button>
           <button class="mode-btn" id="mode-btn-edit" onclick="showEditMode()">✎ Edit Existing</button>
         </div>
 
@@ -918,6 +919,60 @@ body::before {
           </div>
 
           <div id="ar-review" style="display:none"></div>
+        </div>
+
+        <!-- ═══ AUGMENT MODE ═══ -->
+        <div id="ar-augment-mode" style="display:none">
+          <p class="panel-sub" style="margin-bottom:1.5rem">Pick an existing ancestor and paste new findings — census record, will, ship manifest, oral history. The AI will integrate the findings into the existing record (preserving what works, weaving new specifics into the right register) and surface a side-by-side review. Confirm updates the ancestor in place; layers, sigil, frequency tags, and research prompts can each be accepted or rejected individually before save.</p>
+
+          <div class="card" style="max-width:720px;margin-bottom:2rem">
+            <div class="form-group" style="margin-bottom:1rem">
+              <label class="form-label">Select Ancestor</label>
+              <select class="form-select" id="aug-ancestor-select" onchange="loadAncestorForAugment()">
+                <option value="">— Choose an ancestor —</option>
+              </select>
+            </div>
+            <div id="aug-ancestor-summary" style="display:none;padding:0.875rem 1rem;border:1px solid var(--border);border-radius:6px;margin-bottom:1.25rem;background:rgba(201,168,124,0.04)"></div>
+            <div class="form-group" id="aug-findings-wrap" style="display:none">
+              <label class="form-label">New Findings <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">paste sources, transcripts, dates, names, places, anything you've located</span></label>
+              <textarea class="form-textarea" id="aug-new-findings" rows="8" placeholder="e.g. 1851 UK Census, Liverpool ED 12, Household 47: John Detton, age 38, journeyman cooper, b. Birkenhead; wife Mary, 35, b. Glasgow; sons Robert (12), James (8) — confirms 1849 arrival in Liverpool from Glasgow, contradicting earlier assumption of Edinburgh origin. Also: Glasgow Trades House records show John apprenticed to Andrew McTavish 1825–1832."></textarea>
+            </div>
+            <div id="aug-also-log" style="display:none;margin-bottom:1rem;padding:0.75rem 0.875rem;border:1px dashed var(--border);border-radius:6px;background:rgba(201,168,124,0.02)">
+              <label style="display:flex;gap:0.5rem;align-items:center;font-size:15px;cursor:pointer;margin-bottom:0.5rem">
+                <input type="checkbox" id="aug-also-log-check"> Also log these findings to the research findings log
+              </label>
+              <div id="aug-also-log-fields" style="display:none;margin-top:0.5rem">
+                <div style="display:grid;grid-template-columns:120px 160px 1fr;gap:0.5rem;margin-bottom:0.5rem">
+                  <input class="form-input" id="aug-log-date" type="date" placeholder="Date">
+                  <select class="form-select" id="aug-log-type">
+                    <option value="">— Type —</option>
+                    <option value="census">Census</option>
+                    <option value="will">Will / Probate</option>
+                    <option value="baptism">Baptism / Birth</option>
+                    <option value="marriage">Marriage</option>
+                    <option value="burial">Burial / Death</option>
+                    <option value="ship-manifest">Ship Manifest</option>
+                    <option value="land">Land / Property</option>
+                    <option value="newspaper">Newspaper</option>
+                    <option value="oral-history">Oral History</option>
+                    <option value="photo">Photograph</option>
+                    <option value="dna">DNA Match</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <input class="form-input" id="aug-log-label" placeholder="Source label">
+                </div>
+                <input class="form-input" id="aug-log-url" placeholder="URL (optional)">
+              </div>
+            </div>
+            <button class="btn btn-gold" id="aug-run-btn" onclick="runAugment()" style="display:none">⊕ Integrate Findings</button>
+            <div id="aug-form-msg" style="margin-top:0.75rem"></div>
+          </div>
+
+          <div class="ai-loading" id="aug-loading" style="display:none;max-width:720px;margin-bottom:2rem">
+            <div class="ai-loading-glyph">⊕</div>
+            <div class="ai-loading-text">Integrating new findings…</div>
+            <div class="ai-loading-sub">Reading the existing record · Weaving in what's new · Holding the registers</div>
+          </div>
         </div>
 
         <!-- ═══ EDIT MODE ═══ -->
@@ -2043,6 +2098,8 @@ async function loadMyConvergence() {
 // State for current review session
 let arReviewData = null;      // raw AI result
 let arChips = [];             // [{ tagId, tagName, tagType, strength }]
+let arAugmentExistingId = null;     // when set, Confirm PATCHes this id instead of inserting
+let arAugmentExistingRecord = null; // full pre-augment snapshot, used for diff highlights
 let allFrequencyTags = [];    // loaded from DB
 
 async function initAncestorResearch() {
@@ -2424,31 +2481,53 @@ async function confirmAncestorToDatabase() {
     sigil_name:        document.getElementById('rv-sigil-name').value.trim() || null,
     sigil_description: document.getElementById('rv-sigil-description').value.trim() || null,
     sigil_svg:         (document.getElementById('rv-sigil-svg')?.value || '').trim() || null,
+    research_prompts:  Array.isArray(arReviewData?.research_prompts) ? arReviewData.research_prompts : [],
   };
 
   btn.disabled = true; btn.textContent = 'Saving…';
   msgEl.innerHTML = '';
 
   try {
-    // 1. Insert ancestor
-    const result = await restPost('ancestors', payload);
-    if (!Array.isArray(result) || !result[0]?.id) {
-      throw new Error(result?.message || result?.details || result?.code || 'Failed to save ancestor');
-    }
-    const ancestorId = result[0].id;
+    let ancestorId;
+    const isAugment = !!arAugmentExistingId;
 
-    // 2. Save frequency tags
-    for (const chip of arChips) {
-      await restPost('ancestor_frequencies', {
-        ancestor_id:       ancestorId,
-        frequency_tag_id:  chip.tagId,
-        strength:          chip.strength,
-      });
+    if (isAugment) {
+      // PATCH the existing ancestor in place. Don't overwrite slug (can change canonical URLs).
+      const patchPayload = { ...payload };
+      delete patchPayload.slug;
+      const ok = await restPatch('ancestors', arAugmentExistingId, patchPayload);
+      if (!ok) throw new Error('Failed to update ancestor');
+      ancestorId = arAugmentExistingId;
+
+      // Resync frequency tags (delete all, reinsert from arChips)
+      await restDelete(`ancestor_frequencies?ancestor_id=eq.${ancestorId}`);
+      for (const chip of arChips) {
+        await restPost('ancestor_frequencies', {
+          ancestor_id:      ancestorId,
+          frequency_tag_id: chip.tagId,
+          strength:         chip.strength,
+        });
+      }
+    } else {
+      // INSERT a new ancestor (original generate flow)
+      const result = await restPost('ancestors', payload);
+      if (!Array.isArray(result) || !result[0]?.id) {
+        throw new Error(result?.message || result?.details || result?.code || 'Failed to save ancestor');
+      }
+      ancestorId = result[0].id;
+
+      // Save frequency tags
+      for (const chip of arChips) {
+        await restPost('ancestor_frequencies', {
+          ancestor_id:       ancestorId,
+          frequency_tag_id:  chip.tagId,
+          strength:          chip.strength,
+        });
+      }
     }
 
-    // 3. Optionally assign to client
-    if (clientId) {
-      const ancestor = result[0];
+    // 3. Optionally assign to client (only on fresh insert, not on augment of existing record)
+    if (clientId && !isAugment) {
       const caPayload = {
         client_id:         clientId,
         ancestor_id:       ancestorId,
@@ -2484,7 +2563,12 @@ async function confirmAncestorToDatabase() {
 
     // Reload ancestors cache
     await loadAncestors();
-    msgEl.innerHTML = `<span style="color:var(--teal)">✓ ${payload.name} saved${clientId ? ' and assigned to client' : ''}.</span>`;
+    const verb = isAugment ? 'updated' : 'saved';
+    const tail = !isAugment && clientId ? ' and assigned to client' : '';
+    const note = isAugment ? ' <span style="color:var(--text-faint);font-size:14px">(client weaving copies remain unchanged — re-assign or edit individually if you want them refreshed)</span>' : '';
+    msgEl.innerHTML = `<span style="color:var(--teal)">✓ ${payload.name} ${verb}${tail}.</span>${note}`;
+    // Clear augment context so next Confirm starts clean
+    if (isAugment) { arAugmentExistingId = null; arAugmentExistingRecord = null; }
     btn.textContent = '✓ Saved';
 
     // Offer to start another after a pause
@@ -2533,20 +2617,218 @@ async function restPatch(table, id, body) {
 let editorAncestorId = null;
 let editorChips = [];
 let editorClientAssignments = [];
+let editorResearchPrompts = []; // array of strings, edited locally, saved with the ancestor record
+let editorFindings = [];        // array of finding rows from ancestor_research_findings, persisted on add/delete
 
 function showGenerateMode() {
   document.getElementById('ar-generate-mode').style.display = 'block';
+  document.getElementById('ar-augment-mode').style.display = 'none';
   document.getElementById('ar-edit-mode').style.display = 'none';
   document.getElementById('mode-btn-generate').classList.add('active');
+  document.getElementById('mode-btn-augment')?.classList.remove('active');
   document.getElementById('mode-btn-edit').classList.remove('active');
+  // Clear augment state so a subsequent Generate Confirm inserts new (not patches)
+  arAugmentExistingId = null;
+  arAugmentExistingRecord = null;
+}
+
+function showAugmentMode() {
+  document.getElementById('ar-generate-mode').style.display = 'none';
+  document.getElementById('ar-augment-mode').style.display = 'block';
+  document.getElementById('ar-edit-mode').style.display = 'none';
+  document.getElementById('mode-btn-generate').classList.remove('active');
+  document.getElementById('mode-btn-augment').classList.add('active');
+  document.getElementById('mode-btn-edit').classList.remove('active');
+  populateAugmentSelector();
 }
 
 function showEditMode() {
   document.getElementById('ar-generate-mode').style.display = 'none';
+  document.getElementById('ar-augment-mode').style.display = 'none';
   document.getElementById('ar-edit-mode').style.display = 'block';
   document.getElementById('mode-btn-edit').classList.add('active');
+  document.getElementById('mode-btn-augment')?.classList.remove('active');
   document.getElementById('mode-btn-generate').classList.remove('active');
   populateAncestorEditorSelector();
+  // Clear augment state
+  arAugmentExistingId = null;
+  arAugmentExistingRecord = null;
+}
+
+// ════════════════════════════════════════════════════
+// AUGMENT EXISTING ANCESTOR
+// ════════════════════════════════════════════════════
+
+function populateAugmentSelector() {
+  const sel = document.getElementById('aug-ancestor-select');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Choose an ancestor —</option>';
+  [...allAncestors]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a.id;
+      opt.textContent = `${a.name}${a.dates ? ' · ' + a.dates : ''} (${a.status || 'catalog'})`;
+      if (a.id === current) opt.selected = true;
+      sel.appendChild(opt);
+    });
+
+  // Wire the also-log checkbox once
+  const cb = document.getElementById('aug-also-log-check');
+  if (cb && !cb._wired) {
+    cb._wired = true;
+    cb.addEventListener('change', () => {
+      document.getElementById('aug-also-log-fields').style.display = cb.checked ? 'block' : 'none';
+    });
+  }
+}
+
+async function loadAncestorForAugment() {
+  const id = document.getElementById('aug-ancestor-select').value;
+  const summary = document.getElementById('aug-ancestor-summary');
+  const wrap    = document.getElementById('aug-findings-wrap');
+  const log     = document.getElementById('aug-also-log');
+  const runBtn  = document.getElementById('aug-run-btn');
+
+  if (!id) {
+    summary.style.display = 'none';
+    wrap.style.display = 'none';
+    log.style.display = 'none';
+    runBtn.style.display = 'none';
+    return;
+  }
+
+  if (!allFrequencyTags.length) {
+    const tags = await rest('frequency_tags?select=id,slug,name,type&order=name');
+    allFrequencyTags = Array.isArray(tags) ? tags : [];
+  }
+
+  const [ancestor, freqRows] = await Promise.all([
+    rest(`ancestors?id=eq.${id}&select=*`).then(r => r[0]),
+    rest(`ancestor_frequencies?ancestor_id=eq.${id}&select=strength,frequency_tags(name,type)`).catch(() => [])
+  ]);
+
+  if (!ancestor) {
+    summary.style.display = 'block';
+    summary.innerHTML = `<div style="color:var(--red)">Could not load ancestor.</div>`;
+    return;
+  }
+
+  const tagList = (Array.isArray(freqRows) ? freqRows : [])
+    .map(r => r.frequency_tags?.name).filter(Boolean);
+  const promptCount = Array.isArray(ancestor.research_prompts) ? ancestor.research_prompts.length : 0;
+
+  summary.style.display = 'block';
+  summary.innerHTML = `
+    <div style="display:flex;gap:0.75rem;align-items:baseline;margin-bottom:0.5rem">
+      <span style="font-size:18px;font-weight:500;color:var(--text)">${esc(ancestor.name)}</span>
+      ${ancestor.epithet ? `<span style="font-size:14px;color:var(--gold);font-style:italic">${esc(ancestor.epithet)}</span>` : ''}
+    </div>
+    <div style="font-size:14px;color:var(--text-dim);margin-bottom:0.5rem">
+      ${[ancestor.dates, ancestor.location, ancestor.era].filter(Boolean).map(esc).join(' · ')}
+      <span style="margin-left:0.5rem;padding:1px 7px;border-radius:9px;background:rgba(201,168,124,0.08);border:1px solid rgba(201,168,124,0.2);color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;font-size:13px">${esc(ancestor.status || 'catalog')}</span>
+    </div>
+    <div style="font-size:14px;color:var(--text-faint)">
+      ${tagList.length} frequency tag${tagList.length===1?'':'s'} · ${promptCount} open research prompt${promptCount===1?'':'s'} · sigil ${ancestor.sigil_svg ? 'present' : 'missing'}
+    </div>
+  `;
+  // Cache the existing record + tag names for the augment call
+  arAugmentExistingRecord = { ...ancestor, frequency_tags: tagList };
+
+  wrap.style.display = 'block';
+  log.style.display = 'block';
+  runBtn.style.display = 'inline-flex';
+}
+
+async function runAugment() {
+  const id          = document.getElementById('aug-ancestor-select').value;
+  const findings    = document.getElementById('aug-new-findings').value.trim();
+  const msgEl       = document.getElementById('aug-form-msg');
+  const btn         = document.getElementById('aug-run-btn');
+  const loadingEl   = document.getElementById('aug-loading');
+
+  if (!id || !arAugmentExistingRecord) {
+    msgEl.innerHTML = '<div class="msg msg-error">Pick an ancestor first.</div>';
+    return;
+  }
+  if (!findings) {
+    msgEl.innerHTML = '<div class="msg msg-error">Paste new findings to integrate.</div>';
+    return;
+  }
+
+  msgEl.innerHTML = '';
+  btn.disabled = true;
+  btn.textContent = 'Integrating…';
+  loadingEl.style.display = 'flex';
+
+  // Make sure the JWT is fresh before the call
+  try {
+    const fresh = await ensureFreshToken();
+    if (!fresh) { forceReauth('Your session has expired — please sign in again.'); return; }
+
+    const callAugment = () => fetch(
+      `${SUPABASE_URL}/functions/v1/generate-ancestor`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'apikey': SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
+          mode: 'augment',
+          existing_record: arAugmentExistingRecord,
+          new_findings: findings
+        })
+      }
+    );
+
+    let res = await callAugment();
+    if (res.status === 401) {
+      const refreshed = await ensureFreshToken();
+      if (refreshed) res = await callAugment();
+      if (res.status === 401) { forceReauth('Your session has expired — please sign in again.'); return; }
+    }
+
+    const data = await res.json();
+    if (!res.ok || data.error || (data.message && !data.layer_terroir)) {
+      throw new Error(data.error || data.message || `Request failed (${res.status})`);
+    }
+
+    // Optionally log these findings to the research findings log
+    if (document.getElementById('aug-also-log-check').checked) {
+      const dateVal  = document.getElementById('aug-log-date').value || null;
+      const typeVal  = document.getElementById('aug-log-type').value || null;
+      const labelVal = document.getElementById('aug-log-label').value.trim() || null;
+      const urlVal   = document.getElementById('aug-log-url').value.trim() || null;
+      try {
+        await restPost('ancestor_research_findings', {
+          ancestor_id:  id,
+          finding_date: dateVal,
+          source_type:  typeVal,
+          source_label: labelVal || 'Augment integration',
+          summary:      findings,
+          url:          urlVal
+        });
+      } catch (_) { /* don't block the augment review on log failure */ }
+    }
+
+    // Wire into the existing Review screen, but mark as augment so Confirm PATCHes
+    arAugmentExistingId = id;
+    arReviewData = data;
+    arChips = matchFrequencyTags(data.frequency_tags || []);
+    renderAncestorReview(data);
+
+    // Scroll the review into view
+    document.getElementById('ar-review').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (err) {
+    msgEl.innerHTML = `<div class="msg msg-error">Integration failed: ${err.message}</div>`;
+  } finally {
+    loadingEl.style.display = 'none';
+    btn.disabled = false;
+    btn.textContent = '⊕ Integrate Findings';
+  }
 }
 
 function populateAncestorEditorSelector() {
@@ -2577,10 +2859,11 @@ async function loadAncestorForEdit() {
     allFrequencyTags = Array.isArray(tags) ? tags : [];
   }
 
-  const [ancestor, freqRows, clientRows] = await Promise.all([
+  const [ancestor, freqRows, clientRows, findingRows] = await Promise.all([
     rest(`ancestors?id=eq.${id}&select=*`).then(r => r[0]),
     rest(`ancestor_frequencies?ancestor_id=eq.${id}&select=id,strength,frequency_tag_id,frequency_tags(id,name,type)`).catch(() => []),
-    rest(`client_ancestors?ancestor_id=eq.${id}&select=id,client_id,clients(name)`).catch(() => [])
+    rest(`client_ancestors?ancestor_id=eq.${id}&select=id,client_id,clients(name)`).catch(() => []),
+    rest(`ancestor_research_findings?ancestor_id=eq.${id}&select=*&order=finding_date.desc.nullslast,created_at.desc`).catch(() => [])
   ]);
 
   editorAncestorId = id;
@@ -2596,6 +2879,8 @@ async function loadAncestorForEdit() {
     clientId: r.client_id,
     clientName: r.clients?.name || r.client_id
   }));
+  editorResearchPrompts = Array.isArray(ancestor?.research_prompts) ? [...ancestor.research_prompts] : [];
+  editorFindings = Array.isArray(findingRows) ? findingRows : [];
 
   renderEditorForm(ancestor);
 }
@@ -2796,6 +3081,49 @@ function renderEditorForm(a) {
       <div id="ed-client-msg" style="margin-top:0.5rem;font-size:15px"></div>
     </div>
 
+    <!-- Research Prompts -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="editor-section-title">Research Prompts <span style="color:var(--text-faint);font-size:15px;letter-spacing:0.1em">SAVED WITH ANCESTOR</span></div>
+      <p style="font-size:15px;color:var(--text-faint);margin-bottom:1rem;line-height:1.6">Specific archives, record types, or questions that would deepen this ancestor's record. The AI suggests an initial set; add or refine as research proceeds.</p>
+      <div id="ed-research-prompts-list" style="margin-bottom:0.75rem"></div>
+      <div style="display:flex;gap:0.5rem;align-items:flex-start">
+        <textarea class="form-textarea" id="ed-new-prompt" rows="2" placeholder="e.g. 1851 UK Census, Liverpool ED 12 — confirm date of arrival and household composition" style="flex:1"></textarea>
+        <button class="btn btn-outline" style="white-space:nowrap;align-self:flex-start" onclick="addResearchPrompt()">+ Add Prompt</button>
+      </div>
+    </div>
+
+    <!-- Research Findings -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="editor-section-title">Research Findings <span style="color:var(--text-faint);font-size:15px;letter-spacing:0.1em">DATED LOG</span></div>
+      <p style="font-size:15px;color:var(--text-faint);margin-bottom:1rem;line-height:1.6">A running log of genealogical records and other findings as you locate them. Each entry is saved immediately. Use the Augment Existing flow on the Generate panel to feed accumulated findings back into the ancestor's record.</p>
+      <div id="ed-findings-list" style="margin-bottom:1rem"></div>
+      <div style="display:grid;grid-template-columns:120px 160px 1fr;gap:0.5rem;margin-bottom:0.5rem">
+        <input class="form-input" id="ed-new-finding-date" type="date" placeholder="Date">
+        <select class="form-select" id="ed-new-finding-type">
+          <option value="">— Type —</option>
+          <option value="census">Census</option>
+          <option value="will">Will / Probate</option>
+          <option value="baptism">Baptism / Birth</option>
+          <option value="marriage">Marriage</option>
+          <option value="burial">Burial / Death</option>
+          <option value="ship-manifest">Ship Manifest</option>
+          <option value="land">Land / Property</option>
+          <option value="newspaper">Newspaper</option>
+          <option value="oral-history">Oral History</option>
+          <option value="photo">Photograph</option>
+          <option value="dna">DNA Match</option>
+          <option value="other">Other</option>
+        </select>
+        <input class="form-input" id="ed-new-finding-label" placeholder="Source label — e.g. 1851 UK Census, Liverpool ED 12">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 280px;gap:0.5rem;margin-bottom:0.5rem">
+        <textarea class="form-textarea" id="ed-new-finding-summary" rows="2" placeholder="What the record shows or contributes…"></textarea>
+        <input class="form-input" id="ed-new-finding-url" placeholder="URL (optional) — link to scan">
+      </div>
+      <button class="btn btn-outline" onclick="addFinding()">+ Log Finding</button>
+      <div id="ed-finding-msg" style="margin-top:0.5rem;font-size:15px"></div>
+    </div>
+
     <!-- Save bar -->
     <div class="editor-save-bar">
       <div id="ed-save-msg" style="font-size:15px"></div>
@@ -2806,6 +3134,8 @@ function renderEditorForm(a) {
 
   renderEditorChips();
   renderEditorClientChips();
+  renderResearchPromptsEditor();
+  renderFindingsList();
 }
 
 function updateStatusCards() {
@@ -2827,6 +3157,115 @@ function updateSigilPreview(svg, previewId) {
     || (document.getElementById('ed-sigil-preview') ? 'ed-sigil-preview' : 'rv-sigil-preview');
   const box = document.getElementById(id);
   if (box) box.innerHTML = svg || '';
+}
+
+// ── Research prompts editor ────────────────────────────
+function renderResearchPromptsEditor() {
+  const el = document.getElementById('ed-research-prompts-list');
+  if (!el) return;
+  if (!editorResearchPrompts.length) {
+    el.innerHTML = '<div style="font-size:15px;color:var(--text-faint);font-style:italic;padding:0.5rem 0">No prompts yet — add the first one below.</div>';
+    return;
+  }
+  el.innerHTML = editorResearchPrompts.map((p, i) => `
+    <div style="display:flex;gap:0.5rem;align-items:flex-start;padding:0.5rem 0.75rem;border:1px solid var(--border);border-radius:6px;margin-bottom:0.4rem;background:rgba(201,168,124,0.04)">
+      <span style="color:var(--gold);flex-shrink:0;font-weight:500;min-width:1.5em">${i+1}.</span>
+      <span style="flex:1;font-size:15px;color:var(--text-dim);line-height:1.5">${esc(p)}</span>
+      <button class="btn-chip-remove" onclick="removeResearchPrompt(${i})" title="Remove">×</button>
+    </div>`).join('');
+}
+function addResearchPrompt() {
+  const ta = document.getElementById('ed-new-prompt');
+  const v = (ta?.value || '').trim();
+  if (!v) return;
+  editorResearchPrompts.push(v);
+  ta.value = '';
+  renderResearchPromptsEditor();
+}
+function removeResearchPrompt(idx) {
+  editorResearchPrompts.splice(idx, 1);
+  renderResearchPromptsEditor();
+}
+
+// ── Research findings log ──────────────────────────────
+function renderFindingsList() {
+  const el = document.getElementById('ed-findings-list');
+  if (!el) return;
+  if (!editorFindings.length) {
+    el.innerHTML = '<div style="font-size:15px;color:var(--text-faint);font-style:italic;padding:0.5rem 0">No findings logged yet.</div>';
+    return;
+  }
+  el.innerHTML = editorFindings.map(f => {
+    const date = f.finding_date ? new Date(f.finding_date).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—';
+    const typeBadge = f.source_type
+      ? `<span style="font-size:13px;padding:1px 7px;border-radius:9px;background:rgba(201,168,124,0.08);border:1px solid rgba(201,168,124,0.2);color:var(--gold);text-transform:uppercase;letter-spacing:0.06em">${esc(f.source_type)}</span>`
+      : '';
+    const link = f.url
+      ? `<a href="${esc(f.url)}" target="_blank" rel="noopener" style="color:var(--gold);font-size:14px;text-decoration:underline">scan/source ↗</a>`
+      : '';
+    return `
+      <div style="padding:0.75rem 0.875rem;border:1px solid var(--border);border-radius:6px;margin-bottom:0.5rem;background:rgba(201,168,124,0.03)">
+        <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.35rem;font-size:14px;color:var(--text-dim)">
+          <span>${esc(date)}</span>
+          ${typeBadge}
+          <span style="flex:1;font-weight:500;color:var(--text)">${esc(f.source_label || '')}</span>
+          ${link}
+          <button class="btn-chip-remove" onclick="deleteFinding('${esc(f.id)}')" title="Delete">×</button>
+        </div>
+        ${f.summary ? `<div style="font-size:15px;color:var(--text-dim);line-height:1.5;white-space:pre-wrap">${esc(f.summary)}</div>` : ''}
+      </div>`;
+  }).join('');
+}
+async function addFinding() {
+  if (!editorAncestorId) return;
+  const dateVal    = document.getElementById('ed-new-finding-date').value || null;
+  const typeVal    = document.getElementById('ed-new-finding-type').value || null;
+  const labelVal   = document.getElementById('ed-new-finding-label').value.trim() || null;
+  const summaryVal = document.getElementById('ed-new-finding-summary').value.trim() || null;
+  const urlVal     = document.getElementById('ed-new-finding-url').value.trim() || null;
+  const msgEl      = document.getElementById('ed-finding-msg');
+
+  if (!labelVal && !summaryVal) {
+    msgEl.innerHTML = '<span style="color:var(--red)">Add at least a source label or a summary.</span>';
+    return;
+  }
+
+  msgEl.innerHTML = '';
+  try {
+    const result = await restPost('ancestor_research_findings', {
+      ancestor_id:  editorAncestorId,
+      finding_date: dateVal,
+      source_type:  typeVal,
+      source_label: labelVal,
+      summary:      summaryVal,
+      url:          urlVal
+    });
+    if (!Array.isArray(result) || !result[0]?.id) {
+      throw new Error(result?.message || result?.details || 'Failed to log finding');
+    }
+    editorFindings.unshift(result[0]);
+    document.getElementById('ed-new-finding-date').value = '';
+    document.getElementById('ed-new-finding-type').value = '';
+    document.getElementById('ed-new-finding-label').value = '';
+    document.getElementById('ed-new-finding-summary').value = '';
+    document.getElementById('ed-new-finding-url').value = '';
+    renderFindingsList();
+    msgEl.innerHTML = '<span style="color:var(--teal)">✓ Finding logged.</span>';
+    setTimeout(() => { msgEl.innerHTML = ''; }, 2500);
+  } catch (err) {
+    msgEl.innerHTML = `<span style="color:var(--red)">${err.message}</span>`;
+  }
+}
+async function deleteFinding(id) {
+  if (!confirm('Delete this finding? This cannot be undone.')) return;
+  try {
+    await restDelete(`ancestor_research_findings?id=eq.${id}`);
+    editorFindings = editorFindings.filter(f => f.id !== id);
+    renderFindingsList();
+  } catch (err) {
+    const msgEl = document.getElementById('ed-finding-msg');
+    if (msgEl) msgEl.innerHTML = `<span style="color:var(--red)">${err.message}</span>`;
+  }
 }
 
 // ── Editor chip management ─────────────────────────────
@@ -3013,6 +3452,7 @@ async function saveAncestorEdits() {
     sigil_svg:         document.getElementById('ed-sigil-svg').value.trim() || null,
     sigil_image_url:   document.getElementById('ed-sigil-image-url').value.trim() || null,
     photo_url:         document.getElementById('ed-photo-url').value.trim() || null,
+    research_prompts:  Array.isArray(editorResearchPrompts) ? editorResearchPrompts : [],
   };
 
   try {
