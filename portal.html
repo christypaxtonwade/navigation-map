@@ -2232,7 +2232,44 @@ async function editTapestryArchetype(id) {
 function renderTapestryEditor(t, isNew) {
   const el = document.getElementById('tapestry-editor');
   if (!el) return;
+  // Reset PDF state when re-rendering the editor (fresh PDF set for any new draft)
+  clearPdfState('tap');
   el.innerHTML = `
+    <!-- Draft with AI -->
+    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(201,168,124,0.35);background:rgba(201,168,124,0.04)">
+      <div class="editor-section-title">Draft with AI <span style="color:var(--gold);font-size:15px;letter-spacing:0.1em">FAST FIRST PASS</span></div>
+      <p style="font-size:14px;color:var(--text-faint);margin-bottom:1rem;line-height:1.6">Claude drafts the full archetype profile — catalog preview &amp; full, four layers, sigil with SVG, frequency tags. Review and edit everything below before saving. Optionally attach scholarly PDFs (primary myth sources, translations, hymns) as authoritative material.</p>
+      <div class="editor-grid-2" style="margin-bottom:1rem">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Name <span style="color:var(--red)">*</span></label>
+          <input class="form-input" id="tap-ai-name" placeholder="e.g. Inanna · Persephone · Hecate" value="${esc(t.name)}">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Tradition <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">e.g. Sumerian, Greek, Celtic</span></label>
+          <input class="form-input" id="tap-ai-tradition" placeholder="optional — AI infers" value="${esc(t.tradition)}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Epithet <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">optional · AI writes one if blank</span></label>
+        <input class="form-input" id="tap-ai-epithet" placeholder="optional — e.g. She Who Goes Down" value="${esc(t.epithet)}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Context Notes <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">optional · particular myth-cycle, translation preference, why this figure matters now</span></label>
+        <textarea class="form-textarea" id="tap-ai-notes" rows="3" placeholder="e.g. Anchor to the Descent of Inanna text (Wolkstein/Kramer translation). Emphasize the structural surrender at each gate, not the romantic-sister reading."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Source PDFs <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">optional · up to 5 files · scholarly texts, hymns, primary sources</span></label>
+        <div class="upload-area" onclick="document.getElementById('tap-pdf-input').click()">
+          <input type="file" id="tap-pdf-input" accept="application/pdf,.pdf" multiple style="display:none" onchange="onPdfPicked(this,'tap')">
+          <span class="upload-label">Click to attach PDFs</span>
+        </div>
+        <div id="tap-pdf-list" style="margin-top:0.5rem"></div>
+        <div id="tap-pdf-msg" style="margin-top:0.4rem;font-size:14px"></div>
+      </div>
+      <button class="btn btn-gold" id="tap-ai-btn" onclick="draftTapestryWithAI()">✦ Draft Profile</button>
+      <div id="tap-ai-msg" style="margin-top:0.75rem;font-size:14px"></div>
+    </div>
+
     <!-- Identity -->
     <div class="card" style="margin-bottom:1.5rem">
       <div class="editor-section-title">${isNew ? 'New archetype' : 'Edit archetype'}</div>
@@ -2371,6 +2408,87 @@ function cycleTapestryChipStrength(i) {
   const order = ['noted','emerging','dominant'];
   tapestryEditorChips[i].strength = order[(order.indexOf(tapestryEditorChips[i].strength) + 1) % order.length];
   renderTapestryChips();
+}
+
+async function draftTapestryWithAI() {
+  const name      = document.getElementById('tap-ai-name').value.trim();
+  const tradition = document.getElementById('tap-ai-tradition').value.trim();
+  const epithet   = document.getElementById('tap-ai-epithet').value.trim();
+  const notes     = document.getElementById('tap-ai-notes').value.trim();
+  const msgEl     = document.getElementById('tap-ai-msg');
+  const btn       = document.getElementById('tap-ai-btn');
+
+  if (!name) { msgEl.innerHTML = '<span style="color:var(--red)">Name is required.</span>'; return; }
+
+  msgEl.innerHTML = '<span style="color:var(--text-dim)">Drafting… this can take 30–60 seconds.</span>';
+  btn.disabled = true; btn.textContent = 'Drafting…';
+
+  try {
+    const fresh = await ensureFreshToken();
+    if (!fresh) { forceReauth('Your session has expired — please sign in again.'); return; }
+
+    const pdfs = getPdfsForApi('tap');
+    const callDraft = () => fetch(
+      `${SUPABASE_URL}/functions/v1/generate-ancestor`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'apikey': SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ mode: 'tapestry', name, tradition, epithet, notes, pdfs })
+      }
+    );
+
+    let res = await callDraft();
+    if (res.status === 401) {
+      const refreshed = await ensureFreshToken();
+      if (refreshed) res = await callDraft();
+      if (res.status === 401) { forceReauth('Your session has expired — please sign in again.'); return; }
+    }
+    const data = await res.json();
+    if (!res.ok || data.error || (data.message && !data.layer_thread)) {
+      throw new Error(data.error || data.message || `Request failed (${res.status})`);
+    }
+
+    // Populate the editor form fields with the AI's draft
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
+    set('tap-name',              data.name);
+    set('tap-tradition',         data.tradition);
+    set('tap-epithet',           data.epithet);
+    set('tap-catalog-preview',   data.catalog_preview);
+    set('tap-catalog-full',      data.catalog_full);
+    set('tap-layer-terroir',     data.layer_terroir);
+    set('tap-layer-unresolved',  data.layer_unresolved);
+    set('tap-layer-thread',      data.layer_thread);
+    set('tap-layer-lineage',     data.layer_lineage);
+    set('tap-sigil-name',        data.sigil_name);
+    set('tap-sigil-description', data.sigil_description);
+    set('tap-sigil-svg',         data.sigil_svg);
+
+    // Render the SVG preview
+    updateSigilPreview(data.sigil_svg || '', 'tap-sigil-preview');
+
+    // Match AI-suggested frequency tags to known tags and render chips
+    tapestryEditorChips = matchFrequencyTags(data.frequency_tags || []).map(c => ({ ...c, recordId: null }));
+    renderTapestryChips();
+
+    // Surface any AI tags that didn't match a frequency_tags row
+    const matchedNames = new Set(tapestryEditorChips.map(c => c.tagName.toLowerCase()));
+    const unmatched = (data.frequency_tags || []).filter(n => {
+      const norm = (n || '').toLowerCase();
+      return ![...matchedNames].some(m => m === norm || m.includes(norm) || norm.includes(m));
+    });
+    const unmatchedNote = unmatched.length
+      ? `<div style="color:var(--amber);margin-top:0.4rem">⚠ Suggested tags not found in DB: ${unmatched.join(', ')}</div>` : '';
+
+    msgEl.innerHTML = `<span style="color:var(--teal)">✓ Drafted. Review the fields below and edit before saving.</span>${unmatchedNote}`;
+  } catch (err) {
+    msgEl.innerHTML = `<span style="color:var(--red)">Draft failed: ${err.message}</span>`;
+  } finally {
+    btn.disabled = false; btn.textContent = '✦ Draft Profile';
+  }
 }
 
 async function saveTapestryArchetype() {
@@ -2602,7 +2720,7 @@ let arPromoteStubId = null;         // when set, Confirm inserts canonical + upd
 let arPromoteStubData = null;       // full client_ancestors row + client name (for banner + payload composition)
 
 // PDF attachments per mode. Each entry: { id, file, filename, size, base64, media_type, log, date, type, label, url }
-const arPdfState = { ar: [], aug: [] };
+const arPdfState = { ar: [], aug: [], tap: [] };
 const PDF_MAX_FILES = 5;
 const PDF_MAX_BYTES_PER_FILE = 30 * 1024 * 1024; // 30 MB safety margin under Anthropic's 32 MB
 let allFrequencyTags = [];    // loaded from DB
