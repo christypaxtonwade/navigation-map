@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Mythic Tapestry — Christy Paxton Wade</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0c1f;
+  --surface: #11132a;
+  --surface-2: #1a1d3d;
+  --border: rgba(201,168,124,0.14);
+  --border-hover: rgba(201,168,124,0.28);
+  --gold: #c9a87c;
+  --gold-bright: #dfc090;
+  --gold-dim: rgba(201,168,124,0.7);
+  --text: #e7e3d8;
+  --text-dim: #a89e8a;
+  --text-faint: #6e6555;
+  --indigo-glow: rgba(140,120,210,0.25);
+  --teal: #6dd8b2;
+  --red: #c07060;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Jost', sans-serif;
+  background: var(--bg) radial-gradient(ellipse at top, rgba(140,120,210,0.12) 0%, transparent 60%);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ── Header ── */
+.header { padding: 4rem 2rem 2.5rem; text-align: center; }
+.header-eyebrow {
+  font-size: 14px; font-weight: 400; letter-spacing: 0.32em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 1rem;
+}
+.header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3.4rem; font-weight: 300; font-style: italic;
+  color: var(--text); margin-bottom: 1rem; line-height: 1.1;
+}
+.header-rule {
+  width: 80px; height: 1px; background: var(--gold);
+  margin: 1.25rem auto;
+}
+.header-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem; max-width: 720px; margin: 0 auto;
+  color: var(--text-dim); font-style: italic; font-weight: 300;
+}
+.header-links {
+  display: flex; justify-content: center; gap: 1.5rem;
+  flex-wrap: wrap; margin-top: 1.5rem;
+}
+.header-link {
+  font-size: 13px; font-weight: 400; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--gold-dim);
+  text-decoration: none; transition: color 0.2s;
+}
+.header-link:hover { color: var(--gold-bright); }
+.client-banner {
+  display: none; margin: 1rem auto 0; padding: 0.6rem 1rem;
+  border: 1px solid rgba(201,168,124,0.35); border-radius: 6px;
+  background: rgba(201,168,124,0.06);
+  font-size: 14px; color: var(--gold);
+  max-width: 680px; text-align: center;
+}
+
+/* ── Toolbar (search + view switch + filters) ── */
+.toolbar {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(10,12,31,0.85); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 0.85rem 2rem;
+}
+.toolbar-row {
+  max-width: 1400px; margin: 0 auto;
+  display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
+}
+.search-input {
+  flex: 1 1 280px; min-width: 240px;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 0.55rem 0.85rem; font-size: 14px; font-family: inherit;
+  outline: none; transition: border-color 0.2s;
+}
+.search-input::placeholder { color: var(--text-faint); }
+.search-input:focus { border-color: var(--gold-dim); }
+
+.view-toggle { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.view-btn {
+  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 400;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.55rem 0.95rem; border: none; background: transparent;
+  color: var(--text-faint); cursor: pointer; transition: all 0.18s; white-space: nowrap;
+}
+.view-btn + .view-btn { border-left: 1px solid var(--border); }
+.view-btn.active { background: rgba(201,168,124,0.10); color: var(--gold); }
+.view-btn:hover:not(.active) { color: var(--text-dim); }
+
+.filter-row {
+  max-width: 1400px; margin: 0.6rem auto 0;
+  display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
+  font-size: 13px;
+}
+.filter-row label {
+  color: var(--text-faint); letter-spacing: 0.06em;
+  text-transform: uppercase; font-size: 11px;
+}
+.filter-select {
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 5px;
+  padding: 0.35rem 0.6rem; font-size: 13px; font-family: inherit;
+  outline: none;
+}
+.filter-clear {
+  background: transparent; border: 1px solid transparent; color: var(--text-faint);
+  font-size: 12px; cursor: pointer; padding: 0.3rem 0.6rem; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.filter-clear:hover { color: var(--gold); }
+
+/* ── Common card style ── */
+.figure-card {
+  background: var(--surface);
+  border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+  display: flex; flex-direction: column;
+}
+.figure-card:hover { transform: translateY(-2px); border-color: var(--border-hover); box-shadow: 0 6px 24px rgba(0,0,0,0.25); }
+.figure-card-image {
+  width: 100%; aspect-ratio: 1.1 / 1;
+  background: var(--surface-2);
+  background-size: cover; background-position: center;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.figure-card-image.no-image::before {
+  content: '◈';
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.4rem; color: var(--gold-dim); opacity: 0.4;
+}
+.figure-card-body { padding: 0.85rem 1rem 1rem; }
+.figure-card-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem; font-weight: 500; color: var(--text);
+  margin-bottom: 0.15rem; line-height: 1.2;
+}
+.figure-card-tradition {
+  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 0.4rem;
+}
+.figure-card-epithet {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px; font-style: italic; color: var(--text-dim); line-height: 1.4;
+}
+
+/* ── Loom view (by Field) ── */
+.loom-section { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+.field-band { margin-bottom: 2.5rem; }
+.field-header {
+  display: flex; align-items: baseline; gap: 1rem;
+  margin-bottom: 1rem; padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+.field-numeral {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 1.4rem; color: var(--gold);
+}
+.field-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight: 400; color: var(--text);
+}
+.field-count {
+  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-faint); margin-left: auto;
+}
+.field-empty {
+  font-style: italic; color: var(--text-faint); padding: 0.5rem 0; font-size: 14px;
+}
+.figure-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* ── Tradition view ── */
+.tradition-section { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+.tradition-band { margin-bottom: 3rem; }
+.tradition-header {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 1.8rem; color: var(--text);
+  margin-bottom: 1rem; padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Constellation view ── */
+.constellation-wrap {
+  padding: 2rem; max-width: 1400px; margin: 0 auto;
+  display: flex; gap: 2rem; flex-wrap: wrap;
+}
+.constellation-canvas-wrap {
+  flex: 1 1 600px; min-height: 600px;
+  background: radial-gradient(ellipse at center, rgba(140,120,210,0.10) 0%, transparent 70%);
+  border: 1px solid var(--border); border-radius: 8px; padding: 1rem;
+  position: relative;
+}
+.constellation-svg { width: 100%; height: 600px; display: block; }
+.constellation-info {
+  flex: 0 1 280px; min-width: 240px;
+}
+.constellation-info-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 1.25rem;
+}
+.constellation-help {
+  font-size: 13px; color: var(--text-faint); line-height: 1.6; margin-bottom: 1rem;
+}
+.constellation-selected-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem; font-weight: 500; color: var(--gold); margin-bottom: 0.25rem;
+}
+.constellation-selected-meta {
+  font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint);
+  margin-bottom: 0.75rem;
+}
+.constellation-selected-related {
+  font-size: 13px; color: var(--text-dim); line-height: 1.5;
+}
+.constellation-selected-related strong { color: var(--gold); font-weight: 500; display: block; margin-top: 0.5rem; }
+.constellation-svg circle.node {
+  cursor: pointer; transition: fill 0.18s, r 0.18s, stroke 0.18s;
+}
+.constellation-svg circle.node:hover { stroke: var(--gold-bright); stroke-width: 2; }
+.constellation-svg circle.node.selected { fill: var(--gold); stroke: var(--gold-bright); stroke-width: 2.5; }
+.constellation-svg circle.node.related { stroke: var(--gold-dim); stroke-width: 2; }
+.constellation-svg line.edge {
+  stroke: rgba(201,168,124,0.18); stroke-width: 0.6;
+  transition: stroke 0.18s, stroke-width 0.18s;
+}
+.constellation-svg line.edge.highlight { stroke: var(--gold); stroke-width: 1.5; }
+.constellation-svg text.label {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 12px; fill: var(--text-dim); pointer-events: none;
+  transition: fill 0.18s, font-size 0.18s;
+}
+.constellation-svg text.label.selected, .constellation-svg text.label.related {
+  fill: var(--gold-bright); font-size: 13px;
+}
+
+/* ── Catalog (list) view ── */
+.catalog-section { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+.catalog-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.catalog-table thead th {
+  text-align: left; padding: 0.7rem 0.85rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; font-size: 12px;
+  color: var(--text-faint); border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none; white-space: nowrap;
+}
+.catalog-table thead th:hover { color: var(--gold); }
+.catalog-table thead th.sorted { color: var(--gold); }
+.catalog-table thead th.sorted::after { content: ' ↕'; opacity: 0.5; }
+.catalog-table thead th.sorted-asc::after { content: ' ↑'; opacity: 1; }
+.catalog-table thead th.sorted-desc::after { content: ' ↓'; opacity: 1; }
+.catalog-table tbody tr {
+  cursor: pointer; transition: background 0.15s;
+}
+.catalog-table tbody tr:hover { background: rgba(201,168,124,0.04); }
+.catalog-table tbody td {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid rgba(201,168,124,0.05);
+  vertical-align: middle;
+}
+.catalog-thumb {
+  width: 48px; height: 48px; border-radius: 4px;
+  background: var(--surface-2); background-size: cover; background-position: center;
+}
+.catalog-figure-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; font-weight: 500; color: var(--text);
+}
+.catalog-figure-epithet {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 13px; color: var(--text-dim);
+}
+.catalog-tradition {
+  font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold);
+}
+.catalog-period {
+  font-size: 12px; color: var(--text-faint);
+}
+.catalog-tags {
+  display: flex; flex-wrap: wrap; gap: 4px;
+}
+.catalog-tag-chip {
+  font-size: 11px; padding: 1px 6px; border-radius: 9px;
+  background: rgba(201,168,124,0.08); border: 1px solid rgba(201,168,124,0.18);
+  color: var(--gold); white-space: nowrap;
+}
+
+/* ── Profile modal ── */
+.profile-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(10,12,31,0.92); backdrop-filter: blur(8px);
+  display: none; align-items: flex-start; justify-content: center;
+  padding: 2rem 1rem; overflow-y: auto;
+}
+.profile-overlay.open { display: flex; }
+.profile-modal {
+  background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px;
+  width: 100%; max-width: 920px;
+  margin: 1rem auto; overflow: hidden;
+}
+.profile-close {
+  position: sticky; top: 0; right: 0;
+  float: right; margin: 0.6rem 0.6rem 0 0;
+  background: transparent; border: none; cursor: pointer;
+  font-size: 1.6rem; color: var(--text-faint); padding: 0.3rem 0.6rem;
+  z-index: 5;
+}
+.profile-close:hover { color: var(--gold); }
+.profile-image {
+  width: 100%; max-height: 480px; aspect-ratio: 16/9;
+  background: var(--surface-2);
+  background-size: cover; background-position: center;
+  border-bottom: 1px solid var(--border);
+}
+.profile-image.no-image::before {
+  content: '◈'; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 4rem; color: var(--gold-dim); opacity: 0.4;
+}
+.profile-image-attribution {
+  font-size: 12px; color: var(--text-faint);
+  padding: 0.4rem 1.5rem 0.6rem; font-style: italic;
+  border-bottom: 1px solid var(--border);
+}
+.profile-body { padding: 1.5rem 2rem 2rem; }
+.profile-eyebrow {
+  font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 0.5rem;
+}
+.profile-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.4rem; font-weight: 400; color: var(--text);
+  line-height: 1.1; margin-bottom: 0.4rem;
+}
+.profile-epithet {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 1.3rem; color: var(--gold-bright);
+  margin-bottom: 0.5rem;
+}
+.profile-meta {
+  font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-faint); margin-bottom: 1.5rem;
+}
+.profile-section { margin-bottom: 1.75rem; }
+.profile-section-label {
+  font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 0.6rem;
+}
+.profile-section-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem; line-height: 1.7; color: var(--text-dim);
+}
+.profile-section-text p { margin-bottom: 1rem; }
+.profile-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media (max-width: 720px) { .profile-grid-2 { grid-template-columns: 1fr; } }
+.profile-sigil-wrap {
+  display: flex; gap: 1rem; align-items: flex-start;
+  background: rgba(201,168,124,0.04);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem;
+}
+.profile-sigil-svg {
+  width: 80px; height: 80px; flex-shrink: 0;
+}
+.profile-sigil-svg svg { width: 100%; height: 100%; }
+.profile-sigil-text { flex: 1; }
+.profile-sigil-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 15px; color: var(--gold); margin-bottom: 0.3rem;
+}
+.profile-sigil-description {
+  font-size: 13px; color: var(--text-dim); line-height: 1.5;
+}
+.profile-tags {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.5rem;
+}
+.profile-tag-chip {
+  font-size: 12px; padding: 3px 9px; border-radius: 12px;
+  background: rgba(201,168,124,0.08); border: 1px solid rgba(201,168,124,0.22);
+  color: var(--gold);
+}
+.profile-related {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.profile-related-link {
+  font-size: 13px; padding: 4px 10px; border-radius: 14px;
+  border: 1px solid var(--border); color: var(--text-dim);
+  text-decoration: none; cursor: pointer; transition: all 0.15s;
+}
+.profile-related-link:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+/* ── Empty / loading states ── */
+.empty-state {
+  text-align: center; padding: 4rem 2rem;
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 1.2rem; color: var(--text-faint);
+}
+.loading-state {
+  text-align: center; padding: 6rem 2rem;
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  color: var(--text-dim);
+}
+.loading-state::before {
+  content: '✦'; display: block; font-size: 2rem; color: var(--gold);
+  margin-bottom: 0.5rem; animation: spin 2s linear infinite;
+}
+@keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+
+footer { text-align: center; padding: 3rem 2rem; color: var(--text-faint); font-size: 12px; letter-spacing: 0.1em; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-eyebrow">Christy Paxton Wade</div>
+  <h1 class="header-title">The Mythic Tapestry</h1>
+  <div class="header-rule"></div>
+  <p class="header-sub">Archetypal figures the practice claims as <em>chosen resonance</em> — distinct from blood lineage. Each figure performs an operation that illuminates the Fields and Subterrains of the Navigation Map. Where lineage is what the body carries unchosen, tapestry is what the descendant has named and recognized.</p>
+  <div class="header-links">
+    <a href="index.html" class="header-link" data-link>← Navigation Map</a>
+    <a href="fieldguide.html" class="header-link" data-link>Fieldguide ↗</a>
+    <a href="ancestral-weaving.html" class="header-link" data-link>Ancestral Weaving ↗</a>
+    <a href="ancestral-catalog.html" class="header-link" data-link>Ancestral Catalog ↗</a>
+    <a href="convergence.html" class="header-link" data-link>The Convergence ↗</a>
+    <a href="portal.html" class="header-link">Portal ↗</a>
+  </div>
+  <div id="client-banner" class="client-banner"></div>
+</header>
+
+<div class="toolbar">
+  <div class="toolbar-row">
+    <input class="search-input" id="search-input" type="search" placeholder="Search by name, epithet, tradition…">
+    <div class="view-toggle">
+      <button class="view-btn active" data-view="loom">Loom</button>
+      <button class="view-btn" data-view="tradition">Tradition</button>
+      <button class="view-btn" data-view="constellation">Constellation</button>
+      <button class="view-btn" data-view="catalog">Catalog</button>
+    </div>
+  </div>
+  <div class="filter-row">
+    <label>Tradition</label>
+    <select class="filter-select" id="filter-tradition"><option value="">all</option></select>
+    <label>Era</label>
+    <select class="filter-select" id="filter-era"><option value="">all</option></select>
+    <label>Field</label>
+    <select class="filter-select" id="filter-field"><option value="">all</option></select>
+    <label>Frequency</label>
+    <select class="filter-select" id="filter-frequency"><option value="">all</option></select>
+    <button class="filter-clear" id="filter-clear">Clear filters</button>
+    <span style="margin-left:auto;color:var(--text-faint);font-size:12px" id="result-count"></span>
+  </div>
+</div>
+
+<main id="content"><div class="loading-state">Loading the tapestry…</div></main>
+
+<div class="profile-overlay" id="profile-overlay" onclick="closeProfile(event)">
+  <div class="profile-modal" id="profile-modal" onclick="event.stopPropagation()">
+    <button class="profile-close" onclick="closeProfile()" title="Close">×</button>
+    <div id="profile-content"></div>
+  </div>
+</div>
+
+<footer>The Navigation Map of Consciousness · christypaxtonwade.com</footer>
+
+<script>
+const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+
+const FIELDS = [
+  { num: 'I',    name: 'Structural Models' },
+  { num: 'II',   name: 'Anomalous Reception' },
+  { num: 'III',  name: 'Threshold Events' },
+  { num: 'IV',   name: 'Embodied Signal' },
+  { num: 'V',    name: 'Resonance in Language' },
+  { num: 'VI',   name: 'Body as Active Practice' },
+  { num: 'VII',  name: 'The Creative Record' },
+  { num: 'VIII', name: 'Animal and Nature Medicine' },
+  { num: 'IX',   name: 'The Mirror' },
+  { num: 'X',    name: 'The Shadow' },
+  { num: 'XI',   name: 'The Teaching' },
+  { num: 'XII',  name: 'Sovereignty' },
+  { num: 'XIII', name: 'The Return' },
+];
+
+// Subterrains → parent Field name (used to roll subterrain frequencies up to a Field for the Loom view)
+const SUBTERRAIN_TO_FIELD = {
+  'The Ordeal':'Threshold Events','Ancestral and Relational Crossings':'Threshold Events','Portals in Time':'Threshold Events','The Refusal of the Call':'Threshold Events',
+  'What Lies Beneath':'The Shadow','The Ancestral Underground':'The Shadow','The Unspeakable':'The Shadow','The Unnamed':'The Shadow','The Wound That Will Not Close':'The Shadow','The Dismemberment':'The Shadow','The Borrowed Fate':'The Shadow','The Alchemical Process':'The Shadow',
+  'The Forbidden Fire':'The Creative Record','The Sovereign Act of Making':'The Creative Record','The Oral Archive':'The Creative Record','The Living Artifact':'The Creative Record','Narrative and Story':'The Creative Record',
+  'The Encoded Name':'Resonance in Language','Vocabulary as Structure':'Resonance in Language','The Architecture of Meaning':'Resonance in Language','Tone':'Resonance in Language',
+  'The Held Body':'Body as Active Practice',"The Body's Own Threshold":'Body as Active Practice','Movement and Expression':'Body as Active Practice','The Sonic Body':'Body as Active Practice',
+  'The Bird Field':'Animal and Nature Medicine','Plant and Fungal Intelligence':'Animal and Nature Medicine','Terrain and Water':'Animal and Nature Medicine','Totemic Presences':'Animal and Nature Medicine','Seasonal Intelligence':'Animal and Nature Medicine','Wild Darkness':'Animal and Nature Medicine',
+  'The Unbelieved Signal':'Anomalous Reception','Signals from Beyond the Personal Field':'Anomalous Reception','Messengers and Mediators':'Anomalous Reception','The Discernment Layer':'Anomalous Reception',
+  'Wholeness':'Sovereignty','The Claimed Self':'Sovereignty','The Water Bearer':'Sovereignty','The Sovereign Cycle':'Sovereignty','Re-membering':'Sovereignty',
+  'The Other as Teacher':'The Mirror','Beauty as Information':'The Mirror','The Scales':'The Mirror','The Clear Eye':'The Mirror','Reciprocity and Enough':'The Mirror',
+  'Transmission as Sacred Practice':'The Teaching','The Inherited Knowing':'The Teaching','The Expanding Flame':'The Teaching','The Offerings':'The Teaching',
+  'Compassion':'The Return','The Witness':'The Return','The Spiral':'The Return','Dissolution and Integration':'The Return','Terra Incognita':'The Return',
+  'The Quantum Field':'Structural Models','Geometries of Consciousness':'Structural Models','The Operating System':'Structural Models','Navigational Coordinates':'Structural Models',
+  'The Interior Body':'Embodied Signal','Vibrational Frequency':'Embodied Signal',
+};
+function resolveToField(tagName) {
+  if (!tagName) return null;
+  // Direct field match
+  if (FIELDS.find(f => f.name === tagName)) return tagName;
+  // Subterrain → field
+  return SUBTERRAIN_TO_FIELD[tagName] || null;
+}
+
+// ── State ──
+let figures = [];      // [{ ...archetype, frequencies: ['Tag', ...], primaryFields: ['Field name', ...] }]
+let currentView = 'loom';
+let filters = { search: '', tradition: '', era: '', field: '', frequency: '' };
+let CLIENT_ID = new URLSearchParams(window.location.search).get('client_id');
+
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function sb(path) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+  });
+  if (!res.ok) throw new Error(`Supabase ${res.status}`);
+  return res.json();
+}
+
+// Preserve client_id across header links when present
+if (CLIENT_ID) {
+  document.querySelectorAll('a.header-link[data-link]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (!href || href.startsWith('#') || href.startsWith('http')) return;
+    const sep = href.includes('?') ? '&' : '?';
+    a.setAttribute('href', `${href}${sep}client_id=${encodeURIComponent(CLIENT_ID)}`);
+  });
+}
+
+// ── Init ──
+async function init() {
+  try {
+    const [archetypes, freqRows, clientRow] = await Promise.all([
+      sb('tapestry_archetypes?select=*&order=name'),
+      sb('tapestry_archetype_frequencies?select=tapestry_archetype_id,strength,frequency_tags(name)').catch(() => []),
+      CLIENT_ID ? sb(`clients?id=eq.${encodeURIComponent(CLIENT_ID)}&select=id,name`).then(r => r[0]).catch(() => null) : Promise.resolve(null)
+    ]);
+
+    // Build frequency map per archetype
+    const freqMap = {};
+    (Array.isArray(freqRows) ? freqRows : []).forEach(r => {
+      const name = r.frequency_tags?.name; if (!name) return;
+      if (!freqMap[r.tapestry_archetype_id]) freqMap[r.tapestry_archetype_id] = [];
+      freqMap[r.tapestry_archetype_id].push(name);
+    });
+
+    figures = (Array.isArray(archetypes) ? archetypes : []).map(a => {
+      const tags = freqMap[a.id] || [];
+      const primaryFields = [...new Set(tags.map(resolveToField).filter(Boolean))];
+      return { ...a, frequencies: tags, primaryFields };
+    });
+
+    // Optional client banner
+    if (CLIENT_ID && clientRow) {
+      const banner = document.getElementById('client-banner');
+      banner.style.display = 'block';
+      banner.innerHTML = `Viewing <strong style="font-weight:500">${esc(clientRow.name)}</strong>'s mythic resonances · <a href="tapestry.html" style="color:var(--gold);text-decoration:underline">view full tapestry</a>`;
+      // Filter figures to only those assigned to this client
+      const assignments = await sb(`client_tapestry_archetypes?client_id=eq.${encodeURIComponent(CLIENT_ID)}&select=tapestry_archetype_id,resonance_note`).catch(() => []);
+      const assignedIds = new Set((Array.isArray(assignments) ? assignments : []).map(a => a.tapestry_archetype_id));
+      const noteMap = {};
+      (Array.isArray(assignments) ? assignments : []).forEach(a => { if (a.resonance_note) noteMap[a.tapestry_archetype_id] = a.resonance_note; });
+      figures = figures.filter(f => assignedIds.has(f.id)).map(f => ({ ...f, resonance_note: noteMap[f.id] || null }));
+    }
+
+    populateFilters();
+    wireToolbar();
+    render();
+
+    // Open a profile if URL hash is set
+    if (window.location.hash.startsWith('#figure/')) {
+      const slug = decodeURIComponent(window.location.hash.slice(8));
+      const f = figures.find(x => slugify(x.name) === slug);
+      if (f) openProfile(f.id);
+    }
+  } catch (err) {
+    document.getElementById('content').innerHTML = `<div class="empty-state">The tapestry could not be retrieved.<br><span style="font-size:0.95rem;opacity:0.7">${esc(err.message)}</span></div>`;
+  }
+}
+
+function slugify(s) { return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+
+// ── Filters & search ──
+function populateFilters() {
+  const traditions = [...new Set(figures.map(f => f.tradition).filter(Boolean))].sort();
+  const eras       = [...new Set(figures.map(f => f.emergence_period).filter(Boolean))];
+  const allTags    = [...new Set(figures.flatMap(f => f.frequencies))].sort();
+
+  const tradSel = document.getElementById('filter-tradition');
+  traditions.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; tradSel.appendChild(o); });
+
+  const eraSel  = document.getElementById('filter-era');
+  // sort eras chronologically
+  const eraOrder = ['pre-dynastic','bronze-age','iron-age','classical','late-antique','early-medieval','high-medieval','early-modern','modern','contemporary-revival'];
+  eras.sort((a,b) => eraOrder.indexOf(a) - eraOrder.indexOf(b));
+  eras.forEach(e => { const o = document.createElement('option'); o.value = e; o.textContent = e; eraSel.appendChild(o); });
+
+  const fieldSel = document.getElementById('filter-field');
+  FIELDS.forEach(f => { const o = document.createElement('option'); o.value = f.name; o.textContent = `${f.num}. ${f.name}`; fieldSel.appendChild(o); });
+
+  const freqSel = document.getElementById('filter-frequency');
+  allTags.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; freqSel.appendChild(o); });
+}
+
+function wireToolbar() {
+  document.getElementById('search-input').addEventListener('input', e => { filters.search = e.target.value.toLowerCase(); render(); });
+  ['tradition','era','field','frequency'].forEach(k => {
+    document.getElementById('filter-' + k).addEventListener('change', e => { filters[k] = e.target.value; render(); });
+  });
+  document.getElementById('filter-clear').addEventListener('click', () => {
+    filters = { search: '', tradition: '', era: '', field: '', frequency: '' };
+    document.getElementById('search-input').value = '';
+    ['tradition','era','field','frequency'].forEach(k => document.getElementById('filter-' + k).value = '');
+    render();
+  });
+  document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentView = btn.dataset.view;
+      document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b === btn));
+      render();
+    });
+  });
+}
+
+function applyFilters(list) {
+  const q = filters.search.trim();
+  return list.filter(f => {
+    if (q) {
+      const hay = [f.name, f.epithet, f.tradition, f.catalog_preview].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    if (filters.tradition && f.tradition !== filters.tradition) return false;
+    if (filters.era && f.emergence_period !== filters.era) return false;
+    if (filters.field && !f.primaryFields.includes(filters.field)) return false;
+    if (filters.frequency && !f.frequencies.includes(filters.frequency)) return false;
+    return true;
+  });
+}
+
+// ── Render ──
+function render() {
+  const visible = applyFilters(figures);
+  const countEl = document.getElementById('result-count');
+  countEl.textContent = `${visible.length} figure${visible.length===1?'':'s'}`;
+
+  const content = document.getElementById('content');
+  if (!visible.length) { content.innerHTML = `<div class="empty-state">${figures.length === 0 ? 'No tapestry figures yet.' : 'No figures match those filters.'}</div>`; return; }
+
+  if (currentView === 'loom')          renderLoom(visible, content);
+  else if (currentView === 'tradition') renderTradition(visible, content);
+  else if (currentView === 'constellation') renderConstellation(visible, content);
+  else if (currentView === 'catalog')    renderCatalog(visible, content);
+}
+
+function figureCard(f) {
+  const imgStyle = f.image_url ? `style="background-image:url('${esc(f.image_url)}')"` : '';
+  const noImg = f.image_url ? '' : ' no-image';
+  return `<div class="figure-card" onclick="openProfile('${f.id}')">
+    <div class="figure-card-image${noImg}" ${imgStyle}></div>
+    <div class="figure-card-body">
+      <div class="figure-card-tradition">${esc(f.tradition || '—')}</div>
+      <div class="figure-card-name">${esc(f.name)}</div>
+      ${f.epithet ? `<div class="figure-card-epithet">${esc(f.epithet)}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderLoom(visible, content) {
+  let html = '<div class="loom-section">';
+  FIELDS.forEach(field => {
+    const inField = visible.filter(f => f.primaryFields.includes(field.name));
+    if (!inField.length) return;
+    html += `<div class="field-band">
+      <div class="field-header">
+        <span class="field-numeral">${field.num}.</span>
+        <span class="field-name">${esc(field.name)}</span>
+        <span class="field-count">${inField.length} figure${inField.length===1?'':'s'}</span>
+      </div>
+      <div class="figure-grid">${inField.map(figureCard).join('')}</div>
+    </div>`;
+  });
+  // Figures with no Field activation (shouldn't happen but safe)
+  const orphans = visible.filter(f => !f.primaryFields.length);
+  if (orphans.length) {
+    html += `<div class="field-band">
+      <div class="field-header"><span class="field-name">Unfielded</span><span class="field-count">${orphans.length}</span></div>
+      <div class="figure-grid">${orphans.map(figureCard).join('')}</div>
+    </div>`;
+  }
+  html += '</div>';
+  content.innerHTML = html;
+}
+
+function renderTradition(visible, content) {
+  const groups = {};
+  visible.forEach(f => {
+    const t = f.tradition || 'Untraditioned';
+    if (!groups[t]) groups[t] = [];
+    groups[t].push(f);
+  });
+  const sortedTraditions = Object.keys(groups).sort();
+  let html = '<div class="tradition-section">';
+  sortedTraditions.forEach(t => {
+    const group = groups[t];
+    html += `<div class="tradition-band">
+      <div class="tradition-header">${esc(t)} <span style="font-size:0.85rem;color:var(--text-faint);font-style:normal;letter-spacing:0.1em;text-transform:uppercase;margin-left:0.5rem">${group.length}</span></div>
+      <div class="figure-grid">${group.map(figureCard).join('')}</div>
+    </div>`;
+  });
+  html += '</div>';
+  content.innerHTML = html;
+}
+
+function renderConstellation(visible, content) {
+  if (visible.length < 2) {
+    content.innerHTML = '<div class="constellation-wrap"><div class="empty-state" style="flex:1">Constellation needs at least two figures to draw connections.</div></div>';
+    return;
+  }
+  const W = 720, H = 600, cx = W/2, cy = H/2, r = Math.min(W,H)/2 - 80;
+  // Place nodes on a circle, sorted by tradition then name
+  const sorted = [...visible].sort((a,b) => (a.tradition||'').localeCompare(b.tradition||'') || a.name.localeCompare(b.name));
+  const positions = sorted.map((f, i) => {
+    const a = (i / sorted.length) * Math.PI * 2 - Math.PI/2;
+    return { id: f.id, x: cx + r * Math.cos(a), y: cy + r * Math.sin(a), figure: f, angle: a };
+  });
+  // Build edges: any two figures sharing at least one frequency
+  const edges = [];
+  for (let i = 0; i < positions.length; i++) {
+    for (let j = i + 1; j < positions.length; j++) {
+      const shared = positions[i].figure.frequencies.filter(t => positions[j].figure.frequencies.includes(t));
+      if (shared.length) edges.push({ a: i, b: j, shared });
+    }
+  }
+
+  const edgeSvg = edges.map((e, i) => `<line class="edge" data-a="${e.a}" data-b="${e.b}" x1="${positions[e.a].x}" y1="${positions[e.a].y}" x2="${positions[e.b].x}" y2="${positions[e.b].y}"></line>`).join('');
+  const nodeSvg = positions.map((p, i) => {
+    const labelX = p.x + (p.x > cx ? 14 : -14) * Math.cos(p.angle === 0 ? 0 : 1) + (p.x > cx ? 14 : -14);
+    const labelAnchor = p.x > cx ? 'start' : 'end';
+    const lx = p.x + (p.x > cx ? 14 : -14);
+    const ly = p.y + 4;
+    return `<line class="edge" x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" style="display:none"></line>
+      <circle class="node" data-i="${i}" cx="${p.x}" cy="${p.y}" r="9" fill="rgba(201,168,124,0.55)" stroke="rgba(201,168,124,0.4)" stroke-width="1"></circle>
+      <text class="label" data-i="${i}" x="${lx}" y="${ly}" text-anchor="${labelAnchor}">${esc(p.figure.name)}</text>`;
+  }).join('');
+
+  content.innerHTML = `<div class="constellation-wrap">
+    <div class="constellation-canvas-wrap">
+      <svg class="constellation-svg" viewBox="0 0 ${W} ${H}" id="constellation-svg" preserveAspectRatio="xMidYMid meet">
+        ${edgeSvg}
+        ${nodeSvg}
+      </svg>
+    </div>
+    <div class="constellation-info">
+      <div class="constellation-info-card" id="constellation-info-card">
+        <div class="constellation-help">Hover or tap a figure to see who shares its frequencies. Click to open the full profile. Lines connect figures by shared Field or Subterrain activation.</div>
+        <div id="constellation-info-content" style="display:none"></div>
+      </div>
+    </div>
+  </div>`;
+
+  const svg = document.getElementById('constellation-svg');
+  const infoContent = document.getElementById('constellation-info-content');
+  const helpEl = svg.parentElement.parentElement.querySelector('.constellation-help');
+
+  function highlight(i) {
+    svg.querySelectorAll('circle.node').forEach(n => n.classList.remove('selected','related'));
+    svg.querySelectorAll('text.label').forEach(n => n.classList.remove('selected','related'));
+    svg.querySelectorAll('line.edge').forEach(e => e.classList.remove('highlight'));
+    if (i == null) {
+      helpEl.style.display = 'block';
+      infoContent.style.display = 'none';
+      return;
+    }
+    const target = positions[i];
+    svg.querySelector(`circle.node[data-i="${i}"]`).classList.add('selected');
+    svg.querySelector(`text.label[data-i="${i}"]`).classList.add('selected');
+    const relatedSet = new Set();
+    edges.forEach((e, ei) => {
+      if (e.a === i || e.b === i) {
+        const other = e.a === i ? e.b : e.a;
+        relatedSet.add(other);
+        const edgeEl = svg.querySelectorAll(`line.edge`)[ei];
+        if (edgeEl) edgeEl.classList.add('highlight');
+      }
+    });
+    relatedSet.forEach(other => {
+      svg.querySelector(`circle.node[data-i="${other}"]`)?.classList.add('related');
+      svg.querySelector(`text.label[data-i="${other}"]`)?.classList.add('related');
+    });
+    helpEl.style.display = 'none';
+    infoContent.style.display = 'block';
+    const relatedList = [...relatedSet].map(idx => {
+      const p = positions[idx];
+      const sharedTags = edges.find(e => (e.a === i && e.b === idx) || (e.b === i && e.a === idx))?.shared || [];
+      return `<div style="margin-top:0.4rem"><a class="profile-related-link" onclick="openProfile('${p.figure.id}')" style="display:inline-block">${esc(p.figure.name)}</a> <span style="color:var(--text-faint);font-size:11px;letter-spacing:0.06em">${esc(sharedTags.join(' · '))}</span></div>`;
+    }).join('');
+    infoContent.innerHTML = `
+      <div class="constellation-selected-name">${esc(target.figure.name)}</div>
+      <div class="constellation-selected-meta">${esc(target.figure.tradition || '')}${target.figure.emergence_period ? ' · ' + esc(target.figure.emergence_period) : ''}</div>
+      ${target.figure.epithet ? `<div style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--text-dim);margin-bottom:0.6rem">${esc(target.figure.epithet)}</div>` : ''}
+      <button class="profile-related-link" onclick="openProfile('${target.figure.id}')">Open profile →</button>
+      <div class="constellation-selected-related">
+        <strong>Shared resonance with ${relatedSet.size} figure${relatedSet.size===1?'':'s'}:</strong>
+        ${relatedList || '<div style="color:var(--text-faint);font-style:italic">No shared frequencies yet.</div>'}
+      </div>`;
+  }
+
+  svg.querySelectorAll('circle.node').forEach(n => {
+    const i = parseInt(n.getAttribute('data-i'));
+    n.addEventListener('mouseenter', () => highlight(i));
+    n.addEventListener('click', () => openProfile(positions[i].figure.id));
+  });
+  svg.addEventListener('mouseleave', () => highlight(null));
+}
+
+let catalogSort = { col: 'name', dir: 'asc' };
+function renderCatalog(visible, content) {
+  const cols = [
+    { id: 'image', label: '', sortable: false },
+    { id: 'name', label: 'Name', sortable: true },
+    { id: 'tradition', label: 'Tradition', sortable: true },
+    { id: 'emergence_period', label: 'Era', sortable: true },
+    { id: 'fields', label: 'Fields', sortable: false },
+    { id: 'frequencies', label: 'Frequencies', sortable: false },
+  ];
+  const sorted = [...visible].sort((a,b) => {
+    const A = (a[catalogSort.col] || '').toString().toLowerCase();
+    const B = (b[catalogSort.col] || '').toString().toLowerCase();
+    if (A < B) return catalogSort.dir === 'asc' ? -1 : 1;
+    if (A > B) return catalogSort.dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  const headers = cols.map(c => {
+    let cls = '';
+    if (c.sortable && catalogSort.col === c.id) cls = 'sorted-' + catalogSort.dir;
+    else if (c.sortable) cls = 'sorted';
+    return `<th data-col="${c.id}" data-sortable="${c.sortable}" class="${cls}">${esc(c.label)}</th>`;
+  }).join('');
+  const rows = sorted.map(f => `
+    <tr onclick="openProfile('${f.id}')">
+      <td><div class="catalog-thumb" ${f.image_url ? `style="background-image:url('${esc(f.image_url)}')"` : ''}></div></td>
+      <td>
+        <div class="catalog-figure-name">${esc(f.name)}</div>
+        ${f.epithet ? `<div class="catalog-figure-epithet">${esc(f.epithet)}</div>` : ''}
+      </td>
+      <td><span class="catalog-tradition">${esc(f.tradition || '')}</span></td>
+      <td><span class="catalog-period">${esc(f.emergence_period || '')}</span></td>
+      <td><span class="catalog-period">${f.primaryFields.map(esc).join(' · ')}</span></td>
+      <td><div class="catalog-tags">${f.frequencies.slice(0,5).map(t => `<span class="catalog-tag-chip">${esc(t)}</span>`).join('')}${f.frequencies.length>5?`<span class="catalog-tag-chip" style="opacity:0.6">+${f.frequencies.length-5}</span>`:''}</div></td>
+    </tr>`).join('');
+  content.innerHTML = `<div class="catalog-section">
+    <table class="catalog-table">
+      <thead><tr>${headers}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+  document.querySelectorAll('.catalog-table thead th[data-sortable="true"]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.getAttribute('data-col');
+      if (catalogSort.col === col) catalogSort.dir = catalogSort.dir === 'asc' ? 'desc' : 'asc';
+      else { catalogSort.col = col; catalogSort.dir = 'asc'; }
+      render();
+    });
+  });
+}
+
+// ── Profile modal ──
+function openProfile(id) {
+  const f = figures.find(x => x.id === id);
+  if (!f) return;
+  // Update URL hash for shareable link
+  history.replaceState(null, '', `#figure/${slugify(f.name)}`);
+
+  const related = figures
+    .filter(x => x.id !== f.id && x.frequencies.some(t => f.frequencies.includes(t)))
+    .map(x => ({ ...x, shared: x.frequencies.filter(t => f.frequencies.includes(t)) }))
+    .sort((a,b) => b.shared.length - a.shared.length)
+    .slice(0, 8);
+
+  const imgStyle = f.image_url ? `style="background-image:url('${esc(f.image_url)}')"` : '';
+  const noImg = f.image_url ? '' : ' no-image';
+  const c = document.getElementById('profile-content');
+  c.innerHTML = `
+    <div class="profile-image${noImg}" ${imgStyle}></div>
+    ${f.image_attribution ? `<div class="profile-image-attribution">${esc(f.image_attribution)}</div>` : ''}
+    <div class="profile-body">
+      <div class="profile-eyebrow">${esc(f.tradition || '')}${f.emergence_period ? ' · ' + esc(f.emergence_period) : ''}</div>
+      <h2 class="profile-name">${esc(f.name)}</h2>
+      ${f.epithet ? `<div class="profile-epithet">${esc(f.epithet)}</div>` : ''}
+      ${f.resonance_note ? `<div style="font-style:italic;color:var(--text-dim);padding:0.6rem 0.75rem;border-left:2px solid var(--gold-dim);background:rgba(201,168,124,0.04);margin-bottom:1rem">Resonance note: ${esc(f.resonance_note)}</div>` : ''}
+
+      ${f.catalog_preview ? `<div class="profile-section"><div class="profile-section-text">${formatPara(f.catalog_preview)}</div></div>` : ''}
+
+      ${(f.layer_terroir || f.layer_unresolved || f.layer_thread || f.layer_lineage) ? `
+        ${f.layer_terroir   ? `<div class="profile-section"><div class="profile-section-label">Culture &amp; Origin</div><div class="profile-section-text">${formatPara(f.layer_terroir)}</div></div>` : ''}
+        ${f.layer_unresolved ? `<div class="profile-section"><div class="profile-section-label">Unresolved</div><div class="profile-section-text">${formatPara(f.layer_unresolved)}</div></div>` : ''}
+        ${f.layer_thread    ? `<div class="profile-section"><div class="profile-section-label">Thread (Mythic)</div><div class="profile-section-text">${formatPara(f.layer_thread)}</div></div>` : ''}
+        ${f.layer_lineage   ? `<div class="profile-section"><div class="profile-section-label">Lineage</div><div class="profile-section-text">${formatPara(f.layer_lineage)}</div></div>` : ''}
+      ` : ''}
+
+      ${f.catalog_full ? `<div class="profile-section"><div class="profile-section-label">Long-form profile</div><div class="profile-section-text">${formatPara(f.catalog_full)}</div></div>` : ''}
+
+      ${f.sigil_svg || f.sigil_name ? `<div class="profile-section"><div class="profile-section-label">Sigil</div>
+        <div class="profile-sigil-wrap">
+          <div class="profile-sigil-svg">${f.sigil_svg || ''}</div>
+          <div class="profile-sigil-text">
+            ${f.sigil_name ? `<div class="profile-sigil-name">${esc(f.sigil_name)}</div>` : ''}
+            ${f.sigil_description ? `<div class="profile-sigil-description">${esc(f.sigil_description)}</div>` : ''}
+          </div>
+        </div></div>` : ''}
+
+      ${f.frequencies.length ? `<div class="profile-section">
+        <div class="profile-section-label">Frequency tags</div>
+        <div class="profile-tags">${f.frequencies.map(t => `<span class="profile-tag-chip">${esc(t)}</span>`).join('')}</div>
+      </div>` : ''}
+
+      ${related.length ? `<div class="profile-section">
+        <div class="profile-section-label">Related figures (shared frequency)</div>
+        <div class="profile-related">${related.map(r => `<a class="profile-related-link" onclick="openProfile('${r.id}')" title="Shared: ${esc(r.shared.join(' · '))}">${esc(r.name)}</a>`).join('')}</div>
+      </div>` : ''}
+    </div>
+  `;
+  document.getElementById('profile-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('profile-modal').scrollTop = 0;
+}
+
+function formatPara(text) {
+  return esc(text).split(/\n\n+/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+}
+
+function closeProfile(e) {
+  if (e && e.target.id !== 'profile-overlay') return;
+  document.getElementById('profile-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  if (window.location.hash.startsWith('#figure/')) history.replaceState(null, '', window.location.pathname + window.location.search);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProfile({ target: { id: 'profile-overlay' } }); });
+
+init();
+</script>
+</body>
+</html>
