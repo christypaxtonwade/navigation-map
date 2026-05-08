@@ -407,8 +407,38 @@ body::before {
   .convergence-section, .snapshot-card,
   .section, .match-row { page-break-inside: avoid; }
 
-  /* Page margins */
-  @page { margin: 0.75in 0.65in; }
+  /* Page margins — increased for proper book-style breathing room.
+     Side margins go from 0.65in → 0.85in so content is never flush against the printable edge. */
+  @page { margin: 0.85in 0.85in 0.95in 0.85in; }
+
+  /* Box-sizing safety: keep every container inside the printable width */
+  *, *::before, *::after { box-sizing: border-box !important; }
+
+  /* Content breathing room inside the cream surface — also keeps the right column
+     of any flex row (e.g. frequency counts) from sitting flush against the margin */
+  .container, main, #main-content, .convergence-output, .page {
+    padding: 0 6pt !important;
+  }
+
+  /* Dominant-frequencies row specifically — tightened so the count never overflows */
+  .frequency-bar-row {
+    width: 100% !important;
+    column-gap: 12pt !important;
+    padding-right: 4pt !important;
+  }
+  .freq-name {
+    width: 200px !important; flex-shrink: 1 !important; min-width: 0 !important;
+    word-break: break-word !important;
+  }
+  .freq-count {
+    width: 32px !important; flex-shrink: 0 !important;
+    padding-left: 4pt !important;
+  }
+  .freq-bar-wrap { flex: 1 1 auto !important; min-width: 0 !important; }
+
+  /* Frequency-bars reduced to a faint gold line on print — keeps the page calm */
+  .freq-bar { background: #a07428 !important; opacity: 0.55 !important; }
+  .freq-bar-wrap { background: rgba(160,116,40,0.12) !important; }
 }
 
 /* ── Loading ── */
