@@ -974,22 +974,13 @@ function renderCatalog(visible, content) {
 // ── Profile modal ──
 let profileViewMode = 'cards'; // 'cards' or 'long'
 
-function wordCount(text) {
-  if (!text) return 0;
-  return String(text).trim().split(/\s+/).filter(Boolean).length;
-}
-
-function profileCard({ id, title, register, text, accent, fullWidth, html }) {
-  const wc = text ? wordCount(text) : 0;
-  const meta = wc ? `<span class="profile-card-meta">${wc} word${wc===1?'':'s'}</span>` : '';
+function profileCard({ id, title, text, accent, fullWidth, html }) {
   const accentCls = accent ? ` accent-${accent}` : '';
   const widthCls  = fullWidth ? ' full-width' : '';
-  const registerHtml = register ? `<span class="profile-card-register">${esc(register)}</span>` : '';
   const body = html || (text ? `<div class="profile-card-text">${formatPara(text)}</div>` : '');
   return `<section class="profile-card${accentCls}${widthCls}" id="${id || ''}">
     <div class="profile-card-header">
-      <div class="profile-card-title">${esc(title)}${registerHtml ? ' ' + registerHtml : ''}</div>
-      ${meta}
+      <div class="profile-card-title">${esc(title)}</div>
     </div>
     ${body}
   </section>`;
@@ -1032,14 +1023,14 @@ function openProfile(id) {
 
   // Quick-jump nav (only shows for sections that have content)
   const navItems = [];
-  if (f.catalog_preview)  navItems.push({ id: 'sec-preview',    label: 'Preview' });
+  if (f.catalog_preview)  navItems.push({ id: 'sec-preview',    label: 'The Archetype' });
   if (f.layer_terroir)    navItems.push({ id: 'sec-terroir',    label: 'Culture & Origin' });
-  if (f.layer_unresolved) navItems.push({ id: 'sec-unresolved', label: 'Unresolved' });
-  if (f.layer_thread)     navItems.push({ id: 'sec-thread',     label: 'Thread' });
-  if (f.layer_lineage)    navItems.push({ id: 'sec-lineage',    label: 'Lineage' });
+  if (f.layer_unresolved) navItems.push({ id: 'sec-unresolved', label: 'The Unresolved' });
+  if (f.layer_thread)     navItems.push({ id: 'sec-thread',     label: 'The Thread' });
+  if (f.layer_lineage)    navItems.push({ id: 'sec-lineage',    label: 'The Lineage' });
   if (f.catalog_full)     navItems.push({ id: 'sec-telling',    label: 'The Telling' });
-  if (f.sigil_svg || f.sigil_name) navItems.push({ id: 'sec-sigil', label: 'Sigil' });
-  if (related.length)     navItems.push({ id: 'sec-related',    label: 'Related' });
+  if (f.sigil_svg || f.sigil_name) navItems.push({ id: 'sec-sigil', label: 'The Sigil' });
+  if (related.length)     navItems.push({ id: 'sec-related',    label: 'Signatures' });
 
   const navBar = `<nav class="profile-nav">${navItems.map(n => `<a class="profile-nav-link" onclick="document.getElementById('${n.id}')?.scrollIntoView({behavior:'smooth',block:'start'})">${esc(n.label)}</a>`).join('')}</nav>`;
 
@@ -1053,25 +1044,25 @@ function openProfile(id) {
   // Cards
   const cards = [];
   if (f.catalog_preview) cards.push(profileCard({
-    id: 'sec-preview', title: 'Preview', text: f.catalog_preview, fullWidth: true
+    id: 'sec-preview', title: 'The Archetype', text: f.catalog_preview, fullWidth: true
   }));
   if (f.layer_terroir) cards.push(profileCard({
-    id: 'sec-terroir', title: 'Culture & Origin', register: 'somatic', text: f.layer_terroir, accent: 'somatic'
+    id: 'sec-terroir', title: 'Culture & Origin', text: f.layer_terroir, accent: 'somatic'
   }));
   if (f.layer_unresolved) cards.push(profileCard({
-    id: 'sec-unresolved', title: 'Unresolved', register: 'unreceived', text: f.layer_unresolved, accent: 'unreceived'
+    id: 'sec-unresolved', title: 'The Unresolved', text: f.layer_unresolved, accent: 'unreceived'
   }));
   if (f.layer_thread) cards.push(profileCard({
-    id: 'sec-thread', title: 'Thread', register: 'mythic', text: f.layer_thread, accent: 'mythic'
+    id: 'sec-thread', title: 'The Thread', text: f.layer_thread, accent: 'mythic'
   }));
   if (f.layer_lineage) cards.push(profileCard({
-    id: 'sec-lineage', title: 'Lineage', register: 'conceptual', text: f.layer_lineage, accent: 'conceptual'
+    id: 'sec-lineage', title: 'The Lineage', text: f.layer_lineage, accent: 'conceptual'
   }));
   if (f.catalog_full) cards.push(profileCard({
-    id: 'sec-telling', title: 'The Telling', register: 'long-form narrative', text: f.catalog_full, fullWidth: true
+    id: 'sec-telling', title: 'The Telling', text: f.catalog_full, fullWidth: true
   }));
   if (f.sigil_svg || f.sigil_name || f.sigil_description) cards.push(profileCard({
-    id: 'sec-sigil', title: 'Sigil', fullWidth: true,
+    id: 'sec-sigil', title: 'The Sigil', fullWidth: true,
     html: `<div class="profile-sigil-card">
       <div class="profile-sigil-svg-box">${f.sigil_svg || '<span style="color:var(--text-faint);font-size:13px;font-style:italic">no sigil</span>'}</div>
       <div class="profile-sigil-meta-text">
@@ -1081,7 +1072,7 @@ function openProfile(id) {
     </div>`
   }));
   if (related.length) cards.push(profileCard({
-    id: 'sec-related', title: `Related figures · ${related.length}`, fullWidth: true,
+    id: 'sec-related', title: 'Signatures', fullWidth: true,
     html: `<div class="profile-related">${related.map(r => `<a class="profile-related-link" onclick="openProfile('${r.id}')" title="Shared: ${esc(r.shared.join(' · '))}">${esc(r.name)} <span style="opacity:0.55;font-size:11px">${r.shared.length}</span></a>`).join('')}</div>`
   }));
 
