@@ -240,9 +240,13 @@ body {
 .constellation-svg circle.node.related { stroke: var(--gold-dim); stroke-width: 2; }
 .constellation-svg line.edge {
   stroke: rgba(201,168,124,0.18); stroke-width: 0.6;
-  transition: stroke 0.18s, stroke-width 0.18s;
+  opacity: 0;                              /* hidden at idle */
+  transition: stroke 0.18s, stroke-width 0.18s, opacity 0.18s;
+  pointer-events: none;
 }
-.constellation-svg line.edge.highlight { stroke: var(--gold); stroke-width: 1.5; }
+.constellation-svg line.edge.highlight {
+  stroke: var(--gold); stroke-width: 1.5; opacity: 0.85;
+}
 .constellation-svg text.label {
   font-family: 'Cormorant Garamond', serif; font-style: italic;
   font-size: 12px; fill: var(--text-dim); pointer-events: none;
@@ -254,8 +258,10 @@ body {
 .constellation-svg text.field-label {
   font-family: 'Jost', sans-serif; font-size: 10px; font-weight: 400;
   letter-spacing: 0.12em; text-transform: uppercase;
-  fill: rgba(201,168,124,0.55); pointer-events: none;
+  fill: rgba(201,168,124,0.30); pointer-events: none;
+  transition: fill 0.18s;
 }
+.constellation-svg text.field-label.active { fill: rgba(201,168,124,0.75); }
 
 /* ── Catalog (list) view ── */
 .catalog-section { padding: 2rem; max-width: 1400px; margin: 0 auto; }
@@ -984,65 +990,93 @@ function renderConstellation(visible, content) {
     content.innerHTML = '<div class="constellation-wrap"><div class="empty-state" style="flex:1">Constellation needs at least two figures to draw connections.</div></div>';
     return;
   }
-  // Field-clustered layout: 13 Field anchors around the perimeter; figures position at the centroid
-  // of their activated Fields (scaled inward for multi-Field figures). Bridging figures naturally
-  // float between their Field clusters.
-  const W = 820, H = 720, cx = W/2, cy = H/2;
-  const R = 260;          // Field anchor radius
-  const labelR = 305;     // Field label radius (outside anchors)
+  // Field-wedge layout: each figure is anchored to ONE primary Field (the parent Field of its first tag).
+  // Multiple figures in the same Field spread along that Field's arc segment. Edges are drawn only when
+  // a node is hovered/selected — at idle the canvas shows the Field structure, calm.
+  const W = 820, H = 760, cx = W/2, cy = H/2;
+  const R = 260;          // Figure ring radius
+  const labelR = 320;     // Field label radius
 
-  const fieldAnchors = {};
+  // Compute each Field's center angle on the wheel
+  const fieldAngles = {};
   FIELDS.forEach((field, i) => {
-    const a = (i / FIELDS.length) * Math.PI * 2 - Math.PI/2;
-    fieldAnchors[field.name] = {
-      x: cx + R * Math.cos(a), y: cy + R * Math.sin(a),
-      lx: cx + labelR * Math.cos(a), ly: cy + labelR * Math.sin(a),
-      angle: a, name: field.name, num: field.num
-    };
+    fieldAngles[field.name] = (i / FIELDS.length) * Math.PI * 2 - Math.PI/2;
   });
 
-  // For each figure, compute centroid of its Field anchors, scaled inward
-  const positions = visible.map(f => {
-    const fieldsInUse = f.primaryFields.filter(name => fieldAnchors[name]);
-    if (!fieldsInUse.length) {
-      return { id: f.id, figure: f, x: cx, y: cy, fieldCount: 0 };
+  // For each figure, pick its primary Field (parent of its first tag, fallback to first primaryField)
+  function primaryFieldFor(f) {
+    if (f.frequencies && f.frequencies.length) {
+      const fld = resolveToField(f.frequencies[0]);
+      if (fld && fieldAngles[fld] !== undefined) return fld;
     }
-    const xSum = fieldsInUse.reduce((s, n) => s + fieldAnchors[n].x, 0);
-    const ySum = fieldsInUse.reduce((s, n) => s + fieldAnchors[n].y, 0);
-    let x = xSum / fieldsInUse.length;
-    let y = ySum / fieldsInUse.length;
-    // Scale inward more for multi-Field figures (single-Field stays close to anchor; tri-Field migrates toward center)
-    const scale = fieldsInUse.length === 1 ? 0.92 : fieldsInUse.length === 2 ? 0.70 : 0.50;
-    x = cx + (x - cx) * scale;
-    y = cy + (y - cy) * scale;
-    return { id: f.id, figure: f, x, y, fieldCount: fieldsInUse.length };
+    return f.primaryFields[0] || null;
+  }
+
+  // Group figures by primary Field
+  const byField = {};
+  visible.forEach(f => {
+    const fld = primaryFieldFor(f) || 'Unfielded';
+    if (!byField[fld]) byField[fld] = [];
+    byField[fld].push(f);
   });
 
-  // De-overlap pass: nudge nodes apart if too close
-  const minDist = 30;
-  for (let pass = 0; pass < 8; pass++) {
-    let moved = false;
+  // Place each figure within its Field's wedge
+  const positions = [];
+  const sectorSpan = (Math.PI * 2) / FIELDS.length;          // ~27.7° per Field
+  const usableSpan = sectorSpan * 0.7;                        // use 70% of the sector to leave gaps
+  FIELDS.forEach((field, fieldIdx) => {
+    const figs = byField[field.name] || [];
+    if (!figs.length) return;
+    const baseAngle = fieldAngles[field.name];
+    figs.forEach((f, i) => {
+      // Distribute along the arc within the sector. For single figure: dead center.
+      const tFrac = figs.length === 1 ? 0 : (i - (figs.length - 1) / 2) / (figs.length - 1);
+      const angleOffset = tFrac * usableSpan;
+      const angle = baseAngle + angleOffset;
+      // Vary radius slightly so figures don't all sit at same depth — alternate inner/outer
+      const radiusOffset = (i % 2 === 0) ? 0 : -28;
+      const r = R + radiusOffset;
+      positions.push({
+        id: f.id, figure: f, fieldName: field.name,
+        x: cx + r * Math.cos(angle),
+        y: cy + r * Math.sin(angle),
+        angle, baseAngle
+      });
+    });
+  });
+
+  // Orphans (figures with no recognised Field) sit at center as a small cluster
+  const orphans = byField['Unfielded'] || [];
+  orphans.forEach((f, i) => {
+    const a = (i / Math.max(orphans.length, 1)) * Math.PI * 2;
+    positions.push({
+      id: f.id, figure: f, fieldName: 'Unfielded',
+      x: cx + 18 * Math.cos(a), y: cy + 18 * Math.sin(a),
+      angle: a, baseAngle: 0
+    });
+  });
+
+  // Mild de-overlap pass within each Field — nudge same-Field figures apart if too close
+  const minDist = 32;
+  for (let pass = 0; pass < 5; pass++) {
     for (let i = 0; i < positions.length; i++) {
       for (let j = i + 1; j < positions.length; j++) {
+        if (positions[i].fieldName !== positions[j].fieldName) continue;
         const dx = positions[i].x - positions[j].x;
         const dy = positions[i].y - positions[j].y;
         const d = Math.sqrt(dx*dx + dy*dy) || 0.001;
         if (d < minDist) {
           const push = (minDist - d) / 2;
-          const ux = dx / d;
-          const uy = dy / d;
-          positions[i].x += ux * push;
-          positions[i].y += uy * push;
-          positions[j].x -= ux * push;
-          positions[j].y -= uy * push;
-          moved = true;
+          positions[i].x += (dx/d) * push;
+          positions[i].y += (dy/d) * push;
+          positions[j].x -= (dx/d) * push;
+          positions[j].y -= (dy/d) * push;
         }
       }
     }
-    if (!moved) break;
   }
 
-  // Build edges between any two figures sharing at least one frequency tag
+  // Build edges: any two figures sharing at least one frequency tag (rendered hidden, shown on hover)
   const edges = [];
   for (let i = 0; i < positions.length; i++) {
     for (let j = i + 1; j < positions.length; j++) {
@@ -1050,40 +1084,42 @@ function renderConstellation(visible, content) {
       if (shared.length) edges.push({ a: i, b: j, shared });
     }
   }
-  // Sort edges so highly-shared edges render on top (drawn last)
-  edges.sort((a, b) => a.shared.length - b.shared.length);
 
-  // Field rim — a faint guide circle so the structure is readable even sparsely
-  const rimSvg = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="rgba(201,168,124,0.06)" stroke-width="0.5" stroke-dasharray="2 4"></circle>`;
+  // Field rim guide (faint dashed circle through Field anchor positions)
+  const rimSvg = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="rgba(201,168,124,0.06)" stroke-width="0.5" stroke-dasharray="2 5"></circle>`;
 
-  // Field anchor marks + labels
+  // Field anchor marks + labels (always visible — these are the structural rails)
   const fieldSvg = FIELDS.map((field, i) => {
-    const fa = fieldAnchors[field.name];
-    // Label rotation/anchor based on side of circle
-    const isRight = fa.lx > cx + 6;
-    const isLeft  = fa.lx < cx - 6;
+    const ang = fieldAngles[field.name];
+    const ax = cx + R * Math.cos(ang);
+    const ay = cy + R * Math.sin(ang);
+    const lx = cx + labelR * Math.cos(ang);
+    const ly = cy + labelR * Math.sin(ang);
+    const isRight = lx > cx + 6;
+    const isLeft  = lx < cx - 6;
     const anchor = isRight ? 'start' : isLeft ? 'end' : 'middle';
+    const figCount = (byField[field.name] || []).length;
+    const fillIntensity = figCount > 0 ? 0.55 : 0.18;
     return `
-      <circle cx="${fa.x}" cy="${fa.y}" r="2.2" fill="rgba(201,168,124,0.45)"></circle>
-      <text class="field-label" x="${fa.lx}" y="${fa.ly}" text-anchor="${anchor}">${field.num}. ${esc(field.name)}</text>`;
+      <circle cx="${ax}" cy="${ay}" r="${figCount > 0 ? 3 : 2}" fill="rgba(201,168,124,${fillIntensity})"></circle>
+      <text class="field-label${figCount > 0 ? ' active' : ''}" x="${lx}" y="${ly}" text-anchor="${anchor}">${field.num}. ${esc(field.name)}</text>`;
   }).join('');
 
-  const edgeSvg = edges.map((e, i) => {
-    const w = 0.4 + Math.min(1.2, e.shared.length * 0.4);
-    const op = 0.12 + Math.min(0.35, e.shared.length * 0.10);
-    return `<line class="edge" data-i="${i}" data-a="${e.a}" data-b="${e.b}" x1="${positions[e.a].x}" y1="${positions[e.a].y}" x2="${positions[e.b].x}" y2="${positions[e.b].y}" style="stroke-width:${w};stroke-opacity:${op}"></line>`;
-  }).join('');
+  // Edges — hidden by default, only become visible when a node has class .focus
+  const edgeSvg = edges.map((e, i) =>
+    `<line class="edge" data-i="${i}" data-a="${e.a}" data-b="${e.b}" x1="${positions[e.a].x}" y1="${positions[e.a].y}" x2="${positions[e.b].x}" y2="${positions[e.b].y}" data-shared="${e.shared.length}"></line>`
+  ).join('');
 
+  // Nodes + labels
   const nodeSvg = positions.map((p, i) => {
-    // Label sits beside the node, away from center
     const dx = p.x - cx, dy = p.y - cy;
     const len = Math.sqrt(dx*dx + dy*dy) || 1;
     const ox = dx / len, oy = dy / len;
-    const lx = p.x + ox * 14;
-    const ly = p.y + oy * 14 + 4;
+    // Place label outside the node, away from center
+    const lx = p.x + ox * 13;
+    const ly = p.y + oy * 13 + 4;
     const labelAnchor = ox > 0.15 ? 'start' : ox < -0.15 ? 'end' : 'middle';
-    const radius = 6 + Math.min(2, p.figure.frequencies.length * 0.4);
-    return `<circle class="node" data-i="${i}" cx="${p.x}" cy="${p.y}" r="${radius}" fill="rgba(201,168,124,0.55)" stroke="rgba(201,168,124,0.45)" stroke-width="1"></circle>
+    return `<circle class="node" data-i="${i}" cx="${p.x}" cy="${p.y}" r="6" fill="rgba(201,168,124,0.62)" stroke="rgba(201,168,124,0.5)" stroke-width="1"></circle>
       <text class="label" data-i="${i}" x="${lx}" y="${ly}" text-anchor="${labelAnchor}">${esc(p.figure.name)}</text>`;
   }).join('');
 
@@ -1091,14 +1127,14 @@ function renderConstellation(visible, content) {
     <div class="constellation-canvas-wrap">
       <svg class="constellation-svg" viewBox="0 0 ${W} ${H}" id="constellation-svg" preserveAspectRatio="xMidYMid meet">
         ${rimSvg}
-        ${edgeSvg}
         ${fieldSvg}
+        ${edgeSvg}
         ${nodeSvg}
       </svg>
     </div>
     <div class="constellation-info">
       <div class="constellation-info-card" id="constellation-info-card">
-        <div class="constellation-help">Figures cluster around the 13 Fields they activate. Single-Field figures sit close to their Field's mark; figures bridging multiple Fields drift toward the center between them. Hover or tap a figure to see its signatures. Click to open the full profile.</div>
+        <div class="constellation-help">Each figure is placed under its primary Field — the parent Field of its first frequency tag. Field rails around the rim show the Map's spine; figures cluster along the rail of the Field they most directly activate. Hover a figure to see which other figures share its signatures (lines appear only on hover). Click to open the full profile.</div>
         <div id="constellation-info-content" style="display:none"></div>
       </div>
     </div>
