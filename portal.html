@@ -2330,6 +2330,16 @@ function renderTapestryEditor(t, isNew) {
       </div>
     </div>
 
+    <!-- Cultural Protocol -->
+    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(168,110,74,0.30);background:rgba(168,110,74,0.04)">
+      <div class="editor-section-title">Cultural Protocol <span style="color:#a86e4a;font-size:15px;letter-spacing:0.1em">LIVING-TRADITION ACKNOWLEDGMENT</span></div>
+      <p style="font-size:14px;color:var(--text-faint);margin-bottom:1rem;line-height:1.6">How this figure is engaged within their living tradition: protocols for invocation, devotional context, lineage requirements, and orientations of respect for working with them outside formal initiation. The point is not warning-label boilerplate — it is to make a practitioner <em>more capable</em> of engaging the figure with knowledge.</p>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Protocol &amp; Engagement <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">180–260 words · status of tradition, forms of invocation, lineage requirements, appropriate orientation</span></label>
+        <textarea class="form-textarea" id="tap-cultural-protocol" rows="9">${esc(t.cultural_protocol)}</textarea>
+      </div>
+    </div>
+
     <!-- Image & Period -->
     <div class="card" style="margin-bottom:1.5rem">
       <div class="editor-section-title">Image &amp; Period</div>
@@ -2536,6 +2546,7 @@ async function draftTapestryWithAI() {
     set('tap-layer-unresolved',  data.layer_unresolved);
     set('tap-layer-thread',      data.layer_thread);
     set('tap-layer-lineage',     data.layer_lineage);
+    set('tap-cultural-protocol', data.cultural_protocol);
     set('tap-sigil-name',        data.sigil_name);
     set('tap-sigil-description', data.sigil_description);
     set('tap-sigil-svg',         data.sigil_svg);
@@ -2582,6 +2593,7 @@ async function saveTapestryArchetype() {
     layer_unresolved:  document.getElementById('tap-layer-unresolved').value.trim() || null,
     layer_thread:      document.getElementById('tap-layer-thread').value.trim() || null,
     layer_lineage:     document.getElementById('tap-layer-lineage').value.trim() || null,
+    cultural_protocol: document.getElementById('tap-cultural-protocol')?.value.trim() || null,
     sigil_name:        document.getElementById('tap-sigil-name').value.trim() || null,
     sigil_description: document.getElementById('tap-sigil-description').value.trim() || null,
     sigil_svg:         document.getElementById('tap-sigil-svg').value.trim() || null,
