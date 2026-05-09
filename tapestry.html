@@ -75,6 +75,37 @@ body {
   max-width: 680px; text-align: center;
 }
 
+/* ── Traditions note (working-with intro) ── */
+.traditions-note {
+  max-width: 880px; margin: 0 auto 1.25rem;
+  padding: 1rem 1.5rem 1.25rem;
+  border: 1px solid rgba(168,110,74,0.30);
+  border-left: 3px solid #a86e4a;
+  background: rgba(168,110,74,0.04);
+  border-radius: 8px;
+}
+.traditions-note-toggle {
+  width: 100%; background: transparent; border: 0;
+  color: #c98870; font-family: inherit; font-size: 15px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; padding: 0.15rem 0;
+}
+.traditions-note-toggle:focus-visible { outline: 2px solid #c98870; outline-offset: 3px; border-radius: 4px; }
+.traditions-note-chevron {
+  font-size: 18px; transition: transform 0.2s ease; color: #c98870;
+}
+.traditions-note[data-collapsed="true"] .traditions-note-chevron { transform: rotate(-90deg); }
+.traditions-note-body {
+  margin-top: 0.85rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; line-height: 1.65; color: var(--text-dim);
+}
+.traditions-note-body p { margin-bottom: 0.85rem; }
+.traditions-note-body p:last-child { margin-bottom: 0; }
+.traditions-note-body strong { color: var(--text); font-weight: 600; }
+.traditions-note[data-collapsed="true"] .traditions-note-body { display: none; }
+
 /* ── Toolbar (search + view switch + filters) ── */
 .toolbar {
   position: sticky; top: 0; z-index: 50;
@@ -402,6 +433,12 @@ body {
 .profile-card.accent-mythic     { border-left-color: var(--gold); }
 .profile-card.accent-conceptual { border-left-color: #8aa0d6; }   /* cool indigo */
 .profile-card.accent-unreceived { border-left-color: #b690d4; }   /* violet */
+.profile-card.accent-protocol   {
+  border-left-color: #a86e4a;
+  background: rgba(168,110,74,0.05);
+  border-color: rgba(168,110,74,0.25);
+}
+.profile-card.accent-protocol .profile-card-title { color: #c98870; }
 .profile-card-header {
   display: flex; align-items: baseline; justify-content: space-between;
   gap: 0.75rem; margin-bottom: 0.6rem;
@@ -589,6 +626,7 @@ footer { text-align: center; padding: 3rem 2rem; color: var(--text-dim); font-si
   .profile-card.accent-mythic     { --print-accent: #a07428 !important; }
   .profile-card.accent-conceptual { --print-accent: #5874a0 !important; }
   .profile-card.accent-unreceived { --print-accent: #7d5d9c !important; }
+  .profile-card.accent-protocol   { --print-accent: #a86e4a !important; background: transparent !important; }
 
   .profile-card-header {
     border-bottom: none !important; padding-bottom: 0 !important;
@@ -649,6 +687,17 @@ footer { text-align: center; padding: 3rem 2rem; color: var(--text-dim); font-si
   </div>
   <div id="client-banner" class="client-banner"></div>
 </header>
+
+<section class="traditions-note" id="traditions-note">
+  <button class="traditions-note-toggle" id="traditions-note-toggle" aria-expanded="true" onclick="toggleTraditionsNote()">
+    <span class="traditions-note-label">Working with these traditions</span>
+    <span class="traditions-note-chevron" aria-hidden="true">▾</span>
+  </button>
+  <div class="traditions-note-body" id="traditions-note-body">
+    <p>Many figures in this Tapestry sit inside living devotional traditions — Yoruba and its diaspora forms, Hindu and Buddhist lineages, Tibetan Vajrayana, Hawaiian religion, Indigenous American practices, Heathen and Hellenic revivalist communities, Kemetic reconstructionism, and the inherited Christian-mystical streams. These figures are not historical artifacts. The way they are engaged matters, and the lineages that hold them are the authority.</p>
+    <p>The orientation of this practice is acknowledgment and respect. Where a figure is held within an initiatory or closed tradition, initiation belongs to that tradition's teachers, and practice belongs to its practitioners. What lives in this Tapestry is the archetypal <em>operation</em> a figure performs — named, studied, and contemplated through scholarship and the careful reading of stories that have come down. Each profile carries a <strong>Cultural Protocol</strong> section that names the specific terms of respectful engagement for that figure: how the tradition is held today, what is and is not appropriate to do without lineage, and where to direct further study. For figures within reconstructionist traditions (Norse and Germanic especially), this practice explicitly disavows the white-supremacist and nationalist appropriation of those symbols. What is offered here is a starting place, not a finished frame; where the protocols are incomplete or the framing wrong, the living tradition is always the higher source.</p>
+  </div>
+</section>
 
 <div class="toolbar">
   <div class="toolbar-row">
@@ -1048,6 +1097,7 @@ function openProfile(id) {
   if (f.layer_thread)     navItems.push({ id: 'sec-thread',     label: 'The Thread' });
   if (f.layer_lineage)    navItems.push({ id: 'sec-lineage',    label: 'The Lineage' });
   if (f.catalog_full)     navItems.push({ id: 'sec-telling',    label: 'The Telling' });
+  if (f.cultural_protocol) navItems.push({ id: 'sec-protocol',  label: 'Cultural Protocol' });
   if (f.sigil_svg || f.sigil_name) navItems.push({ id: 'sec-sigil', label: 'The Sigil' });
   if (related.length)     navItems.push({ id: 'sec-related',    label: 'Signatures' });
 
@@ -1078,6 +1128,9 @@ function openProfile(id) {
   }));
   if (f.catalog_full) cards.push(profileCard({
     id: 'sec-telling', title: 'The Telling', text: f.catalog_full, fullWidth: true
+  }));
+  if (f.cultural_protocol) cards.push(profileCard({
+    id: 'sec-protocol', title: 'Cultural Protocol', text: f.cultural_protocol, accent: 'protocol', fullWidth: true
   }));
   if (f.sigil_svg || f.sigil_name || f.sigil_description) cards.push(profileCard({
     id: 'sec-sigil', title: 'The Sigil', fullWidth: true,
@@ -1113,6 +1166,34 @@ function setProfileViewMode(mode, figureId) {
 function formatPara(text) {
   return esc(text).split(/\n\n+/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
 }
+
+// Working-with-traditions section: collapse/expand, persisted across visits
+function toggleTraditionsNote() {
+  const sec = document.getElementById('traditions-note');
+  const btn = document.getElementById('traditions-note-toggle');
+  if (!sec || !btn) return;
+  const collapsed = sec.getAttribute('data-collapsed') === 'true';
+  if (collapsed) {
+    sec.removeAttribute('data-collapsed');
+    btn.setAttribute('aria-expanded', 'true');
+    try { localStorage.setItem('tapestry-traditions-note', 'open'); } catch(_) {}
+  } else {
+    sec.setAttribute('data-collapsed', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    try { localStorage.setItem('tapestry-traditions-note', 'closed'); } catch(_) {}
+  }
+}
+(function initTraditionsNote() {
+  try {
+    const saved = localStorage.getItem('tapestry-traditions-note');
+    if (saved === 'closed') {
+      const sec = document.getElementById('traditions-note');
+      const btn = document.getElementById('traditions-note-toggle');
+      if (sec) sec.setAttribute('data-collapsed', 'true');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    }
+  } catch(_) {}
+})();
 
 function closeProfile(e) {
   if (e && e.target.id !== 'profile-overlay') return;
