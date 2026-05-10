@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bulk Tapestry Runner — Admin</title>
+<style>
+  :root {
+    --bg: #0a0c1f; --surface: #14172e; --surface-2: #1a1d3a;
+    --border: rgba(201,168,124,0.18); --gold: #c9a87c; --gold-bright: #d9b88c;
+    --text: #ede8dc; --text-dim: #c8c0b0; --text-faint: #9a9088;
+    --teal: #6dd8b2; --red: #c07060; --amber: #d6a55c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem; font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  h1 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 2.2rem; margin: 0 0 0.4rem; color: var(--text); }
+  .sub { color: var(--text-dim); margin-bottom: 2rem; font-size: 15px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+  }
+  .card-title {
+    font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 0.75rem;
+  }
+  button {
+    font-family: inherit; font-size: 15px; cursor: pointer; border: 0;
+    padding: 0.55rem 1.1rem; border-radius: 4px; transition: all 0.15s;
+  }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-gold {
+    background: var(--gold); color: var(--bg); font-weight: 500;
+  }
+  .btn-gold:hover:not(:disabled) { background: var(--gold-bright); }
+  .btn-outline {
+    background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+  }
+  .btn-outline:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
+  .row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  .progress-wrap {
+    width: 100%; height: 10px; background: var(--surface-2); border-radius: 5px;
+    overflow: hidden; margin: 0.5rem 0 0.75rem;
+  }
+  .progress-bar {
+    height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+    transition: width 0.4s ease; width: 0%;
+  }
+  .progress-text { font-size: 14px; color: var(--text-dim); }
+  .progress-text strong { color: var(--gold); font-weight: 500; }
+  .log {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px;
+    padding: 0.75rem 1rem; max-height: 480px; overflow-y: auto;
+    font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px;
+    line-height: 1.55;
+  }
+  .log-line { margin-bottom: 0.35rem; }
+  .log-line.ok { color: var(--teal); }
+  .log-line.err { color: var(--red); }
+  .log-line.skip { color: var(--text-faint); }
+  .log-line.info { color: var(--text-dim); }
+  .log-line.run { color: var(--amber); }
+  .log-time { color: var(--text-faint); margin-right: 0.6rem; }
+  .auth-warn {
+    background: rgba(192,112,96,0.08); border: 1px solid rgba(192,112,96,0.35);
+    border-radius: 6px; padding: 0.85rem 1rem; color: var(--text); font-size: 14px;
+    margin-bottom: 1.25rem;
+  }
+  .auth-warn a { color: var(--gold); text-decoration: underline; }
+  .figure-summary {
+    color: var(--text-faint); font-size: 13px; margin-top: 0.5rem;
+  }
+  details { margin-top: 0.75rem; }
+  summary {
+    cursor: pointer; color: var(--gold); font-size: 13px; letter-spacing: 0.06em;
+    user-select: none;
+  }
+  summary:hover { color: var(--gold-bright); }
+  ul.figure-list { font-size: 13px; color: var(--text-dim); padding-left: 1.25rem; margin: 0.5rem 0 0; columns: 2; column-gap: 2rem; }
+  ul.figure-list li { margin-bottom: 0.2rem; break-inside: avoid; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Bulk Tapestry Runner</h1>
+  <div class="sub">
+    Generates tapestry archetypes via the <code>generate-ancestor</code> edge function (mode=tapestry, v13)
+    and stages each as a <strong>draft</strong> in the database. Drafts are hidden from the public Tapestry page
+    until you publish them in the Portal Tapestry editor.
+  </div>
+
+  <div id="auth-status"></div>
+
+  <div class="card">
+    <div class="card-title">Run</div>
+    <div class="row">
+      <button id="btn-start" class="btn-gold" onclick="startRun()">Start bulk generation</button>
+      <button id="btn-pause" class="btn-outline" onclick="pauseRun()" disabled>Pause</button>
+      <button id="btn-resume" class="btn-outline" onclick="resumeRun()" disabled>Resume</button>
+      <span id="run-status" class="progress-text" style="margin-left:auto"></span>
+    </div>
+    <div class="progress-wrap"><div id="progress-bar" class="progress-bar"></div></div>
+    <div id="progress-text" class="progress-text">Idle. Press start when ready.</div>
+    <details>
+      <summary>Figures in queue (<span id="fig-count">—</span>)</summary>
+      <ul id="figure-list" class="figure-list"></ul>
+    </details>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Activity log</div>
+    <div id="log" class="log"></div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL      = 'https://egldaiqrwuxqgavjwwim.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+
+// ── Figure queue. Each entry: { name, tradition, notes }. Notes anchor the AI's framing.
+const FIGURES = [
+  // Welsh / Brythonic Celtic
+  { name: 'Cerridwen', tradition: 'Welsh / Brythonic Celtic', notes: 'Welsh keeper of the cauldron of awen. The one who pursues the initiate across all forms until the transmission lands. Native counterpart to Circe.' },
+  { name: 'Branwen', tradition: 'Welsh / Brythonic Celtic', notes: 'Welsh sister of Bran the Blessed (Bran Fendigaid is in the Weaving). Her grief opens war between Wales and Ireland and ends a kingdom. The unreceived register made literal — the message that crossed the sea.' },
+  { name: 'Arianrhod', tradition: 'Welsh / Brythonic Celtic', notes: 'The silver wheel; the mother who refused to name her son Lleu Llaw Gyffes. Sovereignty as refusal-of-naming.' },
+
+  // Norse / Old Germanic — handle white-supremacist appropriation in Cultural Protocol briefly and factually
+  { name: 'Skadi', tradition: 'Norse', notes: 'Came armed to claim weregild for her father. Chose the mountain over the sea when the marriage failed. Sovereignty of cold weather; refusal that does not apologize.' },
+  { name: 'Hel', tradition: 'Norse', notes: 'Keeper of the half-living. Holds the dead who did not die in glory. Threshold figure who does not punish or redeem; she holds.' },
+  { name: 'Freya', tradition: 'Norse', notes: 'Vanir queen; seiðr-sorceress; chooser of half the slain. Magic, gold, war, and love — she refused to be sorted into a single function.' },
+  { name: 'Frigg', tradition: 'Norse', notes: 'Knows all fates and speaks none. Sovereignty of the held tongue. Wife of Odin (already in Tapestry).' },
+  { name: 'Thor', tradition: 'Norse', notes: 'The hammer that guards the common things — farmsteads, crossings, the weather. Protection of common life rather than aristocratic conquest.' },
+  { name: 'Loki', tradition: 'Norse', notes: 'The trickster who uses no lies. The necessary disruption; breaks what needs to break. Threshold figure who refuses placement.' },
+  { name: 'Idunn', tradition: 'Norse', notes: 'Keeper of the apples of renewal. The gods age without her. Holds time from closing.' },
+  { name: 'Tyr', tradition: 'Norse', notes: 'Lost his hand binding the wolf Fenrir. The only god the wolf would trust; the justice that pays its own price.' },
+
+  // Slavic
+  { name: 'Baba Yaga', tradition: 'Slavic', notes: 'The threshold who tests what approaches. Wild, ambiguous, not safe — the test itself is the transmission. Pairs with Cerridwen and Hecate.' },
+
+  // Yoruba / Atlantic Diaspora — Yemayá already in Tapestry
+  { name: 'Oya', tradition: 'Yoruba / Atlantic Diaspora', notes: 'Orisha of wind, transformation, marketplace, and graveyard. The breath that arrives before the storm. Threshold and transmission combined. Particularly useful for clients in active rupture.' },
+  { name: 'Oshun', tradition: 'Yoruba / Atlantic Diaspora', notes: 'Orisha of fresh water, love, fertility, the gold that does not corrode. Counterweight to Yemayá\'s salt — the river that sweetens what has soured.' },
+  { name: 'Obatala', tradition: 'Yoruba / Atlantic Diaspora', notes: 'Creator-orisha of clarity, patience, and the white cloth. The elder. A male wisdom figure in the pantheon.' },
+
+  // Egyptian
+  { name: 'Ma\'at', tradition: 'Egyptian', notes: 'Goddess of cosmic order, truth, and balance. The feather that weighs the heart against itself. Conceptual register at its purest.' },
+  { name: 'Sekhmet', tradition: 'Egyptian', notes: 'Lion-headed; the destroying force Ra had to make. Sovereign rage with a cosmic function.' },
+  { name: 'Nut', tradition: 'Egyptian', notes: 'Sky-goddess arched over the earth. She swallows the sun each night and gives it back. The body stretched between day and day.' },
+
+  // Mesopotamian / Pre-Abrahamic — Inanna and Lilith already in Tapestry
+  { name: 'Asherah', tradition: 'Canaanite / Hebrew', notes: 'Consort of Yahweh in early Hebrew religion; her sacred poles were cut down by reformers. The unreceived register made canonical — the wife erased from the text.' },
+  { name: 'Tiamat', tradition: 'Mesopotamian / Babylonian', notes: 'Primordial salt sea; chaos-mother. The body from which the world was cut by Marduk. Unsentimental origin.' },
+
+  // Hindu — handle living devotional tradition with care; lineage initiation is a real practice
+  { name: 'Kali', tradition: 'Hindu', notes: 'Mahavidya within Hindu Tantra. Destroyer of illusion; the precision of her cut is the mercy. Sovereign refusal — not rage as decoration.' },
+  { name: 'Tara', tradition: 'Tibetan Buddhist', notes: 'Bodhisattva of swift action and protection. She who hears the cry across distance. Mercy as action, not mercy as softness. Counterweight to Kali in the same field.' },
+  { name: 'Durga', tradition: 'Hindu', notes: 'The form assembled by the gods when no single one of them could face the buffalo demon Mahishasura. The figure summoned by impossibility.' },
+  { name: 'Saraswati', tradition: 'Hindu', notes: 'Goddess of knowledge, music, river, and the speaking voice. Conceptual register with somatic grace. The river that carries the word.' },
+  { name: 'Shiva', tradition: 'Hindu', notes: 'Destroyer-creator; the dancer at the still center of motion. A male figure of paradox and continuous transformation.' },
+
+  // Buddhist / Wisdom-tradition
+  { name: 'Guanyin', tradition: 'Chinese Buddhist / Daoist', notes: 'Bodhisattva of compassion in Chinese Mahayana Buddhism (Quan Yin). She who hears the cries of the world. The one who postponed her own enlightenment to remain available.' },
+  { name: 'Buddha', tradition: 'Buddhist', notes: 'Siddhārtha Gautama, the historical Buddha. The one who sat until the world stopped moving. Wisdom by stillness; the renouncer who returned with a method.' },
+  { name: 'Avalokiteśvara', tradition: 'Mahayana Buddhist', notes: 'The bodhisattva of compassion in Mahayana lineage; the masculine form whose transformation across centuries became Guanyin in East Asia. The eyes that see in every direction at once.' },
+
+  // Christian-mystical / threshold saints — Mary Magdalene held back (already in Weaving)
+  { name: 'Black Madonna', tradition: 'European Christian-mystical', notes: 'Underground Marian devotion across Europe — Czestochowa, Montserrat, Le Puy, Rocamadour. The figure in churches the hierarchy cannot quite explain. The wisdom that cannot be made pure.' },
+  { name: 'Saint Brigid', tradition: 'Celtic Christian / Pre-Christian Irish', notes: 'Celtic goddess who became saint without losing herself. Threshold between worlds. Patron of poetry, smithcraft, healing, and sacred fire (the flame at Kildare).' },
+  { name: 'Hildegard von Bingen', tradition: 'Medieval Christian Mystical', notes: '12th-century German Benedictine abbess, composer, theologian, visionary. The vision that wrote itself into music. Wisdom-female who built her own institution within the Church.' },
+  { name: 'Sophia', tradition: 'Gnostic / Christian-mystical', notes: 'Divine Wisdom in Gnostic tradition. The figure who descends into matter to find herself; falls into the world because she IS divine. Threshold between Logos and incarnation.' },
+
+  // Mesoamerican
+  { name: 'Quetzalcoatl', tradition: 'Mesoamerican (Aztec / Toltec)', notes: 'Feathered serpent. Teacher-god who walked away from human sacrifice. A male figure of refusal and wisdom.' },
+  { name: 'Coatlicue', tradition: 'Aztec', notes: 'Earth-mother whose skirt is snakes. Holds opposites without resolving them. Mother of Huitzilopochtli; devourer and giver in one body.' },
+  { name: 'Ix Chel', tradition: 'Mayan', notes: 'Mayan moon-goddess, weaver, midwife. The loom of the moon\'s tides. Patron of women, childbirth, and the cycle.' },
+
+  // Greek (additions) — current Tapestry is heavy Greek, so just two
+  { name: 'Dionysus', tradition: 'Greek', notes: 'The god who is torn and returns. Ecstasy, theater, the undoing of social order through release. Pairs with Persephone as a male return-figure.' },
+  { name: 'Hades', tradition: 'Greek', notes: 'The quiet host beneath. The underworld king is often misread as a kidnapper or punisher. He receives; he does not take.' },
+
+  // Hawaiian — Pele already in Tapestry; treat all Hawaiian figures with living-protocol respect
+  { name: 'Hina', tradition: 'Hawaiian', notes: 'Moon, wave, woman of the canoe. The lunar counterpart to Pele\'s fire. The tide that returns to itself.' },
+  { name: 'Haumea', tradition: 'Hawaiian', notes: 'Earth-mother of regeneration in Hawaiian tradition. Mother of Pele and Hi\'iaka. She who gives birth from every part.' },
+  { name: 'Laka', tradition: 'Hawaiian', notes: 'Hula goddess; patron of the forest and the dance. The body remembering how to move. The somatic register made literal.' },
+  { name: 'Kanaloa', tradition: 'Hawaiian', notes: 'Ocean depth and healing. The long shadow under Kāne\'s daylight. Counterpart figure in the Hawaiian elemental pantheon.' },
+
+  // Mythic-male thresholds — Hermes already in Tapestry
+  { name: 'Osiris', tradition: 'Egyptian', notes: 'The dismembered whose presence is the gathering. Paired with Isis (already in Tapestry). The figure whose return depends entirely on someone else\'s labor of reassembly.' },
+
+  // Irish / Celtic
+  { name: 'Manannán mac Lir', tradition: 'Irish / Celtic', notes: 'Irish sea-god, psychopomp, lord of mist. The veiled crossing. The figure who carries between the living world and the Otherworld.' },
+  { name: 'Cernunnos', tradition: 'Gaulish-Celtic', notes: 'Antlered god of beasts, forests, and the threshold of wild places. Pre-Christian Gaulish-Celtic, attested on the Pillar of the Boatmen. Lord of the crossing wood.' },
+  { name: 'The Morrígan', tradition: 'Irish', notes: 'Sovereignty, war, and fate in Irish myth. The crow who watches the field. She chooses who falls. Ambivalent and exact.' }
+];
+
+// ── Auth: pick up token from portal session
+function loadPortalSession() {
+  const stored = sessionStorage.getItem('portal_session') || localStorage.getItem('portal_session');
+  if (!stored) return null;
+  try { return JSON.parse(stored); } catch(_) { return null; }
+}
+
+let accessToken = null;
+function checkAuth() {
+  const sess = loadPortalSession();
+  const warn = document.getElementById('auth-status');
+  if (sess && sess.access_token) {
+    accessToken = sess.access_token;
+    warn.innerHTML = `<div class="card" style="background:rgba(109,216,178,0.05);border-color:rgba(109,216,178,0.30)"><div class="card-title" style="color:var(--teal)">Authenticated</div><div style="font-size:14px;color:var(--text-dim)">Signed in as <strong>${sess.email || sess.user_id || 'portal user'}</strong>. Token from local portal session.</div></div>`;
+    return true;
+  }
+  warn.innerHTML = `<div class="auth-warn">Not signed in. Open <a href="portal.html" target="_blank">portal.html</a>, sign in, then return to this tab and reload.</div>`;
+  return false;
+}
+
+// ── REST helpers
+async function rest(path, init = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...init,
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${accessToken || SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': init.method === 'POST' ? 'return=representation' : 'return=minimal',
+      ...(init.headers || {})
+    }
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(`REST ${res.status} ${path}: ${body.slice(0, 200)}`);
+  }
+  if (res.status === 204) return null;
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : null;
+}
+
+// ── Match AI tag names to frequency_tags rows by exact name (case-insensitive fallback)
+let allTagsCache = null;
+async function loadAllTags() {
+  if (allTagsCache) return allTagsCache;
+  allTagsCache = await rest('frequency_tags?select=id,name');
+  return allTagsCache;
+}
+function matchTags(aiTags, tagsTable) {
+  const matched = [];
+  const unmatched = [];
+  for (const raw of (aiTags || [])) {
+    const t = String(raw || '').trim();
+    if (!t) continue;
+    let row = tagsTable.find(x => x.name === t);
+    if (!row) row = tagsTable.find(x => x.name.toLowerCase() === t.toLowerCase());
+    if (row) matched.push(row); else unmatched.push(t);
+  }
+  return { matched, unmatched };
+}
+
+// ── Edge function call
+async function callTapestryGenerate(figure) {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-ancestor`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`,
+      'apikey': SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({
+      mode: 'tapestry',
+      name: figure.name,
+      tradition: figure.tradition || '',
+      notes: figure.notes || ''
+    })
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`Edge ${res.status}: ${t.slice(0, 240)}`);
+  }
+  return res.json();
+}
+
+// ── State
+let runState = 'idle'; // idle | running | paused | done
+let queue = [];
+let cursor = 0;
+const log = (cls, msg) => {
+  const el = document.getElementById('log');
+  const t = new Date().toLocaleTimeString();
+  el.innerHTML += `<div class="log-line ${cls}"><span class="log-time">${t}</span>${msg}</div>`;
+  el.scrollTop = el.scrollHeight;
+};
+const updateProgress = () => {
+  const pct = queue.length ? Math.round(100 * cursor / queue.length) : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-text').innerHTML = queue.length
+    ? `<strong>${cursor}</strong> of <strong>${queue.length}</strong> processed (${pct}%)`
+    : 'Idle.';
+};
+
+function renderFigureList() {
+  document.getElementById('fig-count').textContent = FIGURES.length;
+  document.getElementById('figure-list').innerHTML =
+    FIGURES.map(f => `<li><strong>${f.name}</strong> — ${f.tradition}</li>`).join('');
+}
+
+// ── Process one figure
+async function processFigure(fig, allTags) {
+  // 1. Check exists by name
+  const existing = await rest(`tapestry_archetypes?select=id,name&name=eq.${encodeURIComponent(fig.name)}`);
+  if (Array.isArray(existing) && existing.length) {
+    log('skip', `↷ Skip <strong>${fig.name}</strong> — already in database (id ${existing[0].id.slice(0,8)}…)`);
+    return { skipped: true };
+  }
+
+  // 2. Generate via edge function
+  log('run', `→ Generating <strong>${fig.name}</strong> (${fig.tradition})…`);
+  const data = await callTapestryGenerate(fig);
+  if (!data || data.error || !data.layer_thread) {
+    throw new Error(data?.error || data?.message || 'Edge returned no usable record');
+  }
+
+  // 3. Insert tapestry_archetypes (as draft)
+  const payload = {
+    name: data.name || fig.name,
+    tradition: data.tradition || fig.tradition || null,
+    epithet: data.epithet || null,
+    emergence_period: data.emergence_period || null,
+    catalog_preview: data.catalog_preview || null,
+    catalog_full: data.catalog_full || null,
+    layer_terroir: data.layer_terroir || null,
+    layer_unresolved: data.layer_unresolved || null,
+    layer_thread: data.layer_thread || null,
+    layer_lineage: data.layer_lineage || null,
+    cultural_protocol: data.cultural_protocol || null,
+    sigil_name: data.sigil_name || null,
+    sigil_description: data.sigil_description || null,
+    sigil_svg: data.sigil_svg || null,
+    draft: true
+  };
+  const inserted = await rest('tapestry_archetypes', { method: 'POST', body: JSON.stringify(payload) });
+  const newId = Array.isArray(inserted) ? inserted[0]?.id : inserted?.id;
+  if (!newId) throw new Error('Insert returned no id');
+
+  // 4. Match + insert frequency tags
+  const { matched, unmatched } = matchTags(data.frequency_tags || [], allTags);
+  let tagInserts = 0;
+  for (const tag of matched) {
+    try {
+      await rest('tapestry_archetype_frequencies', {
+        method: 'POST',
+        body: JSON.stringify({
+          tapestry_archetype_id: newId,
+          frequency_tag_id: tag.id,
+          strength: 'noted'
+        })
+      });
+      tagInserts++;
+    } catch (e) {
+      log('err', `  ⚠ Tag insert failed for "${tag.name}": ${e.message}`);
+    }
+  }
+
+  let detail = `${tagInserts}/${(data.frequency_tags||[]).length} tags`;
+  if (unmatched.length) detail += `, unmatched: ${unmatched.join(' · ')}`;
+  log('ok', `✓ <strong>${fig.name}</strong> drafted (${detail}). id ${newId.slice(0,8)}…`);
+  return { ok: true };
+}
+
+// ── Run loop
+async function runLoop() {
+  const allTags = await loadAllTags();
+  while (runState === 'running' && cursor < queue.length) {
+    const fig = queue[cursor];
+    document.getElementById('run-status').innerHTML = `Working: <strong>${fig.name}</strong>`;
+    try {
+      await processFigure(fig, allTags);
+    } catch (err) {
+      log('err', `✗ <strong>${fig.name}</strong> failed: ${err.message}`);
+    }
+    cursor++;
+    updateProgress();
+    // tiny pause so the browser can breathe
+    await new Promise(r => setTimeout(r, 250));
+  }
+  if (cursor >= queue.length) {
+    runState = 'done';
+    document.getElementById('run-status').innerHTML = '<span style="color:var(--teal)">All figures processed.</span>';
+    document.getElementById('btn-start').disabled = false;
+    document.getElementById('btn-pause').disabled = true;
+    document.getElementById('btn-resume').disabled = true;
+    log('info', `── Run complete. ${cursor} figure(s) processed. Review drafts in the Portal Tapestry editor.`);
+  }
+}
+
+function startRun() {
+  if (!checkAuth()) return;
+  if (runState === 'running') return;
+  if (runState === 'idle' || runState === 'done') {
+    queue = FIGURES.slice();
+    cursor = 0;
+    document.getElementById('log').innerHTML = '';
+    log('info', `── Starting run. Queue length: ${queue.length}.`);
+  }
+  runState = 'running';
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-pause').disabled = false;
+  document.getElementById('btn-resume').disabled = true;
+  runLoop();
+}
+
+function pauseRun() {
+  if (runState !== 'running') return;
+  runState = 'paused';
+  document.getElementById('btn-pause').disabled = true;
+  document.getElementById('btn-resume').disabled = false;
+  document.getElementById('run-status').innerHTML = '<span style="color:var(--amber)">Paused</span>';
+  log('info', `── Paused at position ${cursor}/${queue.length}. Press resume to continue.`);
+}
+
+function resumeRun() {
+  if (runState !== 'paused') return;
+  runState = 'running';
+  document.getElementById('btn-pause').disabled = false;
+  document.getElementById('btn-resume').disabled = true;
+  log('info', `── Resuming from position ${cursor}/${queue.length}.`);
+  runLoop();
+}
+
+// Init
+renderFigureList();
+checkAuth();
+updateProgress();
+</script>
+</body>
+</html>
