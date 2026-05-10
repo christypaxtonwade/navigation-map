@@ -2199,7 +2199,10 @@ function renderTapestryList() {
   }
   el.innerHTML = tapestryArchetypes.map(t => `
     <div onclick="editTapestryArchetype('${t.id}')" style="cursor:pointer;padding:0.65rem 0.875rem;border:1px solid ${t.id === tapestryEditingId ? 'var(--gold-dim)' : 'var(--border)'};border-radius:6px;margin-bottom:0.4rem;background:${t.id === tapestryEditingId ? 'var(--accent)' : 'transparent'};transition:all 0.15s">
-      <div style="font-size:15px;font-weight:500;color:var(--text)">${esc(t.name)}</div>
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <div style="font-size:15px;font-weight:500;color:var(--text);flex:1">${esc(t.name)}</div>
+        ${t.draft ? `<span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#c98870;background:rgba(168,110,74,0.12);border:1px solid rgba(168,110,74,0.35);padding:1px 6px;border-radius:3px">Draft</span>` : ''}
+      </div>
       ${t.tradition ? `<div style="font-size:13px;color:var(--text-faint);margin-top:0.15rem">${esc(t.tradition)}</div>` : ''}
       ${t.epithet ? `<div style="font-size:13px;color:var(--gold);font-style:italic;margin-top:0.15rem">${esc(t.epithet)}</div>` : ''}
     </div>`).join('');
@@ -2411,11 +2414,38 @@ function renderTapestryEditor(t, isNew) {
 
     <div class="editor-save-bar">
       <div id="tap-save-msg" style="font-size:15px"></div>
+      ${!isNew && t.draft ? `<button class="btn btn-outline" onclick="publishTapestryArchetype()" style="color:#c98870;border-color:rgba(168,110,74,0.45)" title="Make this archetype visible on the public Tapestry page">Publish →</button>` : ''}
+      ${!isNew && !t.draft ? `<button class="btn btn-outline" onclick="unpublishTapestryArchetype()" style="color:var(--text-dim);border-color:var(--border)" title="Move this archetype back to draft (hidden from public page)">Unpublish</button>` : ''}
       ${!isNew ? `<button class="btn btn-outline" onclick="deleteTapestryArchetype()" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Delete</button>` : ''}
       <button class="btn btn-gold" onclick="saveTapestryArchetype()">${isNew ? 'Create archetype →' : 'Save changes →'}</button>
     </div>
   `;
   renderTapestryChips();
+}
+
+async function publishTapestryArchetype() {
+  if (!tapestryEditingId) return;
+  const ok = await restPatch('tapestry_archetypes', tapestryEditingId, { draft: false });
+  if (!ok) {
+    document.getElementById('tap-save-msg').innerHTML = '<span style="color:var(--red)">Publish failed.</span>';
+    return;
+  }
+  await loadTapestryManager();
+  editTapestryArchetype(tapestryEditingId);
+  document.getElementById('tap-save-msg').innerHTML = '<span style="color:var(--teal)">✓ Published. Now visible on the public Tapestry.</span>';
+}
+
+async function unpublishTapestryArchetype() {
+  if (!tapestryEditingId) return;
+  if (!confirm('Move this archetype back to draft? It will be hidden from the public Tapestry page until republished.')) return;
+  const ok = await restPatch('tapestry_archetypes', tapestryEditingId, { draft: true });
+  if (!ok) {
+    document.getElementById('tap-save-msg').innerHTML = '<span style="color:var(--red)">Unpublish failed.</span>';
+    return;
+  }
+  await loadTapestryManager();
+  editTapestryArchetype(tapestryEditingId);
+  document.getElementById('tap-save-msg').innerHTML = '<span style="color:var(--text-dim)">Returned to draft.</span>';
 }
 
 function renderTapestryChips() {
