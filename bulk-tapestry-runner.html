@@ -198,24 +198,67 @@ const FIGURES = [
   { name: 'The Morrígan', tradition: 'Irish', notes: 'Sovereignty, war, and fate in Irish myth. The crow who watches the field. She chooses who falls. Ambivalent and exact.' }
 ];
 
-// ── Auth: pick up token from portal session
+// ── Auth: pick up token from portal session, with auto-refresh
 function loadPortalSession() {
   const stored = sessionStorage.getItem('portal_session') || localStorage.getItem('portal_session');
   if (!stored) return null;
   try { return JSON.parse(stored); } catch(_) { return null; }
 }
+function savePortalSession(sess) {
+  const payload = JSON.stringify(sess);
+  try { localStorage.setItem('portal_session', payload); } catch(_) {}
+  try { sessionStorage.setItem('portal_session', payload); } catch(_) {}
+}
+function tokenExpInSeconds(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return (payload.exp || 0) - Math.floor(Date.now() / 1000);
+  } catch(_) { return -1; }
+}
 
 let accessToken = null;
+let refreshToken = null;
+
 function checkAuth() {
   const sess = loadPortalSession();
   const warn = document.getElementById('auth-status');
   if (sess && sess.access_token) {
     accessToken = sess.access_token;
-    warn.innerHTML = `<div class="card" style="background:rgba(109,216,178,0.05);border-color:rgba(109,216,178,0.30)"><div class="card-title" style="color:var(--teal)">Authenticated</div><div style="font-size:14px;color:var(--text-dim)">Signed in as <strong>${sess.email || sess.user_id || 'portal user'}</strong>. Token from local portal session.</div></div>`;
+    refreshToken = sess.refresh_token || null;
+    warn.innerHTML = `<div class="card" style="background:rgba(109,216,178,0.05);border-color:rgba(109,216,178,0.30)"><div class="card-title" style="color:var(--teal)">Authenticated</div><div style="font-size:14px;color:var(--text-dim)">Signed in as <strong>${sess.email || sess.user_id || 'portal user'}</strong>. Token from local portal session. Auto-refresh enabled.</div></div>`;
     return true;
   }
   warn.innerHTML = `<div class="auth-warn">Not signed in. Open <a href="portal.html" target="_blank">portal.html</a>, sign in, then return to this tab and reload.</div>`;
   return false;
+}
+
+// Refresh the access token if it's within 60s of expiry. Returns true on success.
+async function ensureFreshToken() {
+  if (!accessToken) return false;
+  const remaining = tokenExpInSeconds(accessToken);
+  if (remaining > 60) return true; // still good
+  if (!refreshToken) return false; // can't refresh
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ refresh_token: refreshToken })
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    accessToken = data.access_token;
+    refreshToken = data.refresh_token || refreshToken;
+    const sess = loadPortalSession() || {};
+    sess.access_token = accessToken;
+    sess.refresh_token = refreshToken;
+    savePortalSession(sess);
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
 
 // ── REST helpers
@@ -259,9 +302,10 @@ function matchTags(aiTags, tagsTable) {
   return { matched, unmatched };
 }
 
-// ── Edge function call
+// ── Edge function call. Refreshes the token before calling and retries once on 401.
 async function callTapestryGenerate(figure) {
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-ancestor`, {
+  await ensureFreshToken();
+  const doCall = () => fetch(`${SUPABASE_URL}/functions/v1/generate-ancestor`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -275,6 +319,11 @@ async function callTapestryGenerate(figure) {
       notes: figure.notes || ''
     })
   });
+  let res = await doCall();
+  if (res.status === 401) {
+    const refreshed = await ensureFreshToken();
+    if (refreshed) res = await doCall();
+  }
   if (!res.ok) {
     const t = await res.text();
     throw new Error(`Edge ${res.status}: ${t.slice(0, 240)}`);
@@ -306,12 +355,37 @@ function renderFigureList() {
     FIGURES.map(f => `<li><strong>${f.name}</strong> — ${f.tradition}</li>`).join('');
 }
 
+// ── Normalize a name for diacritic-insensitive comparison.
+//    The AI often returns a scholarly canonical form (Skaði, Þórr, Kālī, Ọṣun)
+//    even when the queue name was anglicized (Skadi, Thor, Kali, Oshun).
+//    We compare by stripped-lowercase form so re-runs reliably skip.
+function normalizeName(s) {
+  return String(s || '')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
+
+// Cache of all existing archetype names (normalized → row), refreshed at run start
+let existingNamesCache = null;
+async function loadExistingNames() {
+  const rows = await rest('tapestry_archetypes?select=id,name');
+  const map = new Map();
+  for (const r of (rows || [])) {
+    map.set(normalizeName(r.name), r);
+  }
+  existingNamesCache = map;
+  return map;
+}
+
 // ── Process one figure
 async function processFigure(fig, allTags) {
-  // 1. Check exists by name
-  const existing = await rest(`tapestry_archetypes?select=id,name&name=eq.${encodeURIComponent(fig.name)}`);
-  if (Array.isArray(existing) && existing.length) {
-    log('skip', `↷ Skip <strong>${fig.name}</strong> — already in database (id ${existing[0].id.slice(0,8)}…)`);
+  // 1. Check exists by NORMALIZED name (handles AI canonical-form name drift)
+  if (!existingNamesCache) await loadExistingNames();
+  const hit = existingNamesCache.get(normalizeName(fig.name));
+  if (hit) {
+    log('skip', `↷ Skip <strong>${fig.name}</strong> — already in database as "${hit.name}" (id ${hit.id.slice(0,8)}…)`);
     return { skipped: true };
   }
 
@@ -363,15 +437,20 @@ async function processFigure(fig, allTags) {
     }
   }
 
+  // Add the just-inserted name (AI canonical form) to the cache so subsequent
+  // figures and re-runs see it.
+  if (existingNamesCache) existingNamesCache.set(normalizeName(payload.name), { id: newId, name: payload.name });
+
   let detail = `${tagInserts}/${(data.frequency_tags||[]).length} tags`;
   if (unmatched.length) detail += `, unmatched: ${unmatched.join(' · ')}`;
-  log('ok', `✓ <strong>${fig.name}</strong> drafted (${detail}). id ${newId.slice(0,8)}…`);
+  log('ok', `✓ <strong>${fig.name}</strong> drafted as "${payload.name}" (${detail}). id ${newId.slice(0,8)}…`);
   return { ok: true };
 }
 
 // ── Run loop
 async function runLoop() {
   const allTags = await loadAllTags();
+  await loadExistingNames(); // refresh the dedup cache at start of each run
   while (runState === 'running' && cursor < queue.length) {
     const fig = queue[cursor];
     document.getElementById('run-status').innerHTML = `Working: <strong>${fig.name}</strong>`;
