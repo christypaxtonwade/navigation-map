@@ -101,6 +101,7 @@
       <button id="btn-start" class="btn-gold" onclick="startRun()">Start bulk generation</button>
       <button id="btn-pause" class="btn-outline" onclick="pauseRun()" disabled>Pause</button>
       <button id="btn-resume" class="btn-outline" onclick="resumeRun()" disabled>Resume</button>
+      <button class="btn-outline" onclick="if(confirm('Clear the runner\'s memory of which figures it has processed? Useful only if you want it to re-check the database for everything. The DB-name skip check will still skip rows that exist there.')) clearProcessedSet()" title="Clear localStorage memory of processed figures">Reset memory</button>
       <span id="run-status" class="progress-text" style="margin-left:auto"></span>
     </div>
     <div class="progress-wrap"><div id="progress-bar" class="progress-bar"></div></div>
@@ -355,16 +356,36 @@ function renderFigureList() {
     FIGURES.map(f => `<li><strong>${f.name}</strong> — ${f.tradition}</li>`).join('');
 }
 
-// ── Normalize a name for diacritic-insensitive comparison.
-//    The AI often returns a scholarly canonical form (Skaði, Þórr, Kālī, Ọṣun)
-//    even when the queue name was anglicized (Skadi, Thor, Kali, Oshun).
-//    We compare by stripped-lowercase form so re-runs reliably skip.
+// ── Normalize a name for diacritic-insensitive, transliteration-tolerant comparison.
+//    The AI returns scholarly canonical forms (Skaði, Þórr, Kālī, Ọṣun, Śiva, Sarasvatī, Freyja)
+//    even when the queue name was anglicized (Skadi, Thor, Kali, Oshun, Shiva, Saraswati, Freya).
+//    This normalizer handles:
+//      • Unicode diacritics (combining marks)
+//      • Old Norse base letters: ð→d, þ→th, ø→o, æ→ae
+//      • Common transliteration variants: sh↔s (Sanskrit/Yoruba), w↔v (Sanskrit), j after y in Norse
+//      • Leading articles: "The", "Saint", "St."
+//      • Doubled consonants (Þórr → thor)
+//      • All non-alphanumeric characters
 function normalizeName(s) {
-  return String(s || '')
+  let n = String(s || '')
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '');
+    .toLowerCase();
+  // Old Norse / extended Latin base letters
+  n = n.replace(/ð/g, 'd').replace(/þ/g, 'th').replace(/ø/g, 'o').replace(/æ/g, 'ae').replace(/ñ/g, 'n');
+  // Strip leading articles
+  n = n.replace(/^the\s+/, '').replace(/^saint\s+/, '').replace(/^st\.?\s+/, '');
+  // Sanskrit/Yoruba transliteration: collapse "sh" → "s" so Shiva matches Śiva, Oshun matches Ọṣun
+  n = n.replace(/sh/g, 's');
+  // Sanskrit transliteration: w → v so Saraswati matches Sarasvatī
+  n = n.replace(/w/g, 'v');
+  // Norse: collapse "yj" → "y" so Freya matches Freyja
+  n = n.replace(/yj/g, 'y');
+  // Strip non-alphanumeric
+  n = n.replace(/[^a-z0-9]/g, '');
+  // Collapse doubled consonants (Þórr→thorr→thor, Iðunn→idunn→idun)
+  n = n.replace(/(.)\1+/g, '$1');
+  return n;
 }
 
 // Cache of all existing archetype names (normalized → row), refreshed at run start
@@ -379,13 +400,43 @@ async function loadExistingNames() {
   return map;
 }
 
+// Persistent processed set: localStorage memory of figures the runner has handled, by queue name.
+// This is the most reliable check — even if the DB cache misses an AI-canonical form, the runner
+// still knows it has processed that figure-list name and refuses to call again.
+const PROCESSED_KEY = 'tapestry-runner-processed';
+function getProcessedSet() {
+  try {
+    const raw = localStorage.getItem(PROCESSED_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch(_) { return new Set(); }
+}
+function markProcessed(figName) {
+  try {
+    const set = getProcessedSet();
+    set.add(figName);
+    localStorage.setItem(PROCESSED_KEY, JSON.stringify([...set]));
+  } catch(_) {}
+}
+function clearProcessedSet() {
+  try { localStorage.removeItem(PROCESSED_KEY); } catch(_) {}
+  log('info', '── Processed-set cleared. Next run will re-check the database for every figure.');
+}
+
 // ── Process one figure
 async function processFigure(fig, allTags) {
-  // 1. Check exists by NORMALIZED name (handles AI canonical-form name drift)
+  // 1a. Check the persistent processed-set (per-figure-name memory)
+  const processed = getProcessedSet();
+  if (processed.has(fig.name)) {
+    log('skip', `↷ Skip <strong>${fig.name}</strong> — runner has previously processed this figure (memory)`);
+    return { skipped: true };
+  }
+
+  // 1b. Check exists by NORMALIZED name in the DB cache (handles AI canonical-form drift)
   if (!existingNamesCache) await loadExistingNames();
   const hit = existingNamesCache.get(normalizeName(fig.name));
   if (hit) {
     log('skip', `↷ Skip <strong>${fig.name}</strong> — already in database as "${hit.name}" (id ${hit.id.slice(0,8)}…)`);
+    markProcessed(fig.name); // remember so future re-runs don't have to query
     return { skipped: true };
   }
 
@@ -396,9 +447,12 @@ async function processFigure(fig, allTags) {
     throw new Error(data?.error || data?.message || 'Edge returned no usable record');
   }
 
-  // 3. Insert tapestry_archetypes (as draft)
+  // 3. Insert tapestry_archetypes (as draft).
+  //    Use the QUEUE name (anglicized, accessible) for the name field, not the AI's
+  //    scholarly canonical (Skaði, Þórr, Kālī, etc.). The scholarly form is preserved
+  //    in catalog_full and layer_lineage where the AI placed the etymology.
   const payload = {
-    name: data.name || fig.name,
+    name: fig.name,
     tradition: data.tradition || fig.tradition || null,
     epithet: data.epithet || null,
     emergence_period: data.emergence_period || null,
@@ -440,6 +494,8 @@ async function processFigure(fig, allTags) {
   // Add the just-inserted name (AI canonical form) to the cache so subsequent
   // figures and re-runs see it.
   if (existingNamesCache) existingNamesCache.set(normalizeName(payload.name), { id: newId, name: payload.name });
+  // Mark this queue-name as processed in the persistent set
+  markProcessed(fig.name);
 
   let detail = `${tagInserts}/${(data.frequency_tags||[]).length} tags`;
   if (unmatched.length) detail += `, unmatched: ${unmatched.join(' · ')}`;
@@ -451,6 +507,19 @@ async function processFigure(fig, allTags) {
 async function runLoop() {
   const allTags = await loadAllTags();
   await loadExistingNames(); // refresh the dedup cache at start of each run
+
+  // Prime the persistent processed-set from the current DB state.
+  // Any figure whose queue-name normalizes to an existing DB row is marked processed.
+  // This catches everything from prior runs that didn't write to localStorage.
+  let primed = 0;
+  for (const fig of FIGURES) {
+    if (!getProcessedSet().has(fig.name) && existingNamesCache.get(normalizeName(fig.name))) {
+      markProcessed(fig.name);
+      primed++;
+    }
+  }
+  if (primed) log('info', `── Primed processed-set from DB: ${primed} figure(s) recognized as already drafted.`);
+
   while (runState === 'running' && cursor < queue.length) {
     const fig = queue[cursor];
     document.getElementById('run-status').innerHTML = `Working: <strong>${fig.name}</strong>`;
