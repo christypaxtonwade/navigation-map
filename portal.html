@@ -2428,9 +2428,11 @@ function renderTapestryEditor(t, isNew) {
 
 async function publishTapestryArchetype() {
   if (!tapestryEditingId) return;
-  const ok = await restPatch('tapestry_archetypes', tapestryEditingId, { draft: false });
-  if (!ok) {
-    document.getElementById('tap-save-msg').innerHTML = '<span style="color:var(--red)">Publish failed.</span>';
+  const fresh = await ensureFreshToken();
+  if (!fresh) { forceReauth('Your session has expired — please sign in again.'); return; }
+  const verbose = await restPatchVerbose('tapestry_archetypes', tapestryEditingId, { draft: false });
+  if (!verbose.ok) {
+    document.getElementById('tap-save-msg').innerHTML = `<span style="color:var(--red)">Publish failed (${verbose.status}) — ${verbose.body || 'no detail'}</span>`;
     return;
   }
   await loadTapestryManager();
@@ -2441,9 +2443,11 @@ async function publishTapestryArchetype() {
 async function unpublishTapestryArchetype() {
   if (!tapestryEditingId) return;
   if (!confirm('Move this archetype back to draft? It will be hidden from the public Tapestry page until republished.')) return;
-  const ok = await restPatch('tapestry_archetypes', tapestryEditingId, { draft: true });
-  if (!ok) {
-    document.getElementById('tap-save-msg').innerHTML = '<span style="color:var(--red)">Unpublish failed.</span>';
+  const fresh = await ensureFreshToken();
+  if (!fresh) { forceReauth('Your session has expired — please sign in again.'); return; }
+  const verbose = await restPatchVerbose('tapestry_archetypes', tapestryEditingId, { draft: true });
+  if (!verbose.ok) {
+    document.getElementById('tap-save-msg').innerHTML = `<span style="color:var(--red)">Unpublish failed (${verbose.status}) — ${verbose.body || 'no detail'}</span>`;
     return;
   }
   await loadTapestryManager();
@@ -2636,14 +2640,18 @@ async function saveTapestryArchetype() {
     emergence_period:  document.getElementById('tap-emergence-period')?.value || null,
   };
   try {
+    // Refresh the token before any write so a stale session doesn't surface as "Save failed"
+    const fresh = await ensureFreshToken();
+    if (!fresh) { forceReauth('Your session has expired — please sign in again.'); return; }
+
     let id;
     if (tapestryEditingId) {
-      const ok = await restPatch('tapestry_archetypes', tapestryEditingId, payload);
-      if (!ok) throw new Error('Save failed');
+      const verbose = await restPatchVerbose('tapestry_archetypes', tapestryEditingId, payload);
+      if (!verbose.ok) throw new Error(`Save failed (${verbose.status}) — ${verbose.body || 'no detail from server'}`);
       id = tapestryEditingId;
     } else {
       const result = await restPost('tapestry_archetypes', payload);
-      if (!Array.isArray(result) || !result[0]?.id) throw new Error(result?.message || 'Save failed');
+      if (!Array.isArray(result) || !result[0]?.id) throw new Error(result?.message || result?.details || 'Save failed (no id returned)');
       id = result[0].id;
       tapestryEditingId = id;
     }
@@ -3415,6 +3423,24 @@ async function restPatch(table, id, body) {
     body: JSON.stringify(body)
   });
   return res.ok;
+}
+
+// Like restPatch but returns { ok, status, body } so callers can surface server errors.
+async function restPatchVerbose(table, id, body) {
+  const token = accessToken || SUPABASE_ANON_KEY;
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(body)
+  });
+  let bodyText = '';
+  try { bodyText = await res.text(); } catch(_) {}
+  return { ok: res.ok, status: res.status, body: bodyText.slice(0, 300) };
 }
 
 // ════════════════════════════════════════════════════
