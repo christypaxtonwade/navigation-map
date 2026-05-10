@@ -807,7 +807,7 @@ if (CLIENT_ID) {
 async function init() {
   try {
     const [archetypes, freqRows, clientRow] = await Promise.all([
-      sb('tapestry_archetypes?select=*&order=name'),
+      sb('tapestry_archetypes?select=*&draft=eq.false&order=name'),
       sb('tapestry_archetype_frequencies?select=tapestry_archetype_id,strength,frequency_tags(name)').catch(() => []),
       CLIENT_ID ? sb(`clients?id=eq.${encodeURIComponent(CLIENT_ID)}&select=id,name`).then(r => r[0]).catch(() => null) : Promise.resolve(null)
     ]);
