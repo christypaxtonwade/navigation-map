@@ -2664,9 +2664,29 @@ async function saveTapestryArchetype() {
         strength: chip.strength
       });
     }
-    msgEl.innerHTML = '<span style="color:var(--teal)">✓ Saved.</span>';
-    setTimeout(() => { msgEl.innerHTML = ''; }, 2500);
-    await loadTapestryManager();
+    // Re-fetch the saved row directly from the DB so we know exactly what was stored,
+    // and warn if any field we sent didn't actually persist.
+    const verifyRows = await rest(`tapestry_archetypes?id=eq.${id}&select=*`);
+    const verified = Array.isArray(verifyRows) ? verifyRows[0] : null;
+    let mismatchNote = '';
+    if (verified) {
+      const mismatches = [];
+      for (const k of Object.keys(payload)) {
+        const sent = payload[k] == null ? '' : String(payload[k]);
+        const got  = verified[k]  == null ? '' : String(verified[k]);
+        if (sent !== got) mismatches.push(`${k} (sent "${sent.slice(0,40)}…", got "${got.slice(0,40)}…")`);
+      }
+      if (mismatches.length) {
+        mismatchNote = ` <span style="color:var(--amber);font-size:14px">⚠ ${mismatches.length} field(s) did not persist as sent: ${mismatches.join('; ')}</span>`;
+      }
+      // Update the in-memory row so the editor re-renders from the fresh DB state, not stale cache
+      const idx = tapestryArchetypes.findIndex(x => x.id === id);
+      if (idx !== -1) tapestryArchetypes[idx] = verified;
+    }
+
+    msgEl.innerHTML = `<span style="color:var(--teal)">✓ Saved.</span>${mismatchNote}`;
+    if (!mismatchNote) setTimeout(() => { msgEl.innerHTML = ''; }, 2500);
+    renderTapestryList();
     editTapestryArchetype(id);
   } catch (err) {
     msgEl.innerHTML = `<span style="color:var(--red)">${err.message}</span>`;
