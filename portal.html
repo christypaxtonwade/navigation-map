@@ -2247,25 +2247,25 @@ function renderTapestryEditor(t, isNew) {
   clearPdfState('tap');
   el.innerHTML = `
     <!-- Draft with AI -->
-    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(201,168,124,0.35);background:rgba(201,168,124,0.04)">
-      <div class="editor-section-title">Draft with AI <span style="color:var(--gold);font-size:15px;letter-spacing:0.1em">FAST FIRST PASS</span></div>
-      <p style="font-size:14px;color:var(--text-faint);margin-bottom:1rem;line-height:1.6">Claude drafts the full archetype profile — catalog preview &amp; full, four layers, sigil with SVG, frequency tags. Review and edit everything below before saving. Optionally attach scholarly PDFs (primary myth sources, translations, hymns) as authoritative material.</p>
+    <div class="card" style="margin-bottom:1.5rem;border:1.5px dashed rgba(201,168,124,0.45);background:rgba(201,168,124,0.06)">
+      <div class="editor-section-title">AI Re-draft Inputs <span style="color:var(--gold);font-size:15px;letter-spacing:0.1em">PROMPT FIELDS · NOT THE RECORD</span></div>
+      <p style="font-size:14px;color:var(--amber);margin-bottom:1rem;line-height:1.6"><strong>These fields configure the AI re-draft only.</strong> They do not save to the archetype. To edit the record itself, scroll down to the <em>Edit archetype</em> card. Clicking <em>✦ Draft Profile</em> below will overwrite the editor fields with a fresh AI draft.</p>
       <div class="editor-grid-2" style="margin-bottom:1rem">
         <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Name <span style="color:var(--red)">*</span></label>
+          <label class="form-label" style="color:var(--gold)">AI prompt — Name <span style="color:var(--red)">*</span></label>
           <input class="form-input" id="tap-ai-name" placeholder="e.g. Inanna · Persephone · Hecate" value="${esc(t.name)}">
         </div>
         <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Tradition <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">e.g. Sumerian, Greek, Celtic</span></label>
+          <label class="form-label" style="color:var(--gold)">AI prompt — Tradition <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">e.g. Sumerian, Greek, Celtic</span></label>
           <input class="form-input" id="tap-ai-tradition" placeholder="optional — AI infers" value="${esc(t.tradition)}">
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Epithet <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">optional · AI writes one if blank</span></label>
+        <label class="form-label" style="color:var(--gold)">AI prompt — Epithet <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">optional · AI writes one if blank</span></label>
         <input class="form-input" id="tap-ai-epithet" placeholder="optional — e.g. She Who Goes Down" value="${esc(t.epithet)}">
       </div>
       <div class="form-group">
-        <label class="form-label">Context Notes <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">optional · particular myth-cycle, translation preference, why this figure matters now</span></label>
+        <label class="form-label" style="color:var(--gold)">AI prompt — Context Notes <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">optional · particular myth-cycle, translation preference, why this figure matters now</span></label>
         <textarea class="form-textarea" id="tap-ai-notes" rows="3" placeholder="e.g. Anchor to the Descent of Inanna text (Wolkstein/Kramer translation). Emphasize the structural surrender at each gate, not the romantic-sister reading."></textarea>
       </div>
       <div class="form-group">
@@ -2281,9 +2281,9 @@ function renderTapestryEditor(t, isNew) {
       <div id="tap-ai-msg" style="margin-top:0.75rem;font-size:14px"></div>
     </div>
 
-    <!-- Identity -->
-    <div class="card" style="margin-bottom:1.5rem">
-      <div class="editor-section-title">${isNew ? 'New archetype' : 'Edit archetype'}</div>
+    <!-- Identity (the actual editable record) -->
+    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(109,216,178,0.30)">
+      <div class="editor-section-title">${isNew ? 'New archetype' : 'Edit archetype'} <span style="color:var(--teal);font-size:15px;letter-spacing:0.1em">THESE FIELDS SAVE TO THE RECORD</span></div>
       <div class="editor-grid-2" style="margin-bottom:1rem">
         <div class="form-group" style="margin-bottom:0">
           <label class="form-label">Name <span style="color:var(--red)">*</span></label>
