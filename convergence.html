@@ -968,6 +968,110 @@ Write TWO paragraphs (total 250-320 words):
   }
   setProgress('purpose', 'done');
 
+  // ── Section: Chart Resonance (chart-driven) ──
+  // Reads the full 13-key chart, aggregates Subterrain-level GK contributions via the
+  // chart_subterrain_resonance RPC, surfaces where the chart concentrates in the Map.
+  // Silently skipped if the client has no chart yet — backwards compatible.
+  setProgress('chart_resonance', 'active');
+  try {
+    const chartCheck = await sb(`chart_gene_keys?client_id=eq.${client.id}&limit=1`);
+    if (chartCheck.length > 0) {
+      const resonResp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/chart_subterrain_resonance`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify({ p_client_id: client.id })
+      });
+      const placements = resonResp.ok ? await resonResp.json() : [];
+
+      if (placements.length > 0) {
+        // Group by subterrain, sum contribution
+        const bySubterrain = {};
+        for (const p of placements) {
+          if (!bySubterrain[p.subterrain_id]) {
+            bySubterrain[p.subterrain_id] = {
+              subterrain_name: p.subterrain_name,
+              field_number: p.field_number,
+              field_name: p.field_name,
+              subterrain_description: p.subterrain_description,
+              total_contribution: 0,
+              placements: []
+            };
+          }
+          bySubterrain[p.subterrain_id].total_contribution += Number(p.contribution);
+          bySubterrain[p.subterrain_id].placements.push(p);
+        }
+        const topSubterrains = Object.values(bySubterrain)
+          .sort((a, b) => b.total_contribution - a.total_contribution)
+          .slice(0, 6);
+
+        const chartContextBlock = topSubterrains.map((sub, idx) => {
+          const placementDetails = sub.placements
+            .map(p => `  • ${p.sphere} — Gene Key ${p.gk_number}: ${p.gk_shadow} → ${p.gk_gift} → ${p.gk_siddhi}
+    I Ching foundation — Hexagram ${p.gk_number} (${p.iching_hexagram_name}): ${p.iching_situation} ${p.iching_principle}
+    Placement reasoning: ${p.reasoning}`)
+            .join('\n');
+          return `${idx + 1}. ${sub.subterrain_name} (Field ${sub.field_number} · ${sub.field_name}) — contribution ${sub.total_contribution.toFixed(2)}
+Subterrain passage: ${sub.subterrain_description || '[no description on file]'}
+Placements:
+${placementDetails}`;
+        }).join('\n\n---\n\n');
+
+        const strongestConvergence = topSubterrains.find(s => s.placements.length >= 2);
+        const convergenceCue = strongestConvergence
+          ? `STRONGEST CONVERGENCE: ${strongestConvergence.placements.length} spheres converge on ${strongestConvergence.subterrain_name}. Treat this as the most direct structural reading of where the chart points.`
+          : 'No multi-sphere convergence in the top set; treat the highest-contribution Subterrain as the primary reading.';
+
+        const chartPrompt = `Write the Chart Resonance section of The Convergence for ${CLIENT_NAME}.
+
+This section reads where the full chart concentrates in the Navigation Map — independent of the ancestor weaving. The Map and the chart are two parallel cartographies; this section surfaces where they describe the same coordinates.
+
+THE TOP SUBTERRAINS BY CHART CONTRIBUTION (sphere-weighted):
+
+${chartContextBlock}
+
+${convergenceCue}
+
+VOICE RULES:
+
+Source-of-truth principle:
+- Subterrain meaning lives in the passage prose, not the Subterrain name. Read against the passage text.
+- Gene Keys arc meaning lives in what each frequency band actually carries; the I Ching foundation (hexagram situation and principle) provides the underlying archetypal context Rudd built the keys on. When naming a Gene Keys arc, unpack its plain meaning in register-aware language — what the shadow band carries, what the gift band opens, what the siddhi band transmits — drawing on the I Ching situation and principle for depth. A reader fluent in the Map but not in the Gene Keys should be able to read each arc as comprehensible without further glossary. Full unpacking for arcs at the strongest convergences; shorter glosses for secondary placements.
+
+Register and embodiment:
+- The Map's vocabulary is primary: frequency, threshold, descent, transmission, thread, register, subterrain, field.
+- Embodied verbs and physical anchors throughout. Verbs that move; bodies present. Throat, breath, chest, hands, eye, body itself — not abstract "inner state" / "outer expression" framings when a physical anchor is available.
+- Somatic threading: physical imagery woven into conceptual readings. The body is not metaphor; the body is the carrier.
+- Do NOT use Human Design typology vocabulary (Manifestor, Generator, Projector, Sacral, Throat-center, Activation Sequence, Venus Sequence, Pearl Sequence, sphere names like Brand or Vocation). That epistemology stays admin-side.
+- Sphere names from the input above (lifes_work, purpose, pearl, etc.) are for structural understanding only — do not surface them in the rendered prose.
+
+Structural arc of the section:
+- Paragraph 1: name the strongest convergence (the Subterrain with multiple spheres landing, or the highest contribution). Read its meaning from the Subterrain passage. Unpack the Gene Keys arc(s) that land there in plain meaning, drawing on the I Ching situation and principle for depth. Keep the unpacking embodied.
+- Paragraph 2: name the architectural extensions and twins — how the chart's pattern repeats or extends across Fields. Lighter unpacking for these arcs.
+- Paragraph 3: name the underground/practice coordinates (typically Field X shadows and Field VI practice). Synthesize what the convergence reads AS — one structural assignment the chart is naming. Speak directly to ${CLIENT_NAME}. Close with a Pattern C cascade: 2-4 short declaratives (each a single sentence) accumulating to a final isolated landing line. The cascade and the landing carry the section's last weight.
+
+Length: 450-550 words across THREE paragraphs.`;
+
+        const chartText = await callClaude(SYSTEM, chartPrompt);
+        const [chartSection] = await sbPost('convergence_sections', {
+          convergence_id: conv.id,
+          section_type: 'chart_resonance',
+          title: 'Your Chart in the Map',
+          ai_draft: chartText,
+          final_text: chartText,
+          sort_order: 0.7
+        });
+        sections.push({ ...chartSection, freqName: null, freqCount: null, ancestors: [] });
+      }
+    }
+  } catch (e) {
+    console.warn('Chart Resonance section skipped:', e?.message || e);
+  }
+  setProgress('chart_resonance', 'done');
+
   // ── Sections 2–6: Dominant frequency analyses ──
   for (let i = 0; i < Math.min(5, topFreqs.length); i++) {
     const [freqName, freqCount] = topFreqs[i];
@@ -1027,6 +1131,182 @@ Write THREE paragraphs:
     });
     setProgress(stepId, 'done');
   }
+
+  // ── Section: Cross-Source Resonance ──
+  // Detects Subterrains appearing across 2+ streams (ancestor / tapestry / chart),
+  // surfaces the highest-signal cross-stream convergences.
+  // Silently skipped if no multi-stream overlap exists.
+  setProgress('cross_source', 'active');
+  try {
+    // Re-fetch chart placements (RPC is idempotent; cleaner than hoisting state from the
+    // chart_resonance try block).
+    let chartPlacements = [];
+    const ccChartCheck = await sb(`chart_gene_keys?client_id=eq.${client.id}&limit=1`);
+    if (ccChartCheck.length > 0) {
+      const cr = await fetch(`${SUPABASE_URL}/rest/v1/rpc/chart_subterrain_resonance`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify({ p_client_id: client.id })
+      });
+      chartPlacements = cr.ok ? await cr.json() : [];
+    }
+
+    // Aggregate chart contributions by Subterrain name (matches the tag names used by
+    // ancestor and tapestry streams)
+    const chartBySubterrain = {};
+    for (const p of chartPlacements) {
+      if (!chartBySubterrain[p.subterrain_name]) chartBySubterrain[p.subterrain_name] = { contribution: 0, placements: [] };
+      chartBySubterrain[p.subterrain_name].contribution += Number(p.contribution);
+      chartBySubterrain[p.subterrain_name].placements.push(p);
+    }
+
+    // Build the unified set of names across streams
+    const allNames = new Set([
+      ...Object.keys(freqCounts),
+      ...Object.keys(tapestryFreqMap || {}),
+      ...Object.keys(chartBySubterrain)
+    ]);
+
+    // Normalize totals per stream so contributions are comparable
+    const ancestorTotal = Object.values(freqCounts).reduce((a, b) => a + b, 0) || 1;
+    const tapestryTotal = Object.values(tapestryFreqMap || {}).reduce((a, arr) => a + (arr || []).length, 0) || 1;
+    const chartTotal = Object.values(chartBySubterrain).reduce((a, x) => a + x.contribution, 0) || 1;
+
+    const crossSource = [];
+    for (const name of allNames) {
+      const streams = [];
+      const detail = {};
+      if (freqCounts[name]) {
+        streams.push('ancestor');
+        detail.ancestor = {
+          count: freqCounts[name],
+          normalized: freqCounts[name] / ancestorTotal,
+          ancestors: (freqAncestors[name] || []).slice(0, 5).map(a => `${a.name}${a.dates ? ' (' + a.dates + ')' : ''}`)
+        };
+      }
+      if (tapestryFreqMap && tapestryFreqMap[name] && tapestryFreqMap[name].length > 0) {
+        streams.push('tapestry');
+        detail.tapestry = {
+          count: tapestryFreqMap[name].length,
+          normalized: tapestryFreqMap[name].length / tapestryTotal,
+          figures: tapestryFreqMap[name]
+        };
+      }
+      if (chartBySubterrain[name]) {
+        streams.push('chart');
+        const cb = chartBySubterrain[name];
+        detail.chart = {
+          contribution: cb.contribution,
+          normalized: cb.contribution / chartTotal,
+          placements: cb.placements.map(p => ({
+            sphere: p.sphere,
+            gk: p.gk_number,
+            arc: `${p.gk_shadow} → ${p.gk_gift} → ${p.gk_siddhi}`,
+            iching: `Hexagram ${p.gk_number} (${p.iching_hexagram_name})`
+          }))
+        };
+      }
+      if (streams.length >= 2) {
+        const totalNorm = (detail.ancestor?.normalized || 0) + (detail.tapestry?.normalized || 0) + (detail.chart?.normalized || 0);
+        crossSource.push({
+          name,
+          streams,
+          stream_count: streams.length,
+          total_normalized: totalNorm,
+          detail
+        });
+      }
+    }
+
+    crossSource.sort((a, b) => {
+      if (b.stream_count !== a.stream_count) return b.stream_count - a.stream_count;
+      return b.total_normalized - a.total_normalized;
+    });
+
+    if (crossSource.length > 0) {
+      const topCross = crossSource.slice(0, 5);
+
+      // Fetch Subterrain passages for context (one query, all Subterrains)
+      const subAll = await sb(`subterrains?select=name,description&limit=100`);
+      const fieldAll = await sb(`fields?select=name,tagline&limit=20`);
+      const passagesByName = Object.fromEntries((subAll || []).map(s => [s.name, s.description || '']));
+      for (const f of (fieldAll || [])) {
+        if (!passagesByName[f.name]) passagesByName[f.name] = f.tagline || '[Field-level tag]';
+      }
+
+      const crossContextBlock = topCross.map((cs, idx) => {
+        const lines = [`${idx + 1}. ${cs.name} — converges across ${cs.stream_count} streams (${cs.streams.join(', ')})`];
+        lines.push(`Passage: ${passagesByName[cs.name] || '[no description on file]'}`);
+        lines.push(`Stream contributions:`);
+        if (cs.detail.ancestor) {
+          lines.push(`  • Ancestor stream — ${cs.detail.ancestor.count} ancestor(s) tagged: ${cs.detail.ancestor.ancestors.join('; ')}`);
+        }
+        if (cs.detail.tapestry) {
+          lines.push(`  • Tapestry stream — ${cs.detail.tapestry.count} figure(s) tagged: ${cs.detail.tapestry.figures.join('; ')}`);
+        }
+        if (cs.detail.chart) {
+          const placementStr = cs.detail.chart.placements
+            .map(p => `${p.sphere} via Gene Key ${p.gk} (${p.arc}; ${p.iching})`)
+            .join('; ');
+          lines.push(`  • Chart stream — ${cs.detail.chart.placements.length} placement(s): ${placementStr}`);
+        }
+        return lines.join('\n');
+      }).join('\n\n---\n\n');
+
+      const threeStreamCount = topCross.filter(c => c.stream_count >= 3).length;
+      const headlineCue = threeStreamCount > 0
+        ? `${threeStreamCount} three-stream convergence(s) present. Three-stream overlaps are structurally the strongest finding the document can deliver — name them first.`
+        : 'No three-stream convergences. Two-stream overlaps are the highest-signal findings; name the strongest in the opening paragraph.';
+
+      const crossPrompt = `Write the Cross-Source Resonance section of The Convergence for ${CLIENT_NAME}.
+
+This section names the highest-signal finding in the document: where multiple independent streams (ancestor lineage, mythic tapestry, structural chart) converge on the same Subterrain. When two or more streams arrive at the same coordinate from different vocabularies, that coordinate is doing structural work in the system — a pattern named from multiple sides at once. The streams are independent: the ancestor stream comes from documented lineage, the tapestry stream comes from chosen mythic resonance, the chart stream comes from the structural archetypal assignment.
+
+THE CROSS-SOURCE CONVERGENCES (Subterrains appearing in 2+ streams, sorted by stream count then by combined normalized contribution):
+
+${crossContextBlock}
+
+${headlineCue}
+
+VOICE RULES:
+
+Source-of-truth principle:
+- Subterrain meaning lives in the passage prose, not the Subterrain name. Read against the passage text.
+- Each stream contributes a different vocabulary: ancestors carry the lineage signal (the line was already living this pattern), tapestry carries the chosen mythic resonance (the client recognized the pattern in figures of myth), chart carries the structural archetypal assignment (the body's design is configured for this pattern). When they overlap, the convergence is significant precisely because the sources are independent.
+- Name ancestors and tapestry figures by name when they appear in the data; their lives ARE the pattern being read.
+
+Register and embodiment:
+- The Map's vocabulary is primary: frequency, threshold, descent, transmission, thread, register, subterrain, field.
+- Embodied verbs and physical anchors throughout. Bodies present, not abstract operations.
+- Do NOT use Human Design typology vocabulary or sphere names from the chart input (lifes_work, purpose, pearl, etc.).
+- The Gene Keys arc may be named explicitly where it lands, in the same plain-meaning unpacking convention used in the Chart Resonance section.
+
+Structural arc of the section:
+- Paragraph 1: name the strongest cross-source convergence. Read its meaning from the Subterrain passage. Name which ancestors AND which mythic figures AND (if present) which structural assignment from the chart all arrive at this coordinate. The reading carries weight because the streams are independent.
+- Paragraph 2: name the second-strongest convergence with similar but tighter treatment. The architecture of the section is the key insight — pattern repeating across independent sources.
+- Paragraph 3: synthesize what the cross-source pattern names AS — the structural coordinate this lineage and this tapestry and this chart all describe in their own vocabularies. Speak directly to ${CLIENT_NAME}. Close with a Pattern C cascade: 2-4 short declaratives accumulating to a final isolated landing line.
+
+Length: 400-500 words across THREE paragraphs.`;
+
+      const crossText = await callClaude(SYSTEM, crossPrompt);
+      const [crossSec] = await sbPost('convergence_sections', {
+        convergence_id: conv.id,
+        section_type: 'cross_source',
+        title: 'Where the Streams Meet',
+        ai_draft: crossText,
+        final_text: crossText,
+        sort_order: topFreqs.length + 0.5
+      });
+      sections.push({ ...crossSec, freqName: null, freqCount: null, ancestors: [] });
+    }
+  } catch (e) {
+    console.warn('Cross-Source Resonance section skipped:', e?.message || e);
+  }
+  setProgress('cross_source', 'done');
 
   // ── Section: The Unresolved Thread ──
   setProgress('unresolved', 'active');
@@ -1275,11 +1555,13 @@ function renderProgressPanel() {
     { id:'init',       label:'Initialising convergence record' },
     { id:'snapshot',   label:'Writing the lineage snapshot' },
     { id:'purpose',    label:'Reading the inherited assignment' },
+    { id:'chart_resonance', label:'Reading the chart in the Map' },
     { id:'freq_0',     label:'Analysing dominant frequency 1' },
     { id:'freq_1',     label:'Analysing dominant frequency 2' },
     { id:'freq_2',     label:'Analysing dominant frequency 3' },
     { id:'freq_3',     label:'Analysing dominant frequency 4' },
     { id:'freq_4',     label:'Analysing dominant frequency 5' },
+    { id:'cross_source', label:'Detecting cross-source resonance' },
     { id:'unresolved', label:'Writing the unresolved thread' },
     { id:'living',     label:'Writing the living thread' },
   ];
