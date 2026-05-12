@@ -198,6 +198,62 @@ body::before {
   font-size: 15px; color: var(--text-dim); font-style: italic;
   margin-top: 0.3rem; line-height: 1.6;
 }
+.source-badges {
+  display: inline-flex;
+  gap: 0.25em;
+  margin-left: 0.6em;
+  vertical-align: middle;
+}
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3em;
+  height: 1.3em;
+  font-size: 0.6em;
+  font-family: 'Jost', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0;
+  font-style: normal;
+  border-radius: 50%;
+  border: 1px solid;
+  cursor: help;
+}
+.source-badge.src-lineage { background: rgba(201, 168, 124, 0.18); border-color: rgba(201, 168, 124, 0.6); color: #c9a87c; }
+.source-badge.src-tapestry { background: rgba(180, 130, 110, 0.18); border-color: rgba(180, 130, 110, 0.6); color: #b48c6e; }
+.source-badge.src-chart { background: rgba(140, 160, 175, 0.18); border-color: rgba(140, 160, 175, 0.6); color: #95a3b3; }
+.source-legend {
+  margin: 0 0 2rem;
+  padding: 0.85rem 1.5rem;
+  background: rgba(201, 168, 124, 0.05);
+  border-left: 2px solid rgba(201, 168, 124, 0.4);
+  font-size: 14px;
+  font-family: 'Jost', sans-serif;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+.source-legend .source-badge { font-size: 0.75em; }
+.source-legend-label { color: var(--text-secondary); font-weight: 500; margin-right: 0.5em; }
+.source-legend-item { display: inline-flex; align-items: center; gap: 0.4em; margin-right: 1.5em; }
+.convergence-sigil {
+  text-align: center;
+  margin: 1.5rem 0 2rem;
+  padding: 0.5rem 0;
+}
+.convergence-sigil svg {
+  width: 120px;
+  height: 120px;
+  display: inline-block;
+  filter: drop-shadow(0 0 8px rgba(201, 168, 124, 0.15));
+}
+.convergence-sigil-caption {
+  margin-top: 0.5rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
 .section-body { padding: 2rem 2.5rem; }
 .section-text {
   font-family: 'Cormorant Garamond', serif;
@@ -743,7 +799,47 @@ async function loadClientData() {
     });
   }
 
-  return { client, ancestors, freqCounts, freqAncestors, sortedFreqs, tapestry, tapestryFreqMap };
+  // ── Chart resonance: per-Subterrain GK contributions ──
+  // Loaded once at clientData level for render-time source attribution.
+  // Same RPC the chart_resonance and cross_source sections use during generation.
+  let chartBySubterrain = {};
+  try {
+    const ccCheck = await sb(`chart_gene_keys?client_id=eq.${client.id}&limit=1`);
+    if (ccCheck.length > 0) {
+      const cr = await fetch(`${SUPABASE_URL}/rest/v1/rpc/chart_subterrain_resonance`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify({ p_client_id: client.id })
+      });
+      const placements = cr.ok ? await cr.json() : [];
+      for (const p of placements) {
+        chartBySubterrain[p.subterrain_name] = (chartBySubterrain[p.subterrain_name] || 0) + Number(p.contribution);
+      }
+    }
+  } catch (_) { /* chart data optional */ }
+
+  // ── Source attribution per frequency name ──
+  // Used by renderSection to show which streams named each frequency:
+  //   'lineage' (ancestor stream), 'tapestry' (mythic stream), 'chart' (Gene Keys chart stream)
+  const sourceMap = {};
+  const allFreqNames = new Set([
+    ...Object.keys(freqCounts),
+    ...Object.keys(tapestryFreqMap),
+    ...Object.keys(chartBySubterrain)
+  ]);
+  for (const name of allFreqNames) {
+    const sources = [];
+    if (freqCounts[name]) sources.push('lineage');
+    if (tapestryFreqMap[name] && tapestryFreqMap[name].length > 0) sources.push('tapestry');
+    if (chartBySubterrain[name]) sources.push('chart');
+    sourceMap[name] = sources;
+  }
+
+  return { client, ancestors, freqCounts, freqAncestors, sortedFreqs, tapestry, tapestryFreqMap, chartBySubterrain, sourceMap };
 }
 
 async function loadExistingConvergence(clientId) {
@@ -861,7 +957,12 @@ async function generateConvergence(clientData) {
 
 The Convergence reads the dominant patterns in an ancestral lineage and surfaces what is carried, what remains unresolved, and what calls forward into the present descendant.
 
-Your voice is: precise, mythically grounded, embodied. Not academic. Not sentimental. Write in complete paragraphs of 120–200 words. No bullet points. No headers within the text. Present tense where the pattern is still active. Speak directly to the living descendant when addressing "the living thread." Use the language of the Navigation Map: frequency, field, subterrain, threshold, signal, the unresolved, the thread.${patternsBlock}${resonanceBlock}`;
+Your voice is: precise, mythically grounded, embodied. Not academic. Not sentimental. Write in complete paragraphs of 120–200 words. No bullet points. No headers within the text. Present tense where the pattern is still active. Speak directly to the living descendant when addressing "the living thread." Use the language of the Navigation Map: frequency, field, subterrain, threshold, signal, the unresolved, the thread.
+
+LINEAGE NAMING (applies to every section):
+- Do NOT infer the structure of ${CLIENT_NAME}'s lineage from her name. Surnames in the client's legal name — whether birth name, married name, hyphenated, middle name, or otherwise — do not necessarily correspond to genealogical branches in the weaving. A married name is not a lineage. A middle name is not a lineage.
+- The ancestor weaving data is the source of truth for which surnames and lines thread through this lineage. Refer to specific ancestors by their actual names from the data provided.
+- When speaking about the lineage as a whole, use "the line," "your line," "the lineage," or "the ancestors." Do NOT construct family-line groupings from the client's surnames. Never write phrases like "the Paxtons and Wades," "the [client-surname] line," or "the lines that married into both [client-surname-1] and [client-surname-2]" unless that exact surname is documented in the ancestor records.${patternsBlock}${resonanceBlock}`;
 
   const sections = [];
 
@@ -1372,6 +1473,124 @@ Write two paragraphs (total 250-300 words):
   sections.push({ ...livingSection, freqName: null, freqCount: null, ancestors: [] });
   setProgress('living', 'done');
 
+  // ── Section: What This Asks ──
+  // The document's closing move. Translates each dominant frequency into a specific
+  // operation, orientation, or threshold the line is asking the descendant to attend.
+  // Reads the already-rendered frequency sections and (if present) the cross-source
+  // section for grounding.
+  setProgress('what_this_asks', 'active');
+  try {
+    const freqSections = sections.filter(s => s.section_type === 'frequency');
+    const crossSection = sections.find(s => s.section_type === 'cross_source');
+
+    const freqSectionsText = freqSections.map(s =>
+      `--- ${s.title} (${s.freqCount} ancestors carrying) ---\n${s.final_text}`
+    ).join('\n\n');
+
+    const crossSourceText = crossSection ? crossSection.final_text : '';
+
+    const whatAsksPrompt = `Write the "What This Asks" closing section of The Convergence for ${CLIENT_NAME}.
+
+This is the document's final move. The diagnostic work is done. This section translates each dominant pattern the Convergence has named into a specific operation, orientation, or threshold the line is asking ${CLIENT_NAME} to attend now. The document becomes transformational here rather than only descriptive.
+
+THE DOMINANT FREQUENCIES NAMED IN THIS CONVERGENCE:
+${topFreqs.map(([name, count], i) => `${i+1}. ${name} (${count} ancestors carrying)`).join('\n')}
+
+WHAT THE DOCUMENT HAS ALREADY ESTABLISHED FOR EACH FREQUENCY (read these for grounding; do not quote them verbatim):
+
+${freqSectionsText}
+
+${crossSection ? `THE STRONGEST CROSS-SOURCE CONVERGENCE THE DOCUMENT NAMED:\n\n${crossSourceText}\n` : ''}
+
+VOICE RULES:
+
+Source-of-truth principle:
+- The frequency meaning lives in what the document has already established for it in the rendered sections above. Read those for grounding; do not re-derive meaning from the frequency name alone.
+- For each frequency, name what the LINE is asking ${CLIENT_NAME} to take up at this coordinate — not what ${CLIENT_NAME} should do generically. The ask is structural, rooted in what the line could not complete.
+
+Register and embodiment:
+- The Map's vocabulary is primary: frequency, threshold, descent, transmission, thread, register, subterrain, field.
+- Embodied verbs and physical anchors. Bodies present.
+- Concrete operations, not generic guidance. "The line is asking for X" / "What this coordinate names is the work of Y" — rooted in the specific pattern named, not platitudes.
+- Do NOT use self-help register ("step into your power," "honor your truth," "trust the process," "lean in"). Do NOT use Human Design typology or sphere names.
+- The asks must be specific enough that they could not apply to anyone with different dominant frequencies.
+
+LINEAGE NAMING discipline applies here as everywhere else: do not infer lineage structure from the client's name.
+
+Structural arc of the section:
+- Open with ONE sentence framing the document's pivot from naming patterns to naming what they ask. Not a header, just a sentence that sets the section's work.
+- For each top frequency (in the order given above), ONE short paragraph (~75-100 words). Open the paragraph by naming the frequency. Name what the line is asking ${CLIENT_NAME} to attend at this coordinate, grounded in what the rendered section already established. Use the Map's vocabulary; the Gene Keys arc as parallel reading where it lands precisely.
+- Close with a Pattern C cascade: 3-5 short declaratives accumulating to a final isolated landing line. The cascade is the document's last word — what the line is asking, in the most distilled form. Use parallel grammatical structure so the cascade builds.
+
+Length: 500-700 words total. Each frequency paragraph is its own short block; the closing cascade is its own final block.`;
+
+    const whatAsksText = await callClaude(SYSTEM, whatAsksPrompt);
+    const [whatAsksSection] = await sbPost('convergence_sections', {
+      convergence_id: conv.id,
+      section_type: 'what_this_asks',
+      title: 'What This Asks',
+      ai_draft: whatAsksText,
+      final_text: whatAsksText,
+      sort_order: topFreqs.length + 3
+    });
+    sections.push({ ...whatAsksSection, freqName: null, freqCount: null, ancestors: [] });
+  } catch (e) {
+    console.warn('What This Asks section skipped:', e?.message || e);
+  }
+  setProgress('what_this_asks', 'done');
+
+  // ── Composite sigil generation ──
+  // Generate a single SVG sigil per Convergence that synthesizes the dominant
+  // frequencies and the strongest cross-source convergence into one mark.
+  // House style: 80×80 viewBox, #c9a87c gold, no fill, minimal precise linework.
+  setProgress('sigil', 'active');
+  try {
+    const crossSection = sections.find(s => s.section_type === 'cross_source');
+    const chartSection = sections.find(s => s.section_type === 'chart_resonance');
+
+    const sigilSystem = `You are generating raw SVG markup for a composite sigil. Return ONLY the <svg>...</svg> markup with no surrounding prose, no markdown code fences, no explanation. Begin output with <svg and end with </svg>.`;
+
+    const sigilPrompt = `Compose a single SVG composite sigil for The Convergence of ${CLIENT_NAME}.
+
+HOUSE STYLE (mandatory):
+- Root element: <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+- Stroke color: #c9a87c (gold). Vary stroke-opacity from 0.5 to 1.0 across elements for visual depth.
+- No fill on shapes — use fill="none" — unless a specific element calls for solid form (rare).
+- Stroke-width: between 0.5 and 1.5, varied across elements for rhythm.
+- Background: transparent. Do NOT include a background <rect> filling the canvas.
+- Composition: 3–6 distinct visual elements (lines, arcs, circles, triangles, polygons, paths) that synthesize into ONE integrated mark. Not a collage of separate icons.
+- Style: minimal, geometric, precise. Echoes the ancestor sigils in the archive — discrete, sovereign, structurally specific.
+
+WHAT THE SIGIL SYNTHESIZES:
+
+Dominant frequencies in this Convergence (each contributes one element to the composition):
+${topFreqs.map(([name, count], i) => `  ${i+1}. ${name} (${count} ancestors carrying)`).join('\n')}
+
+${crossSection ? `STRONGEST CROSS-SOURCE CONVERGENCE: ${crossSection.title}'s subject — give this the visual center of the composition.\n` : ''}
+${chartSection ? `CHART CONCENTRATION: The chart's heaviest weight informs the composition's structural backbone.\n` : ''}
+
+DESIGN INTENT:
+- The sigil reads as the lineage's distilled signature for this moment.
+- It is specific enough that no two Convergences with different dominant frequencies would produce the same sigil.
+- The mark feels integrated and intentional, not random.
+- A practitioner could recognize the Convergence by its sigil at a glance.
+
+Return ONLY the SVG.`;
+
+    const sigilRaw = await callClaude(sigilSystem, sigilPrompt);
+    // Defensive extraction — strip any prose, markdown fences, or trailing whitespace
+    const svgMatch = sigilRaw && sigilRaw.match(/<svg[\s\S]*?<\/svg>/);
+    const sigilSvg = svgMatch ? svgMatch[0] : null;
+
+    if (sigilSvg) {
+      await sbPatch('convergences', conv.id, { sigil_svg: sigilSvg });
+      conv.sigil_svg = sigilSvg;
+    }
+  } catch (e) {
+    console.warn('Sigil generation skipped:', e?.message || e);
+  }
+  setProgress('sigil', 'done');
+
   // Update convergence status
   await sbPatch('convergences', conv.id, { status: 'complete' });
 
@@ -1439,6 +1658,20 @@ function renderSection(sec, freqAncestors) {
   const fieldNote = sec.fieldCtx?.tagline
     ? `<div class="section-fieldguide-note">${sec.fieldCtx.tagline}</div>` : '';
 
+  // Source-distinguishing badges for frequency sections — visible only when the
+  // section's tag was named by at least one stream. Multi-source = stronger signal.
+  const sourceLabels = { lineage: 'L', tapestry: 'T', chart: 'C' };
+  const sourceTooltips = {
+    lineage: 'Named in the ancestor lineage stream',
+    tapestry: 'Named in the mythic tapestry stream',
+    chart: 'Named in the Gene Keys chart stream'
+  };
+  const sourceBadges = (sec.section_type === 'frequency' && Array.isArray(sec.sources) && sec.sources.length)
+    ? `<span class="source-badges">${sec.sources.map(s =>
+        `<span class="source-badge src-${s}" title="${sourceTooltips[s]}">${sourceLabels[s]}</span>`
+      ).join('')}</span>`
+    : '';
+
   // Ancestor evidence chips for frequency sections
   let evidenceHtml = '';
   if (sec.section_type === 'frequency' && sec.ancestors?.length) {
@@ -1473,7 +1706,7 @@ function renderSection(sec, freqAncestors) {
         <div class="section-glyph">${glyph}</div>
         <div class="section-title-block">
           <div class="section-type-label">${typeLabels[sec.section_type] || sec.section_type}</div>
-          <div class="section-title">${sec.title}</div>
+          <div class="section-title">${sec.title}${sourceBadges}</div>
           ${fieldNote}
         </div>
       </div>
@@ -1512,21 +1745,40 @@ function renderConvergence(conv, clientData, history) {
   const maxCount = topFreqs[0]?.[1] || 1;
   const convWithMeta = { ...conv, topFreqs, maxCount, ancestors: clientData?.ancestors };
 
+  const sourceMap = clientData?.sourceMap || {};
   const sectionsHtml = (conv.sections || []).map(sec => {
     const enriched = {
       ...sec,
       ancestors: sec.section_type === 'frequency'
         ? (freqAncestors[sec.title] || []).filter(Boolean)
         : [],
-      fieldCtx: null
+      fieldCtx: null,
+      sources: sourceMap[sec.title] || []
     };
     return renderSection(enriched, freqAncestors);
   }).join('');
 
+  // Build the source-stream legend — only when at least one frequency
+  // section carries multi-stream attribution worth distinguishing.
+  const hasMultiSource = Object.values(sourceMap).some(arr => arr && arr.length >= 1);
+  const sourceLegendHtml = hasMultiSource ? `
+    <div class="source-legend">
+      <span class="source-legend-label">Stream attribution:</span>
+      <span class="source-legend-item"><span class="source-badge src-lineage">L</span> ancestor lineage</span>
+      <span class="source-legend-item"><span class="source-badge src-tapestry">T</span> mythic tapestry</span>
+      <span class="source-legend-item"><span class="source-badge src-chart">C</span> Gene Keys chart</span>
+    </div>` : '';
+
   return `
     <div class="convergence-output">
       ${renderHistoryNav(history, conv.id)}
+      ${conv.sigil_svg ? `
+        <div class="convergence-sigil">
+          ${conv.sigil_svg}
+          <div class="convergence-sigil-caption">Composite Sigil</div>
+        </div>` : ''}
       ${renderSnapshot(convWithMeta)}
+      ${sourceLegendHtml}
       <div class="section-header">
         <div class="section-header-line"></div>
         <div class="section-header-label">The Analysis</div>
@@ -1564,6 +1816,8 @@ function renderProgressPanel() {
     { id:'cross_source', label:'Detecting cross-source resonance' },
     { id:'unresolved', label:'Writing the unresolved thread' },
     { id:'living',     label:'Writing the living thread' },
+    { id:'what_this_asks', label:'Naming what the line asks' },
+    { id:'sigil',          label:'Composing the composite sigil' },
   ];
   return `
     <div class="progress-wrap" id="progress-wrap" style="display:block">
