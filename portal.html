@@ -4575,20 +4575,37 @@ async function handleAncestorUpload(input, field) {
   const path = `${slug}/${field}-${Date.now()}.${ext}`;
 
   const uploadBtn = input.closest('.upload-area');
-  if (uploadBtn) uploadBtn.querySelector('.upload-label').textContent = 'Uploading…';
+  const labelEl = uploadBtn?.querySelector('.upload-label');
+  if (labelEl) labelEl.textContent = 'Uploading…';
 
   try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/ancestor-media/${path}`, {
+    // Refresh token before upload — Supabase Storage rejects stale JWTs with 401
+    const fresh = await ensureFreshToken();
+    if (!fresh) {
+      forceReauth('Your session has expired — please sign in again before uploading.');
+      return;
+    }
+
+    const doUpload = () => fetch(`${SUPABASE_URL}/storage/v1/object/ancestor-media/${path}`, {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': file.type,
+        'Content-Type': file.type || 'application/octet-stream',
         'x-upsert': 'true'
       },
       body: file
     });
-    if (!res.ok) throw new Error('Upload failed');
+    let res = await doUpload();
+    if (res.status === 401) {
+      const refreshed = await ensureFreshToken();
+      if (refreshed) res = await doUpload();
+    }
+    if (!res.ok) {
+      let body = '';
+      try { body = await res.text(); } catch(_) {}
+      throw new Error(`Upload failed (${res.status}) — ${body.slice(0, 240) || file.name + ' · ' + (file.size/1024).toFixed(0) + 'KB'}`);
+    }
 
     const url = `${SUPABASE_URL}/storage/v1/object/public/ancestor-media/${path}`;
 
@@ -4596,15 +4613,15 @@ async function handleAncestorUpload(input, field) {
       document.getElementById('ed-photo-url').value = url;
       document.getElementById('ed-photo-preview').innerHTML =
         `<div class="upload-preview"><img src="${url}" alt="Photo"><div class="upload-preview-note">${url}</div></div>`;
-      if (uploadBtn) uploadBtn.querySelector('.upload-label').textContent = '✓ Uploaded — click to replace';
+      if (labelEl) labelEl.textContent = '✓ Uploaded — click to replace';
     } else if (field === 'sigil') {
       document.getElementById('ed-sigil-image-url').value = url;
       document.getElementById('ed-sigil-img-preview').innerHTML =
         `<div class="upload-preview"><img src="${url}" alt="Sigil"><div class="upload-preview-note">${url}</div></div>`;
-      if (uploadBtn) uploadBtn.querySelector('.upload-label').textContent = '✓ Uploaded — click to replace';
+      if (labelEl) labelEl.textContent = '✓ Uploaded — click to replace';
     }
   } catch(err) {
-    if (uploadBtn) uploadBtn.querySelector('.upload-label').textContent = '✗ Upload failed — try again';
+    if (labelEl) labelEl.textContent = `✗ ${err.message}`;
     console.error('Upload error:', err);
   }
 }
