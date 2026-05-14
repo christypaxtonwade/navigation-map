@@ -2962,11 +2962,18 @@ async function generateAncestorAI() {
 }
 
 // Match AI-suggested tag names (which are field/subterrain names) to real frequency_tags records
+// Strip leading Field-number prefix the AI sometimes includes (e.g. "XII: The Sovereign Cycle" → "The Sovereign Cycle")
+function stripRomanPrefix(s) {
+  return String(s || '').replace(/^[IVX]+\s*[:.\-]\s*/i, '').trim();
+}
+
 function matchFrequencyTags(suggestedNames) {
   const chips = [];
   const usedIds = new Set();
-  suggestedNames.forEach(suggested => {
-    const norm = suggested.toLowerCase().trim();
+  (suggestedNames || []).forEach(suggested => {
+    const cleaned = stripRomanPrefix(suggested);
+    const norm = cleaned.toLowerCase().trim();
+    if (!norm) return;
     // Try exact match first, then prefix/contains
     const match =
       allFrequencyTags.find(t => t.name.toLowerCase() === norm) ||
@@ -3200,15 +3207,16 @@ function reportUnmatchedTags(suggestedNames) {
   const el = document.getElementById('ar-chip-unmatched');
   if (!el) return;
   const matchedNames = arChips.map(c => c.tagName.toLowerCase());
-  const unmatched = suggestedNames.filter(n => {
-    const norm = n.toLowerCase();
+  const unmatched = (suggestedNames || []).filter(n => {
+    const norm = stripRomanPrefix(n).toLowerCase();
+    if (!norm) return false;
     return !matchedNames.some(m => m === norm || m.includes(norm) || norm.includes(m));
   });
   if (unmatched.length) {
     el.innerHTML = `<span style="color:var(--amber)">⚠ Not found in DB: ${unmatched.join(', ')}</span><br>
       <span style="color:var(--text-faint)">These field or subterrain names don't match existing frequency_tags records. Create them in Supabase or adjust the name to match an existing tag.</span>`;
   } else {
-    el.textContent = `✓ All ${suggestedNames.length} AI-suggested tags matched to database records.`;
+    el.textContent = `✓ All ${(suggestedNames || []).length} AI-suggested tags matched to database records.`;
     el.style.color = 'var(--teal)';
   }
 }
