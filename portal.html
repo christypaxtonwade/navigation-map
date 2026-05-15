@@ -756,11 +756,17 @@ body::before {
       <label class="field-label" for="login-email">Email</label>
       <input class="field-input" id="login-email" type="email" autocomplete="email" placeholder="your@email.com">
     </div>
-    <button class="btn-primary" id="btn-login" onclick="handleLogin()">Send magic link</button>
+    <div class="field-group">
+      <label class="field-label" for="login-password">Password</label>
+      <input class="field-input" id="login-password" type="password" autocomplete="current-password" placeholder="••••••••">
+    </div>
+    <button class="btn-primary" id="btn-login" onclick="handleLogin()">Enter →</button>
     <div class="login-error" id="login-error"></div>
-    <p class="login-sub" style="margin-top:1.25rem; font-size:13px; opacity:0.7; line-height:1.4">
-      Portal access is invite-only. If you've been invited, enter your email and we'll send you a one-click sign-in link.
-    </p>
+    <div style="text-align:center;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+      <button id="btn-magic-link" onclick="handleMagicLink()" style="background:transparent;border:none;color:var(--gold-dim);font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;letter-spacing:0.06em;padding:0">
+        No password? Send me a magic link →
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1243,38 +1249,91 @@ document.addEventListener('keydown', e => {
 });
 
 // ── Auth ──────────────────────────────────────────────
-// Magic-link sign-in. The page sends an OTP email via Supabase Auth, the user
-// clicks the link in their email and lands back here with #access_token=...
-// in the URL fragment — which the DOMContentLoaded handler at the top consumes.
+// Two paths to a session:
+//
+// 1. PASSWORD (primary, for admin + anyone with a password set):
+//    handleLogin() POSTs to /auth/v1/token?grant_type=password, gets tokens back
+//    immediately, persists, and enters the app. One round-trip, no email.
+//
+// 2. MAGIC LINK (secondary, for invited clients who never set a password):
+//    handleMagicLink() POSTs to /auth/v1/otp with redirect_to pointing at
+//    portal.html. User clicks the email link → Supabase verifies → 303-redirects
+//    back to portal.html with #access_token=... in the fragment. The
+//    DOMContentLoaded handler at the top consumes that fragment.
 async function handleLogin() {
   const email = document.getElementById('login-email').value.trim();
+  const pw    = document.getElementById('login-password').value;
   const errEl = document.getElementById('login-error');
   const btn   = document.getElementById('btn-login');
 
   errEl.textContent = ''; errEl.classList.remove('login-success');
-  if (!email) { errEl.textContent = 'Email required.'; return; }
+  if (!email || !pw) { errEl.textContent = 'Email and password required.'; return; }
 
+  btn.disabled = true; btn.textContent = 'Entering…';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password: pw })
+    });
+    const data = await res.json();
+
+    if (data.access_token) {
+      accessToken    = data.access_token;
+      refreshToken   = data.refresh_token || null;
+      tokenExpiresAt = Date.now() + ((data.expires_in || 3600) * 1000);
+      currentUser    = data.user;
+      persistSession();
+      enterApp();
+    } else {
+      errEl.textContent = data.error_description || data.msg || 'Login failed. Check your credentials.';
+      btn.disabled = false; btn.textContent = 'Enter →';
+    }
+  } catch(err) {
+    errEl.textContent = 'Network error — please try again.';
+    btn.disabled = false; btn.textContent = 'Enter →';
+  }
+}
+
+// Magic-link sender. Belt-and-suspenders: passes redirect_to as BOTH a query
+// string parameter AND in the body's `data.redirectTo` field so it works
+// across Supabase API versions.
+async function handleMagicLink() {
+  const email = document.getElementById('login-email').value.trim();
+  const errEl = document.getElementById('login-error');
+  const btn   = document.getElementById('btn-magic-link');
+
+  errEl.textContent = ''; errEl.classList.remove('login-success');
+  if (!email) { errEl.textContent = 'Enter your email above first.'; return; }
+
+  const origLabel = btn.textContent;
   btn.disabled = true; btn.textContent = 'Sending…';
 
   try {
-    // redirect_to MUST be on the Supabase Auth → URL Configuration → Redirect URLs allowlist.
-    // We pass the full origin + pathname so the user lands back on portal.html exactly.
-    const redirectUrl = encodeURIComponent(window.location.origin + window.location.pathname);
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/otp?redirect_to=${redirectUrl}`, {
+    const redirectUrl = window.location.origin + window.location.pathname;
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/otp?redirect_to=${encodeURIComponent(redirectUrl)}`, {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Content-Type': 'application/json'
       },
       // create_user: false — portal is invite-only. Unknown emails are rejected.
-      // (Christy's admin account and every invited client already exist in auth.users.)
-      body: JSON.stringify({ email, create_user: false })
+      // redirectTo in body too as a safety net in case query param is ignored.
+      body: JSON.stringify({
+        email,
+        create_user: false,
+        data: { redirectTo: redirectUrl }
+      })
     });
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      errEl.textContent = data.error_description || data.msg || data.error || 'Could not send link. Please check the email and try again.';
-      btn.disabled = false; btn.textContent = 'Send magic link';
+      errEl.textContent = data.error_description || data.msg || data.error || 'Could not send link. If you don\'t have an account, ask Christy for an invite.';
+      btn.disabled = false; btn.textContent = origLabel;
       return;
     }
     errEl.classList.add('login-success');
@@ -1282,7 +1341,7 @@ async function handleLogin() {
     btn.textContent = 'Sent ✓';
   } catch(err) {
     errEl.textContent = 'Network error — please try again.';
-    btn.disabled = false; btn.textContent = 'Send magic link';
+    btn.disabled = false; btn.textContent = origLabel;
   }
 }
 
@@ -1301,8 +1360,12 @@ async function handleSignOut() {
   showView('view-login');
   const emailEl = document.getElementById('login-email');
   if (emailEl) emailEl.value = '';
+  const pwEl = document.getElementById('login-password');
+  if (pwEl) pwEl.value = '';
   const btn = document.getElementById('btn-login');
-  if (btn) { btn.disabled = false; btn.textContent = 'Send magic link'; }
+  if (btn) { btn.disabled = false; btn.textContent = 'Enter →'; }
+  const mlBtn = document.getElementById('btn-magic-link');
+  if (mlBtn) { mlBtn.disabled = false; mlBtn.textContent = 'No password? Send me a magic link →'; }
   const errEl = document.getElementById('login-error');
   if (errEl) { errEl.textContent = ''; errEl.classList.remove('login-success'); }
 }
@@ -1372,7 +1435,9 @@ function forceReauth(reason) {
   const errEl = document.getElementById('login-error');
   if (errEl) { errEl.classList.remove('login-success'); errEl.textContent = reason || 'Your session has expired — please sign in again.'; }
   const btn = document.getElementById('btn-login');
-  if (btn) { btn.disabled = false; btn.textContent = 'Send magic link'; }
+  if (btn) { btn.disabled = false; btn.textContent = 'Enter →'; }
+  const mlBtn = document.getElementById('btn-magic-link');
+  if (mlBtn) { mlBtn.disabled = false; mlBtn.textContent = 'No password? Send me a magic link →'; }
   const emailEl = document.getElementById('login-email');
   if (emailEl) emailEl.focus();
 }
