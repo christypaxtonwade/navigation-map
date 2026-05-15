@@ -4,320 +4,427 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portal Invites · Navigation Map</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --ink: #0a0a0a;
-    --surface: #161616;
-    --border: #2a2520;
-    --gold: #c9a96e;
-    --cream: #e8e2d4;
-    --muted: #6d6d6d;
-    --error: #d97757;
-    --ok: #7ba87b;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--ink);
-    color: var(--cream);
-    font-family: 'Jost', system-ui, sans-serif;
-    font-weight: 300;
-    line-height: 1.5;
-    min-height: 100vh;
-  }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 64px 32px; }
-  h1 {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 400; font-size: 2.4rem;
-    margin: 0 0 8px; letter-spacing: 0.01em;
-  }
-  .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 48px; letter-spacing: 0.02em; }
-  .card { background: var(--surface); border: 1px solid var(--border); padding: 32px; margin-bottom: 16px; }
-  label {
-    display: block; font-size: 0.75rem; text-transform: uppercase;
-    letter-spacing: 0.12em; color: var(--gold); margin-bottom: 8px;
-  }
-  input[type=email] {
-    width: 100%; background: var(--ink); border: 1px solid var(--border);
-    color: var(--cream); padding: 12px 14px; font-family: inherit;
-    font-size: 1rem; margin-bottom: 16px;
-  }
-  input[type=email]:focus { outline: none; border-color: var(--gold); }
-  button {
-    background: transparent; color: var(--gold); border: 1px solid var(--gold);
-    padding: 10px 20px; font-family: inherit; font-size: 0.85rem;
-    letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-  }
-  button:hover:not(:disabled) { background: var(--gold); color: var(--ink); }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
-  .client {
-    border: 1px solid var(--border); padding: 20px 24px; margin-bottom: 12px;
-    display: flex; justify-content: space-between; align-items: center; gap: 16px;
-  }
-  .client-name { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; margin: 0; }
-  .client-email { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
-  .status {
-    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em;
-    padding: 3px 8px; border: 1px solid var(--border); display: inline-block; margin-right: 8px;
-  }
-  .status.invited { color: var(--ok); border-color: var(--ok); }
-  .status.pending { color: var(--muted); }
-  .status.submitted { color: var(--gold); border-color: var(--gold); }
-  .msg { padding: 12px 16px; margin-bottom: 16px; font-size: 0.9rem; border-left: 2px solid var(--gold); background: rgba(201, 169, 110, 0.08); }
-  .msg.error { border-left-color: var(--error); background: rgba(217, 119, 87, 0.08); }
-  .msg.ok { border-left-color: var(--ok); background: rgba(123, 168, 123, 0.08); }
-  .hide { display: none !important; }
-  .top-bar {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
-  }
-  .top-bar .who { color: var(--muted); font-size: 0.85rem; }
-  .logout {
-    background: none; border: none; color: var(--muted);
-    text-transform: none; letter-spacing: 0.02em; padding: 4px 8px; font-size: 0.8rem;
-  }
-  .logout:hover { color: var(--cream); background: none; }
-  .right-cell { text-align: right; color: var(--muted); font-size: 0.85rem; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #09090f;
+  --surface: #0f1018;
+  --surface-2: #161722;
+  --border: rgba(180,155,100,0.14);
+  --border-hover: rgba(180,155,100,0.28);
+  --gold: #c9a87c;
+  --gold-bright: #dfc090;
+  --gold-dim: rgba(201,168,124,0.7);
+  --accent: rgba(201,168,124,0.08);
+  --text: #ede8dc;
+  --text-secondary: #c8c0b0;
+  --text-dim: #b3aa9f;
+  --text-faint: #9a9088;
+  --teal: #6dd8b2;
+  --teal-dim: rgba(109,216,178,0.15);
+  --amber: #f5aa88;
+  --amber-dim: rgba(245,170,136,0.15);
+  --red: #c07060;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Jost', sans-serif; font-weight: 300;
+  font-size: 15px; min-height: 100vh; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(201,168,124,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,124,0.018) 1px, transparent 1px);
+  background-size: 52px 52px; pointer-events: none; z-index: 0;
+}
+
+.serif { font-family: 'Cormorant Garamond', serif; }
+
+.view { display: none; position: relative; z-index: 1; min-height: 100vh; }
+.view.active { display: block; }
+
+/* ─────────── LOGIN ─────────── */
+#view-login { align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+#view-login.active { display: flex; }
+
+.login-card {
+  width: 100%; max-width: 420px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 3rem 2.5rem;
+}
+.login-glyph { text-align: center; font-size: 2rem; color: var(--gold); margin-bottom: 1.25rem; opacity: 0.88; }
+.login-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.9rem; font-weight: 300; font-style: italic;
+  text-align: center; margin-bottom: 0.4rem;
+}
+.login-sub { font-size: 15px; color: var(--text-dim); text-align: center; margin-bottom: 2rem; letter-spacing: 0.04em; }
+.login-rule { width: 32px; height: 1px; background: var(--gold-dim); margin: 0 auto 2rem; }
+
+.field-group { margin-bottom: 1.25rem; }
+.field-label {
+  display: block; font-size: 15px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 0.5rem;
+}
+.field-input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 10px 14px;
+  color: var(--text); font-family: 'Jost', sans-serif;
+  font-size: 15px; font-weight: 300; outline: none;
+  transition: border-color 0.2s;
+}
+.field-input:focus { border-color: var(--gold-dim); }
+
+.btn-primary {
+  width: 100%; padding: 11px; border: none; border-radius: 6px;
+  background: var(--gold); color: var(--bg);
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.2s; margin-top: 0.5rem;
+}
+.btn-primary:hover:not(:disabled) { background: var(--gold-bright); }
+.btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+.note {
+  font-size: 15px; text-align: center;
+  margin-top: 1.25rem; min-height: 1.4em; line-height: 1.4;
+}
+.note.error { color: var(--red); }
+.note.success { color: var(--teal); }
+
+/* ─────────── ADMIN ─────────── */
+#view-admin { padding: 3rem 2rem 5rem; max-width: 980px; margin: 0 auto; }
+
+.admin-header {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1.5rem; margin-bottom: 2rem;
+}
+.admin-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem; font-weight: 300; font-style: italic;
+}
+.admin-sub { font-size: 15px; color: var(--text-dim); letter-spacing: 0.06em; margin-top: 0.25rem; }
+
+.btn-ghost {
+  background: transparent; color: var(--text-dim);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 14px; font-family: 'Jost', sans-serif;
+  font-size: 15px; letter-spacing: 0.08em;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-ghost:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+.client-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.client-row {
+  display: grid; grid-template-columns: 1.4fr 1.7fr auto auto;
+  gap: 1.25rem; align-items: center;
+  padding: 1.1rem 1.25rem;
+  background: var(--surface);
+}
+.client-row:hover { background: var(--surface-2); }
+.client-name { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; color: var(--text); }
+.client-email { color: var(--text-dim); font-size: 15px; word-break: break-all; }
+.client-email.muted { color: var(--text-faint); font-style: italic; }
+
+.tier-badge {
+  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 999px;
+  background: var(--accent); color: var(--gold); border: 1px solid var(--border);
+}
+.tier-badge.empty { color: var(--text-faint); border-style: dashed; }
+
+.status-pill {
+  font-size: 15px; padding: 6px 12px; border-radius: 6px;
+  white-space: nowrap;
+}
+.status-pill.ok { background: var(--teal-dim); color: var(--teal); }
+
+.btn-invite {
+  background: transparent; color: var(--gold);
+  border: 1px solid var(--gold-dim); border-radius: 6px;
+  padding: 7px 14px; font-family: 'Jost', sans-serif;
+  font-size: 15px; letter-spacing: 0.06em;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-invite:hover:not(:disabled) { background: var(--accent); }
+.btn-invite:disabled { color: var(--text-faint); border-color: var(--border); cursor: not-allowed; }
+
+.empty-state, .loading-state {
+  text-align: center; padding: 3rem 1rem;
+  color: var(--text-dim); font-size: 15px;
+}
+
+#admin-flash {
+  margin-bottom: 1.25rem; padding: 0.85rem 1.1rem;
+  border-radius: 6px; font-size: 15px; display: none;
+}
+#admin-flash.show { display: block; }
+#admin-flash.success { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(109,216,178,0.3); }
+#admin-flash.error { background: rgba(192,112,96,0.12); color: var(--red); border: 1px solid rgba(192,112,96,0.3); }
+
+@media (max-width: 720px) {
+  .client-row { grid-template-columns: 1fr; gap: 0.5rem; }
+  .admin-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
+}
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <h1>Portal Invites</h1>
-  <div class="sub">Admin tool · Navigation Map of Consciousness</div>
+<!-- ─────────── LOGIN VIEW ─────────── -->
+<section id="view-login" class="view active">
+  <div class="login-card">
+    <div class="login-glyph">✦</div>
+    <h1 class="login-title">Portal Invites</h1>
+    <p class="login-sub">Admin tool · Navigation Map of Consciousness</p>
+    <div class="login-rule"></div>
 
-  <!-- LOGIN VIEW -->
-  <div id="login-view" class="card">
-    <div id="login-msg" class="msg hide"></div>
-    <label for="email-input">Admin email</label>
-    <input type="email" id="email-input" placeholder="christypaxtonwade@gmail.com" autocomplete="email">
-    <button id="send-link">Send magic link</button>
+    <form id="login-form">
+      <div class="field-group">
+        <label class="field-label" for="login-email">Admin email</label>
+        <input type="email" id="login-email" class="field-input"
+               placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <button type="submit" class="btn-primary" id="login-submit">Send magic link</button>
+      <p id="login-note" class="note"></p>
+    </form>
   </div>
+</section>
 
-  <!-- ADMIN VIEW -->
-  <div id="admin-view" class="hide">
-    <div class="top-bar">
-      <div class="who" id="who"></div>
-      <button class="logout" id="logout">Sign out</button>
+<!-- ─────────── ADMIN VIEW ─────────── -->
+<section id="view-admin" class="view">
+  <header class="admin-header">
+    <div>
+      <h1 class="admin-title">Portal Invites</h1>
+      <p class="admin-sub">Magic-link invites · linked to <span id="admin-email"></span></p>
     </div>
-    <div id="admin-msg" class="msg hide"></div>
-    <div id="clients"></div>
+    <button id="sign-out" class="btn-ghost">Sign out</button>
+  </header>
+
+  <div id="admin-flash"></div>
+  <div id="client-list" class="client-list">
+    <div class="loading-state">Loading clients…</div>
   </div>
+</section>
 
-</div>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
-<script>
 const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
-const REDIRECT_URL = window.location.origin + window.location.pathname;
-const STORAGE_KEY = 'nav-map-admin-session';
 
-// ---------- Session helpers ----------
-function saveSession(s) { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
-function loadSession() {
-  try { const r = sessionStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; }
-  catch { return null; }
-}
-function clearSession() { sessionStorage.removeItem(STORAGE_KEY); }
-
-// ---------- Capture session from magic-link hash ----------
-function captureHashSession() {
-  if (!window.location.hash) return null;
-  const params = new URLSearchParams(window.location.hash.slice(1));
-  const access_token = params.get('access_token');
-  const refresh_token = params.get('refresh_token');
-  const expires_at = params.get('expires_at');
-  if (access_token && refresh_token) {
-    const session = { access_token, refresh_token, expires_at };
-    saveSession(session);
-    history.replaceState(null, '', window.location.pathname);
-    return session;
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    detectSessionInUrl: true,
+    persistSession: true,
+    autoRefreshToken: true,
+    storage: window.localStorage,
+    storageKey: 'nm-portal-auth'
   }
-  return null;
+});
+
+const $ = (id) => document.getElementById(id);
+
+function show(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  $(viewId).classList.add('active');
 }
 
-// ---------- UI ----------
-function showMsg(id, text, kind) {
-  const el = document.getElementById(id);
-  el.textContent = text;
-  el.className = 'msg' + (kind ? ' ' + kind : '');
+function flash(kind, msg) {
+  const el = $('admin-flash');
+  el.className = 'show ' + kind;
+  el.textContent = msg;
+  if (kind === 'success') setTimeout(() => { el.classList.remove('show'); }, 4500);
 }
-function hideMsg(id) { document.getElementById(id).classList.add('hide'); }
 
-// ---------- Magic link ----------
-async function sendMagicLink() {
-  const email = document.getElementById('email-input').value.trim();
-  if (!email) { showMsg('login-msg', 'Email required', 'error'); return; }
-  const btn = document.getElementById('send-link');
-  btn.disabled = true;
-  btn.textContent = 'Sending...';
-  try {
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/otp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
-      body: JSON.stringify({
-        email,
-        create_user: false,
-        options: { emailRedirectTo: REDIRECT_URL }
-      })
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error_description || err.msg || err.error || 'Failed to send link');
+// ─── Magic-link login ──────────────────────────────────
+$('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = $('login-email').value.trim();
+  const note = $('login-note');
+  const btn = $('login-submit');
+  note.className = 'note'; note.textContent = '';
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  // EXPLICIT redirect back to THIS page. Bypasses Site URL entirely.
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: window.location.origin + window.location.pathname
     }
-    showMsg('login-msg', `Magic link sent to ${email}. Check your inbox, click the link, and you'll land back here logged in.`, 'ok');
-    btn.textContent = 'Sent — check email';
-  } catch (err) {
-    showMsg('login-msg', err.message || String(err), 'error');
-    btn.disabled = false;
-    btn.textContent = 'Send magic link';
-  }
-}
-
-// ---------- Auth ----------
-async function fetchUser(session) {
-  const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-    headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}` }
   });
-  if (!res.ok) throw new Error('Session invalid');
-  return res.json();
-}
-async function isAdmin(session) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/is_admin`, {
-    method: 'POST',
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${session.access_token}`,
-      'Content-Type': 'application/json'
-    },
-    body: '{}'
-  });
-  if (!res.ok) return false;
-  const v = await res.json();
-  return v === true;
-}
 
-// ---------- Clients ----------
-async function loadClients(session) {
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/clients?select=id,name,email,intake_status,client_tier,auth_user_id,created_at&order=created_at.desc`,
-    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}` } }
-  );
-  if (!res.ok) throw new Error('Failed to load clients: ' + await res.text());
-  return res.json();
-}
-
-function renderClients(clients) {
-  const container = document.getElementById('clients');
-  container.innerHTML = '';
-  if (clients.length === 0) {
-    container.innerHTML = '<div class="card" style="color:var(--muted)">No clients yet.</div>';
+  btn.disabled = false; btn.textContent = 'Send magic link';
+  if (error) {
+    note.className = 'note error';
+    note.textContent = error.message || 'Could not send link.';
     return;
   }
-  for (const c of clients) {
-    const div = document.createElement('div');
-    div.className = 'client';
-    const invited = !!c.auth_user_id;
-    const intakeStatus = c.intake_status || 'pending';
-    const left = document.createElement('div');
-    left.innerHTML = `
-      <h3 class="client-name">${escapeHtml(c.name)}</h3>
-      <div class="client-email">${escapeHtml(c.email || '(no email on file)')}</div>
-      <div style="margin-top:8px;">
-        <span class="status ${escapeHtml(intakeStatus)}">${escapeHtml(intakeStatus)}</span>
-        ${invited
-          ? '<span class="status invited">portal access ✓</span>'
-          : '<span class="status pending">no portal access</span>'}
-      </div>
-    `;
-    const right = document.createElement('div');
-    right.className = 'right-cell';
-    if (invited) {
-      right.textContent = 'Already invited';
+  note.className = 'note success';
+  note.textContent = 'Magic link sent. Check your inbox and click the link to sign in.';
+});
+
+$('sign-out').addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  location.reload();
+});
+
+// ─── Session bootstrap ─────────────────────────────────
+async function boot() {
+  // detectSessionInUrl consumes the #access_token fragment automatically.
+  // Wait a tick to let that happen, then check session.
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    show('view-login');
+    return;
+  }
+
+  // Strip the auth fragment from URL so it looks clean.
+  if (window.location.hash.includes('access_token')) {
+    history.replaceState(null, '', window.location.pathname);
+  }
+
+  // Verify admin
+  const { data: isAdmin, error: adminErr } = await supabase.rpc('is_admin');
+  if (adminErr || isAdmin !== true) {
+    show('view-login');
+    $('login-note').className = 'note error';
+    $('login-note').textContent = adminErr
+      ? `Auth check failed: ${adminErr.message}`
+      : 'This account is not an admin.';
+    await supabase.auth.signOut();
+    return;
+  }
+
+  $('admin-email').textContent = session.user.email;
+  show('view-admin');
+  await loadClients();
+}
+
+// ─── Load + render clients ─────────────────────────────
+async function loadClients() {
+  const list = $('client-list');
+  list.innerHTML = '<div class="loading-state">Loading clients…</div>';
+
+  const { data, error } = await supabase
+    .from('clients')
+    .select('id, name, email, auth_user_id, client_tier, intake_status')
+    .order('name');
+
+  if (error) {
+    list.innerHTML = `<div class="empty-state">Could not load clients: ${error.message}</div>`;
+    return;
+  }
+  if (!data || data.length === 0) {
+    list.innerHTML = '<div class="empty-state">No clients yet.</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  for (const c of data) {
+    const row = document.createElement('div');
+    row.className = 'client-row';
+    row.dataset.clientId = c.id;
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'client-name serif';
+    nameEl.textContent = c.name || '(unnamed)';
+
+    const emailEl = document.createElement('div');
+    if (c.email) {
+      emailEl.className = 'client-email';
+      emailEl.textContent = c.email;
+    } else {
+      emailEl.className = 'client-email muted';
+      emailEl.textContent = 'no email on file';
+    }
+
+    const tierEl = document.createElement('div');
+    if (c.client_tier) {
+      tierEl.className = 'tier-badge';
+      tierEl.textContent = c.client_tier.replace('_', ' ');
+    } else {
+      tierEl.className = 'tier-badge empty';
+      tierEl.textContent = 'no tier';
+    }
+
+    const actionEl = document.createElement('div');
+    if (c.auth_user_id) {
+      const pill = document.createElement('span');
+      pill.className = 'status-pill ok';
+      pill.textContent = 'Portal access ✓';
+      actionEl.appendChild(pill);
     } else if (!c.email) {
-      right.textContent = 'No email on file';
+      const pill = document.createElement('span');
+      pill.className = 'status-pill';
+      pill.style.color = 'var(--text-faint)';
+      pill.textContent = '— needs email —';
+      actionEl.appendChild(pill);
     } else {
       const btn = document.createElement('button');
+      btn.className = 'btn-invite';
       btn.textContent = 'Invite to portal';
-      btn.onclick = () => inviteClient(c.id, btn);
-      right.appendChild(btn);
+      btn.addEventListener('click', () => sendInvite(c.id, btn));
+      actionEl.appendChild(btn);
     }
-    div.appendChild(left);
-    div.appendChild(right);
-    container.appendChild(div);
+
+    row.appendChild(nameEl);
+    row.appendChild(emailEl);
+    row.appendChild(tierEl);
+    row.appendChild(actionEl);
+    list.appendChild(row);
   }
 }
 
-async function inviteClient(clientId, btn) {
-  hideMsg('admin-msg');
-  btn.disabled = true;
-  btn.textContent = 'Inviting...';
+// ─── Send invite via edge function ─────────────────────
+async function sendInvite(clientId, btn) {
+  btn.disabled = true; btn.textContent = 'Sending…';
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { flash('error', 'Session expired. Sign in again.'); return; }
+
   try {
-    const session = loadSession();
     const res = await fetch(`${SUPABASE_URL}/functions/v1/invite-client`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
-        apikey: SUPABASE_ANON_KEY
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ client_id: clientId })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Invite failed');
-    showMsg('admin-msg', `✓ Invitation sent to ${data.email} (${data.name})`, 'ok');
-    const clients = await loadClients(session);
-    renderClients(clients);
-  } catch (err) {
-    showMsg('admin-msg', err.message || String(err), 'error');
-    btn.disabled = false;
-    btn.textContent = 'Invite to portal';
-  }
-}
-
-function escapeHtml(s) {
-  if (s == null) return '';
-  return String(s).replace(/[&<>"']/g, ch => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[ch]));
-}
-
-// ---------- Boot ----------
-document.getElementById('send-link').addEventListener('click', sendMagicLink);
-document.getElementById('email-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') sendMagicLink();
-});
-document.getElementById('logout').addEventListener('click', () => {
-  clearSession();
-  window.location.reload();
-});
-
-(async function init() {
-  captureHashSession();
-  const session = loadSession();
-  if (!session) return;
-  try {
-    const user = await fetchUser(session);
-    const admin = await isAdmin(session);
-    if (!admin) {
-      showMsg('login-msg', `${user.email} is signed in but is not an admin.`, 'error');
-      clearSession();
+    const json = await res.json();
+    if (!res.ok) {
+      flash('error', `Invite failed: ${json.error || res.statusText}`);
+      btn.disabled = false; btn.textContent = 'Invite to portal';
       return;
     }
-    document.getElementById('login-view').classList.add('hide');
-    document.getElementById('admin-view').classList.remove('hide');
-    document.getElementById('who').textContent = `Signed in as ${user.email}`;
-    const clients = await loadClients(session);
-    renderClients(clients);
-  } catch {
-    showMsg('login-msg', 'Session expired. Sign in again.', 'error');
-    clearSession();
+    if (json.already_invited) {
+      flash('success', `${json.name} already has portal access.`);
+    } else {
+      flash('success', `Invite sent to ${json.name} (${json.email}).`);
+    }
+    await loadClients();
+  } catch (err) {
+    flash('error', `Network error: ${err.message}`);
+    btn.disabled = false; btn.textContent = 'Invite to portal';
   }
-})();
+}
+
+// React to sign-in state changes (in case detectSessionInUrl finishes after boot)
+supabase.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+    if (!$('view-admin').classList.contains('active')) boot();
+  }
+});
+
+boot();
 </script>
 </body>
 </html>
