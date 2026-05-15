@@ -120,23 +120,38 @@ body::before {
 .login-error.login-success { color: var(--teal); }
 
 /* ════════════════════════════════════════════════════
-   SHARED APP SHELL
+   SHARED APP SHELL — top bar + left sidebar + content + footer
 ════════════════════════════════════════════════════ */
-.app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+.app-shell {
+  display: grid;
+  grid-template-areas:
+    "preview preview"
+    "topbar  topbar"
+    "sidebar content"
+    "footer  footer";
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: auto 56px 1fr auto;
+  min-height: 100vh;
+}
 
-.app-header {
+/* ── Top bar (identity + session controls only) ── */
+.app-top-bar {
+  grid-area: topbar;
   position: sticky; top: 0; z-index: 100;
   background: rgba(9,9,15,0.95); backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
-  padding: 0 2rem; height: 56px;
+  padding: 0 2rem;
   display: flex; align-items: center; justify-content: space-between;
 }
-.app-header-left { display: flex; align-items: center; gap: 1.25rem; }
+.top-bar-left  { display: flex; align-items: center; gap: 1.25rem; }
+.top-bar-right { display: flex; align-items: center; gap: 1rem; }
 .app-logo {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.1rem; font-style: italic; color: var(--gold);
   letter-spacing: 0.04em; white-space: nowrap;
+  text-decoration: none;
 }
+.app-logo:hover { color: var(--gold-bright); }
 .app-role-badge {
   font-size: 15px; font-weight: 500; letter-spacing: 0.16em;
   text-transform: uppercase; padding: 3px 8px; border-radius: 10px;
@@ -168,19 +183,6 @@ body::before {
   border-left: 2px solid var(--gold); padding-left: 0.875rem; margin-left: -0.875rem;
 }
 
-.app-site-links { display: flex; align-items: center; gap: 1rem; padding-left: 1rem; border-left: 1px solid var(--border); }
-.app-site-link {
-  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 400;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--text-faint); text-decoration: none;
-  white-space: nowrap; transition: color 0.18s;
-}
-.app-site-link:hover { color: var(--gold); }
-@media (max-width: 900px) {
-  .app-site-links { display: none; }
-}
-
-.app-header-right { display: flex; align-items: center; gap: 1rem; }
 .btn-view-toggle {
   font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
   letter-spacing: 0.1em; text-transform: uppercase;
@@ -204,26 +206,133 @@ body::before {
 }
 .btn-signout:hover { border-color: var(--border); color: var(--text-dim); }
 
-.app-nav {
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  padding: 0 2rem;
-  display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
+/* ── Left sidebar (within-platform navigation) ── */
+.app-sidebar {
+  grid-area: sidebar;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 1.75rem 0;
+  position: sticky; top: 56px;
+  align-self: start;
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
-.app-nav::-webkit-scrollbar { display: none; }
-.nav-tab {
-  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 0 1.25rem; height: 44px;
-  display: inline-flex; align-items: center; cursor: pointer;
-  border: none; background: none; color: var(--text-dim);
-  border-bottom: 2px solid transparent; white-space: nowrap;
-  transition: color 0.2s, border-color 0.2s;
-}
-.nav-tab:hover { color: var(--text); }
-.nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
-.admin-only-tab { display: none; }
+.app-sidebar::-webkit-scrollbar { width: 6px; }
+.app-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-.app-content { flex: 1; padding: 2.5rem 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+.sidebar-group {
+  display: flex; flex-direction: column;
+  padding: 0;
+}
+.sidebar-group-label {
+  font-family: 'Jost', sans-serif;
+  font-size: 15px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 0 1.75rem 0.6rem;
+}
+.sidebar-divider {
+  margin: 1.5rem 1.5rem;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+.sidebar-nav-item {
+  display: flex; align-items: center;
+  padding: 10px 1.75rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 15px; font-weight: 400;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-dim);
+  cursor: pointer;
+  border: none; background: none;
+  border-left: 2px solid transparent;
+  text-align: left; width: 100%;
+  text-decoration: none;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+.sidebar-nav-item:hover {
+  color: var(--text); background: var(--accent);
+}
+.sidebar-nav-item.active {
+  color: var(--gold); border-left-color: var(--gold);
+  background: var(--accent);
+}
+.sidebar-nav-item .ext-arrow {
+  margin-left: auto; font-size: 12px; opacity: 0.88;
+}
+
+/* ── Main content ── */
+.app-content {
+  grid-area: content;
+  padding: 2.5rem 2rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ── Footer (cross-surface bridges) ── */
+.app-footer {
+  grid-area: footer;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 1.5rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 1.25rem;
+}
+.footer-bridges {
+  display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+}
+.footer-link {
+  font-family: 'Jost', sans-serif;
+  font-size: 15px; font-weight: 400;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-dim);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+.footer-link:hover { color: var(--gold); }
+.footer-copyright {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px; font-style: italic;
+  color: var(--text-faint);
+  opacity: 0.88;
+}
+
+/* Mobile: collapse sidebar above content */
+@media (max-width: 800px) {
+  .app-shell {
+    grid-template-areas:
+      "preview"
+      "topbar"
+      "sidebar"
+      "content"
+      "footer";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 56px auto 1fr auto;
+  }
+  .app-sidebar {
+    position: static;
+    max-height: none;
+    padding: 1rem 0;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-group { flex-direction: row; flex-wrap: wrap; gap: 0.25rem; padding: 0 0.5rem; }
+  .sidebar-group-label { display: none; }
+  .sidebar-divider { width: 100%; margin: 0.75rem 0.5rem; }
+  .sidebar-nav-item {
+    padding: 8px 14px; border-left: none;
+    border-bottom: 2px solid transparent;
+    width: auto;
+  }
+  .sidebar-nav-item.active {
+    border-bottom-color: var(--gold); border-left: none;
+  }
+  .app-footer { flex-direction: column; align-items: flex-start; padding: 1.25rem 1rem; }
+}
 
 /* ════════════════════════════════════════════════════
    PANELS
@@ -428,6 +537,7 @@ body::before {
 
 /* ── Preview banner ── */
 .preview-banner {
+  grid-area: preview;
   background: var(--amber-dim); border-bottom: 1px solid rgba(245,170,136,0.25);
   padding: 8px 2rem; text-align: center;
   font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase;
@@ -799,33 +909,31 @@ body::before {
 
     <!-- Preview banner (admin viewing as client) -->
     <div class="preview-banner" id="preview-banner">
-      Viewing as Client — <a href="#" onclick="stopPreview()" style="color:inherit;text-decoration:underline;cursor:pointer">Return to Admin</a>
+      Viewing as Client — <a href="#" onclick="stopPreview();return false;" style="color:inherit;text-decoration:underline;cursor:pointer">Exit Preview</a>
     </div>
 
-    <!-- Header -->
-    <header class="app-header">
-      <div class="app-header-left">
-        <div class="app-logo">Map Guide & Portal</div>
+    <!-- Top bar (identity + session controls) -->
+    <header class="app-top-bar">
+      <div class="top-bar-left">
+        <a class="app-logo" href="#overview">Map Guide &amp; Portal</a>
         <span class="app-role-badge" id="role-badge">·</span>
-        <nav class="app-site-links" aria-label="Site navigation">
-          <a class="app-site-link" href="index.html" target="_blank" rel="noopener">Map ↗</a>
-          <a class="app-site-link" href="fieldguide.html" target="_blank" rel="noopener">Fieldguide ↗</a>
-          <a class="app-site-link" id="site-link-weaving" href="ancestral-weaving.html" target="_blank" rel="noopener">Weaving ↗</a>
-          <a class="app-site-link" id="site-link-catalog" href="ancestral-catalog.html" target="_blank" rel="noopener">Catalog ↗</a>
-          <a class="app-site-link" id="site-link-tapestry" href="tapestry.html" target="_blank" rel="noopener">Tapestry ↗</a>
-          <a class="app-site-link" id="site-link-convergence" href="convergence.html" target="_blank" rel="noopener" style="display:none">Convergence ↗</a>
-        </nav>
       </div>
-      <div class="app-header-right">
+      <div class="top-bar-right">
         <button class="btn-view-toggle" id="btn-toggle-view" onclick="toggleClientPreview()" style="display:none">View as Client</button>
         <button class="btn-signout" onclick="handleSignOut()">Sign Out</button>
       </div>
     </header>
 
-    <!-- Nav tabs -->
-    <nav class="app-nav" id="app-nav">
-      <!-- Injected by JS based on role -->
-    </nav>
+    <!-- Left sidebar (within-platform navigation) -->
+    <aside class="app-sidebar">
+      <nav class="sidebar-group" id="sidebar-panel-nav" aria-label="Panel navigation">
+        <!-- Injected by buildNav() -->
+      </nav>
+      <hr class="sidebar-divider">
+      <nav class="sidebar-group" id="sidebar-external-links" aria-label="External platform pages">
+        <!-- Injected by buildNav() — gated by role + access flags -->
+      </nav>
+    </aside>
 
     <!-- Content -->
     <main class="app-content">
@@ -894,6 +1002,19 @@ body::before {
           </div>
         </div>
         <div class="client-list" id="clients-list"></div>
+      </div>
+
+      <!-- ══ ADMIN: Prospects (top-of-funnel surface — Phase D will populate) ══ -->
+      <div class="panel" id="panel-prospects">
+        <div class="panel-header">
+          <div class="eyebrow">Top of Funnel</div>
+          <div class="panel-title">Prospects</div>
+          <p class="panel-sub">Kit subscribers, Calendly bookings, and intake submitters who don't yet have a client record.</p>
+        </div>
+        <div class="empty" style="padding:3.5rem 1rem; text-align:center; color:var(--text-dim); line-height:1.6;">
+          <div style="font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-style:italic; color:var(--gold); margin-bottom:0.85rem">Coming in Phase D</div>
+          The Prospects pipeline will gather Kit subscribers (Architecture PDF, Signals Quiz, Substack), Calendly bookings, and intake submitters into one filterable list. Webhooks from Kit + Calendly will populate this surface. See <code>website-walkthrough.md</code> §15 for the full spec.
+        </div>
       </div>
 
       <!-- ══ ADMIN: Client Detail (per-client dashboard) ══ -->
@@ -1170,6 +1291,21 @@ body::before {
       </div>
 
     </main>
+
+    <!-- Footer (cross-surface bridges to christypaxtonwade.com) -->
+    <footer class="app-footer">
+      <div class="footer-bridges">
+        <a class="footer-link" href="https://christypaxtonwade.com/">Home</a>
+        <a class="footer-link" href="https://christypaxtonwade.com/begin">Begin</a>
+        <a class="footer-link" href="https://christypaxtonwade.com/earth">Earth</a>
+        <a class="footer-link" href="https://christypaxtonwade.com/sky">Sky</a>
+        <a class="footer-link" href="https://christypaxtonwade.com/life">Life</a>
+        <a class="footer-link" href="https://christypaxtonwade.com/mirror">Mirror</a>
+        <a class="footer-link" href="https://thealchemyofmidlife.substack.com" target="_blank" rel="noopener">Substack ↗</a>
+        <a class="footer-link" href="https://christypaxtonwade.com/sky/tapestry">Tapestry ↗</a>
+      </div>
+      <span class="footer-copyright">© Christy Paxton Wade</span>
+    </footer>
   </div>
 </div>
 
@@ -1467,15 +1603,23 @@ async function enterApp() {
 
   showView('view-app');
 
-  // Navigate to hash if present, otherwise default
-  const hashPanel = panelForHash(window.location.hash);
-  const startPanel = hashPanel || defaultPanel();
+  // Navigate to hash if present, otherwise default.
+  // panelForHash may return a plain string (static panel) OR an object
+  // {panelId, clientId} for dynamic client-detail hashes (#client/{id}).
+  const hashResult = panelForHash(window.location.hash);
+  const isDynamicClient = hashResult && typeof hashResult === 'object' && hashResult.panelId === 'panel-client-detail';
+  const startPanel = isDynamicClient ? null : (hashResult || defaultPanel());
 
   if (isAdmin) {
     await Promise.all([populateWeavingClientSelect()]);
-    showPanel(startPanel);
-    if (startPanel === 'panel-overview') { populateOverview(); renderClientList(); }
-    if (startPanel === 'panel-convergence-admin') loadAllConvergences();
+    if (isDynamicClient) {
+      // Direct load into a client detail from a deep link.
+      showClientDetail(hashResult.clientId);
+    } else {
+      showPanel(startPanel);
+      if (startPanel === 'panel-overview') { populateOverview(); renderClientList(); }
+      if (startPanel === 'panel-convergence-admin') loadAllConvergences();
+    }
   } else {
     showPanel(startPanel);
     if (startPanel === 'panel-my-weaving') loadMyWeaving();
@@ -1484,26 +1628,41 @@ async function enterApp() {
 }
 
 // ── Navigation ────────────────────────────────────────
+// Populates the LEFT SIDEBAR with two groups:
+//   Group 1 — panel nav (admin or client tabs, depending on role)
+//   Group 2 — external platform links (gated by access flags for clients;
+//             admin sees all). Each external link carries ?client_id=<active>
+//             when an active client exists.
+//
+// The "Signal Reading" client-side item and the access-flag-derived client
+// panels arrive in Phase C. Phase A keeps the current client tabs
+// (My Weaving + My Convergence) so the client experience continues to work.
 function buildNav() {
-  const nav = document.getElementById('app-nav');
-  nav.innerHTML = '';
+  const panelGroup    = document.getElementById('sidebar-panel-nav');
+  const externalGroup = document.getElementById('sidebar-external-links');
+  panelGroup.innerHTML = '';
+  externalGroup.innerHTML = '';
 
   const adminTabs = [
     { id: 'panel-overview',           label: 'Overview' },
+    { id: 'panel-prospects',          label: 'Prospects' },
     { id: 'panel-weaving',            label: 'Weaving Builder' },
     { id: 'panel-convergence-admin',  label: 'Convergences' },
     { id: 'panel-ancestor-research',  label: 'Ancestor Research' },
     { id: 'panel-tapestry',           label: 'Tapestry' },
   ];
+  // Phase A: current client tabs preserved. Phase C will derive from access flags
+  // and add Signal Reading / Fieldguide / My Catalog / Tapestry client panels.
   const clientTabs = [
     { id: 'panel-my-weaving',     label: 'My Weaving' },
-    { id: 'panel-my-convergence', label: 'The Convergence' },
+    { id: 'panel-my-convergence', label: 'My Convergence' },
   ];
 
   const tabs = (isAdmin && !isPreviewingAsClient) ? adminTabs : clientTabs;
+
   tabs.forEach(t => {
     const btn = document.createElement('button');
-    btn.className = 'nav-tab';
+    btn.className = 'sidebar-nav-item';
     btn.textContent = t.label;
     btn.dataset.panel = t.id;
     btn.onclick = () => {
@@ -1515,9 +1674,53 @@ function buildNav() {
       if (t.id === 'panel-overview') { populateOverview(); renderClientList(); }
       if (t.id === 'panel-ancestor-research') initAncestorResearch();
       if (t.id === 'panel-tapestry') loadTapestryManager();
+      // panel-prospects: placeholder content, no loader yet (Phase D).
     };
-    nav.appendChild(btn);
+    panelGroup.appendChild(btn);
   });
+
+  // ─── Group 2: External platform links ───
+  // Map link always visible. Other links gated by the active client's access_* flag.
+  // Admin sees all links regardless of flags.
+  const activeClient = getActiveClientObject();
+  const cid = activeClient ? `?client_id=${encodeURIComponent(activeClient.id)}` : '';
+
+  const externalLinks = [
+    { href: 'index.html',             label: 'Map ↗',         flag: null },
+    { href: 'fieldguide.html',        label: 'Fieldguide ↗',  flag: 'access_fieldguide' },
+    { href: 'ancestral-weaving.html', label: 'Weaving ↗',     flag: 'access_weaving' },
+    { href: 'ancestral-catalog.html', label: 'Catalog ↗',     flag: 'access_catalog' },
+    { href: 'tapestry.html',          label: 'Tapestry ↗',    flag: 'access_tapestry' },
+    { href: 'convergence.html',       label: 'Convergence ↗', flag: 'access_convergence' },
+  ];
+
+  externalLinks.forEach(l => {
+    if (l.flag && !isAdmin) {
+      // Client must have the flag true on their own row.
+      if (!activeClient || !activeClient[l.flag]) return;
+    }
+    const a = document.createElement('a');
+    a.className = 'sidebar-nav-item';
+    a.href = l.href + cid;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = l.label;
+    externalGroup.appendChild(a);
+  });
+}
+
+// Returns the active client row (full object) or null.
+// - Admin previewing a client → that client.
+// - Client signed in → their own row.
+// - Admin not previewing → null (admin canonical view; external links carry no client_id).
+function getActiveClientObject() {
+  if (isAdmin && isPreviewingAsClient && previewClientId) {
+    return allClients.find(c => c.id === previewClientId) || null;
+  }
+  if (!isAdmin && currentUser) {
+    return allClients.find(c => c.auth_user_id === currentUser.id || c.email === currentUser.email) || null;
+  }
+  return null;
 }
 
 // ── Hash routing ──────────────────────────────────────
@@ -1525,6 +1728,7 @@ function buildNav() {
 const ADMIN_HASH_MAP = {
   '#overview':            'panel-overview',
   '#clients':             'panel-overview',  // legacy alias — merged into overview
+  '#prospects':           'panel-prospects',
   '#weaving':             'panel-weaving',
   '#convergences':        'panel-convergence-admin',
   '#ancestor-research':   'panel-ancestor-research',
@@ -1534,11 +1738,19 @@ const CLIENT_HASH_MAP = {
   '#my-weaving':    'panel-my-weaving',
   '#my-convergence':'panel-my-convergence',
 };
+const CLIENT_DETAIL_HASH_RX = /^#client\/([0-9a-fA-F-]+)$/;
+
 function hashForPanel(panelId) {
   const all = { ...ADMIN_HASH_MAP, ...CLIENT_HASH_MAP };
   return Object.keys(all).find(h => all[h] === panelId) || '#overview';
 }
 function panelForHash(hash) {
+  // Dynamic: #client/{id} → panel-client-detail (admin only, side-effect: load the detail)
+  const m = CLIENT_DETAIL_HASH_RX.exec(hash);
+  if (m && isAdmin && !isPreviewingAsClient) {
+    return { panelId: 'panel-client-detail', clientId: m[1] };
+  }
+  // Static maps
   const map = (isAdmin && !isPreviewingAsClient) ? ADMIN_HASH_MAP : CLIENT_HASH_MAP;
   return map[hash] || null;
 }
@@ -1550,7 +1762,13 @@ function defaultPanel() {
 window.addEventListener('hashchange', () => {
   if (!document.getElementById('view-app').classList.contains('active')) return;
   const target = panelForHash(window.location.hash);
-  if (target) activatePanel(target);
+  if (!target) return;
+  if (typeof target === 'object' && target.panelId === 'panel-client-detail') {
+    // Dynamic client detail — call the loader, which handles activation.
+    showClientDetail(target.clientId);
+  } else {
+    activatePanel(target);
+  }
 });
 
 function showPanel(panelId) {
@@ -1564,7 +1782,9 @@ function showPanel(panelId) {
 
 function activatePanel(panelId) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => {
+  // Highlight the matching sidebar item (panel-nav group). External-link items
+  // never become "active" — they navigate away to other pages.
+  document.querySelectorAll('#sidebar-panel-nav .sidebar-nav-item').forEach(t => {
     t.classList.toggle('active', t.dataset.panel === panelId);
   });
   const panel = document.getElementById(panelId);
@@ -1608,24 +1828,12 @@ function activeClientId() {
   return null;
 }
 
+// External platform links live in the left sidebar (Group 2), built by buildNav().
+// When the active client changes (preview start/stop, client sign-in), call buildNav()
+// to rebuild the sidebar with the new active_client_id baked into each link.
+// This function remains as a thin alias for legacy callers.
 function updateSiteLinksForActiveClient() {
-  const cid = activeClientId();
-  const weavingEl  = document.getElementById('site-link-weaving');
-  const catalogEl  = document.getElementById('site-link-catalog');
-  const tapestryEl = document.getElementById('site-link-tapestry');
-  const convEl     = document.getElementById('site-link-convergence');
-  const w = cid ? `ancestral-weaving.html?client_id=${encodeURIComponent(cid)}` : 'ancestral-weaving.html';
-  const c = cid ? `ancestral-catalog.html?client_id=${encodeURIComponent(cid)}` : 'ancestral-catalog.html';
-  const t = cid ? `tapestry.html?client_id=${encodeURIComponent(cid)}` : 'tapestry.html';
-  const v = cid ? `convergence.html?client_id=${encodeURIComponent(cid)}` : 'convergence.html';
-  if (weavingEl)  weavingEl.setAttribute('href', w);
-  if (catalogEl)  catalogEl.setAttribute('href', c);
-  if (tapestryEl) tapestryEl.setAttribute('href', t);
-  if (convEl) {
-    convEl.setAttribute('href', v);
-    // Show the Convergence header link only when there's an active client (admin canonical view doesn't need it inline)
-    convEl.style.display = cid ? '' : 'none';
-  }
+  buildNav();
 }
 
 // ════════════════════════════════════════════════════
@@ -1635,8 +1843,14 @@ let currentDetailClient = null;
 let currentDetailData = null;
 
 async function showClientDetail(clientId) {
-  showPanel('panel-client-detail');
   currentDetailClient = clientId;
+  // Push the dynamic hash so browser back-button returns to the previous panel, not the previous client.
+  const targetHash = `#client/${clientId}`;
+  if (window.location.hash !== targetHash) {
+    history.pushState(null, '', targetHash);
+  }
+  // Activate the panel (without going through showPanel, which would set the wrong hash).
+  activatePanel('panel-client-detail');
   document.getElementById('cd-title').textContent = '—';
   document.getElementById('cd-subtitle').textContent = '—';
   document.getElementById('client-detail-content').innerHTML =
