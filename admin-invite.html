@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal Invites · Navigation Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --surface: #161616;
+    --border: #2a2520;
+    --gold: #c9a96e;
+    --cream: #e8e2d4;
+    --muted: #6d6d6d;
+    --error: #d97757;
+    --ok: #7ba87b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'Jost', system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 64px 32px; }
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400; font-size: 2.4rem;
+    margin: 0 0 8px; letter-spacing: 0.01em;
+  }
+  .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 48px; letter-spacing: 0.02em; }
+  .card { background: var(--surface); border: 1px solid var(--border); padding: 32px; margin-bottom: 16px; }
+  label {
+    display: block; font-size: 0.75rem; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--gold); margin-bottom: 8px;
+  }
+  input[type=email] {
+    width: 100%; background: var(--ink); border: 1px solid var(--border);
+    color: var(--cream); padding: 12px 14px; font-family: inherit;
+    font-size: 1rem; margin-bottom: 16px;
+  }
+  input[type=email]:focus { outline: none; border-color: var(--gold); }
+  button {
+    background: transparent; color: var(--gold); border: 1px solid var(--gold);
+    padding: 10px 20px; font-family: inherit; font-size: 0.85rem;
+    letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  button:hover:not(:disabled) { background: var(--gold); color: var(--ink); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .client {
+    border: 1px solid var(--border); padding: 20px 24px; margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  }
+  .client-name { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; margin: 0; }
+  .client-email { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+  .status {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 3px 8px; border: 1px solid var(--border); display: inline-block; margin-right: 8px;
+  }
+  .status.invited { color: var(--ok); border-color: var(--ok); }
+  .status.pending { color: var(--muted); }
+  .status.submitted { color: var(--gold); border-color: var(--gold); }
+  .msg { padding: 12px 16px; margin-bottom: 16px; font-size: 0.9rem; border-left: 2px solid var(--gold); background: rgba(201, 169, 110, 0.08); }
+  .msg.error { border-left-color: var(--error); background: rgba(217, 119, 87, 0.08); }
+  .msg.ok { border-left-color: var(--ok); background: rgba(123, 168, 123, 0.08); }
+  .hide { display: none !important; }
+  .top-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+  }
+  .top-bar .who { color: var(--muted); font-size: 0.85rem; }
+  .logout {
+    background: none; border: none; color: var(--muted);
+    text-transform: none; letter-spacing: 0.02em; padding: 4px 8px; font-size: 0.8rem;
+  }
+  .logout:hover { color: var(--cream); background: none; }
+  .right-cell { text-align: right; color: var(--muted); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Portal Invites</h1>
+  <div class="sub">Admin tool · Navigation Map of Consciousness</div>
+
+  <!-- LOGIN VIEW -->
+  <div id="login-view" class="card">
+    <div id="login-msg" class="msg hide"></div>
+    <label for="email-input">Admin email</label>
+    <input type="email" id="email-input" placeholder="christypaxtonwade@gmail.com" autocomplete="email">
+    <button id="send-link">Send magic link</button>
+  </div>
+
+  <!-- ADMIN VIEW -->
+  <div id="admin-view" class="hide">
+    <div class="top-bar">
+      <div class="who" id="who"></div>
+      <button class="logout" id="logout">Sign out</button>
+    </div>
+    <div id="admin-msg" class="msg hide"></div>
+    <div id="clients"></div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+const REDIRECT_URL = window.location.origin + window.location.pathname;
+const STORAGE_KEY = 'nav-map-admin-session';
+
+// ---------- Session helpers ----------
+function saveSession(s) { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+function loadSession() {
+  try { const r = sessionStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; }
+  catch { return null; }
+}
+function clearSession() { sessionStorage.removeItem(STORAGE_KEY); }
+
+// ---------- Capture session from magic-link hash ----------
+function captureHashSession() {
+  if (!window.location.hash) return null;
+  const params = new URLSearchParams(window.location.hash.slice(1));
+  const access_token = params.get('access_token');
+  const refresh_token = params.get('refresh_token');
+  const expires_at = params.get('expires_at');
+  if (access_token && refresh_token) {
+    const session = { access_token, refresh_token, expires_at };
+    saveSession(session);
+    history.replaceState(null, '', window.location.pathname);
+    return session;
+  }
+  return null;
+}
+
+// ---------- UI ----------
+function showMsg(id, text, kind) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'msg' + (kind ? ' ' + kind : '');
+}
+function hideMsg(id) { document.getElementById(id).classList.add('hide'); }
+
+// ---------- Magic link ----------
+async function sendMagicLink() {
+  const email = document.getElementById('email-input').value.trim();
+  if (!email) { showMsg('login-msg', 'Email required', 'error'); return; }
+  const btn = document.getElementById('send-link');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
+      body: JSON.stringify({
+        email,
+        create_user: false,
+        options: { emailRedirectTo: REDIRECT_URL }
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error_description || err.msg || err.error || 'Failed to send link');
+    }
+    showMsg('login-msg', `Magic link sent to ${email}. Check your inbox, click the link, and you'll land back here logged in.`, 'ok');
+    btn.textContent = 'Sent — check email';
+  } catch (err) {
+    showMsg('login-msg', err.message || String(err), 'error');
+    btn.disabled = false;
+    btn.textContent = 'Send magic link';
+  }
+}
+
+// ---------- Auth ----------
+async function fetchUser(session) {
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}` }
+  });
+  if (!res.ok) throw new Error('Session invalid');
+  return res.json();
+}
+async function isAdmin(session) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/is_admin`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json'
+    },
+    body: '{}'
+  });
+  if (!res.ok) return false;
+  const v = await res.json();
+  return v === true;
+}
+
+// ---------- Clients ----------
+async function loadClients(session) {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/clients?select=id,name,email,intake_status,client_tier,auth_user_id,created_at&order=created_at.desc`,
+    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}` } }
+  );
+  if (!res.ok) throw new Error('Failed to load clients: ' + await res.text());
+  return res.json();
+}
+
+function renderClients(clients) {
+  const container = document.getElementById('clients');
+  container.innerHTML = '';
+  if (clients.length === 0) {
+    container.innerHTML = '<div class="card" style="color:var(--muted)">No clients yet.</div>';
+    return;
+  }
+  for (const c of clients) {
+    const div = document.createElement('div');
+    div.className = 'client';
+    const invited = !!c.auth_user_id;
+    const intakeStatus = c.intake_status || 'pending';
+    const left = document.createElement('div');
+    left.innerHTML = `
+      <h3 class="client-name">${escapeHtml(c.name)}</h3>
+      <div class="client-email">${escapeHtml(c.email || '(no email on file)')}</div>
+      <div style="margin-top:8px;">
+        <span class="status ${escapeHtml(intakeStatus)}">${escapeHtml(intakeStatus)}</span>
+        ${invited
+          ? '<span class="status invited">portal access ✓</span>'
+          : '<span class="status pending">no portal access</span>'}
+      </div>
+    `;
+    const right = document.createElement('div');
+    right.className = 'right-cell';
+    if (invited) {
+      right.textContent = 'Already invited';
+    } else if (!c.email) {
+      right.textContent = 'No email on file';
+    } else {
+      const btn = document.createElement('button');
+      btn.textContent = 'Invite to portal';
+      btn.onclick = () => inviteClient(c.id, btn);
+      right.appendChild(btn);
+    }
+    div.appendChild(left);
+    div.appendChild(right);
+    container.appendChild(div);
+  }
+}
+
+async function inviteClient(clientId, btn) {
+  hideMsg('admin-msg');
+  btn.disabled = true;
+  btn.textContent = 'Inviting...';
+  try {
+    const session = loadSession();
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/invite-client`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({ client_id: clientId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Invite failed');
+    showMsg('admin-msg', `✓ Invitation sent to ${data.email} (${data.name})`, 'ok');
+    const clients = await loadClients(session);
+    renderClients(clients);
+  } catch (err) {
+    showMsg('admin-msg', err.message || String(err), 'error');
+    btn.disabled = false;
+    btn.textContent = 'Invite to portal';
+  }
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
+
+// ---------- Boot ----------
+document.getElementById('send-link').addEventListener('click', sendMagicLink);
+document.getElementById('email-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMagicLink();
+});
+document.getElementById('logout').addEventListener('click', () => {
+  clearSession();
+  window.location.reload();
+});
+
+(async function init() {
+  captureHashSession();
+  const session = loadSession();
+  if (!session) return;
+  try {
+    const user = await fetchUser(session);
+    const admin = await isAdmin(session);
+    if (!admin) {
+      showMsg('login-msg', `${user.email} is signed in but is not an admin.`, 'error');
+      clearSession();
+      return;
+    }
+    document.getElementById('login-view').classList.add('hide');
+    document.getElementById('admin-view').classList.remove('hide');
+    document.getElementById('who').textContent = `Signed in as ${user.email}`;
+    const clients = await loadClients(session);
+    renderClients(clients);
+  } catch {
+    showMsg('login-msg', 'Session expired. Sign in again.', 'error');
+    clearSession();
+  }
+})();
+</script>
+</body>
+</html>
