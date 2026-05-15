@@ -482,9 +482,25 @@ const ERA_BAR_CLASS = {
   '19th-century':  'era-modern',
 };
 
+// Reads the user's access token from the portal session (set by portal.html on sign-in).
+// Mirrored to both sessionStorage and localStorage so cross-tab navigations see it.
+// Returns null if no session, expired, or storage parse fails — caller falls back to anon.
+function getPortalAccessToken() {
+  try {
+    const stored = sessionStorage.getItem('portal_session') || localStorage.getItem('portal_session');
+    if (!stored) return null;
+    const s = JSON.parse(stored);
+    if (s.expires_at && Date.now() > s.expires_at) return null;
+    return s.access_token || null;
+  } catch (e) { return null; }
+}
+
 async function supabaseFetch(path) {
+  // Use the signed-in user's access token for RLS-gated tables (client_ancestors,
+  // client_ancestor_frequencies, etc.). Fall back to anon for public archive views.
+  const token = getPortalAccessToken() || SUPABASE_KEY;
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}` }
   });
   if (!res.ok) throw new Error(`Supabase error ${res.status}`);
   return res.json();
