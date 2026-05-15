@@ -830,7 +830,7 @@ body::before {
     <!-- Content -->
     <main class="app-content">
 
-      <!-- ══ ADMIN: Overview ══ -->
+      <!-- ══ ADMIN: Overview (the operational hub — stats + tier reference + full client list) ══ -->
       <div class="panel" id="panel-overview">
         <div class="panel-header">
           <div class="eyebrow">Map Guide & Portal</div>
@@ -838,20 +838,6 @@ body::before {
           <p class="panel-sub" id="overview-sub">Loading…</p>
         </div>
         <div class="stat-grid" id="overview-stats"></div>
-        <div class="section-header">
-          <div class="section-title">Clients</div>
-          <button class="btn btn-outline btn-sm" onclick="showPanel('panel-clients')">View All →</button>
-        </div>
-        <div class="client-list" id="overview-clients"></div>
-      </div>
-
-      <!-- ══ ADMIN: Clients ══ -->
-      <div class="panel" id="panel-clients">
-        <div class="panel-header">
-          <div class="eyebrow">Administration</div>
-          <div class="panel-title">Clients</div>
-          <p class="panel-sub">Manage client records and their ancestral weavings.</p>
-        </div>
 
         <!-- Collapsible tier reference -->
         <div class="tier-ref" id="tier-ref-clients">
@@ -875,7 +861,7 @@ body::before {
             <h4>Tier 5<span class="tier-meta">Bundled into Lineage / $244 update / Mirror capstone · LIVE</span></h4>
             <p>The Convergence. 8-section pattern analysis generated from a client's Weaving frequency data, plus 2-page summary PDF, plus a reading session in which Christy walks them through the analysis. Portal view: history strip of all their Convergences, current Convergence rendered in full, PDF download. Granted to: Lineage Session clients (first Convergence ~2 weeks after session), Convergence Update clients ($244 for returning Weaving-holders), Mirror Work clients (capstone in month 3).</p>
 
-            <p class="footnote">Tier reflects access, not how someone arrived at it. A friend comp'd into Tier 4 still sees a Tier 4 portal — the Relationship field on each client captures the revenue/audit fact separately.</p>
+            <p class="footnote">Tier reflects access, not how someone arrived at it. A friend comp'd into Tier 4 still sees a Tier 4 portal — the Relationship field on each client captures the revenue/audit fact separately. Access is granted per-flag on each client's detail page.</p>
           </div>
         </div>
 
@@ -913,7 +899,7 @@ body::before {
       <!-- ══ ADMIN: Client Detail (per-client dashboard) ══ -->
       <div class="panel" id="panel-client-detail">
         <div class="panel-header">
-          <button class="btn btn-outline btn-sm" onclick="showPanel('panel-clients');renderClientList()" style="margin-bottom:1rem">← All Clients</button>
+          <button class="btn btn-outline btn-sm" onclick="showPanel('panel-overview');renderClientList()" style="margin-bottom:1rem">← All Clients</button>
           <div class="eyebrow">Client · Admin</div>
           <div class="panel-title" id="cd-title">—</div>
           <p class="panel-sub" id="cd-subtitle">—</p>
@@ -1488,8 +1474,7 @@ async function enterApp() {
   if (isAdmin) {
     await Promise.all([populateWeavingClientSelect()]);
     showPanel(startPanel);
-    if (startPanel === 'panel-overview') populateOverview();
-    if (startPanel === 'panel-clients') renderClientList();
+    if (startPanel === 'panel-overview') { populateOverview(); renderClientList(); }
     if (startPanel === 'panel-convergence-admin') loadAllConvergences();
   } else {
     showPanel(startPanel);
@@ -1505,7 +1490,6 @@ function buildNav() {
 
   const adminTabs = [
     { id: 'panel-overview',           label: 'Overview' },
-    { id: 'panel-clients',            label: 'Clients' },
     { id: 'panel-weaving',            label: 'Weaving Builder' },
     { id: 'panel-convergence-admin',  label: 'Convergences' },
     { id: 'panel-ancestor-research',  label: 'Ancestor Research' },
@@ -1528,7 +1512,7 @@ function buildNav() {
       if (t.id === 'panel-my-weaving') loadMyWeaving();
       if (t.id === 'panel-my-convergence') loadMyConvergence();
       if (t.id === 'panel-weaving') populateWeavingClientSelect();
-      if (t.id === 'panel-clients') renderClientList();
+      if (t.id === 'panel-overview') { populateOverview(); renderClientList(); }
       if (t.id === 'panel-ancestor-research') initAncestorResearch();
       if (t.id === 'panel-tapestry') loadTapestryManager();
     };
@@ -1540,7 +1524,7 @@ function buildNav() {
 // Maps URL hash → panel ID for browser back/forward support
 const ADMIN_HASH_MAP = {
   '#overview':            'panel-overview',
-  '#clients':             'panel-clients',
+  '#clients':             'panel-overview',  // legacy alias — merged into overview
   '#weaving':             'panel-weaving',
   '#convergences':        'panel-convergence-admin',
   '#ancestor-research':   'panel-ancestor-research',
@@ -2284,17 +2268,7 @@ async function populateOverview() {
     <div class="stat-card"><div class="stat-number">${weavings.length}</div><div class="stat-label">Assigned Ancestors</div></div>
     <div class="stat-card"><div class="stat-number">${convs.length}</div><div class="stat-label">Convergences</div></div>
   `;
-
-  const clientsEl = document.getElementById('overview-clients');
-  if (!allClients.length) {
-    clientsEl.innerHTML = '<div class="empty">No clients yet. Create your first client in the Clients tab.</div>';
-    return;
-  }
-  clientsEl.innerHTML = allClients.slice(0,5).map(c => `
-    <div class="client-row" onclick="showPanel('panel-clients');renderClientList()">
-      <div><div class="client-name">${c.name}</div><div class="client-meta">${c.email || '—'}</div></div>
-      <span class="client-badge">Active</span>
-    </div>`).join('');
+  // Full client list now lives in #clients-list in the same panel — renderClientList() handles it.
 }
 
 // ════════════════════════════════════════════════════
