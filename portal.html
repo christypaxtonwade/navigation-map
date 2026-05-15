@@ -703,6 +703,29 @@ body::before {
 .cd-collapsed-content { display: none; }
 .cd-collapsed-content.open { display: block; }
 
+/* ─── Per-client access checkboxes (Client Detail) ─── */
+.access-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem 1.25rem;
+}
+.access-item {
+  display: flex; align-items: flex-start; gap: 0.65rem;
+  padding: 0.6rem 0.75rem; border: 1px solid var(--border);
+  border-radius: 6px; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.access-item:hover { border-color: var(--border-hover); background: var(--surface-2); }
+.access-item input[type="checkbox"] {
+  margin-top: 3px;
+  width: 16px; height: 16px;
+  accent-color: var(--gold);
+  cursor: pointer; flex-shrink: 0;
+}
+.access-label { display: flex; flex-direction: column; gap: 2px; }
+.access-name { font-size: 15px; color: var(--text); font-weight: 400; }
+.access-hint { font-size: 13px; color: var(--text-faint); font-style: italic; line-height: 1.35; }
+
 /* ─── Tier reference panel (admin Clients view) ─── */
 .tier-ref {
   background: var(--surface); border: 1px solid var(--border);
@@ -1693,6 +1716,7 @@ function renderClientDetail(d) {
       ${cdIdentityCard(d)}
       ${cdLifecycleCard(d)}
     </div>
+    ${cdAccessCard(d)}
     ${cdIntakePatternsCard(d)}
     ${cdMirrorAppCard(d)}
     <div class="cd-grid">
@@ -1795,6 +1819,42 @@ function cdIntakeBlock(label, val) {
   }
   return `<div class="cd-row stack"><div class="cd-label">${label}</div>
     <div class="cd-pre">${cdEsc(val)}</div></div>`;
+}
+
+// ── Portal Access (per-client booleans) ────────────────
+// Tiers describe products. These flags decide what the signed-in client
+// actually sees inside the portal. Set per-client by Christy.
+function cdAccessCard(d) {
+  const c = d.client;
+  const flags = [
+    { key: 'access_fieldguide',  label: 'Fieldguide',       hint: '276 passages · the full Fieldguide PDF + index' },
+    { key: 'access_weaving',     label: 'My Weaving',       hint: 'their own ancestor weaving rendered in portal' },
+    { key: 'access_catalog',     label: 'My Catalog',       hint: 'their own ancestors as a sortable catalog (usually off if weaving is small)' },
+    { key: 'access_convergence', label: 'My Convergence',   hint: 'their full Convergence + PDF + history strip' },
+    { key: 'access_tapestry',    label: 'Tapestry',         hint: 'mythic archetype profiles · Mirror / Cohort surface' },
+  ];
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title">Portal Access</h3>
+      <p class="cd-value muted" style="margin-bottom:1rem; font-size:14px">
+        Tiers describe products. These checkboxes decide what this client actually sees in the portal. Defaults are conservative — check only what they should access.
+      </p>
+      <div class="access-grid">
+        ${flags.map(f => `
+          <label class="access-item">
+            <input type="checkbox" id="cd-f-${f.key}"${c[f.key] ? ' checked' : ''}>
+            <span class="access-label">
+              <span class="access-name">${f.label}</span>
+              <span class="access-hint">${f.hint}</span>
+            </span>
+          </label>
+        `).join('')}
+      </div>
+      <div class="cd-actions" style="margin-top:1.25rem">
+        <button class="btn btn-gold btn-sm" onclick="cdSaveAccess()">Save access</button>
+        <span class="cd-status" id="cd-access-status"></span>
+      </div>
+    </div>`;
 }
 
 function cdIntakePatternsCard(d) {
@@ -2096,6 +2156,22 @@ async function cdSaveLifecycle() {
       client_tier:         document.getElementById('cd-f-tier').value || null,
       client_relationship: document.getElementById('cd-f-relationship').value || null,
       intake_status:       document.getElementById('cd-f-status').value
+    });
+    await loadClients();
+    status.textContent = 'saved · ' + new Date().toLocaleTimeString();
+  } catch (e) { status.textContent = 'failed: ' + e.message; }
+}
+
+async function cdSaveAccess() {
+  const status = document.getElementById('cd-access-status');
+  status.textContent = 'saving…';
+  try {
+    await restPatch('clients', currentDetailClient, {
+      access_fieldguide:  document.getElementById('cd-f-access_fieldguide').checked,
+      access_weaving:     document.getElementById('cd-f-access_weaving').checked,
+      access_catalog:     document.getElementById('cd-f-access_catalog').checked,
+      access_convergence: document.getElementById('cd-f-access_convergence').checked,
+      access_tapestry:    document.getElementById('cd-f-access_tapestry').checked
     });
     await loadClients();
     status.textContent = 'saved · ' + new Date().toLocaleTimeString();
