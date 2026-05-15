@@ -99,7 +99,7 @@ body::before {
 .note.success { color: var(--teal); }
 
 /* ─────────── ADMIN ─────────── */
-#view-admin { padding: 3rem 2rem 5rem; max-width: 980px; margin: 0 auto; }
+#view-admin { padding: 3rem 2rem 5rem; max-width: 1080px; margin: 0 auto; }
 
 .admin-header {
   display: flex; justify-content: space-between; align-items: center;
@@ -121,37 +121,84 @@ body::before {
 }
 .btn-ghost:hover { color: var(--gold); border-color: var(--gold-dim); }
 
+/* ─── Tier reference panel ─── */
+.tier-ref {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; margin-bottom: 1.75rem; overflow: hidden;
+}
+.tier-ref-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.85rem 1.25rem; cursor: pointer;
+  border-bottom: 1px solid transparent; transition: border-color 0.2s;
+}
+.tier-ref.open .tier-ref-head { border-bottom-color: var(--border); }
+.tier-ref-head:hover { background: var(--surface-2); }
+.tier-ref-title { font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+.tier-ref-caret { color: var(--text-dim); transition: transform 0.2s; }
+.tier-ref.open .tier-ref-caret { transform: rotate(90deg); }
+.tier-ref-body { display: none; padding: 1.25rem 1.5rem 1.5rem; font-size: 15px; line-height: 1.55; color: var(--text-secondary); }
+.tier-ref.open .tier-ref-body { display: block; }
+.tier-ref-body h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem; font-weight: 500; color: var(--text);
+  margin-top: 1rem;
+}
+.tier-ref-body h4:first-child { margin-top: 0; }
+.tier-ref-body h4 .tier-meta { font-family: 'Jost'; font-size: 13px; color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase; margin-left: 0.5rem; font-weight: 400; }
+.tier-ref-body p { margin: 0.35rem 0 0.75rem; }
+.tier-ref-body .footnote {
+  margin-top: 1.25rem; padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 13px; color: var(--text-faint); font-style: italic;
+}
+
+/* ─── Client list ─── */
 .client-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
 .client-row {
-  display: grid; grid-template-columns: 1.4fr 1.7fr auto auto;
+  display: grid;
+  grid-template-columns: minmax(220px, 1.7fr) 150px 170px minmax(150px, auto);
   gap: 1.25rem; align-items: center;
   padding: 1.1rem 1.25rem;
   background: var(--surface);
 }
 .client-row:hover { background: var(--surface-2); }
-.client-name { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; color: var(--text); }
-.client-email { color: var(--text-dim); font-size: 15px; word-break: break-all; }
+
+.client-id { display: flex; flex-direction: column; gap: 0.2rem; }
+.client-name { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: var(--text); }
+.client-email { color: var(--text-dim); font-size: 14px; word-break: break-all; }
 .client-email.muted { color: var(--text-faint); font-style: italic; }
 
-.tier-badge {
-  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
-  padding: 3px 9px; border-radius: 999px;
-  background: var(--accent); color: var(--gold); border: 1px solid var(--border);
+.row-select {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 7px 10px;
+  color: var(--text); font-family: 'Jost', sans-serif;
+  font-size: 14px; font-weight: 300; outline: none; cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%23c9a87c' d='M0 0l5 6 5-6z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+  transition: border-color 0.2s, background-color 0.2s;
 }
-.tier-badge.empty { color: var(--text-faint); border-style: dashed; }
+.row-select:hover { border-color: var(--border-hover); }
+.row-select:focus { border-color: var(--gold-dim); }
+.row-select.unset { color: var(--text-faint); font-style: italic; }
+.row-select.saving { border-color: var(--gold-dim); background-color: var(--accent); }
+.row-select.saved-flash { border-color: var(--teal); }
 
 .status-pill {
-  font-size: 15px; padding: 6px 12px; border-radius: 6px;
-  white-space: nowrap;
+  font-size: 14px; padding: 6px 12px; border-radius: 6px;
+  white-space: nowrap; text-align: center;
 }
 .status-pill.ok { background: var(--teal-dim); color: var(--teal); }
+.status-pill.muted { color: var(--text-faint); }
 
 .btn-invite {
   background: transparent; color: var(--gold);
   border: 1px solid var(--gold-dim); border-radius: 6px;
   padding: 7px 14px; font-family: 'Jost', sans-serif;
-  font-size: 15px; letter-spacing: 0.06em;
-  cursor: pointer; transition: all 0.2s;
+  font-size: 14px; letter-spacing: 0.06em;
+  cursor: pointer; transition: all 0.2s; width: 100%;
 }
 .btn-invite:hover:not(:disabled) { background: var(--accent); }
 .btn-invite:disabled { color: var(--text-faint); border-color: var(--border); cursor: not-allowed; }
@@ -169,8 +216,17 @@ body::before {
 #admin-flash.success { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(109,216,178,0.3); }
 #admin-flash.error { background: rgba(192,112,96,0.12); color: var(--red); border: 1px solid rgba(192,112,96,0.3); }
 
-@media (max-width: 720px) {
-  .client-row { grid-template-columns: 1fr; gap: 0.5rem; }
+.list-head {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.7fr) 150px 170px minmax(150px, auto);
+  gap: 1.25rem; padding: 0 1.25rem 0.65rem;
+  font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+@media (max-width: 820px) {
+  .client-row, .list-head { grid-template-columns: 1fr; gap: 0.6rem; }
+  .list-head { display: none; }
   .admin-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
 }
 </style>
@@ -207,7 +263,40 @@ body::before {
     <button id="sign-out" class="btn-ghost">Sign out</button>
   </header>
 
+  <!-- Collapsible tier reference -->
+  <div class="tier-ref" id="tier-ref">
+    <div class="tier-ref-head" id="tier-ref-toggle">
+      <span class="tier-ref-title">Tier Reference</span>
+      <span class="tier-ref-caret">›</span>
+    </div>
+    <div class="tier-ref-body">
+      <h4>Tier 1<span class="tier-meta">Free · Public · LIVE</span></h4>
+      <p>The Map as initiation. Visual overview at <code>/map</code> — 13 Fields named, three-arc structure, brief Conceptual-register descriptions. Portal view shows the Map overview only. No Fieldguide content. Granted to every client who has crossed any threshold (discovery call, single session, intake completed).</p>
+
+      <h4>Tier 2<span class="tier-meta">Free · Email-gated · NOT in portal</span></h4>
+      <p>The Architecture PDF — 24-page designed download. Delivered via Kit subscription form at <code>/map#subscribe</code>. Lives outside the portal entirely; never gated here. Listed for orientation only.</p>
+
+      <h4>Tier 3<span class="tier-meta">$88 launch · $111 standard · LAUNCHING 15 JULY 2026</span></h4>
+      <p>The Fieldguide. All 276 passages (13 Fields × 69 Subterrains × 4 registers) at client-facing depth. Astrological correspondences and Mythic Tapestry profiles woven in. Portal view: download link to the PDF + index to all Fields and Subterrains. Granted to: Fieldguide purchasers, Cohort participants (post-15-July), Sovereign Signal clients at discretion, all Mirror Work clients.</p>
+
+      <h4>Tier 4<span class="tier-meta">Lineage Session $444 / Mirror Work $1,888 · LIVE</span></h4>
+      <p>The Ancestral Weaving. Personal lineage research and transmission — curated ancestors written across five layers (Terroir, Unresolved, Thread, Lineage, Sigil), frequency-tagged to specific Fields and Subterrains. Portal view: their Weaving rendered, each ancestor with full layers and frequency tags. Granted to: Lineage Session clients (12-ancestor starter), Weaving Extension clients (+8 ancestors), Mirror Work clients (Weaving deepens across 3 months).</p>
+
+      <h4>Tier 5<span class="tier-meta">Bundled into Lineage / $244 update / Mirror capstone · LIVE</span></h4>
+      <p>The Convergence. 8-section pattern analysis generated from a client's Weaving frequency data, plus 2-page summary PDF, plus a reading session in which Christy walks them through the analysis. Portal view: history strip of all their Convergences, current Convergence rendered in full, PDF download. Granted to: Lineage Session clients (first Convergence ~2 weeks after session), Convergence Update clients ($244 for returning Weaving-holders), Mirror Work clients (capstone in month 3).</p>
+
+      <p class="footnote">A note on relationship: tier reflects access, not how someone arrived at it. A friend who is comp'd into Tier 4 still sees a Tier 4 portal — the relationship field captures the revenue/audit fact separately.</p>
+    </div>
+  </div>
+
   <div id="admin-flash"></div>
+
+  <div class="list-head">
+    <span>Client</span>
+    <span>Tier</span>
+    <span>Relationship</span>
+    <span>Portal access</span>
+  </div>
   <div id="client-list" class="client-list">
     <div class="loading-state">Loading clients…</div>
   </div>
@@ -218,6 +307,24 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
 const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+
+const TIER_OPTIONS = [
+  { value: '', label: '— unset —' },
+  { value: 'tier_1', label: 'Tier 1 · Map' },
+  { value: 'tier_3', label: 'Tier 3 · Fieldguide' },
+  { value: 'tier_4', label: 'Tier 4 · Weaving' },
+  { value: 'tier_5', label: 'Tier 5 · Convergence' }
+];
+
+const RELATIONSHIP_OPTIONS = [
+  { value: '', label: '— unset —' },
+  { value: 'paid', label: 'Paid' },
+  { value: 'comp_friend', label: 'Comp · friend' },
+  { value: 'comp_family', label: 'Comp · family' },
+  { value: 'trade', label: 'Trade' },
+  { value: 'staff', label: 'Staff' },
+  { value: 'prospect', label: 'Prospect' }
+];
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
@@ -243,6 +350,11 @@ function flash(kind, msg) {
   if (kind === 'success') setTimeout(() => { el.classList.remove('show'); }, 4500);
 }
 
+// ─── Tier reference toggle ─────────────────────────────
+$('tier-ref-toggle').addEventListener('click', () => {
+  $('tier-ref').classList.toggle('open');
+});
+
 // ─── Magic-link login ──────────────────────────────────
 $('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -252,7 +364,6 @@ $('login-form').addEventListener('submit', async (e) => {
   note.className = 'note'; note.textContent = '';
   btn.disabled = true; btn.textContent = 'Sending…';
 
-  // EXPLICIT redirect back to THIS page. Bypasses Site URL entirely.
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
@@ -277,8 +388,6 @@ $('sign-out').addEventListener('click', async () => {
 
 // ─── Session bootstrap ─────────────────────────────────
 async function boot() {
-  // detectSessionInUrl consumes the #access_token fragment automatically.
-  // Wait a tick to let that happen, then check session.
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session) {
@@ -286,12 +395,10 @@ async function boot() {
     return;
   }
 
-  // Strip the auth fragment from URL so it looks clean.
   if (window.location.hash.includes('access_token')) {
     history.replaceState(null, '', window.location.pathname);
   }
 
-  // Verify admin
   const { data: isAdmin, error: adminErr } = await supabase.rpc('is_admin');
   if (adminErr || isAdmin !== true) {
     show('view-login');
@@ -315,7 +422,7 @@ async function loadClients() {
 
   const { data, error } = await supabase
     .from('clients')
-    .select('id, name, email, auth_user_id, client_tier, intake_status')
+    .select('id, name, email, auth_user_id, client_tier, client_relationship, intake_status')
     .order('name');
 
   if (error) {
@@ -328,59 +435,95 @@ async function loadClients() {
   }
 
   list.innerHTML = '';
-  for (const c of data) {
-    const row = document.createElement('div');
-    row.className = 'client-row';
-    row.dataset.clientId = c.id;
+  for (const c of data) list.appendChild(renderRow(c));
+}
 
-    const nameEl = document.createElement('div');
-    nameEl.className = 'client-name serif';
-    nameEl.textContent = c.name || '(unnamed)';
+function renderRow(c) {
+  const row = document.createElement('div');
+  row.className = 'client-row';
+  row.dataset.clientId = c.id;
 
-    const emailEl = document.createElement('div');
-    if (c.email) {
-      emailEl.className = 'client-email';
-      emailEl.textContent = c.email;
-    } else {
-      emailEl.className = 'client-email muted';
-      emailEl.textContent = 'no email on file';
-    }
+  // Identity column
+  const idCol = document.createElement('div');
+  idCol.className = 'client-id';
+  const nameEl = document.createElement('div');
+  nameEl.className = 'client-name serif';
+  nameEl.textContent = c.name || '(unnamed)';
+  idCol.appendChild(nameEl);
+  const emailEl = document.createElement('div');
+  if (c.email) { emailEl.className = 'client-email'; emailEl.textContent = c.email; }
+  else { emailEl.className = 'client-email muted'; emailEl.textContent = 'no email on file'; }
+  idCol.appendChild(emailEl);
 
-    const tierEl = document.createElement('div');
-    if (c.client_tier) {
-      tierEl.className = 'tier-badge';
-      tierEl.textContent = c.client_tier.replace('_', ' ');
-    } else {
-      tierEl.className = 'tier-badge empty';
-      tierEl.textContent = 'no tier';
-    }
+  // Tier select
+  const tierSel = buildSelect(TIER_OPTIONS, c.client_tier, (newVal) =>
+    updateField(c.id, 'client_tier', newVal, tierSel));
 
-    const actionEl = document.createElement('div');
-    if (c.auth_user_id) {
-      const pill = document.createElement('span');
-      pill.className = 'status-pill ok';
-      pill.textContent = 'Portal access ✓';
-      actionEl.appendChild(pill);
-    } else if (!c.email) {
-      const pill = document.createElement('span');
-      pill.className = 'status-pill';
-      pill.style.color = 'var(--text-faint)';
-      pill.textContent = '— needs email —';
-      actionEl.appendChild(pill);
-    } else {
-      const btn = document.createElement('button');
-      btn.className = 'btn-invite';
-      btn.textContent = 'Invite to portal';
-      btn.addEventListener('click', () => sendInvite(c.id, btn));
-      actionEl.appendChild(btn);
-    }
+  // Relationship select
+  const relSel = buildSelect(RELATIONSHIP_OPTIONS, c.client_relationship, (newVal) =>
+    updateField(c.id, 'client_relationship', newVal, relSel));
 
-    row.appendChild(nameEl);
-    row.appendChild(emailEl);
-    row.appendChild(tierEl);
-    row.appendChild(actionEl);
-    list.appendChild(row);
+  // Action column
+  const actionEl = document.createElement('div');
+  if (c.auth_user_id) {
+    const pill = document.createElement('span');
+    pill.className = 'status-pill ok';
+    pill.textContent = 'Portal access ✓';
+    actionEl.appendChild(pill);
+  } else if (!c.email) {
+    const pill = document.createElement('span');
+    pill.className = 'status-pill muted';
+    pill.textContent = '— needs email —';
+    actionEl.appendChild(pill);
+  } else {
+    const btn = document.createElement('button');
+    btn.className = 'btn-invite';
+    btn.textContent = 'Invite to portal';
+    btn.addEventListener('click', () => sendInvite(c.id, btn));
+    actionEl.appendChild(btn);
   }
+
+  row.appendChild(idCol);
+  row.appendChild(tierSel);
+  row.appendChild(relSel);
+  row.appendChild(actionEl);
+  return row;
+}
+
+function buildSelect(options, currentValue, onChange) {
+  const sel = document.createElement('select');
+  sel.className = 'row-select';
+  for (const opt of options) {
+    const o = document.createElement('option');
+    o.value = opt.value;
+    o.textContent = opt.label;
+    if ((currentValue || '') === opt.value) o.selected = true;
+    sel.appendChild(o);
+  }
+  if (!currentValue) sel.classList.add('unset');
+  sel.addEventListener('change', async () => {
+    sel.classList.remove('unset');
+    await onChange(sel.value || null);
+  });
+  return sel;
+}
+
+// ─── Update tier / relationship via PATCH ──────────────
+async function updateField(clientId, field, value, selEl) {
+  selEl.disabled = true;
+  selEl.classList.add('saving');
+  const { error } = await supabase
+    .from('clients')
+    .update({ [field]: value })
+    .eq('id', clientId);
+  selEl.disabled = false;
+  selEl.classList.remove('saving');
+  if (error) {
+    flash('error', `Could not save ${field}: ${error.message}`);
+    return;
+  }
+  selEl.classList.add('saved-flash');
+  setTimeout(() => selEl.classList.remove('saved-flash'), 1100);
 }
 
 // ─── Send invite via edge function ─────────────────────
@@ -417,7 +560,6 @@ async function sendInvite(clientId, btn) {
   }
 }
 
-// React to sign-in state changes (in case detectSessionInUrl finishes after boot)
 supabase.auth.onAuthStateChange((event) => {
   if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
     if (!$('view-admin').classList.contains('active')) boot();
