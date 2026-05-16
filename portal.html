@@ -420,6 +420,47 @@ body::before {
   transition: border-color 0.2s;
 }
 .ancestor-row:hover { border-color: var(--border-hover); }
+
+/* ─── Client weaving expand-to-layers (Phase C) ─── */
+.ancestor-row.ca-expandable { display: block; padding: 0; overflow: hidden; }
+.ancestor-row.ca-expandable .ca-row-main {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.85rem 1rem;
+}
+.ancestor-row.ca-expandable .ca-chevron {
+  color: var(--text-faint); font-size: 14px;
+  transition: transform 0.2s; flex-shrink: 0;
+}
+.ancestor-row.ca-expandable.open .ca-chevron { transform: rotate(90deg); color: var(--gold); }
+.ancestor-row.ca-expandable .ca-layers { display: none; padding: 0 1.25rem 1.25rem; }
+.ancestor-row.ca-expandable.open .ca-layers { display: block; }
+
+.ca-layer { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.ca-layer:first-child { margin-top: 0.5rem; padding-top: 0; border-top: none; }
+.ca-layer-label {
+  font-family: 'Jost', sans-serif;
+  font-size: 15px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 0.4rem;
+}
+.ca-layer-body {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; font-weight: 400;
+  line-height: 1.85; color: var(--text-secondary);
+}
+.ca-layer-sigil { background: var(--accent); padding: 1rem; border-radius: 6px; margin-top: 1.5rem; }
+.ca-sigil-art svg { max-width: 140px; display: block; margin: 0 auto 0.85rem; }
+.ca-sigil-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem; font-style: italic; text-align: center;
+  color: var(--gold); margin-bottom: 0.5rem;
+}
+.ca-sigil-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px; line-height: 1.7; color: var(--text-secondary);
+  text-align: center;
+}
+.ca-empty { padding: 1rem; font-style: italic; color: var(--text-faint); }
 .ancestor-era-dot {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
@@ -1103,6 +1144,30 @@ body::before {
         </div>
       </div>
 
+      <!-- ══ CLIENT: My Catalog ══ -->
+      <div class="panel" id="panel-my-catalog">
+        <div class="panel-header">
+          <div class="eyebrow">Your Ancestors</div>
+          <div class="panel-title">The Catalog</div>
+          <p class="panel-sub">Every ancestor in your archive, sorted as a flat browseable list. A different way to find a particular name.</p>
+        </div>
+        <div id="client-catalog-content">
+          <div class="loading"><span class="loading-glyph">✦</span>Loading the catalog…</div>
+        </div>
+      </div>
+
+      <!-- ══ CLIENT: My Tapestry ══ -->
+      <div class="panel" id="panel-my-tapestry">
+        <div class="panel-header">
+          <div class="eyebrow">Your Mythic Resonance</div>
+          <div class="panel-title">The Tapestry</div>
+          <p class="panel-sub">The archetypal figures recognized as chosen resonance — distinct from blood lineage. What the descendant has named and claimed.</p>
+        </div>
+        <div id="client-tapestry-content">
+          <div class="loading"><span class="loading-glyph">✦</span>Drawing the tapestry…</div>
+        </div>
+      </div>
+
       <!-- ══ ADMIN: Ancestor Research ══ -->
       <div class="panel" id="panel-ancestor-research">
         <div class="panel-header">
@@ -1624,6 +1689,8 @@ async function enterApp() {
     showPanel(startPanel);
     if (startPanel === 'panel-my-weaving') loadMyWeaving();
     if (startPanel === 'panel-my-convergence') loadMyConvergence();
+    if (startPanel === 'panel-my-catalog') loadMyCatalog();
+    if (startPanel === 'panel-my-tapestry') loadMyTapestry();
   }
 }
 
@@ -1651,12 +1718,24 @@ function buildNav() {
     { id: 'panel-ancestor-research',  label: 'Ancestor Research' },
     { id: 'panel-tapestry',           label: 'Tapestry' },
   ];
-  // Phase A: current client tabs preserved. Phase C will derive from access flags
-  // and add Signal Reading / Fieldguide / My Catalog / Tapestry client panels.
-  const clientTabs = [
-    { id: 'panel-my-weaving',     label: 'My Weaving' },
-    { id: 'panel-my-convergence', label: 'My Convergence' },
-  ];
+  // Phase C: client tabs derived from access_* flags on the active client.
+  // Order per portal-walkthrough.md §4: Signal Reading (if data) · My Weaving ·
+  // My Convergence · My Catalog · My Tapestry.
+  // Fieldguide deliberately omitted — PDF-only since 2026-05-15.
+  // Signal Reading deferred to Phase F (schema decision pending).
+  const activeClient = getActiveClientObject();
+  const clientTabs = [];
+  if (activeClient) {
+    if (activeClient.access_weaving)     clientTabs.push({ id: 'panel-my-weaving',     label: 'My Weaving' });
+    if (activeClient.access_convergence) clientTabs.push({ id: 'panel-my-convergence', label: 'My Convergence' });
+    if (activeClient.access_catalog)     clientTabs.push({ id: 'panel-my-catalog',     label: 'My Catalog' });
+    if (activeClient.access_tapestry)    clientTabs.push({ id: 'panel-my-tapestry',    label: 'Tapestry' });
+  }
+  // Defensive fallback — signed-in client with no access flags shouldn't reach
+  // here normally; keep My Weaving with its empty state so the page isn't blank.
+  if (clientTabs.length === 0) {
+    clientTabs.push({ id: 'panel-my-weaving', label: 'My Weaving' });
+  }
 
   const tabs = (isAdmin && !isPreviewingAsClient) ? adminTabs : clientTabs;
 
@@ -1670,6 +1749,8 @@ function buildNav() {
       if (t.id === 'panel-convergence-admin') loadAllConvergences();
       if (t.id === 'panel-my-weaving') loadMyWeaving();
       if (t.id === 'panel-my-convergence') loadMyConvergence();
+      if (t.id === 'panel-my-catalog') loadMyCatalog();
+      if (t.id === 'panel-my-tapestry') loadMyTapestry();
       if (t.id === 'panel-weaving') populateWeavingClientSelect();
       if (t.id === 'panel-overview') { populateOverview(); renderClientList(); }
       if (t.id === 'panel-ancestor-research') initAncestorResearch();
@@ -1682,7 +1763,7 @@ function buildNav() {
   // ─── Group 2: External platform links ───
   // Map link always visible. Other links gated by the active client's access_* flag.
   // Admin sees all links regardless of flags.
-  const activeClient = getActiveClientObject();
+  // (activeClient was already resolved above for client tabs — reuse it.)
   const cid = activeClient ? `?client_id=${encodeURIComponent(activeClient.id)}` : '';
 
   // Fieldguide removed 2026-05-15: PDF-only product, no live web rendering.
@@ -1737,8 +1818,10 @@ const ADMIN_HASH_MAP = {
   '#tapestry':            'panel-tapestry',
 };
 const CLIENT_HASH_MAP = {
-  '#my-weaving':    'panel-my-weaving',
-  '#my-convergence':'panel-my-convergence',
+  '#my-weaving':     'panel-my-weaving',
+  '#my-convergence': 'panel-my-convergence',
+  '#my-catalog':     'panel-my-catalog',
+  '#my-tapestry':    'panel-my-tapestry',
 };
 const CLIENT_DETAIL_HASH_RX = /^#client\/([0-9a-fA-F-]+)$/;
 
@@ -1813,8 +1896,15 @@ function startPreview(clientId) {
   document.getElementById('btn-toggle-view').classList.add('previewing');
   buildNav();
   updateSiteLinksForActiveClient();
-  showPanel('panel-my-weaving');
-  loadMyWeaving();
+  // Choose first available client panel based on the previewed client's access flags.
+  // Defaults to My Weaving when present; otherwise picks the first tab buildNav() rendered.
+  const firstTab = document.querySelector('#sidebar-panel-nav .sidebar-nav-item');
+  const targetPanel = firstTab?.dataset.panel || 'panel-my-weaving';
+  showPanel(targetPanel);
+  if (targetPanel === 'panel-my-weaving') loadMyWeaving();
+  else if (targetPanel === 'panel-my-convergence') loadMyConvergence();
+  else if (targetPanel === 'panel-my-catalog') loadMyCatalog();
+  else if (targetPanel === 'panel-my-tapestry') loadMyTapestry();
 }
 
 // Active client_id for the persistent header-strip Weaving / Catalog / Convergence links.
@@ -3301,6 +3391,33 @@ async function loadMyWeaving() {
     grouped[lbl].push(a);
   });
 
+  // Helper: escape HTML in user-provided text
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  // Helper: render the five-layer expansion for a single ancestor (click-to-expand).
+  // Hidden by default; toggleAncestorLayers() flips a class to reveal.
+  const layerBlock = (a) => {
+    const layer = (label, body) => body
+      ? `<div class="ca-layer"><div class="ca-layer-label">${label}</div><div class="ca-layer-body">${esc(body).replace(/\n/g, '<br>')}</div></div>`
+      : '';
+    const sigil = (a.sigil_name || a.sigil_description || a.sigil_svg)
+      ? `<div class="ca-layer ca-layer-sigil">
+          <div class="ca-layer-label">The Sigil</div>
+          ${a.sigil_svg ? `<div class="ca-sigil-art">${a.sigil_svg}</div>` : ''}
+          ${a.sigil_name ? `<div class="ca-sigil-name">${esc(a.sigil_name)}</div>` : ''}
+          ${a.sigil_description ? `<div class="ca-sigil-text">${esc(a.sigil_description)}</div>` : ''}
+        </div>`
+      : '';
+    const anyLayer = a.layer_terroir || a.layer_unresolved || a.layer_thread || a.layer_lineage || sigil;
+    if (!anyLayer) return '<div class="ca-empty">No layers written yet.</div>';
+    return `
+      ${layer('Terroir', a.layer_terroir)}
+      ${layer('The Unresolved', a.layer_unresolved)}
+      ${layer('The Living Thread', a.layer_thread)}
+      ${layer('The Lineage', a.layer_lineage)}
+      ${sigil}`;
+  };
+
   let html = `<div style="margin-bottom:1rem;font-size:15px;color:var(--text-dim)">${rows.length} ancestors assembled across the lineage</div>`;
   arcGroups.forEach(g => {
     const group = grouped[g.label]||[];
@@ -3308,19 +3425,28 @@ async function loadMyWeaving() {
     html += `<div class="section-header" style="margin-top:2rem"><div class="section-title">${g.label}</div></div><div class="ancestor-list">`;
     group.forEach(a => {
       const freqs = freqMap[a.id]||[];
-      const topFreqs = freqs.slice(0,3).map(f=>`<span style="font-size:15px;padding:2px 7px;border-radius:8px;background:var(--accent);border:1px solid var(--border);color:var(--gold);white-space:nowrap">${f}</span>`).join('');
-      html += `<div class="ancestor-row">
-        <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
-        <div class="ancestor-name-block" style="flex:1">
-          <div class="ancestor-name-text">${a.name}</div>
-          <div class="ancestor-dates">${a.dates||''} ${a.location?'· '+a.location:''}</div>
+      const topFreqs = freqs.slice(0,3).map(f=>`<span style="font-size:15px;padding:2px 7px;border-radius:8px;background:var(--accent);border:1px solid var(--border);color:var(--gold);white-space:nowrap">${esc(f)}</span>`).join('');
+      html += `<div class="ancestor-row ca-expandable" data-ca-id="${a.id}" onclick="toggleClientAncestor(this)" style="cursor:pointer">
+        <div class="ca-row-main">
+          <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
+          <div class="ancestor-name-block" style="flex:1">
+            <div class="ancestor-name-text">${esc(a.name)}</div>
+            <div class="ancestor-dates">${esc(a.dates||'')} ${a.location?'· '+esc(a.location):''}</div>
+          </div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${topFreqs}</div>
+          <span class="ca-chevron">▸</span>
         </div>
-        <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${topFreqs}</div>
+        <div class="ca-layers">${layerBlock(a)}</div>
       </div>`;
     });
     html += '</div>';
   });
   container.innerHTML = html;
+}
+
+// Toggle the expanded layers on a client weaving ancestor row.
+function toggleClientAncestor(rowEl) {
+  rowEl.classList.toggle('open');
 }
 
 // ════════════════════════════════════════════════════
@@ -3374,6 +3500,144 @@ async function loadMyConvergence() {
   });
   container.innerHTML = html;
 }
+
+// ════════════════════════════════════════════════════
+// CLIENT — MY CATALOG (flat, browseable list of client's ancestors)
+// ════════════════════════════════════════════════════
+async function loadMyCatalog() {
+  const container = document.getElementById('client-catalog-content');
+  let clientId = null;
+  if (isPreviewingAsClient && previewClientId) {
+    clientId = previewClientId;
+  } else {
+    const myClient = allClients.find(c => c.auth_user_id === currentUser.id || c.email === currentUser.email);
+    clientId = myClient?.id;
+  }
+  if (!clientId) { container.innerHTML = '<div class="empty">No catalog available yet.</div>'; return; }
+
+  const rows = await rest(`client_ancestors?client_id=eq.${clientId}&select=*&order=name.asc`);
+  if (!Array.isArray(rows) || !rows.length) {
+    container.innerHTML = '<div class="empty">Your catalog is being assembled.</div>';
+    return;
+  }
+
+  const idList = rows.map(r=>r.id).join(',');
+  const freqRows = await rest(`client_ancestor_frequencies?select=client_ancestor_id,frequency_tags(name)&client_ancestor_id=in.(${idList})`);
+  const freqMap = {};
+  (Array.isArray(freqRows)?freqRows:[]).forEach(r => {
+    const name = r.frequency_tags?.name; if (!name) return;
+    if (!freqMap[r.client_ancestor_id]) freqMap[r.client_ancestor_id] = [];
+    freqMap[r.client_ancestor_id].push(name);
+  });
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  // Sort controls — alphabetical by default, optional chronological.
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+      <div style="font-size:15px;color:var(--text-dim)">${rows.length} ancestors</div>
+      <div style="display:flex;gap:0.5rem">
+        <button class="btn btn-outline btn-sm" id="cat-sort-alpha" onclick="sortMyCatalog('alpha')">A → Z</button>
+        <button class="btn btn-outline btn-sm" id="cat-sort-chron" onclick="sortMyCatalog('chron')">Chronological</button>
+      </div>
+    </div>
+    <div id="my-catalog-list" class="ancestor-list"></div>
+  `;
+  container.innerHTML = html;
+
+  // Stash for re-sort without re-fetching.
+  window._myCatalogRows = rows;
+  window._myCatalogFreqMap = freqMap;
+  renderMyCatalog('alpha');
+}
+
+function sortMyCatalog(mode) {
+  document.getElementById('cat-sort-alpha').classList.toggle('btn-gold', mode === 'alpha');
+  document.getElementById('cat-sort-alpha').classList.toggle('btn-outline', mode !== 'alpha');
+  document.getElementById('cat-sort-chron').classList.toggle('btn-gold', mode === 'chron');
+  document.getElementById('cat-sort-chron').classList.toggle('btn-outline', mode !== 'chron');
+  renderMyCatalog(mode);
+}
+
+function renderMyCatalog(mode) {
+  const rows = (window._myCatalogRows || []).slice();
+  const freqMap = window._myCatalogFreqMap || {};
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  if (mode === 'chron') {
+    rows.sort((a, b) => (a.sort_year ?? 999999) - (b.sort_year ?? 999999));
+  } else {
+    rows.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  }
+
+  const listEl = document.getElementById('my-catalog-list');
+  if (!listEl) return;
+  listEl.innerHTML = rows.map(a => {
+    const freqs = (freqMap[a.id] || []).slice(0, 4)
+      .map(f => `<span style="font-size:14px;padding:2px 7px;border-radius:8px;background:var(--accent);border:1px solid var(--border);color:var(--gold);white-space:nowrap">${esc(f)}</span>`).join('');
+    const preview = (a.catalog_preview || a.layer_thread || '').slice(0, 180);
+    return `
+      <div class="ancestor-row" style="display:block;padding:1rem 1.25rem">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+          <div>
+            <div class="ancestor-name-text">${esc(a.name)}</div>
+            <div class="ancestor-dates">${esc(a.dates||'')} ${a.location?'· '+esc(a.location):''}${a.relation_to_client?' · '+esc(a.relation_to_client):''}</div>
+          </div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${freqs}</div>
+        </div>
+        ${preview ? `<div style="margin-top:0.6rem;font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--text-secondary);font-style:italic;line-height:1.6">${esc(preview)}${preview.length >= 180 ? '…' : ''}</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════
+// CLIENT — MY TAPESTRY (client's assigned archetypal figures)
+// ════════════════════════════════════════════════════
+async function loadMyTapestry() {
+  const container = document.getElementById('client-tapestry-content');
+  let clientId = null;
+  if (isPreviewingAsClient && previewClientId) {
+    clientId = previewClientId;
+  } else {
+    const myClient = allClients.find(c => c.auth_user_id === currentUser.id || c.email === currentUser.email);
+    clientId = myClient?.id;
+  }
+  if (!clientId) { container.innerHTML = '<div class="empty">No tapestry available yet.</div>'; return; }
+
+  // Fetch this client's tapestry archetypes (with the archetype detail joined).
+  const rows = await rest(`client_tapestry_archetypes?client_id=eq.${clientId}&select=id,resonance_note,strength,tapestry_archetypes(id,name,tradition,epithet,description)`);
+  if (!Array.isArray(rows) || !rows.length) {
+    container.innerHTML = '<div class="empty" style="padding:3rem 1rem;text-align:center">Your tapestry is being woven. The archetypal figures recognized in your work will appear here when Christy adds them.</div>';
+    return;
+  }
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  const cards = rows.map(r => {
+    const arch = r.tapestry_archetypes || {};
+    return `
+      <div class="card" style="margin-bottom:1.25rem">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem">
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:300;font-style:italic;color:var(--text)">${esc(arch.name||'(unnamed)')}</div>
+            ${arch.tradition ? `<div style="font-size:14px;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold-dim);margin-top:0.2rem">${esc(arch.tradition)}</div>` : ''}
+          </div>
+          ${r.strength ? `<span class="client-badge" style="background:var(--accent);color:var(--gold)">${esc(r.strength)}</span>` : ''}
+        </div>
+        ${arch.epithet ? `<div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--text-dim);margin-bottom:0.85rem">${esc(arch.epithet)}</div>` : ''}
+        ${arch.description ? `<div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:1.85;color:var(--text-secondary);margin-bottom:0.85rem">${esc(arch.description)}</div>` : ''}
+        ${r.resonance_note ? `<div style="margin-top:0.75rem;padding-top:0.85rem;border-top:1px solid var(--border)">
+          <div class="eyebrow" style="margin-bottom:0.35rem">Resonance in your work</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;color:var(--text-secondary);line-height:1.7">${esc(r.resonance_note)}</div>
+        </div>` : ''}
+      </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div style="margin-bottom:1.25rem;font-size:15px;color:var(--text-dim)">${rows.length} archetypal ${rows.length === 1 ? 'figure' : 'figures'} recognized in your work</div>
+    ${cards}`;
+}
+
 // ════════════════════════════════════════════════════
 // ANCESTOR RESEARCH
 // ════════════════════════════════════════════════════
