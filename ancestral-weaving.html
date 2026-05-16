@@ -787,36 +787,61 @@ const ERA_GROUPS = [
     } catch { return null; }
   }
   const session = getSession();
-  if (!session) { window.location.replace('/portal.html'); return; }
+  if (!session) {
+    console.warn('[chrome] No portal session → redirecting to login');
+    window.location.replace('/portal.html');
+    return;
+  }
+  if (!session.user || !session.user.email) {
+    console.warn('[chrome] Session payload missing user.email — treating as expired, redirecting to login');
+    sessionStorage.removeItem('portal_session');
+    localStorage.removeItem('portal_session');
+    window.location.replace('/portal.html');
+    return;
+  }
 
   const ADMIN_EMAIL = 'christypaxtonwade@gmail.com';
-  const isAdmin = session.user && session.user.email === ADMIN_EMAIL;
+  const isAdmin = session.user.email === ADMIN_EMAIL;
   const KEY = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : SUPABASE_KEY;
+  console.log('[chrome] role:', isAdmin ? 'admin' : 'client', '· email:', session.user.email);
 
   const params = new URLSearchParams(window.location.search);
   let cidParam = params.get('client_id') || sessionStorage.getItem('active_client_id');
   let activeClient = null;
   try {
     if (isAdmin && cidParam) {
+      // Admin viewing or previewing a specific client.
       const r = await fetch(`${SUPABASE_URL}/rest/v1/clients?id=eq.${cidParam}&select=*&limit=1`, {
         headers: { apikey: KEY, Authorization: `Bearer ${session.access_token}` }
       });
       const rows = await r.json();
       activeClient = Array.isArray(rows) ? rows[0] || null : null;
     } else if (!isAdmin) {
+      // Client must resolve to their own row.
       const r = await fetch(`${SUPABASE_URL}/rest/v1/clients?auth_user_id=eq.${session.user.id}&select=*&limit=1`, {
         headers: { apikey: KEY, Authorization: `Bearer ${session.access_token}` }
       });
       const rows = await r.json();
       activeClient = Array.isArray(rows) ? rows[0] || null : null;
-      if (!activeClient) { window.location.replace('/portal.html'); return; }
-      if (cidParam && cidParam !== activeClient.id) { window.location.replace('/portal.html'); return; }
+      if (!activeClient) {
+        console.warn('[chrome] Signed-in client has no matching clients row — redirecting');
+        window.location.replace('/portal.html');
+        return;
+      }
+      if (cidParam && cidParam !== activeClient.id) {
+        console.warn('[chrome] Client trying to view another client_id — redirecting');
+        window.location.replace('/portal.html');
+        return;
+      }
     }
+    // Else: admin without a cidParam → canonical view, activeClient stays null.
   } catch (err) {
-    console.error('extChromeBoot: context resolution failed', err);
+    console.error('[chrome] context resolution failed', err);
+    // Don't redirect on transient errors — let the page try to render its canonical view.
   }
 
   if (activeClient) sessionStorage.setItem('active_client_id', activeClient.id);
+  console.log('[chrome] activeClient:', activeClient ? activeClient.name : '(none / canonical)');
 
   const LINK_FLAG_MAP = {
     'fieldguide.html':        'access_fieldguide',
@@ -831,7 +856,10 @@ const ERA_GROUPS = [
     const baseHref = href.split('?')[0].split('#')[0];
     for (const [page, flag] of Object.entries(LINK_FLAG_MAP)) {
       if (baseHref === page || baseHref === '/' + page || baseHref.endsWith('/' + page)) {
-        if (!isAdmin && (!activeClient || !activeClient[flag])) {
+        // Gate by activeClient's flag whenever an active client exists.
+        // Admin in canonical view (no activeClient) sees all links unhidden.
+        // Admin previewing a client → that client's flags apply (preview = inhabit their view).
+        if (activeClient && !activeClient[flag]) {
           a.style.display = 'none';
           return;
         }
