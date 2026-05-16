@@ -679,7 +679,6 @@ footer { text-align: center; padding: 3rem 2rem; color: var(--text-dim); font-si
   <p class="header-sub">Archetypal figures the practice claims as <em>chosen resonance</em> — distinct from blood lineage. Each figure performs an operation that illuminates the Fields and Subterrains of the Navigation Map. Where lineage is what the body carries unchosen, tapestry is what the descendant has named and recognized.</p>
   <div class="header-links">
     <a href="index.html" class="header-link" data-link>← Navigation Map</a>
-    <a href="fieldguide.html" class="header-link" data-link>Fieldguide ↗</a>
     <a href="ancestral-weaving.html" class="header-link" data-link>Ancestral Weaving ↗</a>
     <a href="ancestral-catalog.html" class="header-link" data-link>Ancestral Catalog ↗</a>
     <a href="convergence.html" class="header-link" data-link>The Convergence ↗</a>
@@ -845,8 +844,8 @@ function getPortalAccessToken() {
     }
   } catch (err) { console.error('extChromeBoot:', err); }
   if (activeClient) sessionStorage.setItem('active_client_id', activeClient.id);
+  // Fieldguide removed 2026-05-15: PDF-only.
   const LINK_FLAG_MAP = {
-    'fieldguide.html':        'access_fieldguide',
     'ancestral-weaving.html': 'access_weaving',
     'ancestral-catalog.html': 'access_catalog',
     'tapestry.html':          'access_tapestry',
