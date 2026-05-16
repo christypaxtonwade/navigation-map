@@ -874,12 +874,17 @@ async function loadConvergenceHistory(clientId) {
 }
 
 async function loadConvergenceById(convId) {
+  console.log('[loadConvergenceById] requested convId =', convId);
   const convs = await sb(`convergences?id=eq.${convId}&limit=1`);
-  if (!convs.length) return null;
+  if (!convs.length) {
+    console.warn('[loadConvergenceById] no convergence found for id', convId);
+    return null;
+  }
   const conv = convs[0];
   const sections = await sb(
     `convergence_sections?convergence_id=eq.${conv.id}&order=sort_order.asc`
   );
+  console.log('[loadConvergenceById] loaded', { id: conv.id, created_at: conv.created_at, sectionCount: sections.length });
   return { ...conv, sections };
 }
 
@@ -1313,6 +1318,7 @@ function renderSection(sec, freqAncestors) {
  */
 function renderHistoryNav(history, currentConvId) {
   if (!history || history.length === 0) return '';
+  console.log('[renderHistoryNav] rendering', history.length, 'past convergences, active =', currentConvId);
   const fmt = d => new Date(d).toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric'
   });
@@ -1330,9 +1336,22 @@ function renderHistoryNav(history, currentConvId) {
 
 function renderConvergence(conv, clientData, history) {
   const freqAncestors = clientData?.freqAncestors || {};
-  const topFreqs = clientData?.sortedFreqs || conv.dominant_frequencies?.map(f=>[f,0]) || [];
+
+  // Historic convergences carry their own dominant_frequencies snapshot.
+  // Prefer those when present so the bars reflect the lineage state AT THE
+  // TIME the convergence was generated, not the current weaving. Counts
+  // aren't stored historically, so old convergences render names without
+  // bar widths (count = 0). Only the in-progress convergence on initial
+  // render uses live clientData.sortedFreqs (which has real counts).
+  const historicFreqs = conv.dominant_frequencies && conv.dominant_frequencies.length
+    ? conv.dominant_frequencies.map(f => [f, 0])
+    : null;
+  const topFreqs = historicFreqs || clientData?.sortedFreqs || [];
   const maxCount = topFreqs[0]?.[1] || 1;
   const convWithMeta = { ...conv, topFreqs, maxCount, ancestors: clientData?.ancestors };
+
+  console.log('[renderConvergence] conv', conv.id, '· using',
+    historicFreqs ? 'historic dominant_frequencies' : 'live clientData.sortedFreqs');
 
   const sectionsHtml = (conv.sections || []).map(sec => {
     const enriched = {
@@ -1448,14 +1467,17 @@ async function refreshHistory() {
 
 /** Render a specific past convergence (by id), keeping the history nav active. */
 async function viewConvergence(convId) {
+  console.log('[viewConvergence] clicked convId =', convId);
   const main = document.getElementById('main-content');
   try {
     main.innerHTML = `<div class="loading-state"><span class="loading-glyph">◇</span><div class="loading-text">Loading convergence…</div></div>`;
     const conv = await loadConvergenceById(convId);
     if (!conv) throw new Error('Convergence not found.');
+    console.log('[viewConvergence] rendering conv', conv.id, 'with', conv.sections.length, 'sections');
     main.innerHTML = renderConvergence(conv, globalClientData, globalHistory);
     window.scrollTo({ top: 0, behavior: 'instant' });
   } catch (err) {
+    console.error('[viewConvergence] failed:', err);
     main.innerHTML = `<div style="text-align:center;padding:4rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:#c07060">
       <p>${err.message}</p>
     </div>`;
