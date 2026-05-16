@@ -577,15 +577,14 @@ body::before {
 <body>
 
 <!-- ── Sticky navigation ── -->
+<!--
+  Cross-platform site links removed from the sticky nav 2026-05-15. The Fieldguide
+  is a standalone surface (Christy shares the URL directly with whoever should
+  see it); no in-platform links point to it. The sticky nav now carries only the
+  in-document Field jump buttons.
+-->
 <nav class="sticky-nav" id="sticky-nav" aria-label="Field navigation">
   <div class="nav-inner" id="nav-inner">
-    <div class="nav-site-links">
-      <a class="nav-site-link" href="index.html">Map</a>
-      <a class="nav-site-link" href="astrological-correspondences.html">Sky</a>
-      <a class="nav-site-link" href="ancestral-weaving.html">Weaving</a>
-      <a class="nav-site-link" href="ancestral-catalog.html">Catalog</a>
-      <a class="nav-site-link" href="tapestry.html">Tapestry</a>
-    </div>
     <!-- Field buttons injected by JS after data loads -->
   </div>
 </nav>
@@ -603,15 +602,11 @@ body::before {
       <div class="header-rule right"></div>
     </div>
     <p class="header-sub">Thirteen fields. Every subterrain illuminated across four registers. A guide to carry into the territory — where the map always exceeds itself, and the best discoveries happen in the margins.</p>
-    <div class="header-nav-links">
-      <a class="header-nav-link" href="index.html">Navigation Map</a>
-      <a class="header-nav-link" href="astrological-correspondences.html">Astrological Correspondences</a>
-      <a class="header-nav-link" href="ancestral-weaving.html">Ancestral Weaving</a>
-      <a class="header-nav-link" href="ancestral-catalog.html">Ancestral Catalog</a>
-      <a class="header-nav-link" href="tapestry.html">Mythic Tapestry</a>
-      <a class="header-nav-link" href="convergence.html">The Convergence</a>
-      <a class="header-nav-link" href="portal.html">Portal</a>
-    </div>
+    <!--
+      Cross-platform header nav links removed 2026-05-15. The Fieldguide stands
+      apart from the platform; the only outbound links are the cross-site footer
+      at the bottom of the page (back to the public website).
+    -->
   </div>
 
   <!-- ── Jump nav ── -->
@@ -630,96 +625,6 @@ body::before {
 <script>
 const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
-
-// ════════════════════════════════════════════════════
-// PORTAL CROSS-PAGE CHROME — auth gate + access-flag link gating.
-// Fieldguide is the most-gated platform surface: clients must have
-// access_fieldguide=true on their row. Anon redirects to portal; clients
-// without the flag also redirect.
-// ════════════════════════════════════════════════════
-(async function extChromeBoot() {
-  function getSession() {
-    try {
-      const stored = sessionStorage.getItem('portal_session') || localStorage.getItem('portal_session');
-      if (!stored) return null;
-      const s = JSON.parse(stored);
-      if (s.expires_at && Date.now() > s.expires_at) return null;
-      return s;
-    } catch { return null; }
-  }
-  const session = getSession();
-  if (!session) { console.warn('[chrome] No portal session → redirecting'); window.location.replace('/portal.html'); return; }
-  if (!session.user || !session.user.email) {
-    console.warn('[chrome] Session payload missing user.email — redirecting');
-    sessionStorage.removeItem('portal_session'); localStorage.removeItem('portal_session');
-    window.location.replace('/portal.html'); return;
-  }
-  const ADMIN_EMAIL = 'christypaxtonwade@gmail.com';
-  const isAdmin = session.user.email === ADMIN_EMAIL;
-  console.log('[chrome] role:', isAdmin ? 'admin' : 'client', '· email:', session.user.email);
-  const params = new URLSearchParams(window.location.search);
-  let cidParam = params.get('client_id') || sessionStorage.getItem('active_client_id');
-  let activeClient = null;
-  try {
-    if (isAdmin && cidParam) {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/clients?id=eq.${cidParam}&select=*&limit=1`, {
-        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` }
-      });
-      const rows = await r.json();
-      activeClient = Array.isArray(rows) ? rows[0] || null : null;
-    } else if (!isAdmin) {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/clients?auth_user_id=eq.${session.user.id}&select=*&limit=1`, {
-        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` }
-      });
-      const rows = await r.json();
-      activeClient = Array.isArray(rows) ? rows[0] || null : null;
-      if (!activeClient) {
-        console.warn('[chrome] Signed-in client has no clients row → redirecting');
-        window.location.replace('/portal.html'); return;
-      }
-    }
-  } catch (err) { console.error('[chrome]', err); }
-  if (activeClient) sessionStorage.setItem('active_client_id', activeClient.id);
-
-  // Fieldguide-specific universal gate: anyone with an active client lacking
-  // access_fieldguide is bounced — whether they're signed in as that client OR
-  // admin previewing them. Preview-as-client inhabits the client's view, per
-  // navigation-governance.md §3.
-  if (activeClient && !activeClient.access_fieldguide) {
-    console.warn('[chrome] Active client (' + activeClient.name + ') lacks access_fieldguide → redirecting');
-    window.location.replace('/portal.html');
-    return;
-  }
-
-  const LINK_FLAG_MAP = {
-    'fieldguide.html':        'access_fieldguide',
-    'ancestral-weaving.html': 'access_weaving',
-    'ancestral-catalog.html': 'access_catalog',
-    'tapestry.html':          'access_tapestry',
-    'convergence.html':       'access_convergence',
-  };
-  const cid = activeClient ? activeClient.id : null;
-  function gateLink(a) {
-    const href = a.getAttribute('href') || '';
-    const baseHref = href.split('?')[0].split('#')[0];
-    for (const [page, flag] of Object.entries(LINK_FLAG_MAP)) {
-      if (baseHref === page || baseHref === '/' + page || baseHref.endsWith('/' + page)) {
-        // Gate by activeClient's flag — admin canonical (no activeClient) sees all.
-        if (activeClient && !activeClient[flag]) { a.style.display = 'none'; return; }
-        if (cid && !href.includes('client_id=')) {
-          const sep = href.includes('?') ? '&' : '?';
-          a.setAttribute('href', `${href}${sep}client_id=${encodeURIComponent(cid)}`);
-        }
-        return;
-      }
-    }
-  }
-  function gateAll() { document.querySelectorAll('a[href]').forEach(gateLink); }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', gateAll);
-  else gateAll();
-  window.EXT_CONTEXT = { session, isAdmin, activeClient };
-  window.dispatchEvent(new CustomEvent('ext-chrome-ready', { detail: window.EXT_CONTEXT }));
-})();
 
 const REGISTER_ORDER = ['mythic','conceptual','somatic','unreceived'];
 const REGISTER_LABELS = { mythic:'Mythic', conceptual:'Conceptual', somatic:'Somatic', unreceived:'The Unreceived' };
@@ -976,10 +881,12 @@ init();
 </script>
 
 <style>
+  /* Cross-surface footer — back to the public website (christypaxtonwade.com).
+     Same pattern as the other portal pages, palette-adapted to the vellum/ink ground. */
   .ext-footer {
     border-top: 1px solid var(--border);
     margin-top: 4rem;
-    padding: 1.75rem 2rem;
+    padding: 1.75rem var(--page-pad, 2rem);
     display: flex; align-items: center; justify-content: space-between;
     flex-wrap: wrap; gap: 1.25rem;
     position: relative; z-index: 1;
@@ -988,7 +895,7 @@ init();
   .ext-footer-link {
     font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
     letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--text-dim, var(--ink-dim, #4e4228));
+    color: var(--ink-dim, #4e4228);
     text-decoration: none; white-space: nowrap;
     opacity: 0.88; transition: color 0.2s, opacity 0.2s;
   }
@@ -996,7 +903,7 @@ init();
   .ext-footer-copyright {
     font-family: 'Cormorant Garamond', serif;
     font-size: 15px; font-style: italic;
-    color: var(--text-faint, var(--ink-faint, #78694a));
+    color: var(--ink-faint, #78694a);
     opacity: 0.88;
   }
   @media (max-width: 720px) {
