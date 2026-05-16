@@ -1171,6 +1171,18 @@ body::before {
         </div>
       </div>
 
+      <!-- ══ CLIENT: Signal Reading (shown when clients.signals_reading is non-null) ══ -->
+      <div class="panel" id="panel-signal-reading">
+        <div class="panel-header">
+          <div class="eyebrow">Your Quiz Reading</div>
+          <div class="panel-title">Signal Reading</div>
+          <p class="panel-sub">Your reading from the Signals from the Field quiz — your arc, your Field, your register, and the frequency pattern this quiz surfaced.</p>
+        </div>
+        <div id="client-signal-reading-content">
+          <div class="loading"><span class="loading-glyph">✦</span>Loading your reading…</div>
+        </div>
+      </div>
+
       <!-- ══ CLIENT: My Convergence ══ -->
       <div class="panel" id="panel-my-convergence">
         <div class="panel-header">
@@ -1740,6 +1752,7 @@ async function enterApp() {
     }
   } else {
     showPanel(startPanel);
+    if (startPanel === 'panel-signal-reading') loadSignalReading();
     if (startPanel === 'panel-my-weaving') loadMyWeaving();
     if (startPanel === 'panel-my-convergence') loadMyConvergence();
     if (startPanel === 'panel-my-catalog') loadMyCatalog();
@@ -1772,13 +1785,16 @@ function buildNav() {
     { id: 'panel-tapestry',           label: 'Tapestry' },
   ];
   // Phase C: client tabs derived from access_* flags on the active client.
+  // Phase F: Signal Reading prepended when signals_reading is on record (no flag).
   // Order per portal-walkthrough.md §4: Signal Reading (if data) · My Weaving ·
   // My Convergence · My Catalog · My Tapestry.
   // Fieldguide deliberately omitted — PDF-only since 2026-05-15.
-  // Signal Reading deferred to Phase F (schema decision pending).
   const activeClient = getActiveClientObject();
   const clientTabs = [];
   if (activeClient) {
+    // Signal Reading is independent of access flags — every client with a
+    // reading on record sees it. The data is theirs; surfacing it is simple.
+    if (activeClient.signals_reading)    clientTabs.push({ id: 'panel-signal-reading',  label: 'Signal Reading' });
     if (activeClient.access_weaving)     clientTabs.push({ id: 'panel-my-weaving',     label: 'My Weaving' });
     if (activeClient.access_convergence) clientTabs.push({ id: 'panel-my-convergence', label: 'My Convergence' });
     if (activeClient.access_catalog)     clientTabs.push({ id: 'panel-my-catalog',     label: 'My Catalog' });
@@ -1800,6 +1816,7 @@ function buildNav() {
     btn.onclick = () => {
       showPanel(t.id);
       if (t.id === 'panel-convergence-admin') loadAllConvergences();
+      if (t.id === 'panel-signal-reading') loadSignalReading();
       if (t.id === 'panel-my-weaving') loadMyWeaving();
       if (t.id === 'panel-my-convergence') loadMyConvergence();
       if (t.id === 'panel-my-catalog') loadMyCatalog();
@@ -1874,6 +1891,7 @@ const ADMIN_HASH_MAP = {
   '#tapestry':            'panel-tapestry',
 };
 const CLIENT_HASH_MAP = {
+  '#signal-reading': 'panel-signal-reading',
   '#my-weaving':     'panel-my-weaving',
   '#my-convergence': 'panel-my-convergence',
   '#my-catalog':     'panel-my-catalog',
@@ -1957,7 +1975,8 @@ function startPreview(clientId) {
   const firstTab = document.querySelector('#sidebar-panel-nav .sidebar-nav-item');
   const targetPanel = firstTab?.dataset.panel || 'panel-my-weaving';
   showPanel(targetPanel);
-  if (targetPanel === 'panel-my-weaving') loadMyWeaving();
+  if (targetPanel === 'panel-signal-reading') loadSignalReading();
+  else if (targetPanel === 'panel-my-weaving') loadMyWeaving();
   else if (targetPanel === 'panel-my-convergence') loadMyConvergence();
   else if (targetPanel === 'panel-my-catalog') loadMyCatalog();
   else if (targetPanel === 'panel-my-tapestry') loadMyTapestry();
@@ -3644,6 +3663,78 @@ async function loadAllConvergences() {
         </div>`).join('')}
       </div>` : ''}
     </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════
+// CLIENT — SIGNAL READING (Phase F)
+// Renders clients.signals_reading. Schema-light JSONB; renderer handles
+// missing fields gracefully so different payload shapes (Tier 1 vs Tier 2)
+// can coexist in the same column.
+// ════════════════════════════════════════════════════
+async function loadSignalReading() {
+  const container = document.getElementById('client-signal-reading-content');
+  let activeClient = null;
+  if (isPreviewingAsClient && previewClientId) {
+    activeClient = allClients.find(c => c.id === previewClientId);
+  } else if (currentUser) {
+    activeClient = allClients.find(c => c.auth_user_id === currentUser.id || c.email === currentUser.email);
+  }
+  const reading = activeClient?.signals_reading;
+  if (!reading) {
+    container.innerHTML = `<div class="empty" style="padding:3.5rem 1rem;text-align:center">
+      You haven't taken the Signals from the Field quiz yet — or the email you used didn't match this account.
+      <br><br>
+      <a href="https://christypaxtonwade.com/signals" target="_blank" class="btn btn-gold" style="display:inline-block;margin-top:0.5rem">Take the quiz →</a>
+    </div>`;
+    return;
+  }
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const ARC_LABELS = { descent: 'The Descent', underworld: 'The Underworld', return: 'The Return' };
+  const arcLabel = reading.arc ? (ARC_LABELS[reading.arc] || reading.arc) : null;
+
+  // Header row: arc / Field / register / offering recommendation
+  const summaryRows = [];
+  if (arcLabel)         summaryRows.push(['Arc',                arcLabel]);
+  if (reading.field)    summaryRows.push(['Active Field',       reading.field]);
+  if (reading.register) summaryRows.push(['Register',           reading.register]);
+  if (reading.offering) summaryRows.push(['Recommended Offering', reading.offering]);
+  const summaryHtml = summaryRows.map(([label, value]) =>
+    `<div class="cd-row"><div class="cd-label">${esc(label)}</div><div class="cd-value">${esc(value)}</div></div>`
+  ).join('');
+
+  // Frequency tags
+  const tagsHtml = Array.isArray(reading.tags) && reading.tags.length
+    ? `<div class="cd-card full" style="margin-bottom:1.25rem">
+        <h3 class="cd-card-title">Frequency Tags</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.85rem">
+          ${reading.tags.map(t => `<span style="font-size:14px;padding:5px 12px;border-radius:14px;background:var(--accent);border:1px solid var(--border);color:var(--gold)">${esc(t)}</span>`).join('')}
+        </div>
+      </div>`
+    : '';
+
+  // Full reading prose
+  const fullText = reading.reading_full || '';
+  const readingHtml = fullText
+    ? `<div class="cd-card full">
+        <h3 class="cd-card-title">Your Reading</h3>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:1.95;color:var(--text-secondary);margin-top:0.85rem;white-space:pre-wrap">${esc(fullText)}</div>
+      </div>`
+    : '';
+
+  const takenAt = reading.taken_at
+    ? `<div style="font-size:14px;color:var(--text-dim);margin-bottom:1.25rem">Taken ${new Date(reading.taken_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}${reading.tier ? ' · Tier ' + reading.tier : ''}</div>`
+    : '';
+
+  container.innerHTML = `
+    ${takenAt}
+    ${summaryRows.length ? `<div class="cd-card full" style="margin-bottom:1.25rem"><h3 class="cd-card-title">What This Quiz Surfaced</h3>${summaryHtml}</div>` : ''}
+    ${tagsHtml}
+    ${readingHtml}
+    <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center">
+      <a href="https://christypaxtonwade.com/signals" target="_blank" class="btn btn-outline" style="font-size:14px">Retake the quiz ↗</a>
+    </div>
+  `;
 }
 
 // ════════════════════════════════════════════════════
