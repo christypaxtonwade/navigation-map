@@ -619,6 +619,48 @@ function toggle(card) {
 }
 
 loadMap();
+
+// ════════════════════════════════════════════════════
+// CROSS-PAGE CONTEXT THREADING (lightweight chrome boot)
+// Map page is public — no auth gate. But when admin is previewing-as-client
+// and clicks Map ↗, the URL carries ?client_id=X&preview=1 — we forward
+// those params on every outbound platform link (and the Portal return link)
+// so the journey back to portal restores preview state.
+// ════════════════════════════════════════════════════
+(function indexChromeBoot() {
+  const params = new URLSearchParams(window.location.search);
+  const cid = params.get('client_id');
+  const isPreview = params.get('preview') === '1';
+  if (!cid) return;  // No active client context — nothing to thread.
+  const suffix = `client_id=${encodeURIComponent(cid)}${isPreview ? '&preview=1' : ''}`;
+
+  const PLATFORM_PAGES = [
+    'portal.html',
+    'fieldguide.html',
+    'ancestral-weaving.html',
+    'ancestral-catalog.html',
+    'tapestry.html',
+    'convergence.html',
+    'astrological-correspondences.html',
+  ];
+
+  function threadLinks() {
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      const baseHref = href.split('?')[0].split('#')[0];
+      const matched = PLATFORM_PAGES.some(p => baseHref === p || baseHref === '/' + p || baseHref.endsWith('/' + p));
+      if (!matched) return;
+      if (href.includes('client_id=')) return;
+      const sep = href.includes('?') ? '&' : '?';
+      a.setAttribute('href', `${href}${sep}${suffix}`);
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', threadLinks);
+  } else {
+    threadLinks();
+  }
+})();
 </script>
 
 <style>
