@@ -357,7 +357,6 @@ body::before {
   <div class="header-rule"></div>
   <p class="header-sub">Thirteen fields through the turning year. A complete initiatory arc — from pre-incarnation geometry to the sovereign return. Every field is an entry point. The wheel turns around the central axis.</p>
   <div class="header-links">
-    <a href="fieldguide.html" class="header-link">The Fieldguide ↗</a>
     <a href="astrological-correspondences.html" class="header-link">Astrological Correspondences ↗</a>
     <a href="ancestral-weaving.html" class="header-link">Ancestral Weaving ↗</a>
     <a href="ancestral-catalog.html" class="header-link">Ancestral Catalog ↗</a>
@@ -466,7 +465,6 @@ body::before {
   <div class="footer-rule"></div>
   <p class="footer-note">This map is a living document. It turns with the wheel. Enter wherever you are standing.</p>
   <div class="header-links" style="margin-top:1rem">
-    <a href="fieldguide.html" class="header-link">The Fieldguide ↗</a>
     <a href="astrological-correspondences.html" class="header-link">Astrological Correspondences ↗</a>
     <a href="ancestral-weaving.html" class="header-link">Ancestral Weaving ↗</a>
     <a href="ancestral-catalog.html" class="header-link">Ancestral Catalog ↗</a>
@@ -510,13 +508,13 @@ function renderField(field, subterrains) {
   const arcClass = arcCssClass(field.number);
   const delay = 0.3 + (field.number * 0.04);
 
+  // Fieldguide is PDF-only as of 2026-05-15 — chips no longer link out; they display only.
   const subtsHtml = (subterrains || []).map((st, i) => `
-    <a href="fieldguide.html#field-${field.number}" class="subterrain-chip">
+    <div class="subterrain-chip">
       <span class="subterrain-chip-number">Subterrain ${i + 1}</span>
       <span class="subterrain-chip-name">${st.name}</span>
       ${st.description ? `<span class="subterrain-chip-desc">${st.description}</span>` : ''}
-      <span class="subterrain-chip-link">Explore in Fieldguide →</span>
-    </a>`).join('');
+    </div>`).join('');
 
   const registersHtml = `
     <div class="field-registers">
@@ -559,8 +557,7 @@ function renderField(field, subterrains) {
         <div class="card-expand-inner">
           ${registersHtml}
           <div class="subterrains-label">Subterrains</div>
-          <div class="subterrains">${subtsHtml || '<div style="color:var(--ink-faint);font-style:italic;grid-column:1/-1;text-align:center">Subterrain detail in the Fieldguide.</div>'}</div>
-          <a href="fieldguide.html#field-${field.number}" class="fieldguide-link">Full depth treatment in the Fieldguide →</a>
+          <div class="subterrains">${subtsHtml || '<div style="color:var(--ink-faint);font-style:italic;grid-column:1/-1;text-align:center">Subterrain detail in the Fieldguide (PDF).</div>'}</div>
           ${bridgeHtml}
         </div>
       </div>
@@ -623,5 +620,49 @@ function toggle(card) {
 
 loadMap();
 </script>
+
+<style>
+  /* Cross-surface footer (per navigation-governance.md §5).
+     Uses index.html's existing vellum/ink palette. */
+  .ext-footer {
+    border-top: 1px solid var(--border);
+    margin-top: 4rem;
+    padding: 1.75rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1.25rem;
+    position: relative; z-index: 1;
+  }
+  .ext-footer-bridges { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+  .ext-footer-link {
+    font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-dim, var(--text-dim, #4e4228));
+    text-decoration: none; white-space: nowrap;
+    opacity: 0.88; transition: color 0.2s, opacity 0.2s;
+  }
+  .ext-footer-link:hover { color: var(--gold); opacity: 1; }
+  .ext-footer-copyright {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px; font-style: italic;
+    color: var(--ink-faint, var(--text-faint, #78694a));
+    opacity: 0.88;
+  }
+  @media (max-width: 720px) {
+    .ext-footer { flex-direction: column; align-items: flex-start; padding: 1.5rem 1rem; }
+  }
+</style>
+<footer class="ext-footer">
+  <div class="ext-footer-bridges">
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/">Home</a>
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/begin">Begin</a>
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/earth">Earth</a>
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/sky">Sky</a>
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/life">Life</a>
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/mirror">Mirror</a>
+    <a class="ext-footer-link" href="https://thealchemyofmidlife.substack.com" target="_blank" rel="noopener">Substack ↗</a>
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/sky/tapestry">Tapestry ↗</a>
+  </div>
+  <span class="ext-footer-copyright">© Christy Paxton Wade</span>
+</footer>
 </body>
 </html>
