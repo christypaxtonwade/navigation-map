@@ -538,10 +538,16 @@ if (CLIENT_ID_PARAM) {
     } catch { return null; }
   }
   const session = getSession();
-  if (!session) { window.location.replace('/portal.html'); return; }
+  if (!session) { console.warn('[chrome] No portal session → redirecting'); window.location.replace('/portal.html'); return; }
+  if (!session.user || !session.user.email) {
+    console.warn('[chrome] Session payload missing user.email — redirecting');
+    sessionStorage.removeItem('portal_session'); localStorage.removeItem('portal_session');
+    window.location.replace('/portal.html'); return;
+  }
   const ADMIN_EMAIL = 'christypaxtonwade@gmail.com';
-  const isAdmin = session.user && session.user.email === ADMIN_EMAIL;
+  const isAdmin = session.user.email === ADMIN_EMAIL;
   const KEY = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : SUPABASE_KEY;
+  console.log('[chrome] role:', isAdmin ? 'admin' : 'client', '· email:', session.user.email);
   const params = new URLSearchParams(window.location.search);
   let cidParam = params.get('client_id') || sessionStorage.getItem('active_client_id');
   let activeClient = null;
@@ -576,7 +582,8 @@ if (CLIENT_ID_PARAM) {
     const baseHref = href.split('?')[0].split('#')[0];
     for (const [page, flag] of Object.entries(LINK_FLAG_MAP)) {
       if (baseHref === page || baseHref === '/' + page || baseHref.endsWith('/' + page)) {
-        if (!isAdmin && (!activeClient || !activeClient[flag])) { a.style.display = 'none'; return; }
+        // Gate by activeClient's flag — admin canonical (no activeClient) sees all.
+        if (activeClient && !activeClient[flag]) { a.style.display = 'none'; return; }
         if (cid && !href.includes('client_id=')) {
           const sep = href.includes('?') ? '&' : '?';
           a.setAttribute('href', `${href}${sep}client_id=${encodeURIComponent(cid)}`);
