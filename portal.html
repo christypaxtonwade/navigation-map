@@ -1045,16 +1045,55 @@ body::before {
         <div class="client-list" id="clients-list"></div>
       </div>
 
-      <!-- ══ ADMIN: Prospects (top-of-funnel surface — Phase D will populate) ══ -->
+      <!-- ══ ADMIN: Prospects (top-of-funnel surface — table populated by webhooks, deferred) ══ -->
       <div class="panel" id="panel-prospects">
         <div class="panel-header">
           <div class="eyebrow">Top of Funnel</div>
           <div class="panel-title">Prospects</div>
-          <p class="panel-sub">Kit subscribers, Calendly bookings, and intake submitters who don't yet have a client record.</p>
+          <p class="panel-sub">Kit subscribers, Calendly bookings, and intake submitters who don't yet have a client record. Webhooks from Kit and Calendly will populate this surface as those integrations land; until then, rows can be seeded manually.</p>
         </div>
-        <div class="empty" style="padding:3.5rem 1rem; text-align:center; color:var(--text-dim); line-height:1.6;">
-          <div style="font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-style:italic; color:var(--gold); margin-bottom:0.85rem">Coming in Phase D</div>
-          The Prospects pipeline will gather Kit subscribers (Architecture PDF, Signals Quiz, Substack), Calendly bookings, and intake submitters into one filterable list. Webhooks from Kit + Calendly will populate this surface. See <code>website-walkthrough.md</code> §15 for the full spec.
+        <div class="stat-grid" id="prospects-stats"></div>
+        <div id="prospects-filters" style="display:flex;gap:1rem;flex-wrap:wrap;margin:1.5rem 0;align-items:center">
+          <span class="eyebrow" style="margin:0">Filter:</span>
+          <select class="form-select" id="prospects-source-filter" style="width:auto;min-width:160px" onchange="renderProspectList()">
+            <option value="">All sources</option>
+            <option value="kit_pdf">Kit · Architecture PDF</option>
+            <option value="kit_signals">Kit · Signals Quiz</option>
+            <option value="kit_signals_t2">Kit · Signals Tier 2</option>
+            <option value="kit_substack">Kit · Substack</option>
+            <option value="kit_other">Kit · Other</option>
+            <option value="calendly">Calendly</option>
+            <option value="intake">Intake form</option>
+            <option value="manual">Manual</option>
+          </select>
+          <select class="form-select" id="prospects-status-filter" style="width:auto;min-width:140px" onchange="renderProspectList()">
+            <option value="active">Active</option>
+            <option value="converted">Converted</option>
+            <option value="archived">Archived</option>
+            <option value="all">All statuses</option>
+          </select>
+          <select class="form-select" id="prospects-window-filter" style="width:auto;min-width:140px" onchange="renderProspectList()">
+            <option value="0">All time</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+        </div>
+        <div class="client-list" id="prospects-list">
+          <div class="loading"><span class="loading-glyph">✦</span>Loading prospects…</div>
+        </div>
+      </div>
+
+      <!-- ══ ADMIN: Prospect Detail (per-prospect view) ══ -->
+      <div class="panel" id="panel-prospect-detail">
+        <div class="panel-header">
+          <button class="btn btn-outline btn-sm" onclick="showPanel('panel-prospects');loadProspects()" style="margin-bottom:1rem">← All Prospects</button>
+          <div class="eyebrow">Prospect · Admin</div>
+          <div class="panel-title" id="pd-title">—</div>
+          <p class="panel-sub" id="pd-subtitle">—</p>
+        </div>
+        <div id="prospect-detail-content">
+          <div class="empty">No prospect selected.</div>
         </div>
       </div>
 
@@ -1696,6 +1735,7 @@ async function enterApp() {
     } else {
       showPanel(startPanel);
       if (startPanel === 'panel-overview') { populateOverview(); renderClientList(); }
+      if (startPanel === 'panel-prospects') loadProspects();
       if (startPanel === 'panel-convergence-admin') loadAllConvergences();
     }
   } else {
@@ -1768,7 +1808,7 @@ function buildNav() {
       if (t.id === 'panel-overview') { populateOverview(); renderClientList(); }
       if (t.id === 'panel-ancestor-research') initAncestorResearch();
       if (t.id === 'panel-tapestry') loadTapestryManager();
-      // panel-prospects: placeholder content, no loader yet (Phase D).
+      if (t.id === 'panel-prospects') loadProspects();
     };
     panelGroup.appendChild(btn);
   });
@@ -3326,6 +3366,251 @@ async function deleteTapestryArchetype() {
     document.getElementById('tapestry-editor').innerHTML = '<div class="empty" style="padding:3rem;text-align:center;color:var(--text-faint);font-style:italic">Select an archetype to edit, or click + New to create one.</div>';
   } catch (err) {
     alert('Delete failed: ' + err.message);
+  }
+}
+
+// ════════════════════════════════════════════════════
+// ADMIN — PROSPECTS (top-of-funnel surface)
+// Webhooks (Kit, Calendly, Signals) will populate. Until then the table is
+// empty unless rows are inserted manually via SQL.
+// ════════════════════════════════════════════════════
+let allProspects = [];
+
+async function loadProspects() {
+  const list = document.getElementById('prospects-list');
+  list.innerHTML = '<div class="loading"><span class="loading-glyph">✦</span>Loading prospects…</div>';
+  const rows = await rest('prospects?select=*&order=last_activity.desc');
+  allProspects = Array.isArray(rows) ? rows : [];
+  paintProspectsStats();
+  renderProspectList();
+}
+
+function paintProspectsStats() {
+  const total      = allProspects.length;
+  const active     = allProspects.filter(p => !p.archived && !p.converted_to_client_id).length;
+  const converted  = allProspects.filter(p => p.converted_to_client_id).length;
+  const weekCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const newThisWeek = allProspects.filter(p => new Date(p.first_seen).getTime() > weekCutoff).length;
+  const bySource    = {};
+  allProspects.forEach(p => { bySource[p.source] = (bySource[p.source] || 0) + 1; });
+  const topSource = Object.entries(bySource).sort((a,b) => b[1] - a[1])[0];
+
+  document.getElementById('prospects-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-number">${total}</div><div class="stat-label">Total prospects</div></div>
+    <div class="stat-card"><div class="stat-number">${active}</div><div class="stat-label">Active</div></div>
+    <div class="stat-card"><div class="stat-number">${newThisWeek}</div><div class="stat-label">New (7 days)</div></div>
+    <div class="stat-card"><div class="stat-number">${converted}</div><div class="stat-label">Converted</div></div>
+    <div class="stat-card"><div class="stat-number">${topSource ? topSource[1] : 0}</div><div class="stat-label">${topSource ? topSource[0].replace('_',' ') : 'Top source'}</div></div>
+  `;
+}
+
+function renderProspectList() {
+  const list = document.getElementById('prospects-list');
+  const sourceFilter = document.getElementById('prospects-source-filter').value;
+  const statusFilter = document.getElementById('prospects-status-filter').value;
+  const windowDays   = parseInt(document.getElementById('prospects-window-filter').value, 10) || 0;
+  const windowCutoff = windowDays ? Date.now() - windowDays * 24 * 60 * 60 * 1000 : 0;
+
+  let filtered = allProspects;
+  if (sourceFilter) filtered = filtered.filter(p => p.source === sourceFilter);
+  if (statusFilter === 'active')    filtered = filtered.filter(p => !p.archived && !p.converted_to_client_id);
+  if (statusFilter === 'converted') filtered = filtered.filter(p => !!p.converted_to_client_id);
+  if (statusFilter === 'archived')  filtered = filtered.filter(p => p.archived);
+  if (windowCutoff) filtered = filtered.filter(p => new Date(p.last_activity).getTime() > windowCutoff);
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty" style="padding:3rem 1rem;text-align:center">
+      ${allProspects.length === 0
+        ? `No prospects yet. Kit and Calendly webhooks will populate this surface once they're wired. <br><br>You can also seed rows manually via SQL — see <code>prospects</code> table.`
+        : 'No prospects match the current filters.'}
+    </div>`;
+    return;
+  }
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmtDate = (d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const SOURCE_LABELS = {
+    kit_pdf:        'Architecture PDF',
+    kit_signals:    'Signals Quiz',
+    kit_signals_t2: 'Signals Tier 2',
+    kit_substack:   'Substack',
+    kit_other:      'Kit · other',
+    calendly:       'Calendly',
+    intake:         'Intake',
+    manual:         'Manual',
+  };
+
+  list.innerHTML = filtered.map(p => {
+    let statusBadge;
+    if (p.converted_to_client_id) {
+      statusBadge = `<span class="client-badge" style="background:rgba(109,216,178,0.15);color:var(--teal)">Converted ✓</span>`;
+    } else if (p.archived) {
+      statusBadge = `<span class="client-badge" style="color:var(--text-faint)">Archived</span>`;
+    } else {
+      statusBadge = `<span class="client-badge" style="background:var(--accent);color:var(--gold)">Active</span>`;
+    }
+    return `
+      <div class="client-row" style="cursor:pointer" onclick="showProspectDetail('${p.id}')">
+        <div>
+          <div class="client-name">${esc(p.name || p.email)}</div>
+          <div class="client-meta">${esc(p.email)}${p.name ? '' : ''} · first seen ${fmtDate(p.first_seen)} · last activity ${fmtDate(p.last_activity)}</div>
+        </div>
+        <div style="display:flex;gap:0.5rem;flex-shrink:0;align-items:center" onclick="event.stopPropagation()">
+          <span class="client-badge" style="background:var(--accent);color:var(--text-dim)">${SOURCE_LABELS[p.source] || p.source}</span>
+          ${statusBadge}
+          <button class="btn btn-gold btn-sm" onclick="showProspectDetail('${p.id}')">Open</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+let currentProspectId = null;
+
+async function showProspectDetail(prospectId) {
+  currentProspectId = prospectId;
+  showPanel('panel-prospect-detail');
+  const p = allProspects.find(x => x.id === prospectId);
+  if (!p) {
+    document.getElementById('prospect-detail-content').innerHTML = '<div class="empty">Prospect not found.</div>';
+    return;
+  }
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmtDateTime = (d) => new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const SOURCE_LABELS = {
+    kit_pdf: 'Architecture PDF (Kit)',
+    kit_signals: 'Signals Quiz (Kit)',
+    kit_signals_t2: 'Signals Tier 2 (Kit)',
+    kit_substack: 'Substack (Kit)',
+    kit_other: 'Kit · other tag',
+    calendly: 'Calendly booking',
+    intake: 'Intake form',
+    manual: 'Added manually',
+  };
+
+  document.getElementById('pd-title').textContent = p.name || p.email;
+  document.getElementById('pd-subtitle').textContent =
+    [p.email, SOURCE_LABELS[p.source] || p.source, 'first seen ' + fmtDateTime(p.first_seen)].filter(Boolean).join(' · ');
+
+  const isConverted = !!p.converted_to_client_id;
+  const isArchived  = p.archived;
+
+  // Pretty-print source_data
+  const sourceDataHtml = (p.source_data && Object.keys(p.source_data).length)
+    ? `<pre style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1rem;font-size:13px;color:var(--text-dim);overflow:auto;max-height:280px;font-family:'Jost',monospace">${esc(JSON.stringify(p.source_data, null, 2))}</pre>`
+    : '<div class="cd-value muted">No source-specific data on file.</div>';
+
+  document.getElementById('prospect-detail-content').innerHTML = `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <div class="cd-actions" style="flex-wrap:wrap">
+        ${isConverted
+          ? `<a class="btn btn-outline btn-sm" href="#client/${p.converted_to_client_id}" onclick="setTimeout(()=>showClientDetail('${p.converted_to_client_id}'),0)">Open Client Record →</a>`
+          : `<button class="btn btn-gold btn-sm" onclick="convertProspectToClient('${p.id}')">Convert to Client →</button>`}
+        ${isArchived
+          ? `<button class="btn btn-outline btn-sm" onclick="setProspectArchived('${p.id}', false)">Unarchive</button>`
+          : (!isConverted ? `<button class="btn btn-outline btn-sm" onclick="setProspectArchived('${p.id}', true)">Archive</button>` : '')}
+      </div>
+    </div>
+
+    <div class="cd-grid">
+      <div class="cd-card">
+        <h3 class="cd-card-title">Identity</h3>
+        <div class="form-group"><label class="form-label">Name (best known)</label>
+          <input class="form-input" id="pd-f-name" value="${esc(p.name)}"></div>
+        <div class="form-group" style="margin-top:0.75rem"><label class="form-label">Email</label>
+          <input class="form-input" id="pd-f-email" type="email" value="${esc(p.email)}"></div>
+        <div class="cd-actions" style="margin-top:1rem">
+          <button class="btn btn-gold btn-sm" onclick="saveProspectIdentity()">Save</button>
+          <span class="cd-status" id="pd-identity-status"></span>
+        </div>
+      </div>
+
+      <div class="cd-card">
+        <h3 class="cd-card-title">Lifecycle</h3>
+        <div class="cd-row"><div class="cd-label">Source</div>
+          <div class="cd-value">${esc(SOURCE_LABELS[p.source] || p.source)}</div></div>
+        <div class="cd-row"><div class="cd-label">First seen</div>
+          <div class="cd-value">${fmtDateTime(p.first_seen)}</div></div>
+        <div class="cd-row"><div class="cd-label">Last activity</div>
+          <div class="cd-value">${fmtDateTime(p.last_activity)}</div></div>
+        <div class="cd-row"><div class="cd-label">Status</div>
+          <div class="cd-value">${isConverted ? 'Converted to client' : (isArchived ? 'Archived' : 'Active')}</div></div>
+        ${isConverted ? `<div class="cd-row"><div class="cd-label">Client ID</div><div class="cd-value" style="font-family:monospace;font-size:13px">${esc(p.converted_to_client_id)}</div></div>` : ''}
+      </div>
+    </div>
+
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title">Source data</h3>
+      ${sourceDataHtml}
+    </div>
+
+    <div class="cd-card full">
+      <h3 class="cd-card-title">Admin notes</h3>
+      <textarea class="form-textarea" id="pd-f-notes" rows="5" placeholder="What you know about them, follow-ups, context…">${esc(p.notes)}</textarea>
+      <div class="cd-actions" style="margin-top:1rem">
+        <button class="btn btn-gold btn-sm" onclick="saveProspectNotes()">Save notes</button>
+        <span class="cd-status" id="pd-notes-status"></span>
+      </div>
+    </div>
+  `;
+}
+
+async function saveProspectIdentity() {
+  const status = document.getElementById('pd-identity-status');
+  status.textContent = 'saving…';
+  try {
+    await restPatch('prospects', currentProspectId, {
+      name:  document.getElementById('pd-f-name').value.trim() || null,
+      email: document.getElementById('pd-f-email').value.trim()
+    });
+    await loadProspects();
+    status.textContent = 'saved · ' + new Date().toLocaleTimeString();
+  } catch (e) { status.textContent = 'failed: ' + e.message; }
+}
+
+async function saveProspectNotes() {
+  const status = document.getElementById('pd-notes-status');
+  status.textContent = 'saving…';
+  try {
+    await restPatch('prospects', currentProspectId, {
+      notes: document.getElementById('pd-f-notes').value
+    });
+    await loadProspects();
+    status.textContent = 'saved · ' + new Date().toLocaleTimeString();
+  } catch (e) { status.textContent = 'failed: ' + e.message; }
+}
+
+async function setProspectArchived(prospectId, archived) {
+  await restPatch('prospects', prospectId, { archived });
+  await loadProspects();
+  showProspectDetail(prospectId);
+}
+
+// Promote a prospect to a clients row. Creates the new clients record from
+// the prospect's name + email, sets prospects.converted_to_client_id, then
+// opens the new client's detail view.
+async function convertProspectToClient(prospectId) {
+  const p = allProspects.find(x => x.id === prospectId);
+  if (!p) return;
+  if (!confirm(`Create a client record for ${p.name || p.email}?\nThis adds them to your Clients list. The prospect row stays linked.`)) return;
+
+  try {
+    // Create the clients row.
+    const created = await restPost('clients', {
+      name:  p.name || p.email.split('@')[0],
+      email: p.email,
+      notes: p.notes || null
+    });
+    if (!Array.isArray(created) || !created[0]?.id) {
+      throw new Error(created?.message || 'Failed to create client.');
+    }
+    const newClientId = created[0].id;
+    // Link the prospect to the new client.
+    await restPatch('prospects', prospectId, { converted_to_client_id: newClientId });
+    // Refresh in-memory lists and navigate to the new client.
+    await Promise.all([loadClients(), loadProspects()]);
+    showClientDetail(newClientId);
+  } catch (err) {
+    alert('Convert failed: ' + (err.message || err));
   }
 }
 
