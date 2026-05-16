@@ -549,6 +549,8 @@ if (CLIENT_ID_PARAM) {
   console.log('[chrome] role:', isAdmin ? 'admin' : 'client', '· email:', session.user.email);
   const params = new URLSearchParams(window.location.search);
   let cidParam = params.get('client_id') || sessionStorage.getItem('active_client_id');
+  const isPreview = params.get('preview') === '1';
+  const previewSuffix = isPreview ? '&preview=1' : '';
   let activeClient = null;
   try {
     if (isAdmin && cidParam) {
@@ -579,13 +581,19 @@ if (CLIENT_ID_PARAM) {
   function gateLink(a) {
     const href = a.getAttribute('href') || '';
     const baseHref = href.split('?')[0].split('#')[0];
+    if (baseHref === 'portal.html' || baseHref === '/portal.html' || baseHref.endsWith('/portal.html')) {
+      if (cid && !href.includes('client_id=')) {
+        const sep = href.includes('?') ? '&' : '?';
+        a.setAttribute('href', `${href}${sep}client_id=${encodeURIComponent(cid)}${previewSuffix}`);
+      }
+      return;
+    }
     for (const [page, flag] of Object.entries(LINK_FLAG_MAP)) {
       if (baseHref === page || baseHref === '/' + page || baseHref.endsWith('/' + page)) {
-        // Gate by activeClient's flag — admin canonical (no activeClient) sees all.
         if (activeClient && !activeClient[flag]) { a.style.display = 'none'; return; }
         if (cid && !href.includes('client_id=')) {
           const sep = href.includes('?') ? '&' : '?';
-          a.setAttribute('href', `${href}${sep}client_id=${encodeURIComponent(cid)}`);
+          a.setAttribute('href', `${href}${sep}client_id=${encodeURIComponent(cid)}${previewSuffix}`);
         }
         return;
       }
