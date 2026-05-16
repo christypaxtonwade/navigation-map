@@ -673,12 +673,23 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       });
       const rows = await r.json();
       activeClient = Array.isArray(rows) ? rows[0] || null : null;
-      if (!activeClient) { window.location.replace('/portal.html'); return; }
-      // Fieldguide-specific gate: client must have access_fieldguide
-      if (!activeClient.access_fieldguide) { window.location.replace('/portal.html'); return; }
+      if (!activeClient) {
+        console.warn('[chrome] Signed-in client has no clients row → redirecting');
+        window.location.replace('/portal.html'); return;
+      }
     }
-  } catch (err) { console.error('extChromeBoot:', err); }
+  } catch (err) { console.error('[chrome]', err); }
   if (activeClient) sessionStorage.setItem('active_client_id', activeClient.id);
+
+  // Fieldguide-specific universal gate: anyone with an active client lacking
+  // access_fieldguide is bounced — whether they're signed in as that client OR
+  // admin previewing them. Preview-as-client inhabits the client's view, per
+  // navigation-governance.md §3.
+  if (activeClient && !activeClient.access_fieldguide) {
+    console.warn('[chrome] Active client (' + activeClient.name + ') lacks access_fieldguide → redirecting');
+    window.location.replace('/portal.html');
+    return;
+  }
 
   const LINK_FLAG_MAP = {
     'fieldguide.html':        'access_fieldguide',
@@ -963,5 +974,47 @@ async function init() {
 
 init();
 </script>
+
+<style>
+  .ext-footer {
+    border-top: 1px solid var(--border);
+    margin-top: 4rem;
+    padding: 1.75rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1.25rem;
+    position: relative; z-index: 1;
+  }
+  .ext-footer-bridges { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+  .ext-footer-link {
+    font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-dim, var(--ink-dim, #4e4228));
+    text-decoration: none; white-space: nowrap;
+    opacity: 0.88; transition: color 0.2s, opacity 0.2s;
+  }
+  .ext-footer-link:hover { color: var(--gold); opacity: 1; }
+  .ext-footer-copyright {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px; font-style: italic;
+    color: var(--text-faint, var(--ink-faint, #78694a));
+    opacity: 0.88;
+  }
+  @media (max-width: 720px) {
+    .ext-footer { flex-direction: column; align-items: flex-start; padding: 1.5rem 1rem; }
+  }
+</style>
+<footer class="ext-footer">
+  <div class="ext-footer-bridges">
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/">Home</a>
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/begin">Begin</a>
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/earth">Earth</a>
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/sky">Sky</a>
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/life">Life</a>
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/mirror">Mirror</a>
+    <a class="ext-footer-link" href="https://thealchemyofmidlife.substack.com" target="_blank" rel="noopener">Substack ↗</a>
+    <a class="ext-footer-link" href="https://christypaxtonwade.com/sky/tapestry">Tapestry ↗</a>
+  </div>
+  <span class="ext-footer-copyright">© Christy Paxton Wade</span>
+</footer>
 </body>
 </html>
