@@ -806,6 +806,11 @@ const ERA_GROUPS = [
 
   const params = new URLSearchParams(window.location.search);
   let cidParam = params.get('client_id') || sessionStorage.getItem('active_client_id');
+  // preview=1 means we got here via admin previewing-as-client. Forward this
+  // flag on every link (including the Portal return link) so the journey back
+  // restores preview mode rather than landing in the admin canonical view.
+  const isPreview = params.get('preview') === '1';
+  const previewSuffix = isPreview ? '&preview=1' : '';
   let activeClient = null;
   try {
     if (isAdmin && cidParam) {
@@ -853,6 +858,15 @@ const ERA_GROUPS = [
   function gateLink(a) {
     const href = a.getAttribute('href') || '';
     const baseHref = href.split('?')[0].split('#')[0];
+    // Decorate Portal return links with client_id + preview flag so the journey
+    // back to portal.html restores preview mode when applicable.
+    if (baseHref === 'portal.html' || baseHref === '/portal.html' || baseHref.endsWith('/portal.html')) {
+      if (cid && !href.includes('client_id=')) {
+        const sep = href.includes('?') ? '&' : '?';
+        a.setAttribute('href', `${href}${sep}client_id=${encodeURIComponent(cid)}${previewSuffix}`);
+      }
+      return;
+    }
     for (const [page, flag] of Object.entries(LINK_FLAG_MAP)) {
       if (baseHref === page || baseHref === '/' + page || baseHref.endsWith('/' + page)) {
         // Gate by activeClient's flag whenever an active client exists.
@@ -864,7 +878,7 @@ const ERA_GROUPS = [
         }
         if (cid && !href.includes('client_id=')) {
           const sep = href.includes('?') ? '&' : '?';
-          a.setAttribute('href', `${href}${sep}client_id=${encodeURIComponent(cid)}`);
+          a.setAttribute('href', `${href}${sep}client_id=${encodeURIComponent(cid)}${previewSuffix}`);
         }
         return;
       }
