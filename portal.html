@@ -960,8 +960,8 @@ body::before {
             <h4>Tier 2<span class="tier-meta">Free · Email-gated · NOT in portal</span></h4>
             <p>The Architecture PDF — 24-page designed download. Delivered via Kit subscription form at <code>/map#subscribe</code>. Lives outside the portal entirely; never gated here. Listed for orientation only.</p>
 
-            <h4>Tier 3<span class="tier-meta">$88 launch · $111 standard · LAUNCHING 15 JULY 2026</span></h4>
-            <p>The Fieldguide. All 276 passages (13 Fields × 69 Subterrains × 4 registers) at client-facing depth. Astrological correspondences and Mythic Tapestry profiles woven in. Portal view: download link to the PDF + index to all Fields and Subterrains. Granted to: Fieldguide purchasers, Cohort participants (post-15-July), Sovereign Signal clients at discretion, all Mirror Work clients.</p>
+            <h4>Tier 3<span class="tier-meta">$88 launch · $111 standard · PDF-only · LAUNCHING 15 JULY 2026</span></h4>
+            <p>The Fieldguide. All 276 passages (13 Fields × 69 Subterrains × 4 registers) at client-facing depth. Astrological correspondences and Mythic Tapestry profiles woven in. <strong>Delivered as PDF only</strong> — not rendered live in the portal or on the website. Sent or sold to: Fieldguide purchasers, Cohort participants (post-15-July), Sovereign Signal clients at discretion, all Mirror Work clients. Delivery happens outside the portal.</p>
 
             <h4>Tier 4<span class="tier-meta">Lineage Session $444 / Mirror Work $1,888 · LIVE</span></h4>
             <p>The Ancestral Weaving. Personal lineage research and transmission — curated ancestors written across five layers (Terroir, Unresolved, Thread, Lineage, Sigil), frequency-tagged to specific Fields and Subterrains. Portal view: their Weaving rendered, each ancestor with full layers and frequency tags. Granted to: Lineage Session clients (12-ancestor starter), Weaving Extension clients (+8 ancestors), Mirror Work clients (Weaving deepens across 3 months).</p>
@@ -1685,9 +1685,11 @@ function buildNav() {
   const activeClient = getActiveClientObject();
   const cid = activeClient ? `?client_id=${encodeURIComponent(activeClient.id)}` : '';
 
+  // Fieldguide removed 2026-05-15: PDF-only product, no live web rendering.
+  // The fieldguide.html file is deprecated to a redirect stub; the access_fieldguide
+  // column on clients remains in the schema as harmless residue.
   const externalLinks = [
     { href: 'index.html',             label: 'Map ↗',         flag: null },
-    { href: 'fieldguide.html',        label: 'Fieldguide ↗',  flag: 'access_fieldguide' },
     { href: 'ancestral-weaving.html', label: 'Weaving ↗',     flag: 'access_weaving' },
     { href: 'ancestral-catalog.html', label: 'Catalog ↗',     flag: 'access_catalog' },
     { href: 'tapestry.html',          label: 'Tapestry ↗',    flag: 'access_tapestry' },
@@ -2024,8 +2026,10 @@ function cdIntakeBlock(label, val) {
 // actually sees inside the portal. Set per-client by Christy.
 function cdAccessCard(d) {
   const c = d.client;
+  // access_fieldguide intentionally omitted — the Fieldguide is PDF-only as of
+  // 2026-05-15, delivered outside the portal. The column remains on clients
+  // as harmless residue (kept in case web access is reintroduced later).
   const flags = [
-    { key: 'access_fieldguide',  label: 'Fieldguide',       hint: '276 passages · the full Fieldguide PDF + index' },
     { key: 'access_weaving',     label: 'My Weaving',       hint: 'their own ancestor weaving rendered in portal' },
     { key: 'access_catalog',     label: 'My Catalog',       hint: 'their own ancestors as a sortable catalog (usually off if weaving is small)' },
     { key: 'access_convergence', label: 'My Convergence',   hint: 'their full Convergence + PDF + history strip' },
@@ -2364,8 +2368,8 @@ async function cdSaveAccess() {
   const status = document.getElementById('cd-access-status');
   status.textContent = 'saving…';
   try {
+    // access_fieldguide intentionally omitted — Fieldguide is PDF-only post-2026-05-15.
     await restPatch('clients', currentDetailClient, {
-      access_fieldguide:  document.getElementById('cd-f-access_fieldguide').checked,
       access_weaving:     document.getElementById('cd-f-access_weaving').checked,
       access_catalog:     document.getElementById('cd-f-access_catalog').checked,
       access_convergence: document.getElementById('cd-f-access_convergence').checked,
