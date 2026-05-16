@@ -1668,6 +1668,19 @@ async function enterApp() {
 
   showView('view-app');
 
+  // Detect preview-mode return: if URL has ?client_id=X&preview=1 and we're admin,
+  // automatically restart preview-as-X (sent here by the external pages' Portal links).
+  // This preserves preview context across the external-page-and-back journey.
+  const urlParams = new URLSearchParams(window.location.search);
+  const previewClientFromUrl = urlParams.get('preview') === '1' ? urlParams.get('client_id') : null;
+  if (isAdmin && previewClientFromUrl) {
+    // Clean the URL query so refreshes don't re-trigger preview every time.
+    const cleanUrl = window.location.pathname + window.location.hash;
+    history.replaceState(null, '', cleanUrl);
+    startPreview(previewClientFromUrl);
+    return;
+  }
+
   // Navigate to hash if present, otherwise default.
   // panelForHash may return a plain string (static panel) OR an object
   // {panelId, clientId} for dynamic client-detail hashes (#client/{id}).
@@ -1764,7 +1777,10 @@ function buildNav() {
   // Map link always visible. Other links gated by the active client's access_* flag.
   // Admin sees all links regardless of flags.
   // (activeClient was already resolved above for client tabs — reuse it.)
-  const cid = activeClient ? `?client_id=${encodeURIComponent(activeClient.id)}` : '';
+  // When admin is previewing-as-client, we tag URLs with &preview=1 so external
+  // pages know to send the user back to portal in preview mode (not admin view).
+  const previewSuffix = isPreviewingAsClient ? '&preview=1' : '';
+  const cid = activeClient ? `?client_id=${encodeURIComponent(activeClient.id)}${previewSuffix}` : '';
 
   // Fieldguide removed 2026-05-15: PDF-only product, no live web rendering.
   // The fieldguide.html file is deprecated to a redirect stub; the access_fieldguide
