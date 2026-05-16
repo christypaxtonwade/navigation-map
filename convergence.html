@@ -1337,21 +1337,24 @@ function renderHistoryNav(history, currentConvId) {
 function renderConvergence(conv, clientData, history) {
   const freqAncestors = clientData?.freqAncestors || {};
 
-  // Historic convergences carry their own dominant_frequencies snapshot.
-  // Prefer those when present so the bars reflect the lineage state AT THE
-  // TIME the convergence was generated, not the current weaving. Counts
-  // aren't stored historically, so old convergences render names without
-  // bar widths (count = 0). Only the in-progress convergence on initial
-  // render uses live clientData.sortedFreqs (which has real counts).
-  const historicFreqs = conv.dominant_frequencies && conv.dominant_frequencies.length
-    ? conv.dominant_frequencies.map(f => [f, 0])
-    : null;
-  const topFreqs = historicFreqs || clientData?.sortedFreqs || [];
-  const maxCount = topFreqs[0]?.[1] || 1;
+  // Historic convergences carry their own dominant_frequencies snapshot — the
+  // FREQUENCY NAMES that were dominant at the time. Per-frequency counts aren't
+  // stored historically, so when rendering an older convergence we keep its
+  // historic names but look up CURRENT counts for each from clientData to give
+  // meaningful bar widths. Frequencies no longer present in the lineage render
+  // as 0 (acceptable: the lineage has moved). When dominant_frequencies isn't
+  // set on a row (older legacy convergences), fall back to live clientData.
+  const liveByName = Object.fromEntries(clientData?.sortedFreqs || []);
+  const topFreqs = (conv.dominant_frequencies && conv.dominant_frequencies.length)
+    ? conv.dominant_frequencies.map(name => [name, liveByName[name] || 0])
+    : (clientData?.sortedFreqs || []);
+  // Compute max from the actual displayed values (not always topFreqs[0],
+  // since historic order may not match current-count order).
+  const maxCount = Math.max(1, ...topFreqs.map(([, n]) => n));
   const convWithMeta = { ...conv, topFreqs, maxCount, ancestors: clientData?.ancestors };
 
-  console.log('[renderConvergence] conv', conv.id, '· using',
-    historicFreqs ? 'historic dominant_frequencies' : 'live clientData.sortedFreqs');
+  console.log('[renderConvergence] conv', conv.id,
+    '· frequencies:', topFreqs.map(([n, c]) => `${n}(${c})`).join(', '));
 
   const sectionsHtml = (conv.sections || []).map(sec => {
     const enriched = {
