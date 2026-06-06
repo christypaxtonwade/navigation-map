@@ -213,8 +213,48 @@ body {
 }
 .seq-field {
   font-size: 15px; color: var(--ink-gold);
-  border-top: 1px solid var(--vellum-deeper); padding-top: 0.5rem; margin-top: auto;
+  border-top: 1px solid var(--vellum-deeper); padding-top: 0.5rem;
 }
+.seq-note {
+  font-size: 15px; color: var(--ink-secondary); line-height: 1.5;
+  border-top: 1px dashed var(--vellum-deeper); padding-top: 0.5rem; margin-top: auto;
+}
+
+/* ── Astrology placements + Map-activations table ── */
+.astro-tier-h {
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600;
+  letter-spacing: 0.08em; color: var(--gold); margin: 1.6rem 0 0.5rem;
+}
+.astro-table { width: 100%; border-collapse: collapse; margin-bottom: 0.5rem; }
+.astro-table th {
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-dim);
+  text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.astro-table td {
+  font-size: 15px; color: var(--text); padding: 0.6rem 0.7rem;
+  border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.45;
+}
+.astro-table tr:last-child td { border-bottom: none; }
+.astro-body { font-weight: 600; color: var(--text); white-space: nowrap; }
+.astro-pos { color: var(--text-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.astro-note { color: var(--text-dim); max-width: 32rem; }
+.astro-muted { color: var(--text-faint); }
+.astro-retro { color: var(--gold-bright); font-weight: 600; }
+.astro-act-line { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: baseline; margin-bottom: 0.3rem; }
+.astro-act-line:last-child { margin-bottom: 0; }
+.astro-act-lbl {
+  font-family: 'Jost', sans-serif; font-size: 15px; letter-spacing: 0.04em;
+  color: var(--text-faint); text-transform: uppercase;
+}
+.astro-chip {
+  font-size: 15px; color: var(--text); background: var(--accent);
+  border: 1px solid var(--border); border-radius: 4px; padding: 1px 8px;
+}
+.astro-chip.sub { color: var(--text-secondary); }
+.astro-chip.sec { color: var(--text-dim); border-style: dashed; }
+.astro-table.offerings .astro-pos { white-space: normal; color: var(--gold); }
+.astro-table.offerings .astro-body { white-space: normal; }
 
 /* ── Planet positions table ── */
 .planets-table {
@@ -453,7 +493,17 @@ async function init() {
       if (r.ok) matches = await r.json();
     } catch (e) { console.warn('lineage_resonance_check failed:', e); }
 
-    page.innerHTML = render({ client, birth, hd, gk, refByNum, fieldById, matches });
+    // Astrology: natal placements + the Map activations each one drives.
+    const placements  = await sb(`chart_planets?client_id=eq.${CLIENT_ID}&side=eq.personality&select=body,zodiac_sign,zodiac_degree,house,retrograde&order=body`).catch(() => []);
+    const bodyWeights = await sb(`chart_body_weights?select=body_name,body_tier,body_weight,is_angle`).catch(() => []);
+    const signFields  = await sb(`sign_field_activations?select=sign_name,field_id,is_secondary`).catch(() => []);
+    const houseFields = await sb(`house_field_activations?select=house_number,field_id,is_secondary`).catch(() => []);
+    const astSubs     = await sb(`asteroid_subterrain_archetypes?select=body_name,subterrain_id,field_id,is_secondary`).catch(() => []);
+    const subs        = await sb(`subterrains?select=id,name,field_id`).catch(() => []);
+    const subById     = Object.fromEntries(subs.map(s => [s.id, s]));
+
+    page.innerHTML = render({ client, birth, hd, gk, refByNum, fieldById, matches,
+      placements, bodyWeights, signFields, houseFields, astSubs, subById });
     wireNotes(birth);
     wireSaveAndRecompute(client);
     wireCityAutocomplete();
@@ -478,14 +528,17 @@ function fmtDate(d) {
 }
 function fmtTime(t) { return t || '—'; }
 
-function render({ client, birth, hd, gk, refByNum, fieldById, matches }) {
+function render({ client, birth, hd, gk, refByNum, fieldById, matches,
+                 placements, bodyWeights, signFields, houseFields, astSubs, subById }) {
   return `
     ${renderHeader(client, birth)}
     ${renderBirthForm(birth)}
+    ${renderAstrology({ placements, bodyWeights, signFields, houseFields, astSubs, fieldById, subById })}
     ${renderHD(hd)}
     ${renderActivation(gk, refByNum, fieldById)}
     ${renderVenus(gk, refByNum, fieldById)}
     ${renderPearl(gk, refByNum, fieldById)}
+    ${renderOfferingsMap()}
     ${renderMatches(matches)}
     ${renderNotes(birth)}
   `;
@@ -603,6 +656,137 @@ function renderBirthForm(birth) {
     </div>`;
 }
 
+// ── Astrology section ───────────────────────────────────────────────
+const ASTRO_BODY_NAMES = {
+  sun:'Sun', moon:'Moon', mercury:'Mercury', venus:'Venus', mars:'Mars',
+  jupiter:'Jupiter', saturn:'Saturn', uranus:'Uranus', neptune:'Neptune', pluto:'Pluto',
+  earth:'Earth', ascendant:'Ascendant', midheaven:'Midheaven (MC)', imum_coeli:'Imum Coeli (IC)',
+  north_node:'North Node', south_node:'South Node', chiron:'Chiron',
+  ceres:'Ceres', pallas_athena:'Pallas Athena', juno:'Juno', vesta:'Vesta', astraea:'Astraea',
+  hygeia:'Hygeia', eris:'Eris', haumea:'Haumea', sedna:'Sedna', nessus:'Nessus',
+  chariklo:'Chariklo', lilith:'Black Moon Lilith'
+};
+// Quick-reference meaning per body — internal admin language, not client voice.
+const BODY_MEANINGS = {
+  sun:"Core identity and conscious purpose — the signal the life is organized around.",
+  moon:"Inner life, instinct, what the body needs to feel held — the felt undercurrent beneath the persona.",
+  mercury:"How the mind perceives and transmits — language, learning, the wiring of thought.",
+  venus:"What is valued and how love and worth are metabolized — relational and aesthetic gravity.",
+  mars:"Drive, desire, how will is enacted — the body's forward motion and its anger.",
+  jupiter:"Where meaning expands — faith, growth, the reach toward more.",
+  saturn:"Structure, limit, the work of maturation — where mastery is earned through constraint.",
+  uranus:"The break from inherited form — sudden knowing, individuation, the disruptive signal.",
+  neptune:"Dissolution and longing — where boundaries thin and the transpersonal enters.",
+  pluto:"Death-and-rebirth pressure — compulsion, power, what must be transmuted at the root.",
+  earth:"The grounding counterweight to the Sun — what the body must embody to balance its purpose (the Gene Keys Evolution/Purpose axis).",
+  ascendant:"How the person meets the world — the threshold and first impression; the outward gate.",
+  midheaven:"The public vocation and visible aim — what the life builds toward in the world.",
+  imum_coeli:"The private root — home, ancestry, the inner foundation the life rests on.",
+  north_node:"The growth direction — the unfamiliar terrain the soul is moving toward.",
+  south_node:"Inherited competence and karmic backlog — what is already known and must be released, not repeated.",
+  chiron:"The wound that becomes the teaching — where injury and healing share one doorway.",
+  ceres:"Nourishment, loss, and return — the cycle of holding and letting go; the grief-and-care axis.",
+  pallas_athena:"Pattern-perception and strategic wisdom — seeing the structure others miss; creative intelligence.",
+  juno:"Committed partnership and the terms of belonging — what is required to stay in covenant.",
+  vesta:"Devotion and the tended flame — what the person keeps sacred through focused practice.",
+  astraea:"Innocence and the sense of justice — what is restored when the world is met cleanly.",
+  hygeia:"Wholeness through tending — health as practice; the inner-healing intelligence of the body.",
+  eris:"The unwelcomed truth that forces reckoning — the discord that exposes what was excluded.",
+  haumea:"Regeneration and sovereign creation — making and remaking from one's own substance.",
+  sedna:"What was betrayed and submerged — deep-water grief and the long return to belonging.",
+  nessus:"Inherited harm and the line where a cycle of wounding ends or repeats — accountability.",
+  chariklo:"The grace that holds difficult space — containment, boundary, steadying presence near the threshold.",
+  lilith:"The exiled, unowned self — instinct and refusal that won't be domesticated; the reclaimed power."
+};
+const ASTRO_TIER_LABELS = {
+  1:'Tier 1 · full weight (1.0) — the central voice of the chart',
+  2:'Tier 2 · 0.7 weight — traditional planets, the nodal and angular axes',
+  3:'Tier 3 · 0.5 weight — the mapped minor bodies',
+  0:'Unweighted — present in the chart, outside the scoring tiers'
+};
+function astroCap(s){ return String(s||'').replace(/\b\w/g, c => c.toUpperCase()); }
+
+function renderAstrology(d) {
+  const { placements, bodyWeights, signFields, houseFields, astSubs, fieldById, subById } = d;
+  if (!placements || !placements.length) {
+    return `<div class="section">
+      <div class="section-title">Astrology · Natal Placements &amp; Map Activations</div>
+      <div class="matches-empty">No chart computed yet. Save birth data above to compute the placements.</div>
+    </div>`;
+  }
+  const wt = Object.fromEntries((bodyWeights||[]).map(b => [b.body_name, b]));
+  const tierOf = body => (wt[body] ? wt[body].body_tier : 0);
+  const signToFields = {};
+  (signFields||[]).forEach(s => { (signToFields[s.sign_name] = signToFields[s.sign_name] || []).push({ f: fieldById[s.field_id], sec: s.is_secondary }); });
+  const houseToFields = {};
+  (houseFields||[]).forEach(h => { (houseToFields[h.house_number] = houseToFields[h.house_number] || []).push({ f: fieldById[h.field_id], sec: h.is_secondary }); });
+  const bodyToSubs = {};
+  (astSubs||[]).forEach(a => { (bodyToSubs[a.body_name] = bodyToSubs[a.body_name] || []).push({ s: subById[a.subterrain_id], sec: a.is_secondary }); });
+
+  const groups = { 1:[], 2:[], 3:[], 0:[] };
+  placements.forEach(p => { groups[tierOf(p.body)].push(p); });
+
+  const fieldChip = (f, sec) => f ? `<span class="astro-chip${sec?' sec':''}" title="${escapeHtml(f.name)}">F${f.number} · ${escapeHtml(f.name)}</span>` : '';
+  const activations = p => {
+    const parts = [];
+    const seen = new Set(); const fields = [];
+    [...(signToFields[p.zodiac_sign]||[]), ...(houseToFields[p.house]||[])].forEach(x => {
+      if (x.f && !seen.has(x.f.number)) { seen.add(x.f.number); fields.push(x); }
+    });
+    if (fields.length) parts.push(`<div class="astro-act-line"><span class="astro-act-lbl">Fields</span>${fields.map(x=>fieldChip(x.f,x.sec)).join('')}</div>`);
+    const subs = bodyToSubs[p.body] || [];
+    if (subs.length) parts.push(`<div class="astro-act-line"><span class="astro-act-lbl">Subterrains</span>${subs.map(x=>`<span class="astro-chip sub${x.sec?' sec':''}">${x.s?escapeHtml(x.s.name):'—'}</span>`).join('')}</div>`);
+    return parts.join('') || '<span class="astro-muted">—</span>';
+  };
+
+  const tierBlock = tier => {
+    const list = groups[tier];
+    if (!list.length) return '';
+    const rows = list.map(p => {
+      const name = ASTRO_BODY_NAMES[p.body] || astroCap(p.body.replace(/_/g,' '));
+      const sign = p.zodiac_sign ? astroCap(p.zodiac_sign) : '—';
+      const deg = (p.zodiac_degree!=null && p.zodiac_degree!=='') ? Math.floor(Number(p.zodiac_degree))+'°' : '';
+      const house = (p.house!=null) ? 'H'+p.house : '—';
+      const retro = p.retrograde ? ' <span class="astro-retro" title="retrograde">℞</span>' : '';
+      return `<tr>
+        <td class="astro-body">${escapeHtml(name)}${retro}</td>
+        <td class="astro-pos">${deg} ${escapeHtml(sign)} · ${house}</td>
+        <td class="astro-act">${activations(p)}</td>
+        <td class="astro-note">${escapeHtml(BODY_MEANINGS[p.body]||'')}</td>
+      </tr>`;
+    }).join('');
+    return `<div class="astro-tier-h">${ASTRO_TIER_LABELS[tier]}</div>
+      <table class="astro-table">
+        <thead><tr><th>Body</th><th>Position</th><th>Activates on the Map</th><th>Note</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  };
+
+  return `<div class="section">
+    <div class="section-title">Astrology · Natal Placements &amp; Map Activations</div>
+    <div class="section-intro">The natal chart (tropical, Placidus houses), grouped by the scoring tiers. Each body's <b>sign</b> and <b>house</b> light specific Map <b>Fields</b>; the mapped minor bodies also light specific <b>Subterrains</b>. Faded chips are secondary activations. Notes are quick-reference for what each body carries.</div>
+    ${[1,2,3,0].map(tierBlock).join('')}
+  </div>`;
+}
+
+// Sequences → offerings: how to route what the chart shows into the ladder.
+function renderOfferingsMap() {
+  const rows = [
+    ['Signals quiz — Tier 1 (free) · Tier 2 ($44)', 'Activation — dominant Field', "The doorway. Surfaces the strongest Field and register; Tier 2 reads the convergence of chart and quiz. Use it to route a new contact toward the right session."],
+    ['Your Signal Decoded ($144) · Sovereign Signal ($244)', 'Activation Sequence + full chart', "The natal read. Decoded covers the Activation spheres and the placements above; Sovereign Signal carries into the Venus and Pearl sequences and the vocational Pearl."],
+    ['Mirror Work ($1,888 · 3 months)', 'Venus Sequence — esp. Core Wound', "The sustained container where the shadow → gift → siddhi arc is actually worked over time. The Core Wound sphere is the spine of this work."],
+    ['Lineage Session ($444) + Convergence', 'Map fields ↔ ancestral weaving', "Ties each sphere's Map field to the ancestors who carry it. The Lineage Resonance section below surfaces those carriers live."]
+  ];
+  return `<div class="section">
+    <div class="section-title">Working Map · Sequences → Offerings</div>
+    <div class="section-intro">Quick reference for routing what the chart shows into the right offering. Internal — for planning client work.</div>
+    <table class="astro-table offerings">
+      <thead><tr><th>Offering</th><th>What it works</th><th>How to use it</th></tr></thead>
+      <tbody>${rows.map(([o,w,h])=>`<tr><td class="astro-body">${o}</td><td class="astro-pos">${w}</td><td class="astro-note">${h}</td></tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+}
+
 function renderHD(hd) {
   if (!hd) return `
     <div class="section">
@@ -649,6 +833,7 @@ function renderSequence(title, intro, klass, gk, refByNum, fieldById, sphereKeys
         <div class="seq-arc">${arc}</div>
         <div class="seq-meta">${center}</div>
         <div class="seq-field">${fieldStr}</div>
+        ${SPHERE_GUIDE[k] ? `<div class="seq-note">${SPHERE_GUIDE[k]}</div>` : ''}
       </div>`;
   }).join('');
   return `
@@ -659,11 +844,28 @@ function renderSequence(title, intro, klass, gk, refByNum, fieldById, sphereKeys
     </div>`;
 }
 
-const ACTIVATION_INTRO = `Four keys traced from the Sun and Earth on both sides of the chart. <b>Life's Work</b> is what the body came to express. <b>Evolution</b> is the challenge that calls it forward. <b>Radiance</b> is the body's natural transmission. <b>Purpose</b> is the inherited substrate beneath. Each key's <i>shadow → gift → siddhi</i> is a frequency arc; the Map field beneath it is the terrain of consciousness most precisely activated by that sphere.`;
+// Per-sphere working guidance — what to actually do with each in session. Internal.
+const SPHERE_GUIDE = {
+  lifes_work:"What the body is here to express. Work it by naming the gift, then watching where the shadow still runs the show.",
+  evolution:"The challenge that drives growth. The shadow is the recurring friction; the gift is the capacity that friction is building.",
+  radiance:"The body's natural transmission — vitality follows when it lives in the gift. Read it for what restores them.",
+  purpose:"The inherited substrate beneath the work. Usually unconscious; it surfaces under pressure.",
+  attraction:"What and who comes toward them through the heart. Shadow magnetizes the wrong fit; gift, the right one.",
+  iq:"Mental meeting — how they think with others. Shadow: defensive cleverness. Gift: clear discernment.",
+  eq:"Emotional meeting — how they feel with others. Shadow: reactivity. Gift: honest relating.",
+  sq:"Spiritual meeting — how they commune. Shadow: separation. Gift: devotion.",
+  core:"The deepest unresolved frequency — the wound at the floor of the heart's line. The whole Venus sequence transmutes toward its gift; this is the center of long-form work.",
+  vocation:"How the gift becomes work. Shares its key with the Core Wound — vocation is the wound made useful.",
+  brand:"How the work is recognized. Shares its key with Life's Work — the same signal, made visible.",
+  culture:"The community the work gathers and serves.",
+  pearl:"Where the gift becomes prosperity — the simplest, most natural expression that also provides."
+};
 
-const VENUS_INTRO = `The heart's path, six keys traced through Mars, Venus, and Jupiter. <b>Attraction</b> is what comes toward you. <b>IQ · EQ · SQ</b> are how you meet others mentally, emotionally, spiritually. <b>Core Wound</b> is the pattern at the floor of the line — the deepest unresolved frequency, transmuted into the gift on its other side. Each key's Map field shows where that pattern lands in the topography.`;
+const ACTIVATION_INTRO = `Four keys traced from the Sun and Earth on both sides of the chart. <b>Life's Work</b> is what the body came to express. <b>Evolution</b> is the challenge that calls it forward. <b>Radiance</b> is the body's natural transmission. <b>Purpose</b> is the inherited substrate beneath. Each key's <i>shadow → gift → siddhi</i> is a frequency arc; the Map field beneath it is the terrain of consciousness most precisely activated by that sphere. <b>In practice:</b> this is the spine of a natal read (Your Signal Decoded / Sovereign Signal) — start at Life's Work, locate where they currently sit on each arc (shadow under stress, gift at their best), and let Evolution name the growing edge.`;
 
-const PEARL_INTRO = `Four keys traced from Mars, Sun, and Jupiter — the prosperity sequence. <b>Vocation · Brand · Culture · Pearl</b> name how the gift becomes the form your work takes in the world. <b>Vocation</b> shares its key with the Core Wound; <b>Brand</b> shares its key with Life's Work — the same frequency read at a different register.`;
+const VENUS_INTRO = `The heart's path, six keys traced through Mars, Venus, and Jupiter. <b>Attraction</b> is what comes toward you. <b>IQ · EQ · SQ</b> are how you meet others mentally, emotionally, spiritually. <b>Core Wound</b> is the pattern at the floor of the line — the deepest unresolved frequency, transmuted into the gift on its other side. Each key's Map field shows where that pattern lands in the topography. <b>In practice:</b> this sequence is relationship and shadow work — the territory of Mirror Work. The Core Wound is the spine; the IQ/EQ/SQ keys describe how the wound distorts contact and what clean contact looks like once the gift comes online.`;
+
+const PEARL_INTRO = `Four keys traced from Mars, Sun, and Jupiter — the prosperity sequence. <b>Vocation · Brand · Culture · Pearl</b> name how the gift becomes the form your work takes in the world. <b>Vocation</b> shares its key with the Core Wound; <b>Brand</b> shares its key with Life's Work — the same frequency read at a different register. <b>In practice:</b> this is the vocational and "right livelihood" layer — most relevant in Sovereign Signal and as the integration arc of Mirror Work. Read it for how this person's gift naturally wants to provide, once the Activation and Venus work has settled.`;
 
 function renderActivation(gk, refByNum, fieldById) {
   return renderSequence('Activation Sequence', ACTIVATION_INTRO, 'activation', gk, refByNum, fieldById, [
