@@ -1417,7 +1417,7 @@ body::before {
         <a class="footer-link" href="https://christypaxtonwade.com/sky">Sky</a>
         <a class="footer-link" href="https://christypaxtonwade.com/life">Life</a>
         <a class="footer-link" href="https://christypaxtonwade.com/mirror">Mirror</a>
-        <a class="footer-link" href="https://thealchemyofmidlife.substack.com" target="_blank" rel="noopener">Substack ↗</a>
+        <a class="footer-link" href="https://christywade.substack.com" target="_blank" rel="noopener">Substack ↗</a>
         <a class="footer-link" href="https://christypaxtonwade.com/sky/tapestry">Tapestry ↗</a>
       </div>
       <span class="footer-copyright">© Christy Paxton Wade</span>
@@ -2030,7 +2030,7 @@ async function loadClientDetail() {
   if (!id) return;
   const wrap = document.getElementById('client-detail-content');
   try {
-    const [clientArr, birthArr, hdArr, gkArr, ancestors, convs, resonance, allTapestry] = await Promise.all([
+    const [clientArr, birthArr, hdArr, gkArr, ancestors, convs, resonance, allTapestry, planets, sig1, sig2] = await Promise.all([
       rest(`clients?id=eq.${id}&limit=1`),
       rest(`chart_birth_data?client_id=eq.${id}&limit=1`),
       rest(`chart_human_design?client_id=eq.${id}&limit=1`),
@@ -2038,13 +2038,28 @@ async function loadClientDetail() {
       rest(`client_ancestors?client_id=eq.${id}&select=id,name,status,sort_year,dates,relation_to_client&order=sort_year.asc`),
       rest(`convergences?client_id=eq.${id}&order=created_at.desc&select=id,title,status,created_at`),
       rest(`client_tapestry_archetypes?client_id=eq.${id}&select=id,resonance_note,strength,tapestry_archetypes(id,name,tradition,epithet)`).catch(() => []),
-      rest(`tapestry_archetypes?select=id,name,tradition&order=name`).catch(() => [])
+      rest(`tapestry_archetypes?select=id,name,tradition&order=name`).catch(() => []),
+      // Signal Profile sources. Natal placements live on the personality side
+      // (angles — ascendant/MC/IC — exist there only). Asteroids/Chiron are
+      // ephemeris-deferred; tier-3 simply renders empty until they land.
+      rest(`chart_planets?client_id=eq.${id}&side=eq.personality&select=body,zodiac_sign,zodiac_degree,house,retrograde,longitude&order=body`).catch(() => []),
+      rest(`signals_readings?client_id=eq.${id}&select=id,created_at,arc,field_number,field_name,register,tags,offering_label,viewed_at&order=created_at.desc`).catch(() => []),
+      rest(`signals_tier2_readings?client_id=eq.${id}&select=id,created_at,viewed_at,email_sent_at,tier1_computed,field_walking_text,register_frequencies_text,threshold_asking_text&order=created_at.desc`).catch(() => [])
     ]);
     const client = clientArr[0];
     if (!client) { wrap.innerHTML = '<div class="empty">Client not found.</div>'; return; }
     const birth = birthArr[0] || null;
     const hd = hdArr[0] || null;
     const gk = gkArr[0] || null;
+
+    // Most-recent Convergence's editable section texts (keyed convergence_id +
+    // section_type). final_text is the editable body; ai_draft preserves the
+    // original generation for revert.
+    const recentConv = (Array.isArray(convs) && convs[0]) || null;
+    let convSections = [];
+    if (recentConv) {
+      convSections = await rest(`convergence_sections?convergence_id=eq.${recentConv.id}&select=id,section_type,title,ai_draft,final_text,sort_order&order=sort_order.asc`).catch(() => []);
+    }
 
     let refByNum = {}, fieldById = {};
     if (gk) {
@@ -2056,7 +2071,7 @@ async function loadClientDetail() {
       fieldById = Object.fromEntries(fs.map(f => [f.id, f]));
     }
 
-    currentDetailData = { client, birth, hd, gk, ancestors, convs, refByNum, fieldById, resonance: resonance || [], allTapestry: allTapestry || [] };
+    currentDetailData = { client, birth, hd, gk, ancestors, convs, refByNum, fieldById, resonance: resonance || [], allTapestry: allTapestry || [], planets: planets || [], sig1: sig1 || [], sig2: sig2 || [], recentConv, convSections: convSections || [] };
 
     document.getElementById('cd-title').textContent = client.name || '—';
     document.getElementById('cd-subtitle').textContent =
@@ -2088,6 +2103,7 @@ function renderClientDetail(d) {
       ${cdBirthDataCard(d)}
       ${cdChartSummaryCard(d)}
     </div>
+    ${cdSignalProfileCard(d)}
     ${cdWeavingCard(d)}
     ${cdResonanceCard(d)}
     ${cdConvergencesCard(d)}
@@ -2474,6 +2490,360 @@ function cdConvergencesCard(d) {
       <h3 class="cd-card-title">Convergences · ${cs.length}</h3>
       <div class="cd-list">${rows}</div>
     </div>`;
+}
+
+// ════════════════════════════════════════════════════
+// SIGNAL PROFILE — chart placements, Gene Keys, quiz history,
+// Tier 2 readings, editable Convergence sections.
+// Surfaces the same data the Tier 2 scoring engine reads
+// (compute_tier2_convergence), grouped by the chart-weighting
+// tiers locked 2026-05-30.
+// ════════════════════════════════════════════════════
+
+const SIGNAL_BODY_NAMES = {
+  sun:'Sun', moon:'Moon', ascendant:'Ascendant', chiron:'Chiron',
+  mercury:'Mercury', venus:'Venus', mars:'Mars', jupiter:'Jupiter',
+  saturn:'Saturn', uranus:'Uranus', neptune:'Neptune', pluto:'Pluto',
+  north_node:'North Node', south_node:'South Node',
+  midheaven:'Midheaven (MC)', imum_coeli:'Imum Coeli (IC)', earth:'Earth',
+  pallas_athena:'Pallas Athena', juno:'Juno', eris:'Eris', ceres:'Ceres',
+  hygeia:'Hygeia', vesta:'Vesta', astraea:'Astraea', haumea:'Haumea',
+  sedna:'Sedna', lilith:'Lilith', nessus:'Nessus', chariklo:'Chariklo'
+};
+// Tier order mirrors the scoring weights: Tier 1 = 1.0, Tier 2 = 0.7,
+// Tier 3 = 0.5. Earth carries zero scoring weight (shown for completeness).
+const SIGNAL_TIERS = [
+  { key:'1', label:'Tier 1 · full weight (1.0)', hint:'Sun · Moon · Ascendant · Chiron — the central voice of the chart',
+    bodies:['sun','moon','ascendant','chiron'] },
+  { key:'2', label:'Tier 2 · 0.7 weight', hint:'Traditional planets, the karmic Node axis, and the MC/IC angles',
+    bodies:['mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','north_node','south_node','midheaven','imum_coeli'] },
+  { key:'3', label:'Tier 3 · 0.5 weight', hint:'The twelve mapped minor bodies — ephemeris pending',
+    bodies:['pallas_athena','juno','eris','ceres','hygeia','vesta','astraea','haumea','sedna','lilith','nessus','chariklo'] },
+  { key:'0', label:'Unweighted', hint:'Present in the chart but outside the scoring tiers',
+    bodies:['earth'] }
+];
+
+function cdBodyName(b) {
+  return SIGNAL_BODY_NAMES[b] || String(b || '').replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function cdPlacementLine(p) {
+  const name = cdBodyName(p.body);
+  const sign = p.zodiac_sign ? p.zodiac_sign.charAt(0).toUpperCase() + p.zodiac_sign.slice(1) : '—';
+  const deg  = (p.zodiac_degree != null && p.zodiac_degree !== '') ? Math.floor(Number(p.zodiac_degree)) + '°' : '';
+  const house = (p.house != null) ? ' · House ' + p.house : '';
+  const retro = p.retrograde
+    ? ' <span class="status-pill" title="retrograde" style="background:rgba(192,112,96,0.12);color:var(--red)">℞</span>'
+    : '';
+  return `
+    <div class="cd-list-row">
+      <div>
+        <div class="name">${cdEsc(name)}</div>
+        <div class="meta">${deg ? deg + ' ' : ''}${cdEsc(sign)}${house}</div>
+      </div>${retro}
+    </div>`;
+}
+
+function cdChartPlacementsBlock(d) {
+  const planets = d.planets || [];
+  const byBody = Object.fromEntries(planets.map(p => [p.body, p]));
+  const b = d.birth;
+  const canRecompute = !!(b && b.birth_date && b.birth_time && b.birth_place &&
+    b.latitude != null && b.longitude != null && b.timezone);
+
+  const tierBlocks = SIGNAL_TIERS.map(tier => {
+    const present = tier.bodies.map(bn => byBody[bn]).filter(Boolean);
+    // Tier 3 (asteroids) and Unweighted (earth) are hidden entirely when empty
+    // to avoid clutter; Tier 1/2 always show so gaps are visible.
+    if (!present.length && (tier.key === '3' || tier.key === '0')) return '';
+    const rows = present.length
+      ? `<div class="cd-list">${present.map(cdPlacementLine).join('')}</div>`
+      : '<div class="cd-value muted" style="font-style:italic">No placements in this tier yet.</div>';
+    return `
+      <div style="margin-bottom:1rem">
+        <div class="cd-label" style="display:flex;justify-content:space-between;align-items:baseline;gap:0.5rem">
+          <span>${tier.label}</span>
+        </div>
+        <div class="cd-value muted" style="font-size:13px;margin:0.15rem 0 0.5rem">${tier.hint}</div>
+        ${rows}
+      </div>`;
+  }).join('');
+
+  const recomputeBtn = canRecompute
+    ? `<button class="btn btn-outline btn-sm" onclick="cdRecomputeChart()">Recompute Chart</button>`
+    : `<a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${d.client.id}" target="_blank">Enter birth data to compute ↗</a>`;
+
+  return `
+    <div style="margin-bottom:1.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:0.75rem">
+        <h4 class="cd-card-title" style="margin:0">Chart Placements${planets.length ? ' · ' + planets.length : ''}</h4>
+        <div class="cd-actions">${recomputeBtn}<span class="cd-status" id="cd-recompute-status"></span></div>
+      </div>
+      ${planets.length
+        ? tierBlocks
+        : '<div class="cd-value muted">No chart computed yet. Add birth data in Chart Admin, then Recompute.</div>'}
+    </div>`;
+}
+
+function cdGeneKeysBlock(d) {
+  const gk = d.gk, refByNum = d.refByNum || {}, fieldById = d.fieldById || {};
+  if (!gk) {
+    return `
+      <div style="margin-bottom:1.5rem">
+        <h4 class="cd-card-title">Gene Keys Profile</h4>
+        <div class="cd-value muted">No Gene Keys profile computed yet.</div>
+      </div>`;
+  }
+  const SPHERES = [
+    ["Life's Work",'gk_lifes_work','gk_lifes_work_line'],
+    ['Evolution','gk_evolution','gk_evolution_line'],
+    ['Radiance','gk_radiance','gk_radiance_line'],
+    ['Purpose','gk_purpose','gk_purpose_line'],
+    ['Attraction','gk_attraction','gk_attraction_line'],
+    ['IQ','gk_iq','gk_iq_line'],
+    ['EQ','gk_eq','gk_eq_line'],
+    ['SQ','gk_sq','gk_sq_line'],
+    ['Core Wound','gk_core','gk_core_line'],
+    ['Vocation','gk_vocation','gk_vocation_line'],
+    ['Culture','gk_culture','gk_culture_line'],
+    ['Brand','gk_brand','gk_brand_line'],
+    ['Pearl','gk_pearl','gk_pearl_line']
+  ];
+  const rows = SPHERES.map(([label, numKey, lineKey]) => {
+    const num = gk[numKey], line = gk[lineKey];
+    if (!num) return '';
+    const r = refByNum[num];
+    const f = r ? fieldById[r.shadow_field_id || r.primary_field_id] : null;
+    const arc = r ? `${r.shadow} → ${r.gift} → ${r.siddhi}` : '';
+    const fStr = f ? `Field ${f.number} · ${f.name}` : '';
+    return `
+      <div class="cd-row stack" style="padding:0.45rem 0">
+        <div class="cd-label">${label} · <span style="color:var(--gold)">GK ${num}.${line ?? '—'}</span></div>
+        ${arc ? `<div class="cd-value"><i>${cdEsc(arc)}</i></div>` : ''}
+        ${fStr ? `<div class="cd-value muted" style="font-size:13px">${cdEsc(fStr)}</div>` : ''}
+      </div>`;
+  }).join('');
+  return `
+    <div style="margin-bottom:1.5rem">
+      <h4 class="cd-card-title">Gene Keys Profile · 13 spheres</h4>
+      <div class="cd-list">${rows}</div>
+    </div>`;
+}
+
+function cdTier1HistoryBlock(d) {
+  const rows = d.sig1 || [];
+  const body = rows.length
+    ? `<div class="cd-list">${rows.map(r => {
+        const date = r.created_at ? new Date(r.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '—';
+        const field = [r.field_number, r.field_name].filter(Boolean).join(' · ');
+        const tags = Array.isArray(r.tags) && r.tags.length ? r.tags.join(', ') : '';
+        const meta = [r.arc, r.register].filter(Boolean).join(' · ');
+        return `
+          <div class="cd-list-row" style="align-items:flex-start">
+            <div style="flex:1">
+              <div class="name">${cdEsc(field || 'Reading')}</div>
+              <div class="meta">${date}${meta ? ' · ' + cdEsc(meta) : ''}</div>
+              ${tags ? `<div class="cd-value muted" style="font-size:13px;margin-top:0.2rem">${cdEsc(tags)}</div>` : ''}
+              ${r.offering_label ? `<div class="cd-value muted" style="font-size:13px">→ ${cdEsc(r.offering_label)}</div>` : ''}
+            </div>
+            <span class="status-pill">${r.viewed_at ? 'viewed' : 'sent'}</span>
+          </div>`;
+      }).join('')}</div>`
+    : '<div class="cd-value muted" style="font-style:italic">No Tier 1 Signals readings linked to this client.</div>';
+  return `
+    <div style="margin-bottom:1.5rem">
+      <h4 class="cd-card-title">Tier 1 Signals History · ${rows.length}</h4>
+      ${body}
+    </div>`;
+}
+
+function cdTier2HistoryBlock(d) {
+  const rows = d.sig2 || [];
+  const body = rows.length
+    ? rows.map(r => {
+        const date = r.created_at ? new Date(r.created_at).toLocaleString() : '—';
+        let dom = '';
+        try {
+          const c = r.tier1_computed || {};
+          dom = [c.dominant_field, c.primary_subterrain].filter(Boolean).join(' · ');
+        } catch (_) {}
+        const sec = (label, txt) => txt
+          ? `<div style="margin-top:0.75rem"><div class="cd-label" style="margin-bottom:0.25rem">${label}</div><div class="cd-pre" style="white-space:pre-wrap">${cdEsc(txt)}</div></div>`
+          : '';
+        const hasText = r.field_walking_text || r.register_frequencies_text || r.threshold_asking_text;
+        return `
+          <div class="cd-list-row" style="display:block">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem">
+              <div>
+                <div class="name">Tier 2 Reading</div>
+                <div class="meta">${date}${dom ? ' · ' + cdEsc(dom) : ''}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.5rem">
+                <span class="status-pill">${r.viewed_at ? 'viewed' : (r.email_sent_at ? 'sent' : 'draft')}</span>
+                ${hasText ? `<button class="btn btn-outline btn-sm" onclick="cdToggleTier2Reading('${r.id}')">View</button>` : ''}
+              </div>
+            </div>
+            ${hasText ? `<div id="cd-t2-body-${r.id}" style="display:none;margin-top:0.5rem;padding-top:0.5rem;border-top:1px solid rgba(201,168,124,0.15)">
+              ${sec("The Field You're Walking", r.field_walking_text)}
+              ${sec('The Register and the Frequencies Surfacing', r.register_frequencies_text)}
+              ${sec('What the Threshold Is Asking', r.threshold_asking_text)}
+            </div>` : ''}
+          </div>`;
+      }).join('')
+    : '<div class="cd-value muted" style="font-style:italic">No Tier 2 readings linked to this client.</div>';
+  return `
+    <div style="margin-bottom:1.5rem">
+      <h4 class="cd-card-title">Tier 2 Readings · ${rows.length}</h4>
+      <div class="cd-list">${rows.length ? body : ''}</div>
+      ${rows.length ? '' : body}
+    </div>`;
+}
+
+function cdConvergenceEditorBlock(d) {
+  const conv = d.recentConv;
+  const sections = d.convSections || [];
+  if (!conv) {
+    return `
+      <div>
+        <h4 class="cd-card-title">Convergence Section Text</h4>
+        <div class="cd-value muted">No Convergence generated for this client yet.</div>
+      </div>`;
+  }
+  const convDate = conv.created_at ? new Date(conv.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'}) : '';
+  if (!sections.length) {
+    return `
+      <div>
+        <h4 class="cd-card-title">Convergence Section Text</h4>
+        <div class="cd-value muted">Most recent Convergence (${convDate}) has no sections yet.</div>
+      </div>`;
+  }
+  const blocks = sections.map(s => {
+    const heading = s.title || String(s.section_type || '').replace(/_/g,' ');
+    const txt = (s.final_text != null && s.final_text !== '') ? s.final_text : (s.ai_draft || '');
+    const edited = (s.final_text != null && s.final_text !== '' && s.final_text !== s.ai_draft);
+    return `
+      <div class="cd-row stack" style="padding:0.6rem 0;border-top:1px solid rgba(201,168,124,0.12)">
+        <div class="cd-label" style="display:flex;justify-content:space-between;align-items:baseline;gap:0.5rem">
+          <span style="text-transform:capitalize">${cdEsc(heading)}</span>
+          ${edited ? '<span class="status-pill" style="background:rgba(201,168,124,0.12);color:var(--gold)">edited</span>' : ''}
+        </div>
+        <textarea class="form-textarea" id="cd-cs-${s.id}" rows="5">${cdEsc(txt)}</textarea>
+        <div class="cd-actions" style="margin-top:0.5rem">
+          <button class="btn btn-gold btn-sm" onclick="cdSaveConvSection('${s.id}')">Save</button>
+          ${s.ai_draft ? `<button class="btn btn-outline btn-sm" onclick="cdRevertConvSection('${s.id}')" title="Restore the original AI draft into the editor">Revert to draft</button>` : ''}
+          <span class="cd-status" id="cd-cs-status-${s.id}"></span>
+        </div>
+      </div>`;
+  }).join('');
+  return `
+    <div>
+      <h4 class="cd-card-title">Convergence Section Text — ${cdEsc(conv.title || 'most recent')}</h4>
+      <p class="cd-value muted" style="font-size:13px;margin-bottom:0.75rem">${convDate} · editing <code>final_text</code>. The original generation is preserved in <code>ai_draft</code>; Revert restores it into the editor (Save to persist).</p>
+      ${blocks}
+    </div>`;
+}
+
+function cdSignalProfileCard(d) {
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title" style="border-bottom:1px solid rgba(201,168,124,0.2);padding-bottom:0.6rem;margin-bottom:1.25rem">Signal Profile</h3>
+      ${cdChartPlacementsBlock(d)}
+      ${cdGeneKeysBlock(d)}
+      ${cdTier1HistoryBlock(d)}
+      ${cdTier2HistoryBlock(d)}
+      ${cdConvergenceEditorBlock(d)}
+    </div>`;
+}
+
+async function cdRecomputeChart() {
+  const status = document.getElementById('cd-recompute-status');
+  const b = currentDetailData && currentDetailData.birth;
+  if (!b || !currentDetailClient) return;
+  if (!confirm('Recompute this client\'s chart?\n\nThis overwrites chart_planets, chart_human_design, and chart_gene_keys for this client from the birth data on file.')) return;
+  if (status) status.textContent = 'computing…';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/compute-chart`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        client_id:  currentDetailClient,
+        birth_date: b.birth_date,
+        birth_time: b.birth_time,
+        birth_place: b.birth_place,
+        latitude:   b.latitude,
+        longitude:  b.longitude,
+        timezone:   b.timezone
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || data.message || `HTTP ${res.status}`);
+
+    // Chart (Sun..Pluto, Nodes, Angles, HD, GK) done. Now Chiron + the twelve
+    // minor bodies + Black Moon Lilith via compute-asteroids (JPL Horizons,
+    // sequential — takes ~10s). Asteroid failure is non-fatal: the core chart
+    // is already saved, and scoring tolerates missing minor bodies.
+    if (status) status.textContent = 'chart done · computing asteroids (~10s)…';
+    try {
+      const aRes = await fetch(`${SUPABASE_URL}/functions/v1/compute-asteroids`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ client_id: currentDetailClient })
+      });
+      const aData = await aRes.json().catch(() => ({}));
+      if (!aRes.ok) throw new Error(aData.error || aData.message || `HTTP ${aRes.status}`);
+      const note = (aData.failed && aData.failed.length)
+        ? ` · ${aData.failed.length} body${aData.failed.length === 1 ? '' : 's'} skipped`
+        : '';
+      if (status) status.textContent = `recomputed · ${aData.inserted ?? 0} minor bodies${note} · ${new Date().toLocaleTimeString()}`;
+    } catch (ae) {
+      if (status) status.textContent = 'chart recomputed · asteroids failed: ' + ae.message;
+    }
+    loadClientDetail();
+  } catch (e) {
+    if (status) status.textContent = 'failed: ' + e.message;
+  }
+}
+
+async function cdSaveConvSection(id) {
+  const ta = document.getElementById('cd-cs-' + id);
+  const status = document.getElementById('cd-cs-status-' + id);
+  if (!ta) return;
+  if (status) status.textContent = 'saving…';
+  try {
+    const ok = await restPatch('convergence_sections', id, {
+      final_text: ta.value,
+      updated_at: new Date().toISOString()
+    });
+    if (!ok) throw new Error('save failed');
+    const row = (currentDetailData && currentDetailData.convSections || []).find(s => s.id === id);
+    if (row) row.final_text = ta.value;
+    if (status) status.textContent = 'saved · ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    if (status) status.textContent = 'failed: ' + e.message;
+  }
+}
+
+function cdRevertConvSection(id) {
+  const row = (currentDetailData && currentDetailData.convSections || []).find(s => s.id === id);
+  if (!row) return;
+  if (!confirm('Restore the original AI draft into the editor? Save afterward to overwrite your edits.')) return;
+  const ta = document.getElementById('cd-cs-' + id);
+  if (ta) ta.value = row.ai_draft || '';
+  const status = document.getElementById('cd-cs-status-' + id);
+  if (status) status.textContent = 'draft restored — Save to persist';
+}
+
+function cdToggleTier2Reading(id) {
+  const el = document.getElementById('cd-t2-body-' + id);
+  if (el) el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
 }
 
 function cdAdminNotesCard(d) {
