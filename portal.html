@@ -167,7 +167,7 @@ body::before {
 
 /* Author-final field locks — prevent Augment AI from rewriting */
 .field-lock {
-  font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 400;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
   letter-spacing: 0.1em; text-transform: uppercase;
   padding: 2px 8px; margin-left: 0.5rem; border-radius: 8px;
   background: transparent; border: 1px solid var(--border);
@@ -260,7 +260,7 @@ body::before {
   background: var(--accent);
 }
 .sidebar-nav-item .ext-arrow {
-  margin-left: auto; font-size: 12px; opacity: 0.88;
+  margin-left: auto; font-size: 15px; opacity: 0.88;
 }
 
 /* ── Main content ── */
@@ -428,7 +428,7 @@ body::before {
   padding: 0.85rem 1rem;
 }
 .ancestor-row.ca-expandable .ca-chevron {
-  color: var(--text-faint); font-size: 14px;
+  color: var(--text-faint); font-size: 15px;
   transition: transform 0.2s; flex-shrink: 0;
 }
 .ancestor-row.ca-expandable.open .ca-chevron { transform: rotate(90deg); color: var(--gold); }
@@ -739,7 +739,7 @@ body::before {
 }
 .mode-btn {
   flex: 1 1 auto; min-width: 150px;
-  font-family: 'Jost', sans-serif; font-size: 14px;
+  font-family: 'Jost', sans-serif; font-size: 15px;
   font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase;
   padding: 10px 16px; border: none; background: transparent;
   color: var(--text-dim); cursor: pointer; transition: all 0.2s;
@@ -938,7 +938,7 @@ body::before {
 }
 .tier-ref.open .tier-ref-head { border-bottom-color: var(--border); }
 .tier-ref-head:hover { background: var(--surface-2); }
-.tier-ref-title { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
+.tier-ref-title { font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
 .tier-ref-caret { color: var(--text-dim); transition: transform 0.2s; font-size: 18px; }
 .tier-ref.open .tier-ref-caret { transform: rotate(90deg); }
 .tier-ref-body { display: none; padding: 1.25rem 1.5rem 1.5rem; font-size: 15px; line-height: 1.55; color: var(--text-secondary); }
@@ -950,19 +950,19 @@ body::before {
 }
 .tier-ref-body h4:first-child { margin-top: 0; }
 .tier-ref-body h4 .tier-meta {
-  font-family: 'Jost'; font-size: 12px; color: var(--gold);
+  font-family: 'Jost'; font-size: 15px; color: var(--gold);
   letter-spacing: 0.1em; text-transform: uppercase;
   margin-left: 0.5rem; font-weight: 400;
 }
 .tier-ref-body p { margin: 0.35rem 0 0.75rem; }
 .tier-ref-body code {
   background: var(--surface-2); padding: 1px 6px; border-radius: 4px;
-  font-family: 'Jost', monospace; font-size: 13px; color: var(--gold);
+  font-family: 'Jost', monospace; font-size: 15px; color: var(--gold);
 }
 .tier-ref-body .footnote {
   margin-top: 1.25rem; padding-top: 1rem;
   border-top: 1px solid var(--border);
-  font-size: 13px; color: var(--text-faint); font-style: italic;
+  font-size: 15px; color: var(--text-faint); font-style: italic;
 }
 </style>
 </head>
@@ -986,7 +986,7 @@ body::before {
     <button class="btn-primary" id="btn-login" onclick="handleLogin()">Enter →</button>
     <div class="login-error" id="login-error"></div>
     <div style="text-align:center;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border)">
-      <button id="btn-magic-link" onclick="handleMagicLink()" style="background:transparent;border:none;color:var(--gold-dim);font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;letter-spacing:0.06em;padding:0">
+      <button id="btn-magic-link" onclick="handleMagicLink()" style="background:transparent;border:none;color:var(--gold-dim);font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;letter-spacing:0.06em;padding:0">
         No password? Send me a magic link →
       </button>
     </div>
@@ -1285,7 +1285,7 @@ body::before {
 
         <!-- ═══ GENERATE MODE ═══ -->
         <div id="ar-generate-mode">
-          <div id="ar-promote-banner" style="display:none;max-width:720px;margin-bottom:1rem;padding:0.75rem 1rem;border-radius:6px;border:1px solid rgba(201,168,124,0.4);background:rgba(201,168,124,0.06);color:var(--gold);font-size:14px;line-height:1.5"></div>
+          <div id="ar-promote-banner" style="display:none;max-width:720px;margin-bottom:1rem;padding:0.75rem 1rem;border-radius:6px;border:1px solid rgba(201,168,124,0.4);background:rgba(201,168,124,0.06);color:var(--gold);font-size:15px;line-height:1.5"></div>
           <p class="panel-sub" style="margin-bottom:1.5rem">Enter a name and context. The AI verifies identity, determines catalog vs weaving status, and generates the full record. Review and edit all fields before confirming to the database.</p>
 
           <div class="card" id="ancestor-research-form" style="max-width:720px;margin-bottom:2rem">
@@ -1324,7 +1324,7 @@ body::before {
                 <span class="upload-label">Click to attach PDFs</span>
               </div>
               <div id="ar-pdf-list" style="margin-top:0.5rem"></div>
-              <div id="ar-pdf-msg" style="margin-top:0.4rem;font-size:14px"></div>
+              <div id="ar-pdf-msg" style="margin-top:0.4rem;font-size:15px"></div>
             </div>
             <button class="btn btn-gold" id="ar-generate-btn" onclick="generateAncestorAI()">✦ Generate Record</button>
             <div id="ar-form-msg" style="margin-top:0.75rem"></div>
@@ -1374,7 +1374,7 @@ body::before {
                 <span class="upload-label">Click to attach PDFs</span>
               </div>
               <div id="aug-pdf-list" style="margin-top:0.5rem"></div>
-              <div id="aug-pdf-msg" style="margin-top:0.4rem;font-size:14px"></div>
+              <div id="aug-pdf-msg" style="margin-top:0.4rem;font-size:15px"></div>
             </div>
             <div id="aug-also-log" style="display:none;margin-bottom:1rem;padding:0.75rem 0.875rem;border:1px dashed var(--border);border-radius:6px;background:rgba(201,168,124,0.02)">
               <label style="display:flex;gap:0.5rem;align-items:center;font-size:15px;cursor:pointer;margin-bottom:0.5rem">
@@ -2229,9 +2229,9 @@ function cdLifecycleCard(d) {
         <div class="cd-value">${cdEsc(c.entry_offering) || '—'}</div></div>
       <div class="cd-row"><div class="cd-label">Submitted at</div>
         <div class="cd-value">${c.intake_submitted_at ? new Date(c.intake_submitted_at).toLocaleString() : '—'}</div></div>
-      <div class="cd-row stack"><div class="cd-label">Client tier <span style="opacity:0.6;font-weight:400">(what they see in the portal)</span></div>
+      <div class="cd-row stack"><div class="cd-label">Client tier <span style="opacity:0.88;font-weight:400">(what they see in the portal)</span></div>
         <select class="form-select" id="cd-f-tier">${tierOpts}</select></div>
-      <div class="cd-row stack"><div class="cd-label">Relationship <span style="opacity:0.6;font-weight:400">(how they came by access)</span></div>
+      <div class="cd-row stack"><div class="cd-label">Relationship <span style="opacity:0.88;font-weight:400">(how they came by access)</span></div>
         <select class="form-select" id="cd-f-relationship">${relOpts}</select></div>
       <div class="cd-row stack"><div class="cd-label">Intake status</div>
         <select class="form-select" id="cd-f-status">${statusOpts}</select></div>
@@ -2268,7 +2268,7 @@ function cdAccessCard(d) {
   return `
     <div class="cd-card full" style="margin-bottom:1.25rem">
       <h3 class="cd-card-title">Portal Access</h3>
-      <p class="cd-value muted" style="margin-bottom:1rem; font-size:14px">
+      <p class="cd-value muted" style="margin-bottom:1rem; font-size:15px">
         Tiers describe products. These checkboxes decide what this client actually sees in the portal. Defaults are conservative — check only what they should access.
       </p>
       <div class="access-grid">
@@ -2372,7 +2372,7 @@ function cdChartSummaryCard(d) {
     const fStr = f ? `Field ${f.number} · ${f.name}` : '';
     return `<div class="cd-row stack"><div class="cd-label">${label}</div>
       <div class="cd-value">GK ${num}.${line} · <i>${arc}</i></div>
-      ${fStr ? `<div class="cd-value muted" style="font-size:13px">${fStr}</div>` : ''}</div>`;
+      ${fStr ? `<div class="cd-value muted" style="font-size:15px">${fStr}</div>` : ''}</div>`;
   };
   return `
     <div class="cd-card">
@@ -2438,7 +2438,7 @@ function cdResonanceCard(d) {
       <div style="flex:1">
         <div class="name">${cdEsc(t.name || '—')}</div>
         ${meta ? `<div class="meta">${meta}</div>` : ''}
-        ${x.resonance_note ? `<div style="font-size:14px;color:var(--text-dim);font-style:italic;margin-top:0.4rem;padding:0.4rem 0.65rem;border-left:2px solid rgba(201,168,124,0.25);background:rgba(201,168,124,0.03)">${cdEsc(x.resonance_note)}</div>` : ''}
+        ${x.resonance_note ? `<div style="font-size:15px;color:var(--text-dim);font-style:italic;margin-top:0.4rem;padding:0.4rem 0.65rem;border-left:2px solid rgba(201,168,124,0.25);background:rgba(201,168,124,0.03)">${cdEsc(x.resonance_note)}</div>` : ''}
       </div>
       <span class="status-pill">${cdEsc(x.strength || 'noted')}</span>
       <button class="btn btn-outline btn-sm" onclick="cdRemoveResonance('${cdEsc(x.id)}')" title="Remove this resonance" style="color:var(--red);border-color:rgba(192,112,96,0.3);margin-left:0.5rem">Remove</button>
@@ -2448,10 +2448,10 @@ function cdResonanceCard(d) {
   return `
     <div class="cd-card full" style="margin-bottom:1.25rem">
       <h3 class="cd-card-title">Mythic Resonance · ${r.length} figure${r.length===1?'':'s'}</h3>
-      <p style="font-size:14px;color:var(--text-faint);margin-bottom:1rem;line-height:1.5">Chosen archetypal resonance — figures the descendant has named as conscious recognition. Distinct from blood lineage; feeds the Convergence as a parallel input.</p>
+      <p style="font-size:15px;color:var(--text-faint);margin-bottom:1rem;line-height:1.5">Chosen archetypal resonance — figures the descendant has named as conscious recognition. Distinct from blood lineage; feeds the Convergence as a parallel input.</p>
       <div class="cd-list" style="margin-bottom:1rem">${rows}</div>
       ${all.length === 0
-        ? `<div style="font-size:14px;color:var(--text-faint);font-style:italic">No tapestry archetypes have been authored yet. Create them in the <a href="#tapestry" onclick="showPanel('panel-tapestry');loadTapestryManager();return false;" style="color:var(--gold);text-decoration:underline">Tapestry</a> panel.</div>`
+        ? `<div style="font-size:15px;color:var(--text-faint);font-style:italic">No tapestry archetypes have been authored yet. Create them in the <a href="#tapestry" onclick="showPanel('panel-tapestry');loadTapestryManager();return false;" style="color:var(--gold);text-decoration:underline">Tapestry</a> panel.</div>`
         : `<div style="display:grid;grid-template-columns:1fr 140px 110px;gap:0.5rem;margin-bottom:0.5rem">
             <select class="form-select" id="cd-res-archetype">
               <option value="">— Add a resonance —</option>
@@ -2465,7 +2465,7 @@ function cdResonanceCard(d) {
             <button class="btn btn-gold btn-sm" onclick="cdAddResonance()">+ Assign</button>
           </div>
           <textarea class="form-textarea" id="cd-res-note" rows="2" placeholder="Optional resonance note — the descendant's words about why this figure resonates"></textarea>
-          <div id="cd-res-msg" style="margin-top:0.4rem;font-size:14px"></div>`}
+          <div id="cd-res-msg" style="margin-top:0.4rem;font-size:15px"></div>`}
     </div>`;
 }
 
@@ -3257,17 +3257,17 @@ function renderTapestryList() {
   const el = document.getElementById('tapestry-list');
   if (!el) return;
   if (!tapestryArchetypes.length) {
-    el.innerHTML = '<div style="font-size:14px;color:var(--text-faint);font-style:italic;padding:0.75rem 0">No archetypes yet.</div>';
+    el.innerHTML = '<div style="font-size:15px;color:var(--text-faint);font-style:italic;padding:0.75rem 0">No archetypes yet.</div>';
     return;
   }
   el.innerHTML = tapestryArchetypes.map(t => `
     <div onclick="editTapestryArchetype('${t.id}')" style="cursor:pointer;padding:0.65rem 0.875rem;border:1px solid ${t.id === tapestryEditingId ? 'var(--gold-dim)' : 'var(--border)'};border-radius:6px;margin-bottom:0.4rem;background:${t.id === tapestryEditingId ? 'var(--accent)' : 'transparent'};transition:all 0.15s">
       <div style="display:flex;align-items:center;gap:0.5rem">
         <div style="font-size:15px;font-weight:500;color:var(--text);flex:1">${esc(t.name)}</div>
-        ${t.draft ? `<span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#c98870;background:rgba(168,110,74,0.12);border:1px solid rgba(168,110,74,0.35);padding:1px 6px;border-radius:3px">Draft</span>` : ''}
+        ${t.draft ? `<span style="font-size:15px;letter-spacing:0.12em;text-transform:uppercase;color:#c98870;background:rgba(168,110,74,0.12);border:1px solid rgba(168,110,74,0.35);padding:1px 6px;border-radius:3px">Draft</span>` : ''}
       </div>
-      ${t.tradition ? `<div style="font-size:13px;color:var(--text-faint);margin-top:0.15rem">${esc(t.tradition)}</div>` : ''}
-      ${t.epithet ? `<div style="font-size:13px;color:var(--gold);font-style:italic;margin-top:0.15rem">${esc(t.epithet)}</div>` : ''}
+      ${t.tradition ? `<div style="font-size:15px;color:var(--text-faint);margin-top:0.15rem">${esc(t.tradition)}</div>` : ''}
+      ${t.epithet ? `<div style="font-size:15px;color:var(--gold);font-style:italic;margin-top:0.15rem">${esc(t.epithet)}</div>` : ''}
     </div>`).join('');
 }
 
@@ -3309,7 +3309,7 @@ function renderTapestryEditor(t, isNew) {
     <!-- Draft with AI -->
     <div class="card" style="margin-bottom:1.5rem;border:1.5px dashed rgba(201,168,124,0.45);background:rgba(201,168,124,0.06)">
       <div class="editor-section-title">AI Re-draft Inputs <span style="color:var(--gold);font-size:15px;letter-spacing:0.1em">PROMPT FIELDS · NOT THE RECORD</span></div>
-      <p style="font-size:14px;color:var(--amber);margin-bottom:1rem;line-height:1.6"><strong>These fields configure the AI re-draft only.</strong> They do not save to the archetype. To edit the record itself, scroll down to the <em>Edit archetype</em> card. Clicking <em>✦ Draft Profile</em> below will overwrite the editor fields with a fresh AI draft.</p>
+      <p style="font-size:15px;color:var(--amber);margin-bottom:1rem;line-height:1.6"><strong>These fields configure the AI re-draft only.</strong> They do not save to the archetype. To edit the record itself, scroll down to the <em>Edit archetype</em> card. Clicking <em>✦ Draft Profile</em> below will overwrite the editor fields with a fresh AI draft.</p>
       <div class="editor-grid-2" style="margin-bottom:1rem">
         <div class="form-group" style="margin-bottom:0">
           <label class="form-label" style="color:var(--gold)">AI prompt — Name <span style="color:var(--red)">*</span></label>
@@ -3335,10 +3335,10 @@ function renderTapestryEditor(t, isNew) {
           <span class="upload-label">Click to attach PDFs</span>
         </div>
         <div id="tap-pdf-list" style="margin-top:0.5rem"></div>
-        <div id="tap-pdf-msg" style="margin-top:0.4rem;font-size:14px"></div>
+        <div id="tap-pdf-msg" style="margin-top:0.4rem;font-size:15px"></div>
       </div>
       <button class="btn btn-gold" id="tap-ai-btn" onclick="draftTapestryWithAI()">✦ Draft Profile</button>
-      <div id="tap-ai-msg" style="margin-top:0.75rem;font-size:14px"></div>
+      <div id="tap-ai-msg" style="margin-top:0.75rem;font-size:15px"></div>
     </div>
 
     <!-- Identity (the actual editable record) -->
@@ -3399,7 +3399,7 @@ function renderTapestryEditor(t, isNew) {
     <!-- Cultural Protocol -->
     <div class="card" style="margin-bottom:1.5rem;border-color:rgba(168,110,74,0.30);background:rgba(168,110,74,0.04)">
       <div class="editor-section-title">Cultural Protocol <span style="color:#a86e4a;font-size:15px;letter-spacing:0.1em">LIVING-TRADITION ACKNOWLEDGMENT</span></div>
-      <p style="font-size:14px;color:var(--text-faint);margin-bottom:1rem;line-height:1.6">How this figure is engaged within their living tradition: protocols for invocation, devotional context, lineage requirements, and orientations of respect for working with them outside formal initiation. The point is not warning-label boilerplate — it is to make a practitioner <em>more capable</em> of engaging the figure with knowledge.</p>
+      <p style="font-size:15px;color:var(--text-faint);margin-bottom:1rem;line-height:1.6">How this figure is engaged within their living tradition: protocols for invocation, devotional context, lineage requirements, and orientations of respect for working with them outside formal initiation. The point is not warning-label boilerplate — it is to make a practitioner <em>more capable</em> of engaging the figure with knowledge.</p>
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Protocol &amp; Engagement <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">180–260 words · status of tradition, forms of invocation, lineage requirements, appropriate orientation</span></label>
         <textarea class="form-textarea" id="tap-cultural-protocol" rows="9">${esc(t.cultural_protocol)}</textarea>
@@ -3409,7 +3409,7 @@ function renderTapestryEditor(t, isNew) {
     <!-- Image & Period -->
     <div class="card" style="margin-bottom:1.5rem">
       <div class="editor-section-title">Image &amp; Period</div>
-      <p style="font-size:14px;color:var(--text-faint);margin-bottom:1rem;line-height:1.5">Public-domain artwork as the figure's primary image. AI provides research leads (titles, collections, where to look); you source the URL and confirm attribution.</p>
+      <p style="font-size:15px;color:var(--text-faint);margin-bottom:1rem;line-height:1.5">Public-domain artwork as the figure's primary image. AI provides research leads (titles, collections, where to look); you source the URL and confirm attribution.</p>
       <div class="editor-grid-2" style="margin-bottom:1rem">
         <div class="form-group" style="margin-bottom:0">
           <label class="form-label">Image URL <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">Wikimedia Commons direct link or Supabase Storage URL</span></label>
@@ -3559,18 +3559,18 @@ function renderImageSuggestions(suggestions) {
   if (!el) return;
   if (!lastImageSuggestions.length) { el.innerHTML = ''; return; }
   el.innerHTML = `
-    <div style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem">AI image leads — research these, then paste the URL above</div>
+    <div style="font-size:15px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem">AI image leads — research these, then paste the URL above</div>
     ${lastImageSuggestions.map((s, i) => `
       <div style="border:1px solid var(--border);border-radius:6px;padding:0.65rem 0.875rem;margin-bottom:0.5rem;background:rgba(201,168,124,0.03)">
         <div style="display:flex;justify-content:space-between;gap:0.5rem;align-items:flex-start;margin-bottom:0.4rem">
           <div style="flex:1">
-            <div style="font-size:14px;font-weight:500;color:var(--text)">${esc(s.title || 'Untitled work')}</div>
-            <div style="font-size:13px;color:var(--text-faint);margin-top:0.15rem">${[s.period, s.collection].filter(Boolean).map(esc).join(' · ')}</div>
+            <div style="font-size:15px;font-weight:500;color:var(--text)">${esc(s.title || 'Untitled work')}</div>
+            <div style="font-size:15px;color:var(--text-faint);margin-top:0.15rem">${[s.period, s.collection].filter(Boolean).map(esc).join(' · ')}</div>
           </div>
           <button class="btn btn-outline btn-sm" onclick="useImageSuggestion(${i})" title="Pre-fill the attribution and alt fields with this lead. You still need to source and paste the URL.">Use as lead</button>
         </div>
-        ${s.where_to_find ? `<div style="font-size:13px;color:var(--text-dim);margin-bottom:0.3rem"><strong style="font-weight:500;color:var(--text-faint)">Where to find:</strong> ${esc(s.where_to_find)}</div>` : ''}
-        ${s.why ? `<div style="font-size:13px;color:var(--text-dim);font-style:italic;line-height:1.5">${esc(s.why)}</div>` : ''}
+        ${s.where_to_find ? `<div style="font-size:15px;color:var(--text-dim);margin-bottom:0.3rem"><strong style="font-weight:500;color:var(--text-faint)">Where to find:</strong> ${esc(s.where_to_find)}</div>` : ''}
+        ${s.why ? `<div style="font-size:15px;color:var(--text-dim);font-style:italic;line-height:1.5">${esc(s.why)}</div>` : ''}
       </div>`).join('')}
   `;
 }
@@ -3737,7 +3737,7 @@ async function saveTapestryArchetype() {
         if (sent !== got) mismatches.push(`${k} (sent "${sent.slice(0,40)}…", got "${got.slice(0,40)}…")`);
       }
       if (mismatches.length) {
-        mismatchNote = ` <span style="color:var(--amber);font-size:14px">⚠ ${mismatches.length} field(s) did not persist as sent: ${mismatches.join('; ')}</span>`;
+        mismatchNote = ` <span style="color:var(--amber);font-size:15px">⚠ ${mismatches.length} field(s) did not persist as sent: ${mismatches.join('; ')}</span>`;
       }
       // Update the in-memory row so the editor re-renders from the fresh DB state, not stale cache
       const idx = tapestryArchetypes.findIndex(x => x.id === id);
@@ -3897,7 +3897,7 @@ async function showProspectDetail(prospectId) {
 
   // Pretty-print source_data
   const sourceDataHtml = (p.source_data && Object.keys(p.source_data).length)
-    ? `<pre style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1rem;font-size:13px;color:var(--text-dim);overflow:auto;max-height:280px;font-family:'Jost',monospace">${esc(JSON.stringify(p.source_data, null, 2))}</pre>`
+    ? `<pre style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1rem;font-size:15px;color:var(--text-dim);overflow:auto;max-height:280px;font-family:'Jost',monospace">${esc(JSON.stringify(p.source_data, null, 2))}</pre>`
     : '<div class="cd-value muted">No source-specific data on file.</div>';
 
   document.getElementById('prospect-detail-content').innerHTML = `
@@ -3935,7 +3935,7 @@ async function showProspectDetail(prospectId) {
           <div class="cd-value">${fmtDateTime(p.last_activity)}</div></div>
         <div class="cd-row"><div class="cd-label">Status</div>
           <div class="cd-value">${isConverted ? 'Converted to client' : (isArchived ? 'Archived' : 'Active')}</div></div>
-        ${isConverted ? `<div class="cd-row"><div class="cd-label">Client ID</div><div class="cd-value" style="font-family:monospace;font-size:13px">${esc(p.converted_to_client_id)}</div></div>` : ''}
+        ${isConverted ? `<div class="cd-row"><div class="cd-label">Client ID</div><div class="cd-value" style="font-family:monospace;font-size:15px">${esc(p.converted_to_client_id)}</div></div>` : ''}
       </div>
     </div>
 
@@ -4090,7 +4090,7 @@ async function loadSignalReading() {
     ? `<div class="cd-card full" style="margin-bottom:1.25rem">
         <h3 class="cd-card-title">Frequency Tags</h3>
         <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.85rem">
-          ${reading.tags.map(t => `<span style="font-size:14px;padding:5px 12px;border-radius:14px;background:var(--accent);border:1px solid var(--border);color:var(--gold)">${esc(t)}</span>`).join('')}
+          ${reading.tags.map(t => `<span style="font-size:15px;padding:5px 12px;border-radius:14px;background:var(--accent);border:1px solid var(--border);color:var(--gold)">${esc(t)}</span>`).join('')}
         </div>
       </div>`
     : '';
@@ -4105,7 +4105,7 @@ async function loadSignalReading() {
     : '';
 
   const takenAt = reading.taken_at
-    ? `<div style="font-size:14px;color:var(--text-dim);margin-bottom:1.25rem">Taken ${new Date(reading.taken_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}${reading.tier ? ' · Tier ' + reading.tier : ''}</div>`
+    ? `<div style="font-size:15px;color:var(--text-dim);margin-bottom:1.25rem">Taken ${new Date(reading.taken_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}${reading.tier ? ' · Tier ' + reading.tier : ''}</div>`
     : '';
 
   container.innerHTML = `
@@ -4114,7 +4114,7 @@ async function loadSignalReading() {
     ${tagsHtml}
     ${readingHtml}
     <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center">
-      <a href="https://christypaxtonwade.com/signals" target="_blank" class="btn btn-outline" style="font-size:14px">Retake the quiz ↗</a>
+      <a href="https://christypaxtonwade.com/signals" target="_blank" class="btn btn-outline" style="font-size:15px">Retake the quiz ↗</a>
     </div>
   `;
 }
@@ -4348,7 +4348,7 @@ function renderMyCatalog(mode) {
   if (!listEl) return;
   listEl.innerHTML = rows.map(a => {
     const freqs = (freqMap[a.id] || []).slice(0, 4)
-      .map(f => `<span style="font-size:14px;padding:2px 7px;border-radius:8px;background:var(--accent);border:1px solid var(--border);color:var(--gold);white-space:nowrap">${esc(f)}</span>`).join('');
+      .map(f => `<span style="font-size:15px;padding:2px 7px;border-radius:8px;background:var(--accent);border:1px solid var(--border);color:var(--gold);white-space:nowrap">${esc(f)}</span>`).join('');
     const preview = (a.catalog_preview || a.layer_thread || '').slice(0, 180);
     return `
       <div class="ancestor-row" style="display:block;padding:1rem 1.25rem">
@@ -4394,7 +4394,7 @@ async function loadMyTapestry() {
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem">
           <div>
             <div style="font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:300;font-style:italic;color:var(--text)">${esc(arch.name||'(unnamed)')}</div>
-            ${arch.tradition ? `<div style="font-size:14px;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold-dim);margin-top:0.2rem">${esc(arch.tradition)}</div>` : ''}
+            ${arch.tradition ? `<div style="font-size:15px;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold-dim);margin-top:0.2rem">${esc(arch.tradition)}</div>` : ''}
           </div>
           ${r.strength ? `<span class="client-badge" style="background:var(--accent);color:var(--gold)">${esc(r.strength)}</span>` : ''}
         </div>
@@ -4954,7 +4954,7 @@ async function confirmAncestorToDatabase() {
       tail = clientId ? ' and assigned to client' : '';
     }
     const pdfTail = pdfsToLog ? ` · ${pdfsToLog} PDF${pdfsToLog===1?'':'s'} logged to findings` : '';
-    const note = isAugment ? ' <span style="color:var(--text-faint);font-size:14px">(client weaving copies remain unchanged — re-assign or edit individually if you want them refreshed)</span>' : '';
+    const note = isAugment ? ' <span style="color:var(--text-faint);font-size:15px">(client weaving copies remain unchanged — re-assign or edit individually if you want them refreshed)</span>' : '';
     msgEl.innerHTML = `<span style="color:var(--teal)">✓ ${esc(payload.name)} ${verb}${tail}${pdfTail}.</span>${note}`;
     // Clear contextual state so next Confirm starts clean
     if (isAugment) { arAugmentExistingId = null; arAugmentExistingRecord = null; }
@@ -5136,15 +5136,15 @@ async function populateTriageList() {
         <div style="display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;margin-bottom:0.5rem">
           <div style="flex:1">
             <div style="font-size:16px;font-weight:500;color:var(--text);margin-bottom:0.15rem">${esc(r.name)}</div>
-            <div style="font-size:13px;color:var(--text-faint)">From <strong style="font-weight:500;color:var(--gold)">${clientName}</strong>${clientMeta ? ' · ' + clientMeta : ''}</div>
+            <div style="font-size:15px;color:var(--text-faint)">From <strong style="font-weight:500;color:var(--gold)">${clientName}</strong>${clientMeta ? ' · ' + clientMeta : ''}</div>
           </div>
           <div style="display:flex;gap:0.4rem;align-items:center">
             <button class="btn btn-gold btn-sm" onclick="promoteStub('${r.id}')">Promote →</button>
             <button class="btn btn-outline btn-sm" onclick="deleteIntakeStub('${r.id}')" title="Dismiss this intake stub" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Delete</button>
           </div>
         </div>
-        ${ancestorMeta ? `<div style="font-size:14px;color:var(--text-dim);margin-bottom:0.4rem">${ancestorMeta}</div>` : ''}
-        ${notesPreview ? `<div style="font-size:14px;color:var(--text-dim);font-style:italic;line-height:1.5;padding:0.5rem 0.75rem;border-left:2px solid rgba(201,168,124,0.25);background:rgba(201,168,124,0.03)">${notesPreview}</div>` : ''}
+        ${ancestorMeta ? `<div style="font-size:15px;color:var(--text-dim);margin-bottom:0.4rem">${ancestorMeta}</div>` : ''}
+        ${notesPreview ? `<div style="font-size:15px;color:var(--text-dim);font-style:italic;line-height:1.5;padding:0.5rem 0.75rem;border-left:2px solid rgba(201,168,124,0.25);background:rgba(201,168,124,0.03)">${notesPreview}</div>` : ''}
       </div>`;
     }).join('');
   } catch (err) {
@@ -5281,14 +5281,14 @@ async function loadAncestorForAugment() {
   const guidance    = (ancestor.editorial_guidance || '').trim();
 
   const lockedRow = lockedList.length
-    ? `<div style="margin-top:0.5rem;padding:0.5rem 0.75rem;border-radius:6px;background:rgba(201,168,124,0.06);border:1px solid rgba(201,168,124,0.25);font-size:14px;color:var(--gold);line-height:1.5">
+    ? `<div style="margin-top:0.5rem;padding:0.5rem 0.75rem;border-radius:6px;background:rgba(201,168,124,0.06);border:1px solid rgba(201,168,124,0.25);font-size:15px;color:var(--gold);line-height:1.5">
         <strong style="font-weight:500">${lockedList.length} author-final field${lockedList.length===1?'':'s'} locked:</strong> ${lockedList.map(esc).join(', ')}
-        <div style="font-size:13px;color:var(--text-dim);margin-top:0.25rem">The AI will be told to leave these unchanged. Defense-in-depth: locked fields are also force-restored after the AI returns.</div>
+        <div style="font-size:15px;color:var(--text-dim);margin-top:0.25rem">The AI will be told to leave these unchanged. Defense-in-depth: locked fields are also force-restored after the AI returns.</div>
       </div>` : '';
 
   const guidanceRow = guidance
-    ? `<div style="margin-top:0.5rem;padding:0.5rem 0.75rem;border-radius:6px;background:rgba(201,168,124,0.04);border:1px dashed var(--border);font-size:14px;color:var(--text-dim);line-height:1.5">
-        <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.25rem">Standing guidance to AI</div>
+    ? `<div style="margin-top:0.5rem;padding:0.5rem 0.75rem;border-radius:6px;background:rgba(201,168,124,0.04);border:1px dashed var(--border);font-size:15px;color:var(--text-dim);line-height:1.5">
+        <div style="font-size:15px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.25rem">Standing guidance to AI</div>
         ${esc(guidance)}
       </div>` : '';
 
@@ -5296,13 +5296,13 @@ async function loadAncestorForAugment() {
   summary.innerHTML = `
     <div style="display:flex;gap:0.75rem;align-items:baseline;margin-bottom:0.5rem">
       <span style="font-size:18px;font-weight:500;color:var(--text)">${esc(ancestor.name)}</span>
-      ${ancestor.epithet ? `<span style="font-size:14px;color:var(--gold);font-style:italic">${esc(ancestor.epithet)}</span>` : ''}
+      ${ancestor.epithet ? `<span style="font-size:15px;color:var(--gold);font-style:italic">${esc(ancestor.epithet)}</span>` : ''}
     </div>
-    <div style="font-size:14px;color:var(--text-dim);margin-bottom:0.5rem">
+    <div style="font-size:15px;color:var(--text-dim);margin-bottom:0.5rem">
       ${[ancestor.dates, ancestor.location, ancestor.era].filter(Boolean).map(esc).join(' · ')}
-      <span style="margin-left:0.5rem;padding:1px 7px;border-radius:9px;background:rgba(201,168,124,0.08);border:1px solid rgba(201,168,124,0.2);color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;font-size:13px">${esc(ancestor.status || 'catalog')}</span>
+      <span style="margin-left:0.5rem;padding:1px 7px;border-radius:9px;background:rgba(201,168,124,0.08);border:1px solid rgba(201,168,124,0.2);color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;font-size:15px">${esc(ancestor.status || 'catalog')}</span>
     </div>
-    <div style="font-size:14px;color:var(--text-faint)">
+    <div style="font-size:15px;color:var(--text-faint)">
       ${tagList.length} frequency tag${tagList.length===1?'':'s'} · ${promptCount} open research prompt${promptCount===1?'':'s'} · sigil ${ancestor.sigil_svg ? 'present' : 'missing'}
     </div>
     ${lockedRow}
@@ -5813,14 +5813,14 @@ function renderFindingsList() {
   el.innerHTML = editorFindings.map(f => {
     const date = f.finding_date ? new Date(f.finding_date).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—';
     const typeBadge = f.source_type
-      ? `<span style="font-size:13px;padding:1px 7px;border-radius:9px;background:rgba(201,168,124,0.08);border:1px solid rgba(201,168,124,0.2);color:var(--gold);text-transform:uppercase;letter-spacing:0.06em">${esc(f.source_type)}</span>`
+      ? `<span style="font-size:15px;padding:1px 7px;border-radius:9px;background:rgba(201,168,124,0.08);border:1px solid rgba(201,168,124,0.2);color:var(--gold);text-transform:uppercase;letter-spacing:0.06em">${esc(f.source_type)}</span>`
       : '';
     const link = f.url
-      ? `<a href="${esc(f.url)}" target="_blank" rel="noopener" style="color:var(--gold);font-size:14px;text-decoration:underline">scan/source ↗</a>`
+      ? `<a href="${esc(f.url)}" target="_blank" rel="noopener" style="color:var(--gold);font-size:15px;text-decoration:underline">scan/source ↗</a>`
       : '';
     return `
       <div style="padding:0.75rem 0.875rem;border:1px solid var(--border);border-radius:6px;margin-bottom:0.5rem;background:rgba(201,168,124,0.03)">
-        <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.35rem;font-size:14px;color:var(--text-dim)">
+        <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.35rem;font-size:15px;color:var(--text-dim)">
           <span>${esc(date)}</span>
           ${typeBadge}
           <span style="flex:1;font-weight:500;color:var(--text)">${esc(f.source_label || '')}</span>
@@ -5957,11 +5957,11 @@ function renderPdfList(mode) {
   el.innerHTML = list.map((p, i) => `
     <div style="border:1px solid var(--border);border-radius:6px;padding:0.65rem 0.875rem;margin-bottom:0.5rem;background:rgba(201,168,124,0.04)">
       <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem">
-        <span style="font-size:14px;font-weight:500;color:var(--text);flex:1">${esc(p.filename)}</span>
-        <span style="font-size:13px;color:var(--text-faint)">${fmtBytes(p.size)}</span>
+        <span style="font-size:15px;font-weight:500;color:var(--text);flex:1">${esc(p.filename)}</span>
+        <span style="font-size:15px;color:var(--text-faint)">${fmtBytes(p.size)}</span>
         <button class="btn-chip-remove" onclick="removePdf('${mode}','${p.id}')" title="Remove">×</button>
       </div>
-      <label style="display:flex;gap:0.4rem;align-items:center;font-size:14px;color:var(--text-dim);cursor:pointer;margin-bottom:0.5rem">
+      <label style="display:flex;gap:0.4rem;align-items:center;font-size:15px;color:var(--text-dim);cursor:pointer;margin-bottom:0.5rem">
         <input type="checkbox" ${p.log ? 'checked' : ''} onchange="updatePdfField('${mode}','${p.id}','log',this.checked)">
         Log to research findings on save
       </label>
@@ -6251,7 +6251,7 @@ async function saveAncestorEdits() {
     populateAncestorEditorSelector();
 
     const syncSuffix = syncedCount > 0
-      ? ` <span style="color:var(--text-dim);font-size:13px">· synced tags to ${syncedCount} client weaving${syncedCount===1?'':'s'}</span>`
+      ? ` <span style="color:var(--text-dim);font-size:15px">· synced tags to ${syncedCount} client weaving${syncedCount===1?'':'s'}</span>`
       : '';
     msgEl.innerHTML = `<span style="color:var(--teal)">✓ All changes saved.</span>${syncSuffix}`;
     btn.textContent = '✓ Saved';
