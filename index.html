@@ -133,18 +133,18 @@ body::before {
   letter-spacing: 0.05em;
 }
 .arc-label-sub {
-  font-size: 14px; font-weight: 400; letter-spacing: 0.12em;
+  font-size: 15px; font-weight: 400; letter-spacing: 0.12em;
   color: var(--text-dim); text-transform: uppercase;
 }
 .arc-glyph { font-size: 1.1rem; letter-spacing: 0.15em; margin-bottom: 0.15rem; }
 .arc-label.arc-descent    .arc-label-title { color: var(--arc-descent); }
-.arc-label.arc-descent    .arc-glyph { color: var(--arc-descent); opacity: 0.85; }
+.arc-label.arc-descent    .arc-glyph { color: var(--arc-descent); opacity: 0.88; }
 .arc-label.arc-descent    .arc-label-inner { border-color: rgba(184,175,232,0.22); background: rgba(184,175,232,0.04); }
 .arc-label.arc-underworld .arc-label-title { color: var(--arc-underworld); }
-.arc-label.arc-underworld .arc-glyph { color: var(--arc-underworld); opacity: 0.85; }
+.arc-label.arc-underworld .arc-glyph { color: var(--arc-underworld); opacity: 0.88; }
 .arc-label.arc-underworld .arc-label-inner { border-color: rgba(224,158,128,0.22); background: rgba(224,158,128,0.04); }
 .arc-label.arc-return     .arc-label-title { color: var(--arc-return); }
-.arc-label.arc-return     .arc-glyph { color: var(--arc-return); opacity: 0.85; }
+.arc-label.arc-return     .arc-glyph { color: var(--arc-return); opacity: 0.88; }
 .arc-label.arc-return     .arc-label-inner { border-color: rgba(108,204,168,0.22); background: rgba(108,204,168,0.04); }
 
 /* ════════════════════════════════════════════════════════════
@@ -226,7 +226,7 @@ body::before {
 /* Field-level registers (Palette A, on vellum) */
 .field-registers { margin: 0.25rem 0 2rem; }
 .field-registers-label {
-  font-size: 14px; font-weight: 600;
+  font-size: 15px; font-weight: 600;
   letter-spacing: 0.22em; text-transform: uppercase;
   color: var(--ink-dim);
   font-family: 'Jost', sans-serif;
@@ -243,7 +243,7 @@ body::before {
 .registers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
 .register { padding: 1.6rem 1.75rem; border-radius: 3px; }
 .register-label {
-  font-size: 14px; font-weight: 600;
+  font-size: 15px; font-weight: 600;
   letter-spacing: 0.22em; text-transform: uppercase;
   margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.6rem;
 }
@@ -261,7 +261,7 @@ body::before {
 
 /* Subterrain chips on vellum */
 .subterrains-label {
-  font-size: 14px; font-weight: 600;
+  font-size: 15px; font-weight: 600;
   letter-spacing: 0.22em; text-transform: uppercase;
   color: var(--ink-dim);
   font-family: 'Jost', sans-serif;
@@ -284,7 +284,7 @@ body::before {
 .subterrain-chip:hover { background: rgba(221,208,168,0.7); border-color: var(--border-ink-strong); }
 .subterrain-chip-number { font-size: 15px; font-weight: 500; color: var(--ink-gold); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; display: block; }
 .subterrain-chip-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 500; color: var(--ink); line-height: 1.25; display: block; margin-bottom: 3px; }
-.subterrain-chip-desc { font-size: 14px; font-weight: 400; color: var(--ink-secondary); line-height: 1.5; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.subterrain-chip-desc { font-size: 15px; font-weight: 400; color: var(--ink-secondary); line-height: 1.5; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .subterrain-chip-link { font-size: 15px; color: var(--ink-gold); font-weight: 500; letter-spacing: 0.06em; margin-top: 5px; display: block; }
 
 .fieldguide-link {
@@ -299,7 +299,7 @@ body::before {
 /* Bridge nodes inside vellum card */
 .bridge-node { border-top: 1px solid var(--border-ink); margin-top: 1.75rem; padding-top: 1.25rem; }
 .bridge-node-label {
-  font-size: 13px; font-weight: 600; letter-spacing: 0.2em;
+  font-size: 15px; font-weight: 600; letter-spacing: 0.2em;
   color: var(--ink-gold); text-transform: uppercase; margin-bottom: 0.6rem;
   display: flex; align-items: center; gap: 8px;
 }
@@ -318,7 +318,7 @@ body::before {
   font-family: 'Cormorant Garamond', serif;
   font-size: 17px; font-style: italic; color: var(--text-dim);
 }
-.loading-glyph { font-size: 1.5rem; color: var(--gold); opacity: 0.7; display: block; margin-bottom: 0.75rem; }
+.loading-glyph { font-size: 1.5rem; color: var(--gold); opacity: 0.88; display: block; margin-bottom: 0.75rem; }
 
 /* Footer */
 .map-footer { text-align: center; margin-top: 4rem; opacity: 0; animation: fadeUp 0.9s ease 2s forwards; }
@@ -701,7 +701,7 @@ loadMap();
     <a class="ext-footer-link" href="https://christypaxtonwade.com/sky">Sky</a>
     <a class="ext-footer-link" href="https://christypaxtonwade.com/life">Life</a>
     <a class="ext-footer-link" href="https://christypaxtonwade.com/mirror">Mirror</a>
-    <a class="ext-footer-link" href="https://thealchemyofmidlife.substack.com" target="_blank" rel="noopener">Substack ↗</a>
+    <a class="ext-footer-link" href="https://christywade.substack.com" target="_blank" rel="noopener">Substack ↗</a>
     <a class="ext-footer-link" href="https://christypaxtonwade.com/sky/tapestry">Tapestry ↗</a>
   </div>
   <span class="ext-footer-copyright">© Christy Paxton Wade</span>
