@@ -72,7 +72,13 @@ body {
 }
 
 /* ── Sections ── */
-.section { margin-top: 3rem; }
+.section { margin-top: 3.5rem; padding-top: 2.25rem; border-top: 1px solid var(--border); }
+.hd-table { max-width: 560px; }
+.hd-table td:first-child { font-family: 'Jost', sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); width: 180px; white-space: nowrap; }
+.hd-prose { margin-top: 1.25rem; max-width: 820px; }
+.hd-prose p { font-size: 16px; line-height: 1.62; color: var(--text-secondary); margin-bottom: 0.85rem; }
+.hd-prose b { color: var(--text); }
+.hd-prose i { color: var(--text); font-style: italic; }
 .section-title {
   font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500;
   letter-spacing: 0.22em; text-transform: uppercase;
@@ -583,6 +589,21 @@ function render({ client, birth, hd, gk, refByNum, fieldById, matches,
 // One-click PDF of the full chart page. Reads the live, already-rendered DOM and
 // redraws it with jsPDF text + autoTable (no DOM screenshot — reliable, selectable).
 // Tables render via autoTable; the synthesis textarea and prose render as text.
+// Map of Unicode glyphs the standard PDF fonts (WinAnsi) can't render — they
+// otherwise garble (→ becomes "!'") and break jsPDF's line-width measurement,
+// which is what caused the letter-spacing and right-edge overflow.
+const PDF_GLYPHS = {
+  '→': '>', '➔': '>', '➡': '>', '➙': '>', '←': '<',
+  '↔': '-', '↦': '-', '↗': '', '↘': '', '↖': '', '↙': '',
+  '☌': 'conj', '☍': 'opp', '△': 'tri', '□': 'squ', '⚹': 'sex',
+  '℞': '(R)', '…': '...', '‘': "'", '’': "'", '“': '"', '”': '"',
+};
+function pdfClean(s) {
+  return String(s == null ? '' : s)
+    .replace(/[→➔➡➙←↔↦↗↘↖↙☌☍△□⚹℞…‘’“”]/g, c => (PDF_GLYPHS[c] != null ? PDF_GLYPHS[c] : ''))
+    .replace(/\*+/g, '');
+}
+
 function downloadChartPdf(btn) {
   const JS = window.jspdf && window.jspdf.jsPDF;
   if (!JS) { alert('PDF tool is still loading — try again in a moment.'); return; }
@@ -599,51 +620,114 @@ function downloadChartPdf(btn) {
     let y = margin;
     const gold = [122, 86, 24], ink = [28, 23, 13], muted = [120, 112, 72];
     const ensure = sp => { if (y + sp > pageH - margin) { doc.addPage(); y = margin; } };
+
     const heading = t => {
-      ensure(30); doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(gold[0], gold[1], gold[2]);
-      doc.splitTextToSize(t, maxW).forEach(l => { ensure(16); doc.text(l, margin, y); y += 15; }); y += 4;
+      t = pdfClean(t).trim(); if (!t) return;
+      y += 6; ensure(28); doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(gold[0], gold[1], gold[2]);
+      doc.splitTextToSize(t, maxW).forEach(l => { ensure(16); doc.text(l, margin, y); y += 15; }); y += 5;
     };
-    const para = (t, size) => {
-      if (!t || !t.trim()) return;
-      doc.setFont('times', 'normal'); doc.setFontSize(size || 10.5); doc.setTextColor(ink[0], ink[1], ink[2]);
-      doc.splitTextToSize(t.replace(/\s+/g, ' ').trim(), maxW).forEach(l => { ensure(14); doc.text(l, margin, y); y += 13; }); y += 6;
+    const para = (t, size, color) => {
+      const txt = pdfClean(t).replace(/\s+/g, ' ').trim(); if (!txt) return;
+      size = size || 10.5; color = color || ink; const lh = size * 1.32;
+      doc.setFont('times', 'normal'); doc.setFontSize(size); doc.setTextColor(color[0], color[1], color[2]);
+      doc.splitTextToSize(txt, maxW).forEach(l => { ensure(lh); doc.text(l, margin, y); y += lh; }); y += 6;
+    };
+    const boldLine = (t, size, color) => {
+      const txt = pdfClean(t).replace(/\s+/g, ' ').trim(); if (!txt) return;
+      size = size || 10.5; color = color || gold; const lh = size * 1.32;
+      doc.setFont('times', 'bold'); doc.setFontSize(size); doc.setTextColor(color[0], color[1], color[2]);
+      doc.splitTextToSize(txt, maxW).forEach(l => { ensure(lh); doc.text(l, margin, y); y += lh; });
+    };
+    const renderTable = tbl => {
+      ensure(48);
+      doc.autoTable({
+        html: tbl, startY: y, margin: { left: margin, right: margin },
+        styles: { font: 'times', fontSize: 8.5, cellPadding: 3, textColor: [28, 23, 13], lineColor: [216, 199, 154], lineWidth: 0.4, overflow: 'linebreak' },
+        headStyles: { fillColor: [122, 86, 24], textColor: [255, 255, 255], fontStyle: 'bold' },
+        theme: 'grid',
+        didParseCell: data => { if (data.cell && Array.isArray(data.cell.text)) data.cell.text = data.cell.text.map(pdfClean); },
+      });
+      y = doc.lastAutoTable.finalY + 12;
+    };
+    // The synthesis is markdown with **Label** subheadings; render each as a
+    // gold subheading with its paragraph spaced beneath.
+    const renderSynthesis = raw => {
+      const segs = String(raw || '').split(/\*\*(.+?)\*\*/g);
+      if (segs.length > 1) {
+        if (segs[0] && segs[0].trim()) para(segs[0], 10.5);
+        for (let i = 1; i < segs.length; i += 2) {
+          boldLine(segs[i], 10.5, gold); y += 1;
+          para(segs[i + 1] || '', 10.5);
+        }
+      } else {
+        pdfClean(raw).split(/\n{2,}/).forEach(p => para(p, 10.5));
+      }
+    };
+    const renderSeq = grid => {
+      grid.querySelectorAll('.seq-card').forEach(card => {
+        const t = sel => ((card.querySelector(sel) || {}).textContent || '').trim();
+        y += 3;
+        boldLine([t('.seq-sphere'), t('.seq-gk')].filter(Boolean).join('   '), 10.5, gold);
+        const detail = [t('.seq-arc'), t('.seq-meta'), t('.seq-field')].filter(Boolean).join('   ·   ');
+        if (detail) para(detail, 10);
+        const note = t('.seq-note'); if (note) para(note, 9.5, muted);
+      });
+    };
+    // Readable line extraction for div-based sections (breaks at block boundaries).
+    const blockLines = root => {
+      const BLOCK = new Set(['DIV', 'P', 'LI', 'TR', 'UL', 'OL', 'H1', 'H2', 'H3', 'H4', 'SECTION', 'BR']);
+      let s = '';
+      (function walk(n) {
+        n.childNodes.forEach(c => {
+          if (c.nodeType === 3) { s += c.nodeValue.replace(/\s+/g, ' '); }
+          else if (c.nodeType === 1) {
+            const blk = BLOCK.has(c.tagName);
+            if (blk && s && !s.endsWith('\n')) s += '\n';
+            walk(c);
+            if (blk && s && !s.endsWith('\n')) s += '\n';
+          }
+        });
+      })(root);
+      return s.split('\n').map(x => x.trim()).filter(Boolean);
     };
 
     const name = ((page.querySelector('.client-name') || {}).textContent || 'Client').trim();
     const birthLine = ((page.querySelector('.birth-line') || {}).textContent || '').trim();
     doc.setFont('times', 'bold'); doc.setFontSize(20); doc.setTextColor(ink[0], ink[1], ink[2]);
-    doc.text(name, pageW / 2, y, { align: 'center' }); y += 18;
+    doc.text(pdfClean(name), pageW / 2, y, { align: 'center' }); y += 18;
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(gold[0], gold[1], gold[2]);
     doc.text('CHART   ·   NAVIGATION MAP', pageW / 2, y, { align: 'center', charSpace: 1 }); y += 12;
-    if (birthLine) { doc.setFont('times', 'normal'); doc.setFontSize(9.5); doc.setTextColor(muted[0], muted[1], muted[2]); doc.splitTextToSize(birthLine, maxW).forEach(l => { doc.text(l, pageW / 2, y, { align: 'center' }); y += 11; }); }
-    y += 6; doc.setDrawColor(216, 199, 154); doc.line(margin, y, pageW - margin, y); y += 18;
+    if (birthLine) { doc.setFont('times', 'normal'); doc.setFontSize(9.5); doc.setTextColor(muted[0], muted[1], muted[2]); doc.splitTextToSize(pdfClean(birthLine), maxW).forEach(l => { doc.text(l, pageW / 2, y, { align: 'center' }); y += 11; }); }
+    y += 8; doc.setDrawColor(216, 199, 154); doc.line(margin, y, pageW - margin, y); y += 16;
 
     const sections = Array.from(page.querySelectorAll('.section')).filter(s => !s.closest('.no-pdf'));
     sections.forEach(sec => {
       const titleEl = sec.querySelector('.section-title');
-      if (titleEl) heading(titleEl.textContent.trim());
+      if (titleEl) heading(titleEl.textContent);
       const introEl = sec.querySelector('.section-intro');
-      if (introEl) para(introEl.textContent, 9);
+      if (introEl) para(introEl.textContent, 9, muted);
+
       const ta = sec.querySelector('textarea');
-      if (ta && ta.value.trim()) para(ta.value, 10);
-      const tables = sec.querySelectorAll('table');
-      if (tables.length) {
-        tables.forEach(tbl => {
-          ensure(46);
-          doc.autoTable({
-            html: tbl, startY: y, margin: { left: margin, right: margin },
-            styles: { font: 'times', fontSize: 8.5, cellPadding: 3, textColor: [28, 23, 13], lineColor: [216, 199, 154], lineWidth: 0.4, overflow: 'linebreak' },
-            headStyles: { fillColor: [122, 86, 24], textColor: [255, 255, 255], fontStyle: 'bold' },
-            theme: 'grid',
-          });
-          y = doc.lastAutoTable.finalY + 12;
-        });
-      } else if (!ta) {
-        const c = sec.cloneNode(true);
-        c.querySelectorAll('.section-title, .section-intro, button, input, select, textarea').forEach(e => e.remove());
-        para((c.textContent || ''), 10);
+      const seqGrid = sec.querySelector('.seq-grid');
+      const tables = Array.from(sec.querySelectorAll('table'));
+      const hdProse = sec.querySelector('.hd-prose');
+      const emptyEl = sec.querySelector('.matches-empty, .astro-muted');
+
+      if (ta && ta.value.trim()) {
+        renderSynthesis(ta.value);
+      } else if (seqGrid) {
+        renderSeq(seqGrid);
+      } else if (tables.length) {
+        tables.forEach(renderTable);
+        if (hdProse) hdProse.querySelectorAll('p').forEach(p => para(p.textContent, 10));
+      } else if (emptyEl) {
+        para(emptyEl.textContent, 10, muted);
+      } else {
+        const clone = sec.cloneNode(true);
+        clone.querySelectorAll('.section-title, .section-intro, button, input, select, textarea').forEach(e => e.remove());
+        blockLines(clone).forEach(l => para(l, 10));
       }
-      y += 6;
+      y += 10;
     });
 
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -1081,25 +1165,75 @@ function renderOfferingsMap() {
   </div>`;
 }
 
+// How each Human Design dimension reads on the Map. Client-specific where the
+// value is known; falls back to the general principle otherwise.
+const HD_TYPE_MAP = {
+  manifesting_generator: "Built to respond, then move fast. The sacral lights up in answer to what is actually in front of them, so they enter a Field by responding to what energizes them rather than forcing a way in — and they skip steps when the yes is real. They stall and scatter when they override that response and initiate from the mind.",
+  generator: "Built to respond. Energy is sustainable only when the sacral has answered a genuine yes; initiating from the head leads to frustration. On the Map, they enter a Field by responding to what is actually present, not by deciding to.",
+  projector: "Built to see and guide, not to keep pace with sacral beings. Their gift is recognizing the system in another — but it lands cleanly only when invited. This is a body wired for the Mirror (Field IX) and the Teaching (Field XI): made to read terrain, not push through it.",
+  manifestor: "Built to initiate and inform. Here to start things in their own timing rather than wait for response. On the Map, they open Fields that others then move through.",
+  reflector: "Built to sample the whole — almost entirely open, taking a full lunar cycle to find clarity. On the Map, they read the health of an entire Field by feeling it through their own body.",
+};
+const HD_AUTHORITY_MAP = {
+  emotional: "Clarity arrives over time, across an emotional wave — never in the heat of the moment. This is a somatic-emotional register of contact, not a conceptual one: the truest decisions are the ones slept on. Acting before the wave completes is a reliable mechanism of self-betrayal.",
+  sacral: "Truth speaks in the body's immediate yes/no — a gut sound in the present moment, before the mind explains it. Decisions hold when they follow that sound rather than the argument over it.",
+  splenic: "A quiet, one-time intuitive knowing in the present moment — spontaneous and easy to miss. The body knows once; it does not repeat itself.",
+  ego: "Decisions hold when the heart genuinely wants the thing and has the will to back it — what they can promise from desire, not obligation.",
+  ego_projected: "Decisions hold when the heart genuinely wants the thing and has the will to back it — what they can promise from desire, not obligation.",
+  self_projected: "Truth is heard in their own voice — they need to talk it out and listen to what they say and the tone it carries. Direction is auditory and self-referential.",
+  mental: "No single inner authority to decide alone — clarity comes through talking it through with trusted people in a sounding environment, over time.",
+  none: "No fixed inner authority — clarity comes by sampling many perspectives over time rather than deciding on the spot.",
+};
+const HD_PROFILE_LINES = {
+  '1': 'the Investigator (needs a secure foundation of study before they feel safe to act)',
+  '2': 'the Hermit (a natural gift that emerges when it is called out of them)',
+  '3': 'the Martyr (learns the terrain by trial and error, discovering by bumping into what does not work)',
+  '4': 'the Opportunist (lives and works through relationship and a known network)',
+  '5': 'the Heretic (projected onto as the one with the answer; the practical, universalizing fixer)',
+  '6': 'the Role Model (lives in three phases, slowly becoming a living example)',
+};
+function hdProfileBlurb(p) {
+  const m = String(p || '').match(/(\d)\D+(\d)/);
+  if (!m) return '';
+  const a = HD_PROFILE_LINES[m[1]], b = HD_PROFILE_LINES[m[2]];
+  if (!a || !b) return '';
+  return `The conscious line, ${a}, sits over the unconscious line, ${b}. Together they describe the social geometry of the work — how this person learns the terrain and how others meet them in it. A 5 in any profile is the seat of projection, which is the structural ground of the Mirror (Field IX) and the Teaching (Field XI).`;
+}
+
 function renderHD(hd) {
   if (!hd) return `
     <div class="section">
       <div class="section-title">Human Design</div>
       <div class="matches-empty">No HD data yet. Compute the chart to populate.</div>
     </div>`;
-  const list = arr => (arr || []).join(' · ').replace(/_/g, ' ');
+  const list = arr => (arr || []).join(' · ').replace(/_/g, ' ') || '—';
   const channels = (hd.defined_channels || []).map(([a, b]) => `${a}–${b}`).join(' · ') || '—';
+  const tidy = v => (v || '—').replace(/_/g, ' ');
+  const rows = [
+    ['Type', tidy(hd.type)],
+    ['Authority', tidy(hd.authority)],
+    ['Profile', hd.profile || '—'],
+    ['Definition', tidy(hd.definition_type)],
+    ['Defined centers', list(hd.defined_centers)],
+    ['Open centers', list(hd.open_centers)],
+    ['Defined channels', channels],
+  ].map(([k, v]) => `<tr><td class="astro-body">${k}</td><td class="astro-pos">${escapeHtml(v)}</td></tr>`).join('');
+
+  const typeNote = HD_TYPE_MAP[hd.type] || '';
+  const authNote = HD_AUTHORITY_MAP[hd.authority] || '';
+  const profNote = hdProfileBlurb(hd.profile);
+
   return `
     <div class="section">
       <div class="section-title">Human Design · at a glance</div>
-      <div class="hd-block">
-        <div class="hd-cell"><div class="hd-label">Type</div>      <div class="hd-value">${(hd.type || '—').replace(/_/g, ' ')}</div></div>
-        <div class="hd-cell"><div class="hd-label">Authority</div> <div class="hd-value">${(hd.authority || '—').replace(/_/g, ' ')}</div></div>
-        <div class="hd-cell"><div class="hd-label">Profile</div>   <div class="hd-value">${hd.profile || '—'}</div></div>
-        <div class="hd-cell"><div class="hd-label">Definition</div><div class="hd-value">${(hd.definition_type || '—').replace(/_/g, ' ')}</div></div>
-        <div class="hd-cell" style="grid-column: span 2;"><div class="hd-label">Defined centers</div><div class="hd-list-value">${list(hd.defined_centers)}</div></div>
-        <div class="hd-cell" style="grid-column: span 2;"><div class="hd-label">Open centers</div><div class="hd-list-value">${list(hd.open_centers)}</div></div>
-        <div class="hd-cell" style="grid-column: 1 / -1;"><div class="hd-label">Defined channels</div><div class="hd-list-value">${channels}</div></div>
+      <table class="astro-table hd-table"><tbody>${rows}</tbody></table>
+      <div class="hd-prose">
+        <p><b>How this reads on the Map.</b> Human Design describes the body's energetic mechanics; the Map describes the terrain that mechanics moves through. Read together, the design shows <i>how</i> this person engages whatever Field they are standing in — where they are reliable, where they are porous, and the register in which truth actually reaches them.</p>
+        ${typeNote ? `<p><b>Type — ${tidy(hd.type)}.</b> ${typeNote}</p>` : ''}
+        ${authNote ? `<p><b>Authority — ${tidy(hd.authority)}.</b> ${authNote}</p>` : ''}
+        ${profNote ? `<p><b>Profile — ${escapeHtml(hd.profile || '')}.</b> ${profNote}</p>` : ''}
+        <p><b>Centers.</b> Defined centers are the consistent terrain this person transmits from and can rely on; open centers are where they are porous — sampling, amplifying, and most conditioned by whoever is in the room. The throat is the gate of Field V (Resonance in Language); the sacral and root carry the body's drive and stamina (Field IV, Embodied Signal; Field VI, Body as Active Practice); the spleen is real-time bodily knowing; the solar plexus is the emotional wave. An open G or Heart is where identity, direction, or worth can be quietly borrowed from others — the Mirror, Field IX — and the work is to tell what is theirs from what they have absorbed.</p>
+        <p><b>Defined channels.</b> The fixed circuitry — the through-lines that are always on, the consistent wiring running beneath the Fields the chart most strongly activates.</p>
       </div>
     </div>`;
 }
