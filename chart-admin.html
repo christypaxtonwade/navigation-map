@@ -364,7 +364,8 @@ body {
   color: #e09a8c; font-style: italic;
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
 
@@ -579,54 +580,76 @@ function render({ client, birth, hd, gk, refByNum, fieldById, matches,
   `;
 }
 
-// One-click PDF of the full chart page. Clones the live, already-rendered page,
-// strips interactive controls and the editable forms (.no-pdf), turns the
-// synthesis textarea into static text, and downloads a branded document.
+// One-click PDF of the full chart page. Reads the live, already-rendered DOM and
+// redraws it with jsPDF text + autoTable (no DOM screenshot — reliable, selectable).
+// Tables render via autoTable; the synthesis textarea and prose render as text.
 function downloadChartPdf(btn) {
-  if (typeof html2pdf === 'undefined') { alert('PDF tool is still loading — try again in a moment.'); return; }
+  const JS = window.jspdf && window.jspdf.jsPDF;
+  if (!JS) { alert('PDF tool is still loading — try again in a moment.'); return; }
   const page = document.getElementById('page');
   if (!page) return;
   if (btn) { btn.disabled = true; btn.textContent = 'Preparing…'; }
 
-  const clone = page.cloneNode(true);
-  // Drop editable / interactive pieces
-  clone.querySelectorAll('.no-pdf, .header-actions, button, input, select, form, .form-actions, .form-status, .autocomplete-list').forEach(el => el.remove());
-  // Render any textarea (e.g. the synthesis brief) as static, wrapped text
-  clone.querySelectorAll('textarea').forEach(ta => {
-    const div = document.createElement('div');
-    div.style.cssText = 'white-space:pre-wrap;font-size:12px;line-height:1.6;color:#14110a;';
-    div.textContent = ta.value || ta.textContent || '';
-    ta.replaceWith(div);
-  });
+  try {
+    const doc = new JS({ unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 44;
+    const maxW = pageW - margin * 2;
+    let y = margin;
+    const gold = [122, 86, 24], ink = [28, 23, 13], muted = [120, 112, 72];
+    const ensure = sp => { if (y + sp > pageH - margin) { doc.addPage(); y = margin; } };
+    const heading = t => {
+      ensure(30); doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(gold[0], gold[1], gold[2]);
+      doc.splitTextToSize(t, maxW).forEach(l => { ensure(16); doc.text(l, margin, y); y += 15; }); y += 4;
+    };
+    const para = (t, size) => {
+      if (!t || !t.trim()) return;
+      doc.setFont('times', 'normal'); doc.setFontSize(size || 10.5); doc.setTextColor(ink[0], ink[1], ink[2]);
+      doc.splitTextToSize(t.replace(/\s+/g, ' ').trim(), maxW).forEach(l => { ensure(14); doc.text(l, margin, y); y += 13; }); y += 6;
+    };
 
-  const nameEl = clone.querySelector('.client-name');
-  const name = (nameEl && nameEl.textContent.trim()) || 'client';
-  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const name = ((page.querySelector('.client-name') || {}).textContent || 'Client').trim();
+    const birthLine = ((page.querySelector('.birth-line') || {}).textContent || '').trim();
+    doc.setFont('times', 'bold'); doc.setFontSize(20); doc.setTextColor(ink[0], ink[1], ink[2]);
+    doc.text(name, pageW / 2, y, { align: 'center' }); y += 18;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(gold[0], gold[1], gold[2]);
+    doc.text('CHART   ·   NAVIGATION MAP', pageW / 2, y, { align: 'center', charSpace: 1 }); y += 12;
+    if (birthLine) { doc.setFont('times', 'normal'); doc.setFontSize(9.5); doc.setTextColor(muted[0], muted[1], muted[2]); doc.splitTextToSize(birthLine, maxW).forEach(l => { doc.text(l, pageW / 2, y, { align: 'center' }); y += 11; }); }
+    y += 6; doc.setDrawColor(216, 199, 154); doc.line(margin, y, pageW - margin, y); y += 18;
 
-  const holder = document.createElement('div');
-  holder.style.cssText = 'width:760px;padding:40px 44px;background:#ffffff;color:#14110a;';
-  // Force readable ink on a light page (the live page is dark-themed)
-  holder.appendChild(clone);
-  const fix = document.createElement('style');
-  fix.textContent = '#pdf-holder, #pdf-holder * { color:#1c170d !important; background:transparent !important; border-color:#d8c79a !important; box-shadow:none !important; }'
-    + '#pdf-holder .section-title, #pdf-holder .client-name { color:#7a5618 !important; }'
-    + '#pdf-holder .section { page-break-inside:avoid; margin-bottom:18px; }'
-    + '#pdf-holder table { border-collapse:collapse; width:100%; }'
-    + '#pdf-holder th, #pdf-holder td { border:1px solid #d8c79a !important; padding:4px 7px; font-size:11px; }'
-    + '#pdf-holder tr { page-break-inside:avoid; }';
-  holder.id = 'pdf-holder';
-  holder.insertBefore(fix, holder.firstChild);
-  document.body.appendChild(holder);
+    const sections = Array.from(page.querySelectorAll('.section')).filter(s => !s.closest('.no-pdf'));
+    sections.forEach(sec => {
+      const titleEl = sec.querySelector('.section-title');
+      if (titleEl) heading(titleEl.textContent.trim());
+      const introEl = sec.querySelector('.section-intro');
+      if (introEl) para(introEl.textContent, 9);
+      const ta = sec.querySelector('textarea');
+      if (ta && ta.value.trim()) para(ta.value, 10);
+      const tables = sec.querySelectorAll('table');
+      if (tables.length) {
+        tables.forEach(tbl => {
+          ensure(46);
+          doc.autoTable({
+            html: tbl, startY: y, margin: { left: margin, right: margin },
+            styles: { font: 'times', fontSize: 8.5, cellPadding: 3, textColor: [28, 23, 13], lineColor: [216, 199, 154], lineWidth: 0.4, overflow: 'linebreak' },
+            headStyles: { fillColor: [122, 86, 24], textColor: [255, 255, 255], fontStyle: 'bold' },
+            theme: 'grid',
+          });
+          y = doc.lastAutoTable.finalY + 12;
+        });
+      } else if (!ta) {
+        const c = sec.cloneNode(true);
+        c.querySelectorAll('.section-title, .section-intro, button, input, select, textarea').forEach(e => e.remove());
+        para((c.textContent || ''), 10);
+      }
+      y += 6;
+    });
 
-  html2pdf().set({
-    margin: [10, 0, 12, 0],
-    filename: `chart-${slug || 'client'}.pdf`,
-    image: { type: 'jpeg', quality: 0.97 },
-    html2canvas: { scale: 2, backgroundColor: '#ffffff', windowWidth: 900 },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['css', 'avoid-all'] },
-  }).from(holder).save().then(() => holder.remove()).catch(e => { holder.remove(); alert('PDF failed: ' + (e && e.message || e)); })
-    .finally(() => { if (btn) { btn.disabled = false; btn.textContent = 'Download PDF'; } });
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    doc.save(`chart-${slug || 'client'}.pdf`);
+  } catch (e) { alert('PDF failed: ' + (e && e.message || e)); }
+  if (btn) setTimeout(() => { btn.disabled = false; btn.textContent = 'Download PDF'; }, 1500);
 }
 
 function renderHeader(client, birth) {
