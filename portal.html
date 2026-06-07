@@ -2094,7 +2094,7 @@ async function loadClientDetail() {
       // ephemeris-deferred; tier-3 simply renders empty until they land.
       rest(`chart_planets?client_id=eq.${id}&side=eq.personality&select=body,zodiac_sign,zodiac_degree,house,retrograde,longitude&order=body`).catch(() => []),
       rest(`signals_readings?client_id=eq.${id}&select=id,created_at,arc,field_number,field_name,register,tags,offering_label,viewed_at,reading_text,reading_html&order=created_at.desc`).catch(() => []),
-      rest(`signals_tier2_readings?client_id=eq.${id}&select=id,created_at,viewed_at,email_sent_at,tier1_computed,field_walking_text,register_frequencies_text,threshold_asking_text&order=created_at.desc`).catch(() => [])
+      rest(`signals_tier2_readings?client_id=eq.${id}&select=id,created_at,viewed_at,email_sent_at,tier1_computed,field_walking_text,register_frequencies_text,threshold_asking_text,affirmation,journal_prompt,signal_notes,birth_data,email,client_name,tier2_answers&order=created_at.desc`).catch(() => [])
     ]);
     const client = clientArr[0];
     if (!client) { wrap.innerHTML = '<div class="empty">Client not found.</div>'; return; }
@@ -2699,6 +2699,65 @@ function cdTier1HistoryBlock(d) {
   return `<div class="sp-section"><h4 class="sp-h">Tier 1 Signals History · ${rows.length}</h4>${body}</div>`;
 }
 
+// Plain one-line glosses for the 13 Fields (shared by the Signal Map view + PDF).
+const CD_FIELD_GLOSS = {
+  'I': 'How you make sense of reality — the patterns and frameworks underneath what happens.',
+  'II': 'Receiving insight, signal, and meaning from beyond ordinary thinking.',
+  'III': 'Crossings and turning points — what you are being asked to release and move through.',
+  'IV': 'What your body knows first — sensation, voice, and felt-sense as information.',
+  'V': 'How words, tone, and naming carry meaning for you.',
+  'VI': 'The body as the place where change is felt, moved, and tended.',
+  'VII': 'What you make, write, or carry forward — creation as a record of self.',
+  'VIII': 'What the living world — animals, plants, land, elements — teaches you.',
+  'IX': 'How relationships and reflection show you back to yourself.',
+  'X': "What's hidden, inherited, or hard to face, surfacing to be worked.",
+  'XI': 'What you carry to give — the gift meant to be transmitted to others.',
+  'XII': 'Coming home to yourself — claiming and integrating who you are.',
+  'XIII': 'Completing a cycle, and the new beginning it opens.',
+};
+function cdFmtDate(d) { if (!d) return ''; const dt = new Date(d + 'T00:00:00'); return isNaN(dt) ? d : dt.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }); }
+function cdFmtTime(t) { if (!t) return ''; const m = String(t).match(/^(\d{1,2}):(\d{2})/); if (!m) return t; let h = +m[1]; const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${h}:${m[2]} ${ap}`; }
+
+// Build a unified model for a Tier 2 reading row (used by both the view + PDF).
+function cdReadingModel(r) {
+  const client = (currentDetailData && currentDetailData.client) || {};
+  const name = r.client_name || client.name || '';
+  const email = r.email || client.email || '';
+  const b = r.birth_data || {};
+  const born = [cdFmtDate(b.birth_date), cdFmtTime(b.birth_time), b.birth_place].filter(Boolean).join(' · ');
+  const dateStr = r.created_at ? new Date(r.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+  let convergence = null;
+  const pkg = r.tier2_answers && r.tier2_answers.convergence_package;
+  if (pkg) {
+    const fs = (pkg.field_strengths || []).map(f => ({
+      roman: f.roman, name: f.name,
+      quiz: Math.max(0, Number(f.mean_adjusted_rating != null ? f.mean_adjusted_rating : (f.positive_rating_sum || 0))),
+      chart: Math.max(0, Number(f.chart_brightness || 0)),
+    })).slice(0, 5);
+    const qmax = Math.max(...fs.map(f => f.quiz), 0.0001), cmax = Math.max(...fs.map(f => f.chart), 0.0001);
+    fs.forEach(f => { f.quizPct = Math.round(f.quiz / qmax * 100); f.chartPct = Math.round(f.chart / cmax * 100); });
+    const noteByName = {}; (r.signal_notes || []).forEach(n => { if (n && n.name) noteByName[n.name.trim().toLowerCase()] = n.note; });
+    const freqs = (pkg.top_convergent_subterrains || []).slice(0, 5).map(s => ({ name: s.subterrain_name, field: s.field_roman, note: noteByName[(s.subterrain_name || '').trim().toLowerCase()] || '' }));
+    convergence = { fields: fs, freqs };
+  }
+  return {
+    name, email, born, dateStr, convergence,
+    sections: [
+      { heading: "The Field You're Walking", body: r.field_walking_text || '' },
+      { heading: 'The Register and the Frequencies Surfacing', body: r.register_frequencies_text || '' },
+      { heading: 'What the Threshold Is Asking', body: r.threshold_asking_text || '' },
+    ],
+    affirmation: r.affirmation || '', journal: r.journal_prompt || '',
+  };
+}
+function cdConvergenceHtml(cv) {
+  if (!cv || !cv.fields.length) return '';
+  const bar = (key, pct, faded) => `<div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.25rem"><span class="sp-dim" style="width:74px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase">${key}</span><span style="flex:1;height:7px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden"><span style="display:block;height:100%;width:${pct}%;background:${faded ? 'rgba(184,146,74,0.5)' : 'var(--gold)'};border-radius:3px"></span></span></div>`;
+  const fields = cv.fields.map(f => `<div style="margin-bottom:0.8rem"><div style="font-size:13px;letter-spacing:0.06em;text-transform:uppercase">${cdEsc(f.roman)} · ${cdEsc(f.name)}</div><div class="sp-dim" style="margin:0.1rem 0 0.3rem">${cdEsc(CD_FIELD_GLOSS[f.roman] || '')}</div>${bar('In answers', f.quizPct, false)}${bar('In chart', f.chartPct, true)}</div>`).join('');
+  const freqs = cv.freqs.length ? `<div style="margin-top:1rem"><div class="sp-reading-label">The five strongest frequencies</div>${cv.freqs.map(s => `<div style="padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.12)"><b>${cdEsc(s.name)}</b> <span class="sp-dim">${cdEsc(s.field)}</span>${s.note ? `<div class="sp-dim" style="margin-top:0.1rem">${cdEsc(s.note)}</div>` : ''}</div>`).join('')}</div>` : '';
+  return `<div class="sp-reading"><div class="sp-reading-label">Your Signal Map · top 5</div>${fields}${freqs}</div>`;
+}
+
 function cdTier2HistoryBlock(d) {
   const rows = d.sig2 || [];
   const body = rows.length
@@ -2712,13 +2771,15 @@ function cdTier2HistoryBlock(d) {
         const hasText = r.field_walking_text || r.register_frequencies_text || r.threshold_asking_text;
         const status = r.viewed_at ? 'viewed' : (r.email_sent_at ? 'sent' : 'draft');
         const open = i === 0; // most recent reading expanded by default
+        const m = cdReadingModel(r);
+        const metaLine = [m.email, m.born].filter(Boolean).map(cdEsc).join(' &nbsp;·&nbsp; ');
         return `
           <div class="sp-t2">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:0.6rem;flex-wrap:wrap">
               <div><span class="sp-bodyname">Tier 2 Reading</span>${i === 0 ? ' <span class="sp-pill" style="color:var(--gold)">latest</span>' : ''}<div class="sp-dim">${date}${dom ? ' · ' + cdEsc(dom) : ''}</div></div>
               <div style="display:flex;align-items:center;gap:0.5rem"><span class="sp-pill">${status}</span>${hasText ? `<button class="btn btn-outline btn-sm" onclick="cdToggleTier2Reading('${r.id}')">${open ? 'Hide' : 'View'}</button><button class="btn btn-outline btn-sm" onclick="cdDownloadTier2Pdf('${r.id}', this)">PDF</button>` : ''}</div>
             </div>
-            ${hasText ? `<div id="cd-t2-body-${r.id}" style="display:${open ? 'block' : 'none'}">${sec("The Field You're Walking", r.field_walking_text)}${sec('The Register and the Frequencies Surfacing', r.register_frequencies_text)}${sec('What the Threshold Is Asking', r.threshold_asking_text)}</div>` : ''}
+            ${hasText ? `<div id="cd-t2-body-${r.id}" style="display:${open ? 'block' : 'none'}">${metaLine ? `<div class="sp-dim" style="margin:0.4rem 0 0.9rem">${metaLine}</div>` : ''}${sec("The Field You're Walking", r.field_walking_text)}${sec('The Register and the Frequencies Surfacing', r.register_frequencies_text)}${sec('What the Threshold Is Asking', r.threshold_asking_text)}${cdConvergenceHtml(m.convergence)}${r.affirmation ? `<div class="sp-reading"><div class="sp-reading-label">Affirmation</div><div class="sp-reading-body" style="font-style:italic;color:var(--gold)">${cdEsc(r.affirmation)}</div></div>` : ''}${r.journal_prompt ? `<div class="sp-reading"><div class="sp-reading-label">Journal prompt</div><div class="sp-reading-body" style="font-style:italic">${cdEsc(r.journal_prompt)}</div></div>` : ''}</div>` : ''}
           </div>`;
       }).join('')
     : '<div class="sp-empty">No Tier 2 readings linked to this client.</div>';
@@ -2861,62 +2922,89 @@ function cdToggleTier2Reading(id) {
   if (el) el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
 }
 
-// One-click branded PDF of a Tier 2 reading (the document the client receives).
-// Drawn with jsPDF text — reliable, selectable, no DOM screenshot.
-function cdBuildReadingPdf(opts) {
+// One-click branded PDF of a Tier 2 reading (matches the customer keepsake):
+// details, the three sections, the Signal Map (drawn bars + frequencies),
+// affirmation, journal prompt, CTA. jsPDF text — selectable, reliable.
+const CD_DISCOVERY_URL = 'https://calendly.com/christypaxtonwade/firstsignal';
+function cdBuildReadingPdf(m, filename) {
   const JS = window.jspdf && window.jspdf.jsPDF;
   if (!JS) { alert('PDF tool is still loading — try again in a moment.'); return; }
   const doc = new JS({ unit: 'pt', format: 'a4' });
-  const pageW = doc.internal.pageSize.getWidth();
-  const pageH = doc.internal.pageSize.getHeight();
-  const margin = 56;
-  const maxW = pageW - margin * 2;
-  let y = margin;
-  const gold = [122, 86, 24], ink = [20, 17, 10], muted = [120, 112, 72];
+  const pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight();
+  const margin = 56, maxW = pageW - margin * 2; let y = margin;
+  const gold = [122, 86, 24], ink = [20, 17, 10], muted = [120, 112, 72], track = [222, 210, 180];
   const ensure = sp => { if (y + sp > pageH - margin) { doc.addPage(); y = margin; } };
+  const para = (t, size, color, gap) => {
+    const txt = String(t == null ? '' : t).replace(/\s+/g, ' ').trim(); if (!txt) return;
+    size = size || 11.5; color = color || ink; const lh = size * 1.34;
+    doc.setFont('times', 'normal'); doc.setFontSize(size); doc.setTextColor(color[0], color[1], color[2]);
+    doc.splitTextToSize(txt, maxW).forEach(l => { ensure(lh); doc.text(l, margin, y); y += lh; });
+    y += (gap == null ? 7 : gap);
+  };
+  const heading = t => { ensure(30); doc.setFont('times', 'bold'); doc.setFontSize(14); doc.setTextColor(gold[0], gold[1], gold[2]); doc.splitTextToSize(String(t || ''), maxW).forEach(l => { ensure(18); doc.text(l, margin, y); y += 17; }); y += 5; };
+  const label = t => { ensure(16); doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(muted[0], muted[1], muted[2]); doc.text(String(t || '').toUpperCase(), margin, y, { charSpace: 1 }); y += 12; };
 
   doc.setFont('times', 'bold'); doc.setFontSize(22); doc.setTextColor(ink[0], ink[1], ink[2]);
-  doc.text(opts.title || 'Signals Reading', pageW / 2, y, { align: 'center' }); y += 20;
+  doc.text('Signals Reading', pageW / 2, y, { align: 'center' }); y += 19;
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(gold[0], gold[1], gold[2]);
   doc.text('CHRISTY PAXTON WADE   ·   NAVIGATION MAP', pageW / 2, y, { align: 'center', charSpace: 1 }); y += 16;
-  if (opts.name) { doc.setFont('times', 'italic'); doc.setFontSize(11); doc.setTextColor(muted[0], muted[1], muted[2]); doc.text(opts.name, pageW / 2, y, { align: 'center' }); y += 13; }
-  if (opts.dateStr) { doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(muted[0], muted[1], muted[2]); doc.text(opts.dateStr, pageW / 2, y, { align: 'center' }); y += 10; }
-  y += 8; doc.setDrawColor(216, 199, 154); doc.line(margin, y, pageW - margin, y); y += 24;
+  if (m.name) { doc.setFont('times', 'italic'); doc.setFontSize(11); doc.setTextColor(muted[0], muted[1], muted[2]); doc.text('Prepared for ' + m.name, pageW / 2, y, { align: 'center' }); y += 13; }
+  y += 6; doc.setDrawColor(track[0], track[1], track[2]); doc.line(margin, y, pageW - margin, y); y += 18;
 
-  (opts.sections || []).forEach(s => {
-    ensure(40);
-    doc.setFont('times', 'bold'); doc.setFontSize(13); doc.setTextColor(gold[0], gold[1], gold[2]);
-    doc.splitTextToSize(s.heading || '', maxW).forEach(line => { ensure(17); doc.text(line, margin, y); y += 16; });
-    y += 4;
-    doc.setFont('times', 'normal'); doc.setFontSize(11.5); doc.setTextColor(ink[0], ink[1], ink[2]);
-    String(s.body || '').split(/\n{2,}/).filter(p => p.trim()).forEach(p => {
-      doc.splitTextToSize(p.trim().replace(/\s+/g, ' '), maxW).forEach(line => { ensure(15); doc.text(line, margin, y); y += 15; });
-      y += 8;
-    });
-    y += 10;
+  [['Email', m.email], ['Born', m.born], ['Reading', m.dateStr]].filter(r => r[1]).forEach(([k, v]) => {
+    ensure(14); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(muted[0], muted[1], muted[2]); doc.text(k.toUpperCase(), margin, y, { charSpace: 1 });
+    doc.setFont('times', 'normal'); doc.setFontSize(10.5); doc.setTextColor(ink[0], ink[1], ink[2]); doc.text(String(v), margin + 70, y); y += 13;
   });
+  y += 12;
 
-  doc.save(opts.filename || 'signals-reading.pdf');
+  (m.sections || []).forEach(s => { heading(s.heading); String(s.body || '').split(/\n{2,}/).filter(p => p.trim()).forEach(p => para(p, 11.5, ink, 8)); y += 8; });
+
+  const cv = m.convergence;
+  if (cv && cv.fields.length) {
+    ensure(40); heading('Your Signal Map');
+    para('The first bar is how present each current was in the answers; the second, how strongly the birth chart carries it. Both high = a defining signal; one leading = a living edge.', 9.5, muted, 10);
+    cv.fields.forEach(f => {
+      ensure(40);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(ink[0], ink[1], ink[2]);
+      doc.text((f.roman + ' · ' + f.name).toUpperCase(), margin, y, { charSpace: 0.5 }); y += 12;
+      doc.setFont('times', 'normal'); doc.setFontSize(9.5); doc.setTextColor(muted[0], muted[1], muted[2]);
+      doc.splitTextToSize(CD_FIELD_GLOSS[f.roman] || '', maxW).forEach(l => { ensure(12); doc.text(l, margin, y); y += 11; });
+      const drawBar = (key, pct, faded) => {
+        ensure(12); doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(muted[0], muted[1], muted[2]); doc.text(key.toUpperCase(), margin, y + 6, { charSpace: 0.5 });
+        const bx = margin + 56, bw = maxW - 56, bh = 6;
+        doc.setFillColor(232, 224, 202); doc.rect(bx, y, bw, bh, 'F');
+        doc.setFillColor(faded ? 188 : 122, faded ? 158 : 86, faded ? 96 : 24); doc.rect(bx, y, bw * (pct || 0) / 100, bh, 'F');
+        y += bh + 5;
+      };
+      drawBar('Answers', f.quizPct, false); drawBar('Chart', f.chartPct, true); y += 7;
+    });
+    if (cv.freqs && cv.freqs.length) {
+      y += 4; label('The five strongest frequencies surfacing');
+      cv.freqs.forEach(s => { ensure(20); doc.setFont('times', 'bold'); doc.setFontSize(10.5); doc.setTextColor(ink[0], ink[1], ink[2]); doc.text(s.name + '  (' + s.field + ')', margin, y); y += 13; if (s.note) para(s.note, 10, muted, 6); else y += 2; });
+    }
+    y += 8;
+  }
+
+  if (m.affirmation) {
+    ensure(40); y += 6; doc.setDrawColor(track[0], track[1], track[2]); doc.line(margin, y, pageW - margin, y); y += 16;
+    doc.setFont('times', 'italic'); doc.setFontSize(13); doc.setTextColor(gold[0], gold[1], gold[2]);
+    doc.splitTextToSize(m.affirmation, maxW - 40).forEach(l => { ensure(18); doc.text(l, pageW / 2, y, { align: 'center' }); y += 18; });
+    y += 8; doc.setDrawColor(track[0], track[1], track[2]); doc.line(margin, y, pageW - margin, y); y += 18;
+  }
+  if (m.journal) { label('A question to sit with'); doc.setFont('times', 'italic'); doc.setFontSize(12); doc.setTextColor(ink[0], ink[1], ink[2]); doc.splitTextToSize(m.journal, maxW).forEach(l => { ensure(16); doc.text(l, margin, y); y += 16; }); y += 12; }
+  ensure(40); y += 4; label('Where to go next');
+  para('Next step is a short Discovery call to find the right doorway into the work: ' + CD_DISCOVERY_URL, 10.5, ink, 6);
+
+  doc.save(filename || 'signals-reading.pdf');
 }
 
 function cdDownloadTier2Pdf(id, btn) {
   const r = (currentDetailData && currentDetailData.sig2 || []).find(x => x.id === id);
   if (!r) return;
-  const name = (currentDetailData && currentDetailData.client && currentDetailData.client.name) || '';
-  const dateStr = r.created_at ? new Date(r.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '';
-  const slug = (name || 'client').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const m = cdReadingModel(r);
+  const slug = (m.name || 'client').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   if (btn) { btn.disabled = true; btn.textContent = '…'; }
-  try { cdBuildReadingPdf({
-    title: 'Signals Reading',
-    name,
-    dateStr,
-    sections: [
-      { heading: "The Field You're Walking", body: r.field_walking_text },
-      { heading: 'The Register and the Frequencies Surfacing', body: r.register_frequencies_text },
-      { heading: 'What the Threshold Is Asking', body: r.threshold_asking_text },
-    ],
-    filename: `signals-reading-${slug || 'client'}.pdf`,
-  }); } catch (e) { alert('PDF failed: ' + (e && e.message || e)); }
+  try { cdBuildReadingPdf(m, `signals-reading-${slug || 'client'}.pdf`); } catch (e) { alert('PDF failed: ' + (e && e.message || e)); }
   if (btn) setTimeout(() => { btn.disabled = false; btn.textContent = 'PDF'; }, 1500);
 }
 function cdToggleTier1Reading(id) {
