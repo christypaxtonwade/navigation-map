@@ -2092,7 +2092,7 @@ async function loadClientDetail() {
       // (angles — ascendant/MC/IC — exist there only). Asteroids/Chiron are
       // ephemeris-deferred; tier-3 simply renders empty until they land.
       rest(`chart_planets?client_id=eq.${id}&side=eq.personality&select=body,zodiac_sign,zodiac_degree,house,retrograde,longitude&order=body`).catch(() => []),
-      rest(`signals_readings?client_id=eq.${id}&select=id,created_at,arc,field_number,field_name,register,tags,offering_label,viewed_at&order=created_at.desc`).catch(() => []),
+      rest(`signals_readings?client_id=eq.${id}&select=id,created_at,arc,field_number,field_name,register,tags,offering_label,viewed_at,reading_text,reading_html&order=created_at.desc`).catch(() => []),
       rest(`signals_tier2_readings?client_id=eq.${id}&select=id,created_at,viewed_at,email_sent_at,tier1_computed,field_walking_text,register_frequencies_text,threshold_asking_text&order=created_at.desc`).catch(() => [])
     ]);
     const client = clientArr[0];
@@ -2220,7 +2220,7 @@ function cdLifecycleCard(d) {
   const relOpts = `<option value=""${!c.client_relationship?' selected':''}>— unset —</option>` +
     Object.entries(REL_LABELS).map(([v,l]) =>
       `<option value="${v}"${c.client_relationship===v?' selected':''}>${l}</option>`).join('');
-  const statusOpts = ['pending','application_submitted','application_accepted','application_declined','submitted','reviewed','activated'].map(s =>
+  const statusOpts = ['pending','application_submitted','application_accepted','application_declined','submitted','reviewed','activated','tier2_quiz'].map(s =>
     `<option value="${s}"${c.intake_status===s?' selected':''}>${s.replace(/_/g,' ')}</option>`).join('');
   return `
     <div class="cd-card">
@@ -2684,13 +2684,14 @@ function cdTier1HistoryBlock(d) {
           const field = [r.field_number, r.field_name].filter(Boolean).join(' · ') || '—';
           const meta = [r.arc, r.register].filter(Boolean).join(' · ') || '—';
           const tags = Array.isArray(r.tags) && r.tags.length ? r.tags.join(', ') : '—';
+          const readingTxt = r.reading_text || (r.reading_html ? r.reading_html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '');
           return `<tr>
             <td class="sp-dim">${date}</td>
             <td><span class="sp-bodyname">${cdEsc(field)}</span>${r.offering_label ? `<div class="sp-dim">→ ${cdEsc(r.offering_label)}</div>` : ''}</td>
             <td class="sp-dim">${cdEsc(meta)}</td>
             <td>${cdEsc(tags)}</td>
-            <td class="ctr"><span class="sp-pill">${r.viewed_at ? 'viewed' : 'sent'}</span></td>
-          </tr>`;
+            <td class="ctr"><span class="sp-pill">${r.viewed_at ? 'viewed' : 'sent'}</span>${readingTxt ? `<div style="margin-top:0.35rem"><button class="btn btn-outline btn-sm" onclick="cdToggleTier1Reading('${r.id}')">View</button></div>` : ''}</td>
+          </tr>${readingTxt ? `<tr id="cd-t1-body-${r.id}" style="display:none"><td colspan="5"><div class="sp-reading"><div class="sp-reading-body">${cdEsc(readingTxt)}</div></div></td></tr>` : ''}`;
         }).join('')}</tbody>
       </table>`
     : '<div class="sp-empty">No Tier 1 Signals readings linked to this client.</div>';
@@ -2700,7 +2701,7 @@ function cdTier1HistoryBlock(d) {
 function cdTier2HistoryBlock(d) {
   const rows = d.sig2 || [];
   const body = rows.length
-    ? rows.map(r => {
+    ? rows.map((r, i) => {
         const date = r.created_at ? new Date(r.created_at).toLocaleString() : '—';
         let dom = '';
         try { const c = r.tier1_computed || {}; dom = [c.dominant_field, c.primary_subterrain].filter(Boolean).join(' · '); } catch (_) {}
@@ -2709,17 +2710,18 @@ function cdTier2HistoryBlock(d) {
           : '';
         const hasText = r.field_walking_text || r.register_frequencies_text || r.threshold_asking_text;
         const status = r.viewed_at ? 'viewed' : (r.email_sent_at ? 'sent' : 'draft');
+        const open = i === 0; // most recent reading expanded by default
         return `
           <div class="sp-t2">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:0.6rem;flex-wrap:wrap">
-              <div><span class="sp-bodyname">Tier 2 Reading</span><div class="sp-dim">${date}${dom ? ' · ' + cdEsc(dom) : ''}</div></div>
-              <div style="display:flex;align-items:center;gap:0.5rem"><span class="sp-pill">${status}</span>${hasText ? `<button class="btn btn-outline btn-sm" onclick="cdToggleTier2Reading('${r.id}')">View</button>` : ''}</div>
+              <div><span class="sp-bodyname">Tier 2 Reading</span>${i === 0 ? ' <span class="sp-pill" style="color:var(--gold)">latest</span>' : ''}<div class="sp-dim">${date}${dom ? ' · ' + cdEsc(dom) : ''}</div></div>
+              <div style="display:flex;align-items:center;gap:0.5rem"><span class="sp-pill">${status}</span>${hasText ? `<button class="btn btn-outline btn-sm" onclick="cdToggleTier2Reading('${r.id}')">${open ? 'Hide' : 'View'}</button>` : ''}</div>
             </div>
-            ${hasText ? `<div id="cd-t2-body-${r.id}" style="display:none">${sec("The Field You're Walking", r.field_walking_text)}${sec('The Register and the Frequencies Surfacing', r.register_frequencies_text)}${sec('What the Threshold Is Asking', r.threshold_asking_text)}</div>` : ''}
+            ${hasText ? `<div id="cd-t2-body-${r.id}" style="display:${open ? 'block' : 'none'}">${sec("The Field You're Walking", r.field_walking_text)}${sec('The Register and the Frequencies Surfacing', r.register_frequencies_text)}${sec('What the Threshold Is Asking', r.threshold_asking_text)}</div>` : ''}
           </div>`;
       }).join('')
     : '<div class="sp-empty">No Tier 2 readings linked to this client.</div>';
-  return `<div class="sp-section"><h4 class="sp-h">Tier 2 Readings · ${rows.length}</h4>${body}</div>`;
+  return `<div class="sp-section"><h4 class="sp-h">Tier 2 Readings · ${rows.length}</h4>${rows.length ? '<p class="sp-sub">The full reading the client receives by email. The most recent is shown expanded.</p>' : ''}${body}</div>`;
 }
 
 function cdConvergenceEditorBlock(d) {
@@ -2856,6 +2858,11 @@ function cdRevertConvSection(id) {
 function cdToggleTier2Reading(id) {
   const el = document.getElementById('cd-t2-body-' + id);
   if (el) el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
+}
+function cdToggleTier1Reading(id) {
+  // Tier 1 detail is a table row — toggle between hidden and default (table-row).
+  const el = document.getElementById('cd-t1-body-' + id);
+  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
 }
 
 function cdAdminNotesCard(d) {
