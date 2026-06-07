@@ -256,6 +256,29 @@ body {
 .astro-table.offerings .astro-pos { white-space: normal; color: var(--gold); }
 .astro-table.offerings .astro-body { white-space: normal; }
 
+/* ── Chart Analysis · emphasis bars ── */
+.analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+.analysis-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem 1.25rem; }
+.analysis-h { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.06em; color: var(--gold); margin-bottom: 0.75rem; }
+.bal-row { display: grid; grid-template-columns: 12rem 1fr auto; gap: 0.75rem; align-items: center; margin-bottom: 0.5rem; }
+.bal-row:last-child { margin-bottom: 0; }
+.bal-lbl { font-size: 15px; color: var(--text); }
+.bal-bar { height: 8px; background: var(--accent); border-radius: 4px; overflow: hidden; }
+.bal-fill { display: block; height: 100%; background: var(--gold); }
+.bal-val { font-size: 15px; color: var(--text-dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ── Aspects + Chart x Quiz convergence ── */
+.astro-table .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.astro-table .ctr { text-align: center; }
+.astro-aspect-glyph { font-size: 18px; color: var(--gold); }
+.cq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.cq-headline { font-size: 18px; color: var(--text); font-weight: 600; margin: 0.2rem 0 0.4rem; }
+.cq-block { margin-top: 0.9rem; }
+.cq-h { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.05em; color: var(--gold); margin-bottom: 0.4rem; }
+.cq-list { margin: 0; padding-left: 1.2rem; }
+.cq-list li { font-size: 15px; color: var(--text); line-height: 1.5; margin-bottom: 0.2rem; }
+.synthesis-text { width: 100%; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 16px; line-height: 1.65; min-height: 340px; resize: vertical; }
+
 /* ── Planet positions table ── */
 .planets-table {
   width: 100%; border-collapse: collapse;
@@ -494,7 +517,7 @@ async function init() {
     } catch (e) { console.warn('lineage_resonance_check failed:', e); }
 
     // Astrology: natal placements + the Map activations each one drives.
-    const placements  = await sb(`chart_planets?client_id=eq.${CLIENT_ID}&side=eq.personality&select=body,zodiac_sign,zodiac_degree,house,retrograde&order=body`).catch(() => []);
+    const placements  = await sb(`chart_planets?client_id=eq.${CLIENT_ID}&side=eq.personality&select=body,zodiac_sign,zodiac_degree,longitude,house,retrograde&order=body`).catch(() => []);
     const bodyWeights = await sb(`chart_body_weights?select=body_name,body_tier,body_weight,is_angle`).catch(() => []);
     const signFields  = await sb(`sign_field_activations?select=sign_name,field_id,is_secondary`).catch(() => []);
     const houseFields = await sb(`house_field_activations?select=house_number,field_id,is_secondary`).catch(() => []);
@@ -502,8 +525,15 @@ async function init() {
     const subs        = await sb(`subterrains?select=id,name,field_id`).catch(() => []);
     const subById     = Object.fromEntries(subs.map(s => [s.id, s]));
 
+    // Chart x quiz convergence — present only if the client has a Tier 2 reading.
+    const t2 = (await sb(`signals_tier2_readings?client_id=eq.${CLIENT_ID}&order=created_at.desc&limit=1&select=created_at,tier2_answers`).catch(() => []))[0] || null;
+    const convergence = t2?.tier2_answers?.convergence_package || null;
+
+    // AI working brief (internal), if one has been generated.
+    const synthesis = (await sb(`client_chart_synthesis?client_id=eq.${CLIENT_ID}&select=synthesis_text,model,updated_at`).catch(() => []))[0] || null;
+
     page.innerHTML = render({ client, birth, hd, gk, refByNum, fieldById, matches,
-      placements, bodyWeights, signFields, houseFields, astSubs, subById });
+      placements, bodyWeights, signFields, houseFields, astSubs, subById, convergence, synthesis });
     wireNotes(birth);
     wireSaveAndRecompute(client);
     wireCityAutocomplete();
@@ -529,11 +559,15 @@ function fmtDate(d) {
 function fmtTime(t) { return t || '—'; }
 
 function render({ client, birth, hd, gk, refByNum, fieldById, matches,
-                 placements, bodyWeights, signFields, houseFields, astSubs, subById }) {
+                 placements, bodyWeights, signFields, houseFields, astSubs, subById, convergence, synthesis }) {
   return `
     ${renderHeader(client, birth)}
+    ${renderSynthesis({ synthesis })}
     ${renderBirthForm(birth)}
     ${renderAstrology({ placements, bodyWeights, signFields, houseFields, astSubs, fieldById, subById })}
+    ${renderChartAnalysis({ placements, signFields, houseFields, fieldById })}
+    ${renderAspects({ placements })}
+    ${renderChartQuizConvergence({ convergence })}
     ${renderHD(hd)}
     ${renderActivation(gk, refByNum, fieldById)}
     ${renderVenus(gk, refByNum, fieldById)}
@@ -767,6 +801,191 @@ function renderAstrology(d) {
     <div class="section-intro">The natal chart (tropical, Placidus houses), grouped by the scoring tiers. Each body's <b>sign</b> and <b>house</b> light specific Map <b>Fields</b>; the mapped minor bodies also light specific <b>Subterrains</b>. Faded chips are secondary activations. Notes are quick-reference for what each body carries.</div>
     ${[1,2,3,0].map(tierBlock).join('')}
   </div>`;
+}
+
+// ── Chart Analysis · structured emphasis (deterministic, from placements) ──
+const ASTRO_ELEMENTS = { aries:'Fire', leo:'Fire', sagittarius:'Fire', taurus:'Earth', virgo:'Earth', capricorn:'Earth', gemini:'Air', libra:'Air', aquarius:'Air', cancer:'Water', scorpio:'Water', pisces:'Water' };
+const ASTRO_MODALITIES = { aries:'Cardinal', cancer:'Cardinal', libra:'Cardinal', capricorn:'Cardinal', taurus:'Fixed', leo:'Fixed', scorpio:'Fixed', aquarius:'Fixed', gemini:'Mutable', virgo:'Mutable', sagittarius:'Mutable', pisces:'Mutable' };
+// Balance is read over the personal/social/outer bodies + the individuating angles.
+const BALANCE_BODIES = ['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','ascendant','midheaven','chiron'];
+
+function renderChartAnalysis(d) {
+  const { placements, signFields, houseFields, fieldById } = d;
+  if (!placements || !placements.length) return '';
+  const byBody = Object.fromEntries(placements.map(p => [p.body, p]));
+
+  const el = { Fire:0, Earth:0, Air:0, Water:0 };
+  const mo = { Cardinal:0, Fixed:0, Mutable:0 };
+  let counted = 0;
+  BALANCE_BODIES.forEach(b => {
+    const p = byBody[b];
+    if (p && p.zodiac_sign) {
+      const e = ASTRO_ELEMENTS[p.zodiac_sign], m = ASTRO_MODALITIES[p.zodiac_sign];
+      if (e) { el[e]++; counted++; }
+      if (m) mo[m]++;
+    }
+  });
+  const totalMo = mo.Cardinal + mo.Fixed + mo.Mutable;
+
+  // Field emphasis: tally Map Fields lit across all placements (sign + house).
+  const s2f = {}; (signFields||[]).forEach(s => { (s2f[s.sign_name] = s2f[s.sign_name] || []).push(s.field_id); });
+  const h2f = {}; (houseFields||[]).forEach(h => { (h2f[h.house_number] = h2f[h.house_number] || []).push(h.field_id); });
+  const fieldCount = {};
+  placements.forEach(p => {
+    const ids = new Set([...(s2f[p.zodiac_sign]||[]), ...(h2f[p.house]||[])]);
+    ids.forEach(id => { fieldCount[id] = (fieldCount[id]||0) + 1; });
+  });
+  const topFields = Object.entries(fieldCount).map(([id,n]) => ({ f: fieldById[id], n })).filter(x => x.f).sort((a,b) => b.n - a.n).slice(0, 5);
+
+  const bar = (label, val, total) => {
+    const pct = total ? Math.round(val/total*100) : 0;
+    return `<div class="bal-row"><span class="bal-lbl">${label}</span><span class="bal-bar"><span class="bal-fill" style="width:${pct}%"></span></span><span class="bal-val">${val} · ${pct}%</span></div>`;
+  };
+
+  return `<div class="section">
+    <div class="section-title">Chart Analysis · Emphasis</div>
+    <div class="section-intro">A quantitative read over the personal, social, and outer bodies (Sun–Pluto, Ascendant, Midheaven, Chiron). <b>Element</b> and <b>modality</b> show the chart's temperament; <b>Field emphasis</b> shows where the placements concentrate on the Map.</div>
+    <div class="analysis-grid">
+      <div class="analysis-box">
+        <div class="analysis-h">Element balance</div>
+        ${bar('Fire',el.Fire,counted)}${bar('Earth',el.Earth,counted)}${bar('Air',el.Air,counted)}${bar('Water',el.Water,counted)}
+      </div>
+      <div class="analysis-box">
+        <div class="analysis-h">Modality balance</div>
+        ${bar('Cardinal',mo.Cardinal,totalMo)}${bar('Fixed',mo.Fixed,totalMo)}${bar('Mutable',mo.Mutable,totalMo)}
+      </div>
+    </div>
+    <div class="analysis-box" style="margin-top:1rem">
+      <div class="analysis-h">Field emphasis — where the chart concentrates on the Map</div>
+      ${topFields.length ? topFields.map(x => bar(`F${x.f.number} · ${escapeHtml(x.f.name)}`, x.n, placements.length)).join('') : '<div class="astro-muted">No field activations.</div>'}
+    </div>
+  </div>`;
+}
+
+// ── Aspects (major geometric relationships between the core bodies) ──
+const ASPECT_DEFS = [
+  { name:'Conjunction', glyph:'☌', angle:0,   orb:8 },
+  { name:'Opposition',  glyph:'☍', angle:180, orb:8 },
+  { name:'Trine',       glyph:'△', angle:120, orb:7 },
+  { name:'Square',      glyph:'□', angle:90,  orb:7 },
+  { name:'Sextile',     glyph:'⚹', angle:60,  orb:5 }
+];
+const ASPECT_BODIES = ['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','chiron','north_node','ascendant','midheaven'];
+
+function renderAspects(d) {
+  const placements = (d.placements||[]).filter(p => ASPECT_BODIES.includes(p.body) && p.longitude!=null);
+  if (placements.length < 2) return '';
+  const found = [];
+  for (let i=0;i<placements.length;i++){
+    for (let j=i+1;j<placements.length;j++){
+      const a=placements[i], b=placements[j];
+      let sep = Math.abs(Number(a.longitude)-Number(b.longitude)) % 360;
+      if (sep>180) sep = 360-sep;
+      for (const asp of ASPECT_DEFS){
+        const orb = Math.abs(sep-asp.angle);
+        if (orb<=asp.orb){ found.push({ a:a.body, b:b.body, asp, orb }); break; }
+      }
+    }
+  }
+  if (!found.length) return `<div class="section"><div class="section-title">Aspects</div><div class="matches-empty">No major aspects within orb among the core bodies.</div></div>`;
+  found.sort((x,y)=>x.orb-y.orb);
+  const nm = b => ASTRO_BODY_NAMES[b] || astroCap(b.replace(/_/g,' '));
+  const rows = found.map(f => `<tr>
+    <td class="astro-body">${escapeHtml(nm(f.a))}</td>
+    <td class="ctr astro-aspect-glyph" title="${f.asp.name}">${f.asp.glyph}</td>
+    <td class="astro-body">${escapeHtml(nm(f.b))}</td>
+    <td class="astro-pos">${f.asp.name}</td>
+    <td class="astro-pos num">${f.orb.toFixed(1)}°</td>
+  </tr>`).join('');
+  return `<div class="section">
+    <div class="section-title">Aspects · ${found.length}</div>
+    <div class="section-intro">The major geometric relationships among the core bodies — conjunction, opposition, trine, square, sextile — tightest first. Orbs: 8° conjunction/opposition, 7° trine/square, 5° sextile.</div>
+    <table class="astro-table"><thead><tr><th>Body</th><th class="ctr">Aspect</th><th>Body</th><th>Type</th><th class="num">Orb</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
+}
+
+// ── Chart x Quiz convergence (only when the client has a Tier 2 reading) ──
+function renderChartQuizConvergence(d) {
+  const c = d.convergence;
+  if (!c) return '';
+  const df = c.dominant_field || {};
+  const ps = c.primary_subterrain || {};
+  const fs = (c.field_strengths || []).slice(0, 6);
+  const conv = c.top_convergent_subterrains || [];
+  const divB = c.divergence_rated_chart_dark || [];
+  const divA = c.divergence_chart_lit_rating_flat || [];
+  const num = n => (n==null ? '—' : Number(n).toFixed(1));
+  const fsRows = fs.map(f => `<tr><td class="astro-body">${escapeHtml(f.roman||'')} · ${escapeHtml(f.name||'')}</td><td class="num">${num(f.positive_rating_sum ?? f.rating_sum)}</td><td class="num">${num(f.chart_brightness)}</td></tr>`).join('');
+  const list = (arr, label) => arr.length
+    ? `<div class="cq-block"><div class="cq-h">${label}</div><ul class="cq-list">${arr.map(x => `<li>${escapeHtml(x.subterrain_name||x.name||'—')}${x.field_roman?` <span class="astro-muted">(${escapeHtml(x.field_roman)})</span>`:''}</li>`).join('')}</ul></div>`
+    : '';
+  return `<div class="section">
+    <div class="section-title">Chart × Quiz Convergence</div>
+    <div class="section-intro">From this client's most recent Signals Reading. Where their birth design (chart) and what's surfacing now (quiz) agree is the high-confidence spine; where they diverge is the live edge. The numbers are the engine's internal weighting — for your eyes, never shown to the client.</div>
+    <div class="cq-grid">
+      <div class="analysis-box">
+        <div class="analysis-h">Dominant Field</div>
+        <div class="cq-headline">${escapeHtml(df.roman||'')} · ${escapeHtml(df.name||'—')}</div>
+        <div class="astro-muted">Primary Subterrain: ${escapeHtml(ps.subterrain_name||'—')}</div>
+        <div class="astro-muted">Dominant register: ${escapeHtml(c.dominant_register||'—')}</div>
+      </div>
+      <div class="analysis-box">
+        <div class="analysis-h">Field strengths (rating · chart)</div>
+        <table class="astro-table"><thead><tr><th>Field</th><th class="num">Rating</th><th class="num">Chart</th></tr></thead><tbody>${fsRows}</tbody></table>
+      </div>
+    </div>
+    ${list(conv, 'Convergent — strong in both design and now')}
+    ${list(divB, 'Surfacing now, not in the design (acquired / situational)')}
+    ${list(divA, 'In the design, not lived right now (dormant)')}
+  </div>`;
+}
+
+// ── Chart Synthesis (AI working brief, internal) ──
+function renderSynthesis(d) {
+  const s = d.synthesis;
+  const updated = s?.updated_at ? new Date(s.updated_at).toLocaleString() : '';
+  const has = s && s.synthesis_text;
+  return `<div class="section">
+    <div class="section-title">Chart Synthesis · working brief (internal)</div>
+    <div class="section-intro">An AI synthesis of this client's chart, Gene Keys, Human Design, Map terrain, and — if present — their Signals convergence, written in your voice for your eyes. Editable; regenerate after a recompute. Never shown to the client.</div>
+    ${has ? `
+      <textarea class="field-input synthesis-text" id="synthesis-text" rows="16">${escapeHtml(s.synthesis_text)}</textarea>
+      <div class="form-actions" style="margin-top:0.65rem">
+        <button class="btn btn-primary" onclick="cdSaveSynthesis()">Save edits</button>
+        <button class="btn" onclick="cdGenerateSynthesis()">Regenerate</button>
+        <span class="form-status" id="synthesis-status">${updated ? 'last generated ' + escapeHtml(updated) : ''}</span>
+      </div>` : `
+      <button class="btn btn-primary" onclick="cdGenerateSynthesis()">Generate synthesis</button>
+      <span class="form-status" id="synthesis-status" style="margin-left:0.6rem"></span>
+      <div class="matches-empty" style="margin-top:0.6rem">No synthesis yet. Generate one once the chart is computed.</div>`}
+  </div>`;
+}
+
+async function cdGenerateSynthesis() {
+  const status = document.getElementById('synthesis-status');
+  if (status) status.textContent = 'generating… (~15s)';
+  try {
+    const token = await getFreshAccessToken();
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-client-synthesis`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token || SUPABASE_KEY}` },
+      body: JSON.stringify({ client_id: CLIENT_ID })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || data.details || `HTTP ${res.status}`);
+    if (status) status.textContent = 'generated — refreshing…';
+    setTimeout(() => location.reload(), 500);
+  } catch (e) { if (status) status.textContent = 'failed: ' + e.message; }
+}
+async function cdSaveSynthesis() {
+  const ta = document.getElementById('synthesis-text');
+  const status = document.getElementById('synthesis-status');
+  if (!ta) return;
+  if (status) status.textContent = 'saving…';
+  try {
+    await sbPatch('client_chart_synthesis', 'client_id', CLIENT_ID, { synthesis_text: ta.value, updated_at: new Date().toISOString() });
+    if (status) status.textContent = 'saved · ' + new Date().toLocaleTimeString();
+  } catch (e) { if (status) status.textContent = 'failed: ' + e.message; }
 }
 
 // Sequences → offerings: how to route what the chart shows into the ladder.
