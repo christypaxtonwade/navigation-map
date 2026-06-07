@@ -73,12 +73,9 @@ body {
 
 /* ── Sections ── */
 .section { margin-top: 3.5rem; padding-top: 2.25rem; border-top: 1px solid var(--border); }
-.hd-table { max-width: 560px; }
-.hd-table td:first-child { font-family: 'Jost', sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); width: 180px; white-space: nowrap; }
-.hd-prose { margin-top: 1.25rem; max-width: 820px; }
-.hd-prose p { font-size: 16px; line-height: 1.62; color: var(--text-secondary); margin-bottom: 0.85rem; }
-.hd-prose b { color: var(--text); }
-.hd-prose i { color: var(--text); font-style: italic; }
+.hd-table td:first-child { font-family: 'Jost', sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); width: 150px; white-space: nowrap; vertical-align: top; }
+.hd-table td:nth-child(2) { color: var(--text); white-space: nowrap; vertical-align: top; }
+.hd-table td:nth-child(3) { color: var(--text-secondary); }
 .section-title {
   font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500;
   letter-spacing: 0.22em; text-transform: uppercase;
@@ -663,15 +660,69 @@ function downloadChartPdf(btn) {
         pdfClean(raw).split(/\n{2,}/).forEach(p => para(p, 10.5));
       }
     };
-    const renderSeq = grid => {
-      grid.querySelectorAll('.seq-card').forEach(card => {
-        const t = sel => ((card.querySelector(sel) || {}).textContent || '').trim();
-        y += 3;
-        boldLine([t('.seq-sphere'), t('.seq-gk')].filter(Boolean).join('   '), 10.5, gold);
-        const detail = [t('.seq-arc'), t('.seq-meta'), t('.seq-field')].filter(Boolean).join('   ·   ');
-        if (detail) para(detail, 10);
-        const note = t('.seq-note'); if (note) para(note, 9.5, muted);
+    // Gene Keys sequence → table (one row per sphere).
+    const renderSeqTable = grid => {
+      const body = Array.from(grid.querySelectorAll('.seq-card')).map(card => {
+        const t = sel => pdfClean(((card.querySelector(sel) || {}).textContent || '').trim());
+        const cf = [t('.seq-meta'), t('.seq-field')].filter(Boolean).join(' · ');
+        return [t('.seq-sphere'), t('.seq-gk'), t('.seq-arc'), cf, t('.seq-note')];
       });
+      if (!body.length) return;
+      ensure(48);
+      doc.autoTable({
+        head: [['Sphere', 'Key', 'Shadow > Gift > Siddhi', 'Center · Field', 'In session']],
+        body, startY: y, margin: { left: margin, right: margin },
+        styles: { font: 'times', fontSize: 8, cellPadding: 3, textColor: [28, 23, 13], lineColor: [216, 199, 154], lineWidth: 0.4, overflow: 'linebreak', valign: 'top' },
+        headStyles: { fillColor: [122, 86, 24], textColor: [255, 255, 255], fontStyle: 'bold' },
+        columnStyles: { 0: { cellWidth: 58, fontStyle: 'bold' }, 1: { cellWidth: 32 }, 2: { cellWidth: 96 }, 3: { cellWidth: 80 }, 4: { cellWidth: 'auto' } },
+        theme: 'grid',
+      });
+      y = doc.lastAutoTable.finalY + 12;
+    };
+    // Chart Analysis · Emphasis → drawn bar charts (no font issues).
+    const renderBars = sec => {
+      sec.querySelectorAll('.analysis-box').forEach(box => {
+        const h = ((box.querySelector('.analysis-h') || {}).textContent || '').trim();
+        if (h) { y += 4; boldLine(h, 10, gold); y += 3; }
+        box.querySelectorAll('.bal-row').forEach(row => {
+          const lbl = pdfClean(((row.querySelector('.bal-lbl') || {}).textContent || '').trim());
+          const valText = pdfClean(((row.querySelector('.bal-val') || {}).textContent || '').trim());
+          const m = valText.match(/(\d+)\s*%/); const pct = m ? Math.max(0, Math.min(100, parseInt(m[1], 10))) : 0;
+          const barH = 8; ensure(barH + 6);
+          const lblW = 150, valW = 64, barX = margin + lblW, barW = maxW - lblW - valW;
+          doc.setFont('times', 'normal'); doc.setFontSize(9.5); doc.setTextColor(ink[0], ink[1], ink[2]);
+          doc.text(lbl, margin, y + barH - 1);
+          doc.setDrawColor(216, 199, 154); doc.setFillColor(238, 231, 209); doc.rect(barX, y, barW, barH, 'FD');
+          if (pct > 0) { doc.setFillColor(122, 86, 24); doc.rect(barX, y, barW * pct / 100, barH, 'F'); }
+          doc.setFontSize(8.5); doc.setTextColor(muted[0], muted[1], muted[2]);
+          doc.text(valText, barX + barW + 6, y + barH - 1);
+          y += barH + 6;
+        });
+        y += 4;
+      });
+    };
+    // Lineage Resonance → table (one row per ancestor match), when populated.
+    const renderMatchesTable = sec => {
+      const rows = [];
+      sec.querySelectorAll('.match-group').forEach(g => {
+        const header = pdfClean(((g.querySelector('.match-group-header') || {}).textContent || '').trim());
+        g.querySelectorAll('.match-row').forEach(r => {
+          const t = sel => pdfClean(((r.querySelector(sel) || {}).textContent || '').trim());
+          const meta = t('.match-meta');
+          rows.push([header, t('.match-name') + (meta ? '\n' + meta : ''), t('.match-strength'), t('.match-context')]);
+        });
+      });
+      if (!rows.length) return;
+      ensure(48);
+      doc.autoTable({
+        head: [['Match', 'Ancestor', 'Strength', 'Context']],
+        body: rows, startY: y, margin: { left: margin, right: margin },
+        styles: { font: 'times', fontSize: 8, cellPadding: 3, textColor: [28, 23, 13], lineColor: [216, 199, 154], lineWidth: 0.4, overflow: 'linebreak', valign: 'top' },
+        headStyles: { fillColor: [122, 86, 24], textColor: [255, 255, 255], fontStyle: 'bold' },
+        columnStyles: { 0: { cellWidth: 110 }, 1: { cellWidth: 110 }, 2: { cellWidth: 50 }, 3: { cellWidth: 'auto' } },
+        theme: 'grid',
+      });
+      y = doc.lastAutoTable.finalY + 12;
     };
     // Readable line extraction for div-based sections (breaks at block boundaries).
     const blockLines = root => {
@@ -709,17 +760,21 @@ function downloadChartPdf(btn) {
 
       const ta = sec.querySelector('textarea');
       const seqGrid = sec.querySelector('.seq-grid');
+      const balRow = sec.querySelector('.bal-row');
+      const matchGroup = sec.querySelector('.match-group');
       const tables = Array.from(sec.querySelectorAll('table'));
-      const hdProse = sec.querySelector('.hd-prose');
       const emptyEl = sec.querySelector('.matches-empty, .astro-muted');
 
       if (ta && ta.value.trim()) {
         renderSynthesis(ta.value);
       } else if (seqGrid) {
-        renderSeq(seqGrid);
+        renderSeqTable(seqGrid);
+      } else if (balRow) {
+        renderBars(sec);
+      } else if (matchGroup) {
+        renderMatchesTable(sec);
       } else if (tables.length) {
         tables.forEach(renderTable);
-        if (hdProse) hdProse.querySelectorAll('p').forEach(p => para(p.textContent, 10));
       } else if (emptyEl) {
         para(emptyEl.textContent, 10, muted);
       } else {
@@ -1165,40 +1220,41 @@ function renderOfferingsMap() {
   </div>`;
 }
 
-// How each Human Design dimension reads on the Map. Client-specific where the
-// value is known; falls back to the general principle otherwise.
-const HD_TYPE_MAP = {
-  manifesting_generator: "Built to respond, then move fast. The sacral lights up in answer to what is actually in front of them, so they enter a Field by responding to what energizes them rather than forcing a way in — and they skip steps when the yes is real. They stall and scatter when they override that response and initiate from the mind.",
-  generator: "Built to respond. Energy is sustainable only when the sacral has answered a genuine yes; initiating from the head leads to frustration. On the Map, they enter a Field by responding to what is actually present, not by deciding to.",
-  projector: "Built to see and guide, not to keep pace with sacral beings. Their gift is recognizing the system in another — but it lands cleanly only when invited. This is a body wired for the Mirror (Field IX) and the Teaching (Field XI): made to read terrain, not push through it.",
-  manifestor: "Built to initiate and inform. Here to start things in their own timing rather than wait for response. On the Map, they open Fields that others then move through.",
-  reflector: "Built to sample the whole — almost entirely open, taking a full lunar cycle to find clarity. On the Map, they read the health of an entire Field by feeling it through their own body.",
+// Concise per-dimension notes connecting each Human Design value to the Map —
+// short enough to live inline in the table's third column.
+const HD_TYPE_NOTE = {
+  manifesting_generator: "Built to respond, not initiate — enters a Field by following what genuinely energizes the body, and scatters when it pushes from the mind.",
+  generator: "Built to respond — sustainable energy follows a true gut yes; frustration follows initiating from the head.",
+  projector: "Built to see and guide when invited — wired for the Mirror (IX) and the Teaching (XI), reading terrain rather than pushing through it.",
+  manifestor: "Built to initiate and inform — opens Fields that others then move through.",
+  reflector: "Almost entirely open — reads the health of a whole Field through the body, over a lunar cycle.",
 };
-const HD_AUTHORITY_MAP = {
-  emotional: "Clarity arrives over time, across an emotional wave — never in the heat of the moment. This is a somatic-emotional register of contact, not a conceptual one: the truest decisions are the ones slept on. Acting before the wave completes is a reliable mechanism of self-betrayal.",
-  sacral: "Truth speaks in the body's immediate yes/no — a gut sound in the present moment, before the mind explains it. Decisions hold when they follow that sound rather than the argument over it.",
-  splenic: "A quiet, one-time intuitive knowing in the present moment — spontaneous and easy to miss. The body knows once; it does not repeat itself.",
-  ego: "Decisions hold when the heart genuinely wants the thing and has the will to back it — what they can promise from desire, not obligation.",
-  ego_projected: "Decisions hold when the heart genuinely wants the thing and has the will to back it — what they can promise from desire, not obligation.",
-  self_projected: "Truth is heard in their own voice — they need to talk it out and listen to what they say and the tone it carries. Direction is auditory and self-referential.",
-  mental: "No single inner authority to decide alone — clarity comes through talking it through with trusted people in a sounding environment, over time.",
-  none: "No fixed inner authority — clarity comes by sampling many perspectives over time rather than deciding on the spot.",
+const HD_AUTH_NOTE = {
+  emotional: "Truth lands over an emotional wave, not in the moment — the somatic register of contact. Decisions need time.",
+  sacral: "Truth is the body's immediate gut yes/no, before the mind explains it.",
+  splenic: "A quiet, one-time intuitive knowing in the present moment — easy to miss.",
+  ego: "Holds when the heart genuinely wants the thing and has the will to back it.",
+  ego_projected: "Holds when the heart genuinely wants the thing and has the will to back it.",
+  self_projected: "Heard in their own voice — they need to talk it out and listen to the tone it carries.",
+  mental: "No single inner authority — clarity comes through talking it through with trusted people over time.",
+  none: "Clarity comes by sampling many perspectives over time, not deciding on the spot.",
 };
-const HD_PROFILE_LINES = {
-  '1': 'the Investigator (needs a secure foundation of study before they feel safe to act)',
-  '2': 'the Hermit (a natural gift that emerges when it is called out of them)',
-  '3': 'the Martyr (learns the terrain by trial and error, discovering by bumping into what does not work)',
-  '4': 'the Opportunist (lives and works through relationship and a known network)',
-  '5': 'the Heretic (projected onto as the one with the answer; the practical, universalizing fixer)',
-  '6': 'the Role Model (lives in three phases, slowly becoming a living example)',
-};
-function hdProfileBlurb(p) {
+const HD_LINE_SHORT = { '1': 'Investigator', '2': 'Hermit', '3': 'Martyr (trial and error)', '4': 'Opportunist (network)', '5': 'Heretic (projected-upon)', '6': 'Role Model' };
+function hdProfileNote(p) {
   const m = String(p || '').match(/(\d)\D+(\d)/);
   if (!m) return '';
-  const a = HD_PROFILE_LINES[m[1]], b = HD_PROFILE_LINES[m[2]];
+  const a = HD_LINE_SHORT[m[1]], b = HD_LINE_SHORT[m[2]];
   if (!a || !b) return '';
-  return `The conscious line, ${a}, sits over the unconscious line, ${b}. Together they describe the social geometry of the work — how this person learns the terrain and how others meet them in it. A 5 in any profile is the seat of projection, which is the structural ground of the Mirror (Field IX) and the Teaching (Field XI).`;
+  let s = `Conscious ${a} over unconscious ${b}.`;
+  if (m[1] === '5' || m[2] === '5') s += ' The 5 is the seat of projection — the ground of the Mirror (IX) and the Teaching (XI).';
+  return s;
 }
+const HD_DEF_NOTE = {
+  single: "All defined centers wired into one circuit — self-contained processing.",
+  split: "Defined centers in two groups — others naturally bridge the gap.",
+  triple_split: "Three groups of definition — needs varied input to connect them.",
+  quadruple_split: "Four groups — highly compartmentalized processing.",
+};
 
 function renderHD(hd) {
   if (!hd) return `
@@ -1210,31 +1266,23 @@ function renderHD(hd) {
   const channels = (hd.defined_channels || []).map(([a, b]) => `${a}–${b}`).join(' · ') || '—';
   const tidy = v => (v || '—').replace(/_/g, ' ');
   const rows = [
-    ['Type', tidy(hd.type)],
-    ['Authority', tidy(hd.authority)],
-    ['Profile', hd.profile || '—'],
-    ['Definition', tidy(hd.definition_type)],
-    ['Defined centers', list(hd.defined_centers)],
-    ['Open centers', list(hd.open_centers)],
-    ['Defined channels', channels],
-  ].map(([k, v]) => `<tr><td class="astro-body">${k}</td><td class="astro-pos">${escapeHtml(v)}</td></tr>`).join('');
-
-  const typeNote = HD_TYPE_MAP[hd.type] || '';
-  const authNote = HD_AUTHORITY_MAP[hd.authority] || '';
-  const profNote = hdProfileBlurb(hd.profile);
+    ['Type', tidy(hd.type), HD_TYPE_NOTE[hd.type] || ''],
+    ['Authority', tidy(hd.authority), HD_AUTH_NOTE[hd.authority] || ''],
+    ['Profile', hd.profile || '—', hdProfileNote(hd.profile)],
+    ['Definition', tidy(hd.definition_type), HD_DEF_NOTE[hd.definition_type] || ''],
+    ['Defined centers', list(hd.defined_centers), 'The consistent terrain transmitted from. Throat = Field V; sacral and root = Fields IV and VI; spleen = real-time bodily knowing; solar plexus = the emotional wave.'],
+    ['Open centers', list(hd.open_centers), 'Where porous and conditioned. An open G or Heart can borrow identity, direction, or worth from the room — the Mirror (Field IX).'],
+    ['Defined channels', channels, "The fixed circuitry — always-on wiring beneath the chart's strongest Fields."],
+  ].map(([k, v, note]) => `<tr><td class="astro-body">${k}</td><td class="astro-pos">${escapeHtml(v)}</td><td class="astro-note">${escapeHtml(note)}</td></tr>`).join('');
 
   return `
     <div class="section">
       <div class="section-title">Human Design · at a glance</div>
-      <table class="astro-table hd-table"><tbody>${rows}</tbody></table>
-      <div class="hd-prose">
-        <p><b>How this reads on the Map.</b> Human Design describes the body's energetic mechanics; the Map describes the terrain that mechanics moves through. Read together, the design shows <i>how</i> this person engages whatever Field they are standing in — where they are reliable, where they are porous, and the register in which truth actually reaches them.</p>
-        ${typeNote ? `<p><b>Type — ${tidy(hd.type)}.</b> ${typeNote}</p>` : ''}
-        ${authNote ? `<p><b>Authority — ${tidy(hd.authority)}.</b> ${authNote}</p>` : ''}
-        ${profNote ? `<p><b>Profile — ${escapeHtml(hd.profile || '')}.</b> ${profNote}</p>` : ''}
-        <p><b>Centers.</b> Defined centers are the consistent terrain this person transmits from and can rely on; open centers are where they are porous — sampling, amplifying, and most conditioned by whoever is in the room. The throat is the gate of Field V (Resonance in Language); the sacral and root carry the body's drive and stamina (Field IV, Embodied Signal; Field VI, Body as Active Practice); the spleen is real-time bodily knowing; the solar plexus is the emotional wave. An open G or Heart is where identity, direction, or worth can be quietly borrowed from others — the Mirror, Field IX — and the work is to tell what is theirs from what they have absorbed.</p>
-        <p><b>Defined channels.</b> The fixed circuitry — the through-lines that are always on, the consistent wiring running beneath the Fields the chart most strongly activates.</p>
-      </div>
+      <div class="section-intro">Human Design describes the body's energetic mechanics; the Map describes the terrain that mechanics moves through. Each row shows how the two connect.</div>
+      <table class="astro-table hd-table">
+        <thead><tr><th>Dimension</th><th>This chart</th><th>How it reads on the Map</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
     </div>`;
 }
 
