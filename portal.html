@@ -2225,6 +2225,13 @@ function cdIdentityCard(d) {
       <h3 class="cd-card-title">Identity &amp; Contact</h3>
       <div class="form-group"><label class="form-label">Name</label>
         <input class="form-input" id="cd-f-name" value="${cdEsc(c.name)}"></div>
+      <div class="form-group" style="margin-top:0.75rem"><label class="form-label">Pronouns</label>
+        <select class="form-select" id="cd-f-pronouns">
+          <option value=""${!c.pronouns ? ' selected' : ''}>— not set (synthesis uses they/them)</option>
+          <option value="she/her"${c.pronouns === 'she/her' ? ' selected' : ''}>she/her</option>
+          <option value="he/him"${c.pronouns === 'he/him' ? ' selected' : ''}>he/him</option>
+          <option value="they/them"${c.pronouns === 'they/them' ? ' selected' : ''}>they/them</option>
+        </select></div>
       <div class="form-group" style="margin-top:0.75rem"><label class="form-label">Email</label>
         <input class="form-input" id="cd-f-email" type="email" value="${cdEsc(c.email)}"></div>
       <div class="form-group" style="margin-top:0.75rem"><label class="form-label">Phone</label>
@@ -2821,7 +2828,7 @@ function cdTier2HistoryBlock(d) {
               <div><span class="sp-bodyname">Tier 2 Reading</span>${i === 0 ? ' <span class="sp-pill" style="color:var(--gold)">latest</span>' : ''}<div class="sp-dim">${date}${dom ? ' · ' + cdEsc(dom) : ''}</div></div>
               <div style="display:flex;align-items:center;gap:0.5rem"><span class="sp-pill">${status}</span>${hasText ? `<button class="btn btn-outline btn-sm" onclick="cdToggleTier2Reading('${r.id}')">${open ? 'Hide' : 'View'}</button><button class="btn btn-outline btn-sm" onclick="cdDownloadTier2Pdf('${r.id}', this)">PDF</button>` : ''}</div>
             </div>
-            ${hasText ? `<div id="cd-t2-body-${r.id}" style="display:${open ? 'block' : 'none'}">${metaLine ? `<div class="sp-dim" style="margin:0.4rem 0 0.9rem">${metaLine}</div>` : ''}${sec("The Field You're Walking", r.field_walking_text)}${sec('The Register and the Frequencies Surfacing', r.register_frequencies_text)}${sec('What the Threshold Is Asking', r.threshold_asking_text)}${cdConvergenceHtml(m.convergence)}${r.affirmation ? `<div class="sp-reading"><div class="sp-reading-label">Affirmation</div><div class="sp-reading-body" style="font-style:italic;color:var(--gold)">${cdEsc(r.affirmation)}</div></div>` : ''}${r.journal_prompt ? `<div class="sp-reading"><div class="sp-reading-label">Journal prompt</div><div class="sp-reading-body" style="font-style:italic">${cdEsc(r.journal_prompt)}</div></div>` : ''}</div>` : ''}
+            ${hasText ? `<div id="cd-t2-body-${r.id}" style="display:${open ? 'block' : 'none'}">${metaLine ? `<div class="sp-dim" style="margin:0.4rem 0 0.9rem">${metaLine}</div>` : ''}${sec("The Field You're Walking", r.field_walking_text)}${sec('The Register and the Frequencies Surfacing', r.register_frequencies_text)}${sec('What the Threshold Is Asking', r.threshold_asking_text)}${cdConvergenceHtml(m.convergence)}${r.affirmation ? `<div class="sp-reading"><div class="sp-reading-label">Contemplation</div><div class="sp-reading-body" style="font-style:italic;color:var(--gold)">${cdEsc(r.affirmation)}</div></div>` : ''}${r.journal_prompt ? `<div class="sp-reading"><div class="sp-reading-label">Journal prompt</div><div class="sp-reading-body" style="font-style:italic">${cdEsc(r.journal_prompt)}</div></div>` : ''}</div>` : ''}
           </div>`;
       }).join('')
     : '<div class="sp-empty">No Tier 2 readings linked to this client.</div>';
@@ -3029,6 +3036,7 @@ function cdBuildReadingPdf(m, filename) {
 
   if (m.affirmation) {
     ensure(40); y += 6; doc.setDrawColor(track[0], track[1], track[2]); doc.line(margin, y, pageW - margin, y); y += 16;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(muted[0], muted[1], muted[2]); doc.text('CONTEMPLATION', pageW / 2, y, { align: 'center', charSpace: 1 }); y += 14;
     doc.setFont('times', 'italic'); doc.setFontSize(13); doc.setTextColor(gold[0], gold[1], gold[2]);
     doc.splitTextToSize(m.affirmation, maxW - 40).forEach(l => { ensure(18); doc.text(l, pageW / 2, y, { align: 'center' }); y += 18; });
     y += 8; doc.setDrawColor(track[0], track[1], track[2]); doc.line(margin, y, pageW - margin, y); y += 18;
@@ -3084,6 +3092,7 @@ async function cdSaveIdentity() {
   try {
     await restPatch('clients', currentDetailClient, {
       name:    document.getElementById('cd-f-name').value.trim(),
+      pronouns: document.getElementById('cd-f-pronouns').value || null,
       email:   document.getElementById('cd-f-email').value.trim() || null,
       phone:   document.getElementById('cd-f-phone').value.trim() || null,
       current_address: document.getElementById('cd-f-addr').value.trim() || null
