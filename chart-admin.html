@@ -561,7 +561,12 @@ function fmtDate(d) {
     return new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   } catch { return d; }
 }
-function fmtTime(t) { return t || '—'; }
+function fmtTime(t) { const m = String(t || '').match(/^(\d{1,2}):(\d{2})/); if (!m) return t || '—'; let h = +m[1]; const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${h}:${m[2]} ${ap}`; }
+// Explicit 12-hour time entry (hour / minute / AM-PM) — independent of the
+// browser's 12h/24h locale, so AM/PM is always enterable.
+function parseTo12(t) { const m = String(t || '').match(/^(\d{1,2}):(\d{2})/); if (!m) return { h: '', m: '', ap: '' }; let h = parseInt(m[1], 10); const ap = h >= 12 ? 'PM' : 'AM'; let h12 = h % 12; if (h12 === 0) h12 = 12; return { h: String(h12), m: m[2], ap }; }
+function hourOptions(sel) { let o = '<option value="">Hr</option>'; for (let h = 1; h <= 12; h++) o += `<option value="${h}"${String(h) === String(sel) ? ' selected' : ''}>${h}</option>`; return o; }
+function timeFrom12(h, m, ap) { h = parseInt(h, 10); m = parseInt(m, 10); if (isNaN(h) || isNaN(m) || !ap) return ''; let h24 = h % 12; if (ap === 'PM') h24 += 12; return String(h24).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':00'; }
 
 function render({ client, birth, hd, gk, refByNum, fieldById, matches,
                  placements, bodyWeights, signFields, houseFields, astSubs, subById, convergence, synthesis }) {
@@ -866,7 +871,13 @@ function renderBirthForm(birth) {
         </div>
         <div class="field">
           <label class="field-label">Birth time</label>
-          <input class="field-input" id="f-time" type="time" step="1" value="${v('birth_time')}">
+          ${(() => { const tp = parseTo12(v('birth_time')); return `
+          <div style="display:flex;gap:0.4rem;align-items:center">
+            <select class="field-select" id="f-time-h" style="flex:0 0 auto">${hourOptions(tp.h)}</select>
+            <span style="opacity:0.6">:</span>
+            <input class="field-input" id="f-time-m" type="number" min="0" max="59" placeholder="Min" value="${tp.m}" style="flex:0 0 5rem">
+            <select class="field-select" id="f-time-ap" style="flex:0 0 auto"><option value="">—</option><option value="AM"${tp.ap === 'AM' ? ' selected' : ''}>AM</option><option value="PM"${tp.ap === 'PM' ? ' selected' : ''}>PM</option></select>
+          </div>`; })()}
           <div class="field-hint">Local time at birth place</div>
         </div>
 
@@ -1602,7 +1613,7 @@ function wireSaveAndRecompute(client) {
     const payload = {
       client_id: CLIENT_ID,
       birth_date: document.getElementById('f-date').value.trim(),
-      birth_time: document.getElementById('f-time').value.trim(),
+      birth_time: timeFrom12(document.getElementById('f-time-h').value, document.getElementById('f-time-m').value, document.getElementById('f-time-ap').value),
       birth_place: document.getElementById('f-place').value.trim(),
       latitude:    Number(document.getElementById('f-lat').value),
       longitude:   Number(document.getElementById('f-lon').value),
