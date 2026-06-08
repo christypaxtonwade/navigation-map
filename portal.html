@@ -2158,7 +2158,49 @@ function renderClientDetail(d) {
     ${cdResonanceCard(d)}
     ${cdConvergencesCard(d)}
     ${cdAdminNotesCard(d)}
+    ${cdDangerZoneCard(d)}
   `;
+}
+
+function cdDangerZoneCard(d) {
+  const c = d.client || {};
+  return `
+    <div class="cd-card full" style="border-color: rgba(192,112,96,0.45)">
+      <h3 class="cd-card-title" style="color:#d98a78">Danger Zone</h3>
+      <p class="sp-dim" style="margin-bottom:0.8rem">Permanently delete this client and all of their chart data, Gene Keys, convergences, and Signals readings. This cannot be undone. Use for test records or clients you intend to remove entirely.</p>
+      <div class="cd-actions">
+        <button class="btn btn-outline btn-sm" style="border-color:#c07060;color:#d98a78" onclick="cdDeleteClient('${c.id}', this)">Delete client</button>
+        <span class="cd-status" id="cd-delete-status"></span>
+      </div>
+    </div>`;
+}
+
+async function cdDeleteClient(id, btn) {
+  const c = (currentDetailData && currentDetailData.client) || {};
+  const label = (c.name && c.name.trim()) || (c.email && c.email.trim()) || 'DELETE';
+  const typed = prompt(`Permanently delete this client and all of their chart data and Signals readings.\n\nThis cannot be undone. Type "${label}" to confirm:`);
+  if (typed === null) return;
+  if (typed.trim() !== label) { alert('That did not match — nothing was deleted.'); return; }
+  const status = document.getElementById('cd-delete-status');
+  if (btn) btn.disabled = true;
+  if (status) status.textContent = 'deleting…';
+  try {
+    const token = accessToken || SUPABASE_ANON_KEY;
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/admin_delete_client`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_client_id: id })
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok || (out && out.deleted === false)) throw new Error((out && (out.message || out.reason)) || `HTTP ${res.status}`);
+    await loadClients();
+    showPanel('panel-overview');
+    if (typeof renderClientList === 'function') renderClientList();
+  } catch (e) {
+    if (btn) btn.disabled = false;
+    if (status) status.textContent = 'failed: ' + (e.message || e);
+    else alert('Delete failed: ' + (e.message || e));
+  }
 }
 
 function cdQuickActions(d) {
