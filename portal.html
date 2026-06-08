@@ -2221,7 +2221,7 @@ function cdLifecycleCard(d) {
   const relOpts = `<option value=""${!c.client_relationship?' selected':''}>— unset —</option>` +
     Object.entries(REL_LABELS).map(([v,l]) =>
       `<option value="${v}"${c.client_relationship===v?' selected':''}>${l}</option>`).join('');
-  const statusOpts = ['pending','application_submitted','application_accepted','application_declined','submitted','reviewed','activated','tier2_quiz'].map(s =>
+  const statusOpts = ['signals_tier1','pending','application_submitted','application_accepted','application_declined','submitted','reviewed','activated','tier2_quiz'].map(s =>
     `<option value="${s}"${c.intake_status===s?' selected':''}>${s.replace(/_/g,' ')}</option>`).join('');
   return `
     <div class="cd-card">
