@@ -2828,7 +2828,7 @@ function cdTier2HistoryBlock(d) {
               <div><span class="sp-bodyname">Tier 2 Reading</span>${i === 0 ? ' <span class="sp-pill" style="color:var(--gold)">latest</span>' : ''}<div class="sp-dim">${date}${dom ? ' · ' + cdEsc(dom) : ''}</div></div>
               <div style="display:flex;align-items:center;gap:0.5rem"><span class="sp-pill">${status}</span>${hasText ? `<button class="btn btn-outline btn-sm" onclick="cdToggleTier2Reading('${r.id}')">${open ? 'Hide' : 'View'}</button><button class="btn btn-outline btn-sm" onclick="cdDownloadTier2Pdf('${r.id}', this)">PDF</button>` : ''}</div>
             </div>
-            ${hasText ? `<div id="cd-t2-body-${r.id}" style="display:${open ? 'block' : 'none'}">${metaLine ? `<div class="sp-dim" style="margin:0.4rem 0 0.9rem">${metaLine}</div>` : ''}${sec("The Field You're Walking", r.field_walking_text)}${sec('The Register and the Frequencies Surfacing', r.register_frequencies_text)}${sec('What the Threshold Is Asking', r.threshold_asking_text)}${cdConvergenceHtml(m.convergence)}${r.affirmation ? `<div class="sp-reading"><div class="sp-reading-label">Contemplation</div><div class="sp-reading-body" style="font-style:italic;color:var(--gold)">${cdEsc(r.affirmation)}</div></div>` : ''}${r.journal_prompt ? `<div class="sp-reading"><div class="sp-reading-label">Journal prompt</div><div class="sp-reading-body" style="font-style:italic">${cdEsc(r.journal_prompt)}</div></div>` : ''}</div>` : ''}
+            ${hasText ? `<div id="cd-t2-body-${r.id}" style="display:${open ? 'block' : 'none'}">${metaLine ? `<div class="sp-dim" style="margin:0.4rem 0 0.9rem">${metaLine}</div>` : ''}${sec("The Field You're Walking", r.field_walking_text)}${sec('The Register and the Frequencies Surfacing', r.register_frequencies_text)}${sec('What the Threshold Is Asking', r.threshold_asking_text)}${cdConvergenceHtml(m.convergence)}${r.affirmation ? `<div class="sp-reading"><div class="sp-reading-label">Contemplation</div><div class="sp-reading-body" style="font-style:italic;color:var(--gold)">${cdEsc(r.affirmation)}</div></div>` : ''}${r.journal_prompt ? `<div class="sp-reading"><div class="sp-reading-label">Journal Prompt</div><div class="sp-reading-body" style="font-style:italic">${cdEsc(r.journal_prompt)}</div></div>` : ''}</div>` : ''}
           </div>`;
       }).join('')
     : '<div class="sp-empty">No Tier 2 readings linked to this client.</div>';
@@ -3041,7 +3041,7 @@ function cdBuildReadingPdf(m, filename) {
     doc.splitTextToSize(m.affirmation, maxW - 40).forEach(l => { ensure(18); doc.text(l, pageW / 2, y, { align: 'center' }); y += 18; });
     y += 8; doc.setDrawColor(track[0], track[1], track[2]); doc.line(margin, y, pageW - margin, y); y += 18;
   }
-  if (m.journal) { label('A question to sit with'); doc.setFont('times', 'italic'); doc.setFontSize(12); doc.setTextColor(ink[0], ink[1], ink[2]); doc.splitTextToSize(m.journal, maxW).forEach(l => { ensure(16); doc.text(l, margin, y); y += 16; }); y += 12; }
+  if (m.journal) { label('Journal Prompt'); doc.setFont('times', 'italic'); doc.setFontSize(12); doc.setTextColor(ink[0], ink[1], ink[2]); doc.splitTextToSize(m.journal, maxW).forEach(l => { ensure(16); doc.text(l, margin, y); y += 16; }); y += 12; }
   ensure(40); y += 4; label('Where to go next');
   para('Next step is a short Discovery call to find the right doorway into the work: ' + CD_DISCOVERY_URL, 10.5, ink, 6);
 
