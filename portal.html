@@ -821,6 +821,23 @@ body::before {
 .cd-card { background: var(--surface); border: 1px solid var(--border);
   border-radius: 8px; padding: 1.5rem; }
 .cd-card.full { grid-column: 1 / -1; }
+/* Client-detail section tabs — one focused group at a time instead of one long scroll */
+.cd-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; position: sticky; top: 0; z-index: 5;
+  background: var(--bg, #14110b); padding: 0.6rem 0 0.9rem; margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border); }
+.cd-tab { font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-dim); background: transparent;
+  border: 1px solid var(--border); border-radius: 999px; padding: 0.5rem 1.1rem; cursor: pointer;
+  transition: all 0.18s; }
+.cd-tab:hover { color: var(--gold); border-color: var(--gold); }
+.cd-tab.active { color: var(--bg, #14110b); background: var(--gold); border-color: var(--gold); }
+.cd-tier-legend { font-size: 14px; line-height: 1.5; }
+.cd-tier-legend .cd-tier-row { display: grid; grid-template-columns: 150px 1fr; gap: 1rem;
+  padding: 0.55rem 0; border-bottom: 1px solid var(--border); }
+.cd-tier-legend .cd-tier-row:last-child { border-bottom: none; }
+.cd-tier-legend .cd-tier-row.current { background: rgba(184,146,74,0.10); border-radius: 6px;
+  padding-left: 0.6rem; padding-right: 0.6rem; }
+.cd-tier-legend .cd-tier-name { font-weight: 600; color: var(--gold); }
 .cd-card-title { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600;
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold);
   margin: 0 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
@@ -1045,8 +1062,11 @@ body::before {
             <span class="tier-ref-caret">›</span>
           </div>
           <div class="tier-ref-body">
+            <h4>Entry — Signals readings<span class="tier-meta">Free snapshot · $44 reading · LIVE</span></h4>
+            <p>The lowest step of the ladder, on the Sky branch. The free 8-question snapshot and the $44 Signals Reading both grant <strong>Tier 1</strong> portal access and show the client their own reading in the portal's Signal Reading panel. A $44 buyer lands at <code>client_tier = tier_1</code>, <code>intake_status = tier2_quiz</code>; a free-quiz lead at <code>signals_tier1</code>. The paid reading invites the reader onward to the Lineage Session.</p>
+
             <h4>Tier 1<span class="tier-meta">Free · Public · LIVE</span></h4>
-            <p>The Map as initiation. Visual overview at <code>/map</code> — 13 Fields named, three-arc structure, brief Conceptual-register descriptions. Portal view shows Map overview only. No Fieldguide content. Granted to every client who has crossed any threshold (discovery call, single session, intake completed).</p>
+            <p>The Map as initiation. Visual overview at <code>/map</code> — 13 Fields named, three-arc structure, brief Conceptual-register descriptions. Portal view shows Map overview only. No Fieldguide content. Granted to every client who has crossed any threshold (Signals reading, discovery call, single session, intake completed).</p>
 
             <h4>Tier 2<span class="tier-meta">Free · Email-gated · NOT in portal</span></h4>
             <p>The Architecture PDF — 24-page designed download. Delivered via Kit subscription form at <code>/map#subscribe</code>. Lives outside the portal entirely; never gated here. Listed for orientation only.</p>
@@ -2235,28 +2255,66 @@ function cdSnapshotCard(d) {
     </div>`;
 }
 
+// The client detail is organized into focused sections shown one at a time via
+// a sticky tab strip — so it's scannable instead of one long uniform scroll.
+// Every card is still rendered (hidden sections stay in the DOM), so all the
+// existing save/toggle wiring by element id continues to work unchanged.
 function renderClientDetail(d) {
+  const sections = [
+    { key: 'overview',  label: 'Overview',
+      html: `${cdSnapshotCard(d)}${cdQuickActions(d)}` },
+    { key: 'details',   label: 'Details',
+      html: `<div class="cd-grid">${cdIdentityCard(d)}${cdLifecycleCard(d)}</div>${cdAccessCard(d)}${cdTierLegendCard(d)}` },
+    { key: 'intake',    label: 'Intake',
+      html: `${cdIntakePatternsCard(d)}${cdMirrorAppCard(d)}` },
+    { key: 'chart',     label: 'Chart & Signals',
+      html: `<div class="cd-grid">${cdBirthDataCard(d)}${cdChartSummaryCard(d)}</div>${cdSignalProfileCard(d)}` },
+    { key: 'ancestral', label: 'Ancestral',
+      html: `${cdWeavingCard(d)}${cdResonanceCard(d)}${cdConvergencesCard(d)}` },
+    { key: 'admin',     label: 'Admin',
+      html: `${cdAdminNotesCard(d)}${cdDangerZoneCard(d)}` },
+  ];
+  const tabs = sections.map((s, i) =>
+    `<button class="cd-tab${i === 0 ? ' active' : ''}" data-sec="${s.key}" onclick="cdShowSection('${s.key}')">${s.label}</button>`
+  ).join('');
+  const bodies = sections.map((s, i) =>
+    `<div class="cd-section" id="cd-sec-${s.key}" style="display:${i === 0 ? 'block' : 'none'}">${s.html}</div>`
+  ).join('');
+  return `<div class="cd-tabs">${tabs}</div>${bodies}`;
+}
+
+function cdShowSection(key) {
+  document.querySelectorAll('#client-detail-content .cd-section').forEach(el => {
+    el.style.display = (el.id === 'cd-sec-' + key) ? 'block' : 'none';
+  });
+  document.querySelectorAll('#client-detail-content .cd-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.sec === key);
+  });
+  window.scrollTo(0, 0);
+}
+
+// On-page tier legend — so the tier meaning lives WITH the client (not only in
+// the Overview reference), and includes the Signals entry step. The client's
+// current tier row is highlighted.
+function cdTierLegendCard(d) {
+  const c = d.client || {};
+  const rows = [
+    { tiers: ['tier_1'],           name: 'Entry · Signals',   note: 'Free snapshot + $44 Signals Reading. Grants Tier 1 access + their reading in the portal.' },
+    { tiers: ['tier_1'],           name: 'Tier 1 · Map',      note: 'The Map overview — Field names, arc structure. Every client who has crossed any threshold.' },
+    { tiers: ['tier_3'],           name: 'Tier 3 · Fieldguide', note: 'The Fieldguide (delivered as PDF, not in-portal). Fieldguide buyers, Cohort, Mirror.' },
+    { tiers: ['tier_4'],           name: 'Tier 4 · Weaving',   note: 'Their ancestral Weaving rendered in the portal. Lineage Session / Mirror Work.' },
+    { tiers: ['tier_5'],           name: 'Tier 5 · Convergence', note: 'Full Convergence + PDF + history. Lineage first Convergence / Convergence Update / Mirror capstone.' },
+  ];
+  const body = rows.map(r => {
+    const current = c.client_tier && r.tiers.includes(c.client_tier);
+    return `<div class="cd-tier-row${current ? ' current' : ''}"><div class="cd-tier-name">${r.name}${current ? ' ·  ← this client' : ''}</div><div>${r.note}</div></div>`;
+  }).join('');
   return `
-    ${cdSnapshotCard(d)}
-    ${cdQuickActions(d)}
-    <div class="cd-grid">
-      ${cdIdentityCard(d)}
-      ${cdLifecycleCard(d)}
-    </div>
-    ${cdAccessCard(d)}
-    ${cdIntakePatternsCard(d)}
-    ${cdMirrorAppCard(d)}
-    <div class="cd-grid">
-      ${cdBirthDataCard(d)}
-      ${cdChartSummaryCard(d)}
-    </div>
-    ${cdSignalProfileCard(d)}
-    ${cdWeavingCard(d)}
-    ${cdResonanceCard(d)}
-    ${cdConvergencesCard(d)}
-    ${cdAdminNotesCard(d)}
-    ${cdDangerZoneCard(d)}
-  `;
+    <div class="cd-card full" style="margin-top:1.25rem">
+      <h3 class="cd-card-title">What the tiers mean</h3>
+      <p class="cd-value muted" style="margin-bottom:1rem;font-size:14px">Tier = what the client sees in the portal. Set it in Lifecycle above. Signals readers sit at the entry step (Tier 1).</p>
+      <div class="cd-tier-legend">${body}</div>
+    </div>`;
 }
 
 function cdDangerZoneCard(d) {
