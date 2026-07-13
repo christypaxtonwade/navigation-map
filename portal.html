@@ -1842,9 +1842,11 @@ function buildNav() {
   const activeClient = getActiveClientObject();
   const clientTabs = [];
   if (activeClient) {
-    // Signal Reading is independent of access flags — every client with a
-    // reading on record sees it. The data is theirs; surfacing it is simple.
-    if (activeClient.signals_reading)    clientTabs.push({ id: 'panel-signal-reading',  label: 'Signal Reading' });
+    // Signal Reading is independent of access flags. The readings live in the
+    // signals_readings / signals_tier2_readings tables (loaded by loadSignalReading),
+    // NOT in the legacy clients.signals_reading JSONB — so we always surface the
+    // tab; the loader shows the client's readings or a take-the-quiz empty state.
+    clientTabs.push({ id: 'panel-signal-reading',  label: 'Signal Reading' });
     if (activeClient.access_weaving)     clientTabs.push({ id: 'panel-my-weaving',     label: 'My Weaving' });
     if (activeClient.access_convergence) clientTabs.push({ id: 'panel-my-convergence', label: 'My Convergence' });
     if (activeClient.access_catalog)     clientTabs.push({ id: 'panel-my-catalog',     label: 'My Catalog' });
@@ -4294,6 +4296,15 @@ async function loadAllConvergences() {
 // missing fields gracefully so different payload shapes (Tier 1 vs Tier 2)
 // can coexist in the same column.
 // ════════════════════════════════════════════════════
+// Standalone collapse toggle for the client Signal Reading panel (no admin deps).
+function crToggle(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (btn) btn.textContent = open ? 'View' : 'Hide';
+}
+
 async function loadSignalReading() {
   const container = document.getElementById('client-signal-reading-content');
   let activeClient = null;
@@ -4302,60 +4313,103 @@ async function loadSignalReading() {
   } else if (currentUser) {
     activeClient = allClients.find(c => c.auth_user_id === currentUser.id || c.email === currentUser.email);
   }
-  const reading = activeClient?.signals_reading;
-  if (!reading) {
+  if (!activeClient) {
+    container.innerHTML = `<div class="empty" style="padding:3.5rem 1rem;text-align:center">We couldn't match your account to a client record yet.</div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="empty" style="padding:2.5rem 1rem;text-align:center">Loading your readings…</div>`;
+
+  // Readings live in the dedicated tables (RLS scopes them to this client), NOT
+  // in the legacy clients.signals_reading JSONB. Pull both tiers, newest first.
+  const cid = activeClient.id;
+  let sig2 = [], sig1 = [];
+  try {
+    [sig2, sig1] = await Promise.all([
+      rest(`signals_tier2_readings?client_id=eq.${cid}&order=created_at.desc&select=id,created_at,viewed_at,email_sent_at,tier1_computed,field_walking_text,register_frequencies_text,threshold_asking_text,affirmation,journal_prompt,signal_notes,birth_data,email,client_name,tier2_answers,magic_link_token`).catch(() => []),
+      rest(`signals_readings?client_id=eq.${cid}&order=created_at.desc&select=id,created_at,arc,field_number,field_name,register,tags,offering_label,viewed_at,reading_text,reading_html,primary_field,magic_link_token`).catch(() => [])
+    ]);
+  } catch (err) {
+    if (err && err.message === 'SESSION_EXPIRED') return;
+    container.innerHTML = `<div class="msg msg-error">Couldn't load your readings: ${cdEsc(err.message)}</div>`;
+    return;
+  }
+  sig2 = Array.isArray(sig2) ? sig2 : [];
+  sig1 = Array.isArray(sig1) ? sig1 : [];
+
+  if (!sig2.length && !sig1.length) {
     container.innerHTML = `<div class="empty" style="padding:3.5rem 1rem;text-align:center">
-      You haven't taken the Signals from the Field quiz yet — or the email you used didn't match this account.
+      You don't have a Signals reading on record yet — or the email you used for the reading is different from the one on this account.
       <br><br>
-      <a href="https://christypaxtonwade.com/signals" target="_blank" class="btn btn-gold" style="display:inline-block;margin-top:0.5rem">Take the quiz →</a>
+      <a href="https://christypaxtonwade.com/signals" target="_blank" class="btn btn-gold" style="display:inline-block;margin-top:0.5rem">Take the Signals reading →</a>
     </div>`;
     return;
   }
 
-  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const ARC_LABELS = { descent: 'The Descent', underworld: 'The Underworld', return: 'The Return' };
-  const arcLabel = reading.arc ? (ARC_LABELS[reading.arc] || reading.arc) : null;
+  const secCard = (heading, body) => body
+    ? `<div class="cd-card full" style="margin-bottom:1rem"><h3 class="cd-card-title">${cdEsc(heading)}</h3><div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:1.95;color:var(--text-secondary);margin-top:0.6rem;white-space:pre-wrap">${cdEsc(body)}</div></div>`
+    : '';
 
-  // Header row: arc / Field / register / offering recommendation
-  const summaryRows = [];
-  if (arcLabel)         summaryRows.push(['Arc',                arcLabel]);
-  if (reading.field)    summaryRows.push(['Active Field',       reading.field]);
-  if (reading.register) summaryRows.push(['Register',           reading.register]);
-  if (reading.offering) summaryRows.push(['Recommended Offering', reading.offering]);
-  const summaryHtml = summaryRows.map(([label, value]) =>
-    `<div class="cd-row"><div class="cd-label">${esc(label)}</div><div class="cd-value">${esc(value)}</div></div>`
-  ).join('');
-
-  // Frequency tags
-  const tagsHtml = Array.isArray(reading.tags) && reading.tags.length
-    ? `<div class="cd-card full" style="margin-bottom:1.25rem">
-        <h3 class="cd-card-title">Frequency Tags</h3>
-        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.85rem">
-          ${reading.tags.map(t => `<span style="font-size:15px;padding:5px 12px;border-radius:14px;background:var(--accent);border:1px solid var(--border);color:var(--gold)">${esc(t)}</span>`).join('')}
+  // ── Tier 2 (paid) readings — the full written reading ──
+  const tier2Html = sig2.map((r, i) => {
+    const m = cdReadingModel(r);
+    const open = i === 0;
+    const dateStr = m.dateStr || (r.created_at ? new Date(r.created_at).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' }) : '');
+    const bodyId = `cr-t2-${r.id}`;
+    const sections = m.sections.map(s => secCard(s.heading, s.body)).join('');
+    const mapHtml = cdConvergenceHtml(m.convergence);
+    const contemplation = m.affirmation ? `<div class="cd-card full" style="margin-bottom:1rem"><h3 class="cd-card-title">Contemplation</h3><div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:1.9;color:var(--gold);margin-top:0.6rem;white-space:pre-wrap">${cdEsc(m.affirmation)}</div></div>` : '';
+    const journal = m.journal ? `<div class="cd-card full" style="margin-bottom:1rem"><h3 class="cd-card-title">Journal Prompt</h3><div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:1.9;color:var(--text-secondary);margin-top:0.6rem;white-space:pre-wrap">${cdEsc(m.journal)}</div></div>` : '';
+    const link = r.magic_link_token ? `<a href="https://christypaxtonwade.com/signals/reading/${encodeURIComponent(r.magic_link_token)}" target="_blank" class="btn btn-outline btn-sm">Open full reading ↗</a>` : '';
+    return `
+      <div style="border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.5rem">
+          <div><span class="cd-card-title">Signals Reading</span>${i === 0 ? ' <span class="sp-pill" style="color:var(--gold)">latest</span>' : ''}<div style="font-size:14px;color:var(--text-dim)">${cdEsc(dateStr)}${m.born ? ' · ' + cdEsc(m.born) : ''}</div></div>
+          <div style="display:flex;gap:0.5rem;align-items:center">${link}${i === 0 ? '' : `<button class="btn btn-outline btn-sm" onclick="crToggle('${bodyId}', this)">View</button>`}</div>
         </div>
-      </div>`
-    : '';
+        <div id="${bodyId}" style="display:${open ? 'block' : 'none'};margin-top:0.75rem">
+          ${sections}${mapHtml}${contemplation}${journal}
+        </div>
+      </div>`;
+  }).join('');
 
-  // Full reading prose
-  const fullText = reading.reading_full || '';
-  const readingHtml = fullText
-    ? `<div class="cd-card full">
-        <h3 class="cd-card-title">Your Reading</h3>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:1.95;color:var(--text-secondary);margin-top:0.85rem;white-space:pre-wrap">${esc(fullText)}</div>
-      </div>`
-    : '';
-
-  const takenAt = reading.taken_at
-    ? `<div style="font-size:15px;color:var(--text-dim);margin-bottom:1.25rem">Taken ${new Date(reading.taken_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}${reading.tier ? ' · Tier ' + reading.tier : ''}</div>`
-    : '';
+  // ── Tier 1 (free quiz) snapshots ──
+  const ARC_LABELS = { descent: 'The Descent', underworld: 'The Underworld', return: 'The Return' };
+  const tier1Html = sig1.map((r, i) => {
+    const dateStr = r.created_at ? new Date(r.created_at).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' }) : '';
+    const bodyId = `cr-t1-${r.id}`;
+    const arcLabel = r.arc ? (ARC_LABELS[r.arc] || r.arc) : '';
+    const field = r.primary_field || [r.field_number, r.field_name].filter(Boolean).join(' — ');
+    const rows = [];
+    if (arcLabel)    rows.push(['Arc', arcLabel]);
+    if (field)       rows.push(['Active Field', field]);
+    if (r.register)  rows.push(['Register', r.register]);
+    if (r.offering_label) rows.push(['Suggested door', r.offering_label]);
+    const summary = rows.map(([l, v]) => `<div class="cd-row"><div class="cd-label">${cdEsc(l)}</div><div class="cd-value">${cdEsc(v)}</div></div>`).join('');
+    const tags = Array.isArray(r.tags) && r.tags.length
+      ? `<div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.85rem">${r.tags.map(t => `<span style="font-size:14px;padding:4px 11px;border-radius:14px;background:var(--accent);border:1px solid var(--border);color:var(--gold)">${cdEsc(t)}</span>`).join('')}</div>`
+      : '';
+    const txt = r.reading_text || (r.reading_html ? String(r.reading_html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '');
+    const prose = txt ? `<div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:1.95;color:var(--text-secondary);margin-top:0.85rem;white-space:pre-wrap">${cdEsc(txt)}</div>` : '';
+    const open = i === 0;
+    return `
+      <div style="border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.5rem">
+          <div><span class="cd-card-title">Free Signals Snapshot</span><div style="font-size:14px;color:var(--text-dim)">${cdEsc(dateStr)}</div></div>
+          ${open ? '' : `<button class="btn btn-outline btn-sm" onclick="crToggle('${bodyId}', this)">View</button>`}
+        </div>
+        <div id="${bodyId}" style="display:${open ? 'block' : 'none'};margin-top:0.5rem">
+          ${summary}${tags}${prose}
+        </div>
+      </div>`;
+  }).join('');
 
   container.innerHTML = `
-    ${takenAt}
-    ${summaryRows.length ? `<div class="cd-card full" style="margin-bottom:1.25rem"><h3 class="cd-card-title">What This Quiz Surfaced</h3>${summaryHtml}</div>` : ''}
-    ${tagsHtml}
-    ${readingHtml}
+    ${sig2.length ? `<div style="margin-bottom:0.5rem"><h2 style="font-family:'Cormorant Garamond',serif;font-weight:400;font-size:22px;color:var(--text-primary);margin:0 0 1rem">Your Signals Reading${sig2.length > 1 ? 's' : ''}</h2></div>${tier2Html}` : ''}
+    ${sig1.length ? `<div style="margin:1.5rem 0 0.5rem"><h2 style="font-family:'Cormorant Garamond',serif;font-weight:400;font-size:22px;color:var(--text-primary);margin:0 0 1rem">Free Snapshot${sig1.length > 1 ? 's' : ''}</h2></div>${tier1Html}` : ''}
     <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center">
-      <a href="https://christypaxtonwade.com/signals" target="_blank" class="btn btn-outline" style="font-size:15px">Retake the quiz ↗</a>
+      ${sig2.length ? '' : `<a href="https://christypaxtonwade.com/signals/upgrade" target="_blank" class="btn btn-gold" style="font-size:15px;margin-right:0.5rem">Get the full Signals Reading ↗</a>`}
+      <a href="https://christypaxtonwade.com/signals" target="_blank" class="btn btn-outline" style="font-size:15px">Take the quiz again ↗</a>
     </div>
   `;
 }
