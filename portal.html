@@ -1826,13 +1826,16 @@ function buildNav() {
   panelGroup.innerHTML = '';
   externalGroup.innerHTML = '';
 
+  // Admin work panels. Labels chosen to NOT collide with the external "open page"
+  // links below (Weaving ↗, Catalog ↗, Tapestry ↗, Convergence ↗): these are the
+  // build/manage surfaces; the ↗ links open the rendered page in a new tab.
   const adminTabs = [
     { id: 'panel-overview',           label: 'Overview' },
     { id: 'panel-prospects',          label: 'Prospects' },
     { id: 'panel-weaving',            label: 'Weaving Builder' },
-    { id: 'panel-convergence-admin',  label: 'Convergences' },
+    { id: 'panel-convergence-admin',  label: 'All Convergences' },
     { id: 'panel-ancestor-research',  label: 'Ancestor Research' },
-    { id: 'panel-tapestry',           label: 'Tapestry' },
+    { id: 'panel-tapestry',           label: 'Tapestry Builder' },
   ];
   // Phase C: client tabs derived from access_* flags on the active client.
   // Phase F: Signal Reading prepended when signals_reading is on record (no flag).
@@ -2106,7 +2109,7 @@ async function loadClientDetail() {
       // (angles — ascendant/MC/IC — exist there only). Asteroids/Chiron are
       // ephemeris-deferred; tier-3 simply renders empty until they land.
       rest(`chart_planets?client_id=eq.${id}&side=eq.personality&select=body,zodiac_sign,zodiac_degree,house,retrograde,longitude&order=body`).catch(() => []),
-      rest(`signals_readings?client_id=eq.${id}&select=id,created_at,arc,field_number,field_name,register,tags,offering_label,viewed_at,reading_text,reading_html&order=created_at.desc`).catch(() => []),
+      rest(`signals_readings?client_id=eq.${id}&select=id,created_at,arc,field_number,field_name,register,tags,offering_label,viewed_at,reading_text,reading_html,email_captured_at&order=created_at.desc`).catch(() => []),
       rest(`signals_tier2_readings?client_id=eq.${id}&select=id,created_at,viewed_at,email_sent_at,tier1_computed,field_walking_text,register_frequencies_text,threshold_asking_text,affirmation,journal_prompt,signal_notes,birth_data,email,client_name,tier2_answers&order=created_at.desc`).catch(() => [])
     ]);
     const client = clientArr[0];
@@ -2153,8 +2156,88 @@ function cdEsc(s) {
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+// Plain-language names for the intake_status lifecycle codes. Reused by the
+// Snapshot pill and the Lifecycle dropdown so the admin never sees raw codes.
+const CD_STATUS_PLAIN = {
+  signals_tier1:         'Lead · took the free quiz',
+  tier2_quiz:            'Bought the Signals Reading ($44)',
+  pending:               'Pending',
+  submitted:             'Intake submitted',
+  reviewed:              'Reviewed',
+  activated:             'Active client',
+  application_submitted: 'Applied · Mirror Work',
+  application_accepted:  'Application accepted',
+  application_declined:  'Application declined'
+};
+function cdStatusPlain(s) {
+  return CD_STATUS_PLAIN[s] || (s ? s.replace(/_/g, ' ') : 'No status set');
+}
+function cdShortDate(v) {
+  if (!v) return '';
+  const dt = new Date(v);
+  return isNaN(dt) ? '' : dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// Snapshot — the "who is this and what have they done" card. Everything here is
+// built from data already loaded in loadClientDetail (no extra queries): the
+// client record, their free/paid Signals readings, weaving, and convergences.
+function cdSnapshotCard(d) {
+  const c = d.client || {};
+  const sig1 = d.sig1 || [], sig2 = d.sig2 || [], convs = d.convs || [], anc = d.ancestors || [];
+  const hasChart = !!d.birth;
+  const hasMirrorApp = ['mirror_app_arrival','mirror_app_descent_position','mirror_app_compression','mirror_app_container_need','mirror_app_ready_to_stop'].some(k => c[k] && String(c[k]).trim());
+
+  // Dated activity, oldest first.
+  const ev = [];
+  if (c.created_at)          ev.push([c.created_at, 'Record created']);
+  sig1.forEach(r => {
+    if (r.created_at)        ev.push([r.created_at, 'Took the free Signals quiz']);
+    if (r.email_captured_at) ev.push([r.email_captured_at, 'Gave their email on the quiz']);
+  });
+  sig2.forEach(r => { if (r.created_at) ev.push([r.created_at, 'Purchased the Signals Reading ($44)']); });
+  if (c.intake_submitted_at) ev.push([c.intake_submitted_at, 'Submitted the intake form' + (c.entry_offering ? ` — ${c.entry_offering}` : '')]);
+  convs.forEach(cv => { if (cv.created_at) ev.push([cv.created_at, (cv.title || 'Convergence') + ' generated']); });
+  ev.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+  const timeline = ev.length
+    ? ev.map(e => `<div class="cd-row"><div class="cd-label" style="min-width:132px">${cdShortDate(e[0])}</div><div class="cd-value">${cdEsc(e[1])}</div></div>`).join('')
+    : '<div class="cd-value muted">No recorded activity yet.</div>';
+  if (hasMirrorApp) {
+    // No timestamp column for the application; surface it as a standing fact.
+    // (rendered below the dated list)
+  }
+
+  const chip = (on, label) => `<span style="font-size:14px;padding:4px 12px;border-radius:14px;border:1px solid var(--border);${on ? 'background:var(--accent);color:var(--gold)' : 'color:var(--text-dim);opacity:0.65'}">${label}</span>`;
+  const chips = [
+    chip(hasChart, 'Chart ' + (hasChart ? '✓' : '—')),
+    chip(anc.length > 0, `Weaving · ${anc.length}`),
+    chip(convs.length > 0, `Convergence · ${convs.length}`),
+    chip(sig1.length > 0, `Free quiz · ${sig1.length}`),
+    chip(sig2.length > 0, `Signals Reading · ${sig2.length}`),
+    chip(hasMirrorApp, 'Mirror application ' + (hasMirrorApp ? '✓' : '—'))
+  ].join(' ');
+
+  const relPlain = c.client_relationship ? c.client_relationship.replace(/_/g, ' ') : '';
+  const idLine = [c.email, c.pronouns, relPlain].filter(Boolean).map(cdEsc).join(' &nbsp;·&nbsp; ');
+
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem;border-left:3px solid var(--gold)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.8rem;flex-wrap:wrap">
+        <div>
+          <h3 class="cd-card-title" style="margin-bottom:0.25rem">Snapshot</h3>
+          <div class="cd-value muted">${idLine || '—'}</div>
+        </div>
+        <span class="sp-pill" style="color:var(--gold);white-space:nowrap">${cdEsc(cdStatusPlain(c.intake_status))}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin:1.1rem 0 1.3rem">${chips}</div>
+      <div class="cd-label" style="margin-bottom:0.5rem">Activity</div>
+      ${timeline}
+      ${hasMirrorApp ? '<div class="cd-row"><div class="cd-label" style="min-width:132px">—</div><div class="cd-value">Mirror Work application on file (see below)</div></div>' : ''}
+    </div>`;
+}
+
 function renderClientDetail(d) {
   return `
+    ${cdSnapshotCard(d)}
     ${cdQuickActions(d)}
     <div class="cd-grid">
       ${cdIdentityCard(d)}
@@ -2284,20 +2367,21 @@ function cdLifecycleCard(d) {
   const relOpts = `<option value=""${!c.client_relationship?' selected':''}>— unset —</option>` +
     Object.entries(REL_LABELS).map(([v,l]) =>
       `<option value="${v}"${c.client_relationship===v?' selected':''}>${l}</option>`).join('');
-  const statusOpts = ['signals_tier1','pending','application_submitted','application_accepted','application_declined','submitted','reviewed','activated','tier2_quiz'].map(s =>
-    `<option value="${s}"${c.intake_status===s?' selected':''}>${s.replace(/_/g,' ')}</option>`).join('');
+  const statusOpts = ['signals_tier1','tier2_quiz','pending','submitted','reviewed','activated','application_submitted','application_accepted','application_declined'].map(s =>
+    `<option value="${s}"${c.intake_status===s?' selected':''}>${cdStatusPlain(s)}</option>`).join('');
   return `
     <div class="cd-card">
       <h3 class="cd-card-title">Lifecycle</h3>
-      <div class="cd-row"><div class="cd-label">Entry offering</div>
-        <div class="cd-value">${cdEsc(c.entry_offering) || '—'}</div></div>
-      <div class="cd-row"><div class="cd-label">Submitted at</div>
-        <div class="cd-value">${c.intake_submitted_at ? new Date(c.intake_submitted_at).toLocaleString() : '—'}</div></div>
+      <p class="cd-value muted" style="margin-bottom:1rem;font-size:14px">Where this person is in your process, and how they came in. The Snapshot above shows the dated history; these three are the settings you control.</p>
+      <div class="cd-row"><div class="cd-label">Came in for</div>
+        <div class="cd-value${c.entry_offering ? '' : ' muted'}">${cdEsc(c.entry_offering) || '— none recorded —'}</div></div>
+      <div class="cd-row"><div class="cd-label">Intake submitted</div>
+        <div class="cd-value${c.intake_submitted_at ? '' : ' muted'}">${c.intake_submitted_at ? new Date(c.intake_submitted_at).toLocaleString() : '— no intake form on file —'}</div></div>
       <div class="cd-row stack"><div class="cd-label">Client tier <span style="opacity:0.88;font-weight:400">(what they see in the portal)</span></div>
         <select class="form-select" id="cd-f-tier">${tierOpts}</select></div>
-      <div class="cd-row stack"><div class="cd-label">Relationship <span style="opacity:0.88;font-weight:400">(how they came by access)</span></div>
+      <div class="cd-row stack"><div class="cd-label">Relationship <span style="opacity:0.88;font-weight:400">(how they came by access — paid, comp, trade…)</span></div>
         <select class="form-select" id="cd-f-relationship">${relOpts}</select></div>
-      <div class="cd-row stack"><div class="cd-label">Intake status</div>
+      <div class="cd-row stack"><div class="cd-label">Stage <span style="opacity:0.88;font-weight:400">(where they are in your process)</span></div>
         <select class="form-select" id="cd-f-status">${statusOpts}</select></div>
       <div class="cd-actions" style="margin-top:1rem">
         <button class="btn btn-gold btn-sm" onclick="cdSaveLifecycle()">Save</button>
