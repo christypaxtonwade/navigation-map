@@ -2006,6 +2006,17 @@ function toggleClientPreview() {
   if (isPreviewingAsClient) {
     stopPreview();
   } else {
+    // Honor the client whose file is currently open. When the client-detail panel
+    // is the active view, preview THAT client — not Christy's template record.
+    // (Fixes the leak where opening a client and clicking "View as Client" showed
+    //  the admin's own weaving. The stale currentDetailClient after returning to
+    //  Overview is ignored because we require the detail panel to be active.)
+    const detailPanel = document.getElementById('panel-client-detail');
+    const detailActive = detailPanel && detailPanel.classList.contains('active');
+    if (detailActive && currentDetailClient) {
+      startPreview(currentDetailClient);
+      return;
+    }
     const christyClient = allClients.find(c => c.email === ADMIN_EMAIL || c.name === 'Christy Paxton Wade');
     if (christyClient) startPreview(christyClient.id);
     else if (allClients.length > 0) startPreview(allClients[0].id);
@@ -2130,6 +2141,7 @@ async function loadClientDetail() {
     wrap.innerHTML = renderClientDetail(currentDetailData);
     wireClientDetail();
   } catch (err) {
+    if (err && err.message === 'SESSION_EXPIRED') return; // re-auth already surfaced to the user
     wrap.innerHTML = `<div class="msg msg-error">Failed to load: ${err.message}</div>`;
   }
 }
@@ -3163,14 +3175,33 @@ function showView(id) {
 
 // ── REST helpers ──────────────────────────────────────
 async function rest(path) {
+  // Reads MUST run with a fresh token. The mutation call-sites already refresh;
+  // reads did not — so an aged (≈1h) token returned 401 or an empty result that
+  // got misread as "Client not found" / blank forms, and only a page refresh
+  // (which re-mints the token) fixed it. Refresh here, and treat a real auth
+  // failure as a re-auth rather than silently returning junk.
+  if (accessToken) {
+    const ok = await ensureFreshToken();
+    if (!ok) { forceReauth('Your session expired — please sign in again.'); throw new Error('SESSION_EXPIRED'); }
+  }
   const token = accessToken || SUPABASE_ANON_KEY;
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
   });
+  if (res.status === 401 || res.status === 403) {
+    forceReauth('Your session expired — please sign in again.');
+    throw new Error('SESSION_EXPIRED');
+  }
+  // Non-auth non-2xx: preserve legacy behavior (return the parsed body so existing
+  // Array.isArray(...) / .catch(()=>[]) guards at call-sites keep working).
   return res.json();
 }
 
 async function restPost(table, body) {
+  if (accessToken) {
+    const ok = await ensureFreshToken();
+    if (!ok) { forceReauth('Your session expired — please sign in again.'); throw new Error('SESSION_EXPIRED'); }
+  }
   const token = accessToken || SUPABASE_ANON_KEY;
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
     method: 'POST',
@@ -3186,6 +3217,10 @@ async function restPost(table, body) {
 }
 
 async function restDelete(path) {
+  if (accessToken) {
+    const ok = await ensureFreshToken();
+    if (!ok) { forceReauth('Your session expired — please sign in again.'); throw new Error('SESSION_EXPIRED'); }
+  }
   const token = accessToken || SUPABASE_ANON_KEY;
   await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     method: 'DELETE',

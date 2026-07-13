@@ -402,9 +402,14 @@ async function getFreshAccessToken() {
   const { session } = readPortalSession();
   if (!session) return null;
   const now = Date.now();
+  const expired = session.expires_at && now > session.expires_at;
   const needsRefresh = !session.expires_at || (now > session.expires_at - 60_000);
   if (!needsRefresh) return session.access_token;
-  if (!session.refresh_token) return session.access_token;
+  // Can't refresh (older session shape with no refresh_token). If the token is
+  // merely near expiry it still works; if it's already expired, return null so
+  // callers re-auth instead of sending a dead JWT that RLS reads as "no user"
+  // (which surfaced as the intermittent "Client not found").
+  if (!session.refresh_token) return expired ? null : session.access_token;
   if (!_refreshInflight) {
     _refreshInflight = (async () => {
       try {
@@ -436,15 +441,21 @@ async function getFreshAccessToken() {
 // shared via localStorage, so a tab opened from the portal inherits it.
 // (Using the anon key here was the "Client not found" bug: anon can't read clients.)
 async function sb(path) {
-  const token = (await getFreshAccessToken()) || SUPABASE_KEY;
+  // No anon fallback: these are RLS-protected admin tables. A null/expired token
+  // must surface as a session error, NOT silently fall back to the anon key
+  // (anon can't read these → the old "Client not found" bug).
+  const token = await getFreshAccessToken();
+  if (!token) throw new Error('SESSION_EXPIRED');
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}` }
   });
+  if (res.status === 401 || res.status === 403) throw new Error('SESSION_EXPIRED');
   if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
   return res.json();
 }
 async function sbPatch(table, idCol, idVal, body) {
-  const token = (await getFreshAccessToken()) || SUPABASE_KEY;
+  const token = await getFreshAccessToken();
+  if (!token) throw new Error('SESSION_EXPIRED');
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idCol}=eq.${idVal}`, {
     method: 'PATCH',
     headers: {
@@ -544,7 +555,10 @@ async function init() {
     wireCityAutocomplete();
     rewireCoordToggle();
   } catch (err) {
-    page.innerHTML = `<div class="error-box">${err.message}</div>`;
+    const msg = (err && err.message === 'SESSION_EXPIRED')
+      ? 'Your session expired. Reopen this page from the portal (it shares your login), or sign in at the portal again, then reopen.'
+      : err.message;
+    page.innerHTML = `<div class="error-box">${msg}</div>`;
   }
 }
 
