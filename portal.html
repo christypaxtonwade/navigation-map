@@ -1058,29 +1058,22 @@ body::before {
         <!-- Collapsible tier reference -->
         <div class="tier-ref" id="tier-ref-clients">
           <div class="tier-ref-head" onclick="document.getElementById('tier-ref-clients').classList.toggle('open')">
-            <span class="tier-ref-title">Tier Reference</span>
+            <span class="tier-ref-title">How portal access works</span>
             <span class="tier-ref-caret">›</span>
           </div>
           <div class="tier-ref-body">
-            <h4>Entry — Signals readings<span class="tier-meta">Free snapshot · $44 reading · LIVE</span></h4>
-            <p>The lowest step of the ladder, on the Sky branch. The free 8-question snapshot and the $44 Signals Reading both grant <strong>Tier 1</strong> portal access and show the client their own reading in the portal's Signal Reading panel. A $44 buyer lands at <code>client_tier = tier_1</code>, <code>intake_status = tier2_quiz</code>; a free-quiz lead at <code>signals_tier1</code>. The paid reading invites the reader onward to the Lineage Session.</p>
+            <p class="footnote" style="margin-top:0">There are no access tiers. Access follows what a client has done. Two steps: first they need a <strong>portal login</strong> (your Invite button — until then they can't enter at all); then, once inside, they see the pieces below.</p>
 
-            <h4>Tier 1<span class="tier-meta">Free · Public · LIVE</span></h4>
-            <p>The Map as initiation. Visual overview at <code>/map</code> — 13 Fields named, three-arc structure, brief Conceptual-register descriptions. Portal view shows Map overview only. No Fieldguide content. Granted to every client who has crossed any threshold (Signals reading, discovery call, single session, intake completed).</p>
+            <h4>Always available<span class="tier-meta">every client</span></h4>
+            <p>The <strong>Map</strong> (public on the website), <strong>Tapestry</strong>, and their own <strong>Signals reading</strong> once they've completed one.</p>
 
-            <h4>Tier 2<span class="tier-meta">Free · Email-gated · NOT in portal</span></h4>
-            <p>The Architecture PDF — 24-page designed download. Delivered via Kit subscription form at <code>/map#subscribe</code>. Lives outside the portal entirely; never gated here. Listed for orientation only.</p>
+            <h4>After a Lineage Session, or manual<span class="tier-meta">you flip the switch</span></h4>
+            <p>Their <strong>Weaving</strong>, <strong>Catalog</strong>, and <strong>Convergence</strong> — turned on per client in the Portal Access card on their page.</p>
 
-            <h4>Tier 3<span class="tier-meta">$88 launch · $111 standard · PDF-only · LAUNCHING 15 JULY 2026</span></h4>
-            <p>The Fieldguide. All 276 passages (13 Fields × 69 Subterrains × 4 registers) at client-facing depth. Astrological correspondences and Mythic Tapestry profiles woven in. <strong>Delivered as PDF only</strong> — not rendered live in the portal or on the website. Sent or sold to: Fieldguide purchasers, Cohort participants (post-15-July), Sovereign Signal clients at discretion, all Mirror Work clients. Delivery happens outside the portal.</p>
+            <h4>Not yet available<span class="tier-meta">off for everyone</span></h4>
+            <p>The <strong>Fieldguide</strong> — off until it is published.</p>
 
-            <h4>Tier 4<span class="tier-meta">Lineage Session $444 / Mirror Work $1,888 · LIVE</span></h4>
-            <p>The Ancestral Weaving. Personal lineage research and transmission — curated ancestors written across five layers (Terroir, Unresolved, Thread, Lineage, Sigil), frequency-tagged to specific Fields and Subterrains. Portal view: their Weaving rendered, each ancestor with full layers and frequency tags. Granted to: Lineage Session clients (12-ancestor starter), Weaving Extension clients (+8 ancestors), Mirror Work clients (Weaving deepens across 3 months).</p>
-
-            <h4>Tier 5<span class="tier-meta">Bundled into Lineage / $244 update / Mirror capstone · LIVE</span></h4>
-            <p>The Convergence. 12-section pattern analysis generated from a client's Weaving frequency data, plus 2-page summary PDF, plus a reading session in which Christy walks them through the analysis. Portal view: history strip of all their Convergences, current Convergence rendered in full, PDF download. Granted to: Lineage Session clients (first Convergence ~2 weeks after session), Convergence Update clients ($244 for returning Weaving-holders), Mirror Work clients (capstone in month 3).</p>
-
-            <p class="footnote">Tier reflects access, not how someone arrived at it. A friend comp'd into Tier 4 still sees a Tier 4 portal — the Relationship field on each client captures the revenue/audit fact separately. Access is granted per-flag on each client's detail page.</p>
+            <p class="footnote">Each client's page shows exactly where they stand: whether they have a login, what they've completed, and which pieces are on.</p>
           </div>
         </div>
 
@@ -1873,7 +1866,8 @@ function buildNav() {
     if (activeClient.access_weaving)     clientTabs.push({ id: 'panel-my-weaving',     label: 'My Weaving' });
     if (activeClient.access_convergence) clientTabs.push({ id: 'panel-my-convergence', label: 'My Convergence' });
     if (activeClient.access_catalog)     clientTabs.push({ id: 'panel-my-catalog',     label: 'My Catalog' });
-    if (activeClient.access_tapestry)    clientTabs.push({ id: 'panel-my-tapestry',    label: 'Tapestry' });
+    // Tapestry is available to every client (Christy's decision 2026-07-13) — not gated.
+    clientTabs.push({ id: 'panel-my-tapestry',    label: 'Tapestry' });
   }
   // Defensive fallback — signed-in client with no access flags shouldn't reach
   // here normally; keep My Weaving with its empty state so the page isn't blank.
@@ -1921,7 +1915,7 @@ function buildNav() {
     { href: 'index.html',             label: 'Map ↗',         flag: null },
     { href: 'ancestral-weaving.html', label: 'Weaving ↗',     flag: 'access_weaving' },
     { href: 'ancestral-catalog.html', label: 'Catalog ↗',     flag: 'access_catalog' },
-    { href: 'tapestry.html',          label: 'Tapestry ↗',    flag: 'access_tapestry' },
+    { href: 'tapestry.html',          label: 'Tapestry ↗',    flag: null },
     { href: 'convergence.html',       label: 'Convergence ↗', flag: 'access_convergence' },
   ];
 
@@ -2161,7 +2155,7 @@ async function loadClientDetail() {
 
     document.getElementById('cd-title').textContent = client.name || '—';
     document.getElementById('cd-subtitle').textContent =
-      [client.email, client.entry_offering, client.client_tier].filter(Boolean).join(' · ');
+      [client.email, client.entry_offering].filter(Boolean).join(' · ');
 
     wrap.innerHTML = renderClientDetail(currentDetailData);
     wireClientDetail();
@@ -2196,6 +2190,21 @@ function cdShortDate(v) {
   if (!v) return '';
   const dt = new Date(v);
   return isNaN(dt) ? '' : dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// Portal-login status line for the Snapshot. The Invite button is the gate: until
+// it's clicked, a client has no login and cannot enter the portal at all.
+function cdLoginLine(c) {
+  if (c.auth_user_id) {
+    return `<div style="font-size:14px;color:var(--text-secondary)"><i class="ti"></i>Portal login: <span style="color:var(--gold)">active</span> — they can sign in.</div>`;
+  }
+  if (c.email) {
+    return `<div style="display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap;font-size:14px;color:var(--text-secondary)">
+      <span>Portal login: <span class="muted">not invited yet</span> — they can't enter the portal.</span>
+      <button class="btn btn-gold btn-sm" onclick="inviteClient('${c.id}', this)">Invite to portal</button>
+    </div>`;
+  }
+  return `<div style="font-size:14px" class="muted">Portal login: add an email above before they can be invited.</div>`;
 }
 
 // Snapshot — the "who is this and what have they done" card. Everything here is
@@ -2248,8 +2257,9 @@ function cdSnapshotCard(d) {
         </div>
         <span class="sp-pill" style="color:var(--gold);white-space:nowrap">${cdEsc(cdStatusPlain(c.intake_status))}</span>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin:1.1rem 0 1.3rem">${chips}</div>
-      <div class="cd-label" style="margin-bottom:0.5rem">Activity</div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin:1.1rem 0 1rem">${chips}</div>
+      ${cdLoginLine(c)}
+      <div class="cd-label" style="margin:1.2rem 0 0.5rem">Activity</div>
       ${timeline}
       ${hasMirrorApp ? '<div class="cd-row"><div class="cd-label" style="min-width:132px">—</div><div class="cd-value">Mirror Work application on file (see below)</div></div>' : ''}
     </div>`;
@@ -2264,7 +2274,7 @@ function renderClientDetail(d) {
     { key: 'overview',  label: 'Overview',
       html: `${cdSnapshotCard(d)}${cdQuickActions(d)}` },
     { key: 'details',   label: 'Details',
-      html: `<div class="cd-grid">${cdIdentityCard(d)}${cdLifecycleCard(d)}</div>${cdAccessCard(d)}${cdTierLegendCard(d)}` },
+      html: `<div class="cd-grid">${cdIdentityCard(d)}${cdLifecycleCard(d)}</div>${cdAccessCard(d)}` },
     { key: 'intake',    label: 'Intake',
       html: `${cdIntakePatternsCard(d)}${cdMirrorAppCard(d)}` },
     { key: 'chart',     label: 'Chart & Signals',
@@ -2291,30 +2301,6 @@ function cdShowSection(key) {
     b.classList.toggle('active', b.dataset.sec === key);
   });
   window.scrollTo(0, 0);
-}
-
-// On-page tier legend — so the tier meaning lives WITH the client (not only in
-// the Overview reference), and includes the Signals entry step. The client's
-// current tier row is highlighted.
-function cdTierLegendCard(d) {
-  const c = d.client || {};
-  const rows = [
-    { tiers: ['tier_1'],           name: 'Entry · Signals',   note: 'Free snapshot + $44 Signals Reading. Grants Tier 1 access + their reading in the portal.' },
-    { tiers: ['tier_1'],           name: 'Tier 1 · Map',      note: 'The Map overview — Field names, arc structure. Every client who has crossed any threshold.' },
-    { tiers: ['tier_3'],           name: 'Tier 3 · Fieldguide', note: 'The Fieldguide (delivered as PDF, not in-portal). Fieldguide buyers, Cohort, Mirror.' },
-    { tiers: ['tier_4'],           name: 'Tier 4 · Weaving',   note: 'Their ancestral Weaving rendered in the portal. Lineage Session / Mirror Work.' },
-    { tiers: ['tier_5'],           name: 'Tier 5 · Convergence', note: 'Full Convergence + PDF + history. Lineage first Convergence / Convergence Update / Mirror capstone.' },
-  ];
-  const body = rows.map(r => {
-    const current = c.client_tier && r.tiers.includes(c.client_tier);
-    return `<div class="cd-tier-row${current ? ' current' : ''}"><div class="cd-tier-name">${r.name}${current ? ' ·  ← this client' : ''}</div><div>${r.note}</div></div>`;
-  }).join('');
-  return `
-    <div class="cd-card full" style="margin-top:1.25rem">
-      <h3 class="cd-card-title">What the tiers mean</h3>
-      <p class="cd-value muted" style="margin-bottom:1rem;font-size:14px">Tier = what the client sees in the portal. Set it in Lifecycle above. Signals readers sit at the entry step (Tier 1).</p>
-      <div class="cd-tier-legend">${body}</div>
-    </div>`;
 }
 
 function cdDangerZoneCard(d) {
@@ -2402,18 +2388,8 @@ function cdIdentityCard(d) {
 
 function cdLifecycleCard(d) {
   const c = d.client;
-  // Tier dropdown — labelled values so admin sees what each tier means.
-  // Tier 2 is intentionally absent: it's email-gated (Architecture PDF), not portal-gated.
-  const TIER_LABELS = {
-    'tier_1': 'Tier 1 · Map',
-    'tier_3': 'Tier 3 · Fieldguide',
-    'tier_4': 'Tier 4 · Weaving',
-    'tier_5': 'Tier 5 · Convergence'
-  };
-  const tierOpts = `<option value=""${!c.client_tier?' selected':''}>— unset —</option>` +
-    Object.entries(TIER_LABELS).map(([v,l]) =>
-      `<option value="${v}"${c.client_tier===v?' selected':''}>${l}</option>`).join('');
-  // Relationship — orthogonal to tier. Captures revenue / audit fact.
+  // Tiers were removed 2026-07-13 — portal access now follows engagement (see the
+  // Portal Access card), not a tier number. Relationship + Stage remain.
   const REL_LABELS = {
     'paid':         'Paid',
     'comp_friend':  'Comp · friend',
@@ -2430,13 +2406,11 @@ function cdLifecycleCard(d) {
   return `
     <div class="cd-card">
       <h3 class="cd-card-title">Lifecycle</h3>
-      <p class="cd-value muted" style="margin-bottom:1rem;font-size:14px">Where this person is in your process, and how they came in. The Snapshot above shows the dated history; these three are the settings you control.</p>
+      <p class="cd-value muted" style="margin-bottom:1rem;font-size:14px">Where this person is in your process, and how they came in. The Snapshot above shows the dated history; portal access is set in the Portal Access card below.</p>
       <div class="cd-row"><div class="cd-label">Came in for</div>
         <div class="cd-value${c.entry_offering ? '' : ' muted'}">${cdEsc(c.entry_offering) || '— none recorded —'}</div></div>
       <div class="cd-row"><div class="cd-label">Intake submitted</div>
         <div class="cd-value${c.intake_submitted_at ? '' : ' muted'}">${c.intake_submitted_at ? new Date(c.intake_submitted_at).toLocaleString() : '— no intake form on file —'}</div></div>
-      <div class="cd-row stack"><div class="cd-label">Client tier <span style="opacity:0.88;font-weight:400">(what they see in the portal)</span></div>
-        <select class="form-select" id="cd-f-tier">${tierOpts}</select></div>
       <div class="cd-row stack"><div class="cd-label">Relationship <span style="opacity:0.88;font-weight:400">(how they came by access — paid, comp, trade…)</span></div>
         <select class="form-select" id="cd-f-relationship">${relOpts}</select></div>
       <div class="cd-row stack"><div class="cd-label">Stage <span style="opacity:0.88;font-weight:400">(where they are in your process)</span></div>
@@ -2457,26 +2431,36 @@ function cdIntakeBlock(label, val) {
     <div class="cd-pre">${cdEsc(val)}</div></div>`;
 }
 
-// ── Portal Access (per-client booleans) ────────────────
-// Tiers describe products. These flags decide what the signed-in client
-// actually sees inside the portal. Set per-client by Christy.
+// ── Portal Access ──────────────────────────────────────
+// Access follows engagement, not tiers (Christy's decision 2026-07-13).
+// Automatic pieces (Signals reading, Tapestry) are shown as fixed facts;
+// the Weaving / Catalog / Convergence are the manual switches you flip after a
+// Lineage Session. The Fieldguide is off for everyone until it's published.
 function cdAccessCard(d) {
   const c = d.client;
-  // access_fieldguide intentionally omitted — the Fieldguide is PDF-only as of
-  // 2026-05-15, delivered outside the portal. The column remains on clients
-  // as harmless residue (kept in case web access is reintroduced later).
+  const sig1 = d.sig1 || [], sig2 = d.sig2 || [];
+  const hasReading = sig1.length > 0 || sig2.length > 0;
+  // The manual switches — turned on after a Lineage Session, or by hand.
   const flags = [
-    { key: 'access_weaving',     label: 'My Weaving',       hint: 'their own ancestor weaving rendered in portal' },
-    { key: 'access_catalog',     label: 'My Catalog',       hint: 'their own ancestors as a sortable catalog (usually off if weaving is small)' },
-    { key: 'access_convergence', label: 'My Convergence',   hint: 'their full Convergence + PDF + history strip' },
-    { key: 'access_tapestry',    label: 'Tapestry',         hint: 'mythic archetype profiles · Mirror / Cohort surface' },
+    { key: 'access_weaving',     label: 'My Weaving',     hint: 'their ancestral weaving, rendered in the portal' },
+    { key: 'access_convergence', label: 'My Convergence', hint: 'their full Convergence + PDF + history' },
+    { key: 'access_catalog',     label: 'My Catalog',     hint: 'their ancestors as a sortable catalog (usually with the weaving)' },
   ];
+  const autoRow = (on, name, note) =>
+    `<div class="cd-row"><div class="cd-label" style="min-width:150px">${name}</div><div class="cd-value">${on ? '<span style="color:var(--gold)">On</span>' : '<span class="muted">Off</span>'} — ${note}</div></div>`;
   return `
     <div class="cd-card full" style="margin-bottom:1.25rem">
       <h3 class="cd-card-title">Portal Access</h3>
       <p class="cd-value muted" style="margin-bottom:1rem; font-size:15px">
-        Tiers describe products. These checkboxes decide what this client actually sees in the portal. Defaults are conservative — check only what they should access.
+        What this client sees once they can log in. Some access is automatic; the rest you turn on after a Lineage Session (or whenever you choose).
       </p>
+      <div style="margin-bottom:1.25rem">
+        ${autoRow(true, 'The Map', 'public on the website — always available')}
+        ${autoRow(hasReading, 'Signals reading', hasReading ? 'they have a reading — it shows automatically' : 'appears automatically once they complete a reading')}
+        ${autoRow(true, 'Tapestry', 'on for every client')}
+        ${autoRow(false, 'Fieldguide', 'off for everyone until it is published')}
+      </div>
+      <p class="cd-value" style="margin-bottom:0.75rem; font-size:14px; font-weight:500">Turn on after a Lineage Session (or manually):</p>
       <div class="access-grid">
         ${flags.map(f => `
           <label class="access-item">
@@ -3264,7 +3248,6 @@ async function cdSaveLifecycle() {
   status.textContent = 'saving…';
   try {
     await restPatch('clients', currentDetailClient, {
-      client_tier:         document.getElementById('cd-f-tier').value || null,
       client_relationship: document.getElementById('cd-f-relationship').value || null,
       intake_status:       document.getElementById('cd-f-status').value
     });
@@ -3277,12 +3260,11 @@ async function cdSaveAccess() {
   const status = document.getElementById('cd-access-status');
   status.textContent = 'saving…';
   try {
-    // access_fieldguide intentionally omitted — Fieldguide is PDF-only post-2026-05-15.
+    // Tapestry (all clients) + Fieldguide (off) are no longer per-client switches.
     await restPatch('clients', currentDetailClient, {
       access_weaving:     document.getElementById('cd-f-access_weaving').checked,
       access_catalog:     document.getElementById('cd-f-access_catalog').checked,
-      access_convergence: document.getElementById('cd-f-access_convergence').checked,
-      access_tapestry:    document.getElementById('cd-f-access_tapestry').checked
+      access_convergence: document.getElementById('cd-f-access_convergence').checked
     });
     await loadClients();
     status.textContent = 'saved · ' + new Date().toLocaleTimeString();
@@ -3428,12 +3410,9 @@ function renderClientList() {
   const el = document.getElementById('clients-list');
   if (!allClients.length) { el.innerHTML = '<div class="empty">No clients yet.</div>'; return; }
   el.innerHTML = allClients.map(c => {
-    const tierBadge = c.client_tier
-      ? `<span class="client-badge" style="background:var(--accent);color:var(--gold)">${c.client_tier.replace('_',' ')}</span>`
-      : '';
     let accessPill;
     if (c.auth_user_id) {
-      accessPill = `<span class="client-badge" style="background:rgba(109,216,178,0.15);color:var(--teal)">Access ✓</span>`;
+      accessPill = `<span class="client-badge" style="background:rgba(109,216,178,0.15);color:var(--teal)">Login ✓</span>`;
     } else if (c.email) {
       accessPill = `<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();inviteClient('${c.id}', this)">Invite</button>`;
     } else {
@@ -3443,7 +3422,6 @@ function renderClientList() {
     <div class="client-row" style="cursor:pointer" onclick="showClientDetail('${c.id}')">
       <div><div class="client-name">${c.name}</div><div class="client-meta">${c.email || '—'}${c.notes ? ' · ' + c.notes.slice(0,60) + '…' : ''}</div></div>
       <div style="display:flex;gap:0.5rem;flex-shrink:0;align-items:center" onclick="event.stopPropagation()">
-        ${tierBadge}
         ${accessPill}
         <button class="btn btn-gold btn-sm" onclick="showClientDetail('${c.id}')">Open</button>
         <button class="btn btn-outline btn-sm" onclick="startPreview('${c.id}')">Preview</button>
