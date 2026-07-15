@@ -5120,6 +5120,7 @@ function myTapestryClientId() {
 }
 let _tapestryFull = [];   // cache of the full published tapestry
 let _tapestryMine = [];   // this client's rows
+let _tapExpanded = new Set(); // which figures are opened for exploration
 
 async function loadMyTapestry() {
   const container = document.getElementById('client-tapestry-content');
@@ -5129,7 +5130,7 @@ async function loadMyTapestry() {
 
   const [mine, full] = await Promise.all([
     rest(`client_tapestry_archetypes?client_id=eq.${clientId}&select=id,resonance_note,strength,client_added,tapestry_archetype_id,tapestry_archetypes(id,name,tradition,epithet,description)`).catch(() => []),
-    rest(`tapestry_archetypes?select=id,name,tradition,epithet,description,draft&order=name`).catch(() => [])
+    rest(`tapestry_archetypes?select=id,name,tradition,epithet,emergence_period,description,catalog_preview,catalog_full,layer_terroir,layer_unresolved,layer_thread,layer_lineage,sigil_name,sigil_svg,image_url,image_alt,draft&order=name`).catch(() => [])
   ]);
   _tapestryMine = Array.isArray(mine) ? mine : [];
   _tapestryFull = (Array.isArray(full) ? full : []).filter(a => !a.draft);
@@ -5170,17 +5171,40 @@ function renderMyTapestry() {
   // ── Browse the full tapestry (filtered client-side) ──
   const q = (document.getElementById('tap-search')?.value || '').trim().toLowerCase();
   const list = _tapestryFull.filter(a => !q || `${a.name} ${a.tradition||''} ${a.epithet||''}`.toLowerCase().includes(q));
+  const layerBlock = (label, txt) => txt
+    ? `<div style="margin-top:0.85rem"><div class="eyebrow" style="margin-bottom:0.3rem">${label}</div><div style="font-family:'Cormorant Garamond',serif;font-size:15px;line-height:1.75;color:var(--text-secondary);white-space:pre-wrap">${esc(txt)}</div></div>`
+    : '';
   const browse = list.map(a => {
     const inProfile = mineIds.has(a.id);
+    const open = _tapExpanded.has(a.id);
+    const mainProse = a.catalog_full || a.catalog_preview || a.description || '';
+    const meta = [a.tradition, a.emergence_period].filter(Boolean).map(esc).join(' · ');
+    const detail = `
+      <div id="tap-det-${a.id}" style="display:${open ? 'block' : 'none'};padding:0.5rem 0 0.25rem">
+        ${a.epithet ? `<div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--text-dim);margin-bottom:0.6rem">${esc(a.epithet)}</div>` : ''}
+        ${mainProse ? `<div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:1.85;color:var(--text-secondary)">${esc(mainProse)}</div>` : ''}
+        ${layerBlock('Terroir', a.layer_terroir)}
+        ${layerBlock('The Unresolved', a.layer_unresolved)}
+        ${layerBlock('The Living Thread', a.layer_thread)}
+        ${layerBlock('The Lineage', a.layer_lineage)}
+        ${a.sigil_svg ? `<div style="margin-top:1rem;max-width:150px">${a.sigil_svg}</div>` : (a.image_url ? `<div style="margin-top:1rem"><img src="${esc(a.image_url)}" alt="${esc(a.image_alt||a.name)}" style="max-width:220px;border-radius:8px"></div>` : '')}
+        ${inProfile ? '' : `<div style="margin-top:1rem"><button class="btn btn-gold btn-sm" onclick="cdTapestryAdd('${a.id}', this)">Add to my tapestry</button></div>`}
+      </div>`;
     return `
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding:0.85rem 0;border-bottom:1px solid var(--border)">
-        <div style="min-width:0">
-          <div style="font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-style:italic;color:var(--text)">${esc(a.name)}${a.tradition?` <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold-dim);font-style:normal"> · ${esc(a.tradition)}</span>`:''}</div>
-          ${a.epithet ? `<div style="font-size:14px;font-style:italic;color:var(--text-dim);margin-top:0.15rem">${esc(a.epithet)}</div>` : ''}
+      <div style="padding:0.85rem 0;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
+          <div style="min-width:0;cursor:pointer" onclick="tapToggleExplore('${a.id}')">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-style:italic;color:var(--text)">${esc(a.name)}${meta?` <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold-dim);font-style:normal"> · ${meta}</span>`:''}</div>
+            ${a.epithet ? `<div style="font-size:14px;font-style:italic;color:var(--text-dim);margin-top:0.15rem">${esc(a.epithet)}</div>` : ''}
+          </div>
+          <div style="display:flex;gap:0.5rem;align-items:center;white-space:nowrap">
+            <button class="btn btn-outline btn-sm" id="tap-exp-${a.id}" onclick="tapToggleExplore('${a.id}')">${open ? 'Hide' : 'Explore'}</button>
+            ${inProfile
+              ? '<span class="client-badge" style="color:var(--text-dim)">in your tapestry</span>'
+              : `<button class="btn btn-gold btn-sm" onclick="cdTapestryAdd('${a.id}', this)">Add</button>`}
+          </div>
         </div>
-        ${inProfile
-          ? '<span class="client-badge" style="color:var(--text-dim);white-space:nowrap">in your tapestry</span>'
-          : `<button class="btn btn-gold btn-sm" style="white-space:nowrap" onclick="cdTapestryAdd('${a.id}', this)">Add</button>`}
+        ${detail}
       </div>`;
   }).join('');
 
@@ -5189,13 +5213,23 @@ function renderMyTapestry() {
     ${mineCards}
     <div style="margin:2.5rem 0 1rem;padding-top:1.5rem;border-top:1px solid var(--border)">
       <h2 style="font-family:'Cormorant Garamond',serif;font-weight:400;font-size:22px;color:var(--text);margin:0 0 0.4rem">Explore the Mythic Tapestry</h2>
-      <div style="font-size:15px;color:var(--text-dim);margin-bottom:1rem">${_tapestryFull.length} figures across many traditions. Add any that speak to you — they'll join your tapestry above.</div>
+      <div style="font-size:15px;color:var(--text-dim);margin-bottom:1rem">${_tapestryFull.length} figures across many traditions. Open any figure to read it in full, and add the ones that speak to you. You can also open the <a href="https://christypaxtonwade.com/tapestry" target="_blank" rel="noopener" style="color:var(--gold)">full public tapestry ↗</a>.</div>
       <input class="form-input" id="tap-search" placeholder="Search by name, tradition, or epithet…" value="${esc(q)}" oninput="renderMyTapestry()" style="margin-bottom:1rem">
       <div>${browse || '<div class="empty">No figures match that search.</div>'}</div>
     </div>`;
   // keep focus + caret in the search box across re-renders
   const s = document.getElementById('tap-search');
   if (s && q) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); }
+}
+
+function tapToggleExplore(id) {
+  const el = document.getElementById('tap-det-' + id);
+  if (!el) return;
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (open) _tapExpanded.delete(id); else _tapExpanded.add(id);
+  const b = document.getElementById('tap-exp-' + id);
+  if (b) b.textContent = open ? 'Explore' : 'Hide';
 }
 
 async function cdTapestryAdd(archetypeId, btn) {
