@@ -1113,7 +1113,41 @@ body::before {
         <div class="panel-header">
           <div class="eyebrow">Top of Funnel</div>
           <div class="panel-title">Prospects</div>
-          <p class="panel-sub">Kit subscribers, Calendly bookings, and intake submitters who don't yet have a client record. Webhooks from Kit and Calendly will populate this surface as those integrations land; until then, rows can be seeded manually.</p>
+          <p class="panel-sub">People who aren't yet clients. The Kit and Calendly auto-feeds aren't connected yet, so add prospects by hand with the button below (or seed them as those integrations land).</p>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
+          <button class="btn btn-gold btn-sm" onclick="showAddProspectForm()">+ New Prospect</button>
+        </div>
+        <div id="add-prospect-form" style="display:none;margin-bottom:1.5rem">
+          <div class="card">
+            <div class="eyebrow" style="margin-bottom:1rem">New Prospect</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+              <div class="form-group"><label class="form-label">Name</label>
+                <input class="form-input" id="new-prospect-name" placeholder="Full name"></div>
+              <div class="form-group"><label class="form-label">Email</label>
+                <input class="form-input" id="new-prospect-email" type="email" placeholder="email@example.com"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+              <div class="form-group"><label class="form-label">Source</label>
+                <select class="form-select" id="new-prospect-source">
+                  <option value="manual">Manual</option>
+                  <option value="kit_pdf">Kit · Architecture PDF</option>
+                  <option value="kit_signals">Kit · Signals Quiz</option>
+                  <option value="kit_signals_t2">Kit · Signals Tier 2</option>
+                  <option value="kit_substack">Kit · Substack</option>
+                  <option value="calendly">Calendly</option>
+                  <option value="intake">Intake form</option>
+                  <option value="kit_other">Other</option>
+                </select></div>
+            </div>
+            <div class="form-group"><label class="form-label">Notes (optional)</label>
+              <textarea class="form-textarea" id="new-prospect-notes" placeholder="Where they came from, context…" rows="3"></textarea></div>
+            <div style="display:flex;gap:0.75rem">
+              <button class="btn btn-gold" onclick="createProspect()">Create Prospect</button>
+              <button class="btn btn-outline" onclick="document.getElementById('add-prospect-form').style.display='none'">Cancel</button>
+            </div>
+            <div id="prospect-create-msg" style="margin-top:0.75rem"></div>
+          </div>
         </div>
         <div class="stat-grid" id="prospects-stats"></div>
         <div id="prospects-filters" style="display:flex;gap:1rem;flex-wrap:wrap;margin:1.5rem 0;align-items:center">
@@ -1188,8 +1222,8 @@ body::before {
                 <option value="">— Choose a client —</option>
               </select>
             </div>
-            <div class="card" style="margin-top:1rem" id="weaving-add-ancestor" style="display:none">
-              <div class="eyebrow" style="margin-bottom:1rem">Add Ancestor</div>
+            <div class="card" style="margin-top:1rem;display:none" id="weaving-add-ancestor">
+              <div class="eyebrow" style="margin-bottom:1rem">Add from the shared pool</div>
               <select class="form-select" id="ancestor-select" style="margin-bottom:0.75rem">
                 <option value="">— Choose ancestor —</option>
               </select>
@@ -1198,8 +1232,44 @@ body::before {
                 <option value="emerging">Emerging</option>
                 <option value="noted">Noted</option>
               </select>
+              <select class="form-select" id="ancestor-side" style="margin-bottom:0.75rem">
+                <option value="">Lineage side — unspecified</option>
+                <option value="maternal">Maternal</option>
+                <option value="paternal">Paternal</option>
+                <option value="both">Both / chosen</option>
+                <option value="unknown">Unknown</option>
+              </select>
               <button class="btn btn-gold" style="width:100%" onclick="addAncestorToClient()">Add to Weaving</button>
               <div id="weaving-add-msg" style="margin-top:0.75rem;"></div>
+
+              <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)">
+                <button class="btn btn-outline btn-sm" style="width:100%" onclick="toggleNewPersonalAncestor()">+ New personal ancestor for this client</button>
+                <div id="new-personal-ancestor" style="display:none;margin-top:1rem">
+                  <p style="font-size:13px;color:var(--text-dim);margin-bottom:0.75rem">Held in this client's weaving only — not added to the shared pool.</p>
+                  <input class="form-input" id="pa-name" placeholder="Name *" style="margin-bottom:0.5rem">
+                  <input class="form-input" id="pa-dates" placeholder="Dates (e.g. 1850–1912)" style="margin-bottom:0.5rem">
+                  <input class="form-input" id="pa-year" type="number" placeholder="Approx. year (for ordering)" style="margin-bottom:0.5rem">
+                  <input class="form-input" id="pa-relation" placeholder="Relation (e.g. great-grandmother)" style="margin-bottom:0.5rem">
+                  <input class="form-input" id="pa-occupation" placeholder="Occupation (optional)" style="margin-bottom:0.5rem">
+                  <select class="form-select" id="pa-side" style="margin-bottom:0.5rem">
+                    <option value="">Lineage side — unspecified</option>
+                    <option value="maternal">Maternal</option>
+                    <option value="paternal">Paternal</option>
+                    <option value="both">Both / chosen</option>
+                    <option value="unknown">Unknown</option>
+                  </select>
+                  <details style="margin-bottom:0.5rem">
+                    <summary style="cursor:pointer;font-size:14px;color:var(--text-dim);margin:0.25rem 0 0.6rem">Layers (optional — write now or later)</summary>
+                    <textarea class="form-textarea" id="pa-terroir" placeholder="Terroir" rows="2" style="margin-bottom:0.4rem"></textarea>
+                    <textarea class="form-textarea" id="pa-unresolved" placeholder="The Unresolved" rows="2" style="margin-bottom:0.4rem"></textarea>
+                    <textarea class="form-textarea" id="pa-thread" placeholder="The Living Thread" rows="2" style="margin-bottom:0.4rem"></textarea>
+                    <textarea class="form-textarea" id="pa-lineage" placeholder="The Lineage" rows="2" style="margin-bottom:0.4rem"></textarea>
+                    <textarea class="form-textarea" id="pa-preview" placeholder="Catalog preview" rows="2"></textarea>
+                  </details>
+                  <button class="btn btn-gold" style="width:100%" onclick="createPersonalAncestor()">Create in this weaving</button>
+                  <div id="pa-msg" style="margin-top:0.5rem"></div>
+                </div>
+              </div>
             </div>
           </div>
           <div>
@@ -1274,11 +1344,23 @@ body::before {
       <div class="panel" id="panel-my-tapestry">
         <div class="panel-header">
           <div class="eyebrow">Your Mythic Resonance</div>
-          <div class="panel-title">The Tapestry</div>
-          <p class="panel-sub">The archetypal figures recognized as chosen resonance — distinct from blood lineage. What the descendant has named and claimed.</p>
+          <div class="panel-title">My Tapestry</div>
+          <p class="panel-sub">The archetypal figures recognized in your work, and the ones you choose — distinct from blood lineage. Add any from the full Mythic Tapestry that speak to you.</p>
         </div>
         <div id="client-tapestry-content">
           <div class="loading"><span class="loading-glyph">✦</span>Drawing the tapestry…</div>
+        </div>
+      </div>
+
+      <!-- ══ CLIENT: Messages ══ -->
+      <div class="panel" id="panel-client-messages">
+        <div class="panel-header">
+          <div class="eyebrow">Between Us</div>
+          <div class="panel-title">Messages</div>
+          <p class="panel-sub">A private thread with Christy. She's notified by email when you write; you'll get an email when she replies.</p>
+        </div>
+        <div id="client-messages-content">
+          <div class="loading"><span class="loading-glyph">✦</span>Loading…</div>
         </div>
       </div>
 
@@ -1816,6 +1898,7 @@ async function enterApp() {
   } else {
     showPanel(startPanel);
     if (startPanel === 'panel-signal-reading') loadSignalReading();
+    if (startPanel === 'panel-client-messages') loadMyMessages();
     if (startPanel === 'panel-my-weaving') loadMyWeaving();
     if (startPanel === 'panel-my-convergence') loadMyConvergence();
     if (startPanel === 'panel-my-catalog') loadMyCatalog();
@@ -1863,11 +1946,14 @@ function buildNav() {
     // NOT in the legacy clients.signals_reading JSONB — so we always surface the
     // tab; the loader shows the client's readings or a take-the-quiz empty state.
     clientTabs.push({ id: 'panel-signal-reading',  label: 'Signal Reading' });
+    clientTabs.push({ id: 'panel-client-messages', label: 'Messages' });
     if (activeClient.access_weaving)     clientTabs.push({ id: 'panel-my-weaving',     label: 'My Weaving' });
     if (activeClient.access_convergence) clientTabs.push({ id: 'panel-my-convergence', label: 'My Convergence' });
     if (activeClient.access_catalog)     clientTabs.push({ id: 'panel-my-catalog',     label: 'My Catalog' });
     // Tapestry is available to every client (Christy's decision 2026-07-13) — not gated.
-    clientTabs.push({ id: 'panel-my-tapestry',    label: 'Tapestry' });
+    // "My Tapestry" = their selectable figures; distinct from the "Mythic Tapestry ↗"
+    // external link (the public full tapestry).
+    clientTabs.push({ id: 'panel-my-tapestry',    label: 'My Tapestry' });
   }
   // Defensive fallback — signed-in client with no access flags shouldn't reach
   // here normally; keep My Weaving with its empty state so the page isn't blank.
@@ -1886,6 +1972,7 @@ function buildNav() {
       showPanel(t.id);
       if (t.id === 'panel-convergence-admin') loadAllConvergences();
       if (t.id === 'panel-signal-reading') loadSignalReading();
+      if (t.id === 'panel-client-messages') loadMyMessages();
       if (t.id === 'panel-my-weaving') loadMyWeaving();
       if (t.id === 'panel-my-convergence') loadMyConvergence();
       if (t.id === 'panel-my-catalog') loadMyCatalog();
@@ -1911,12 +1998,16 @@ function buildNav() {
   // Fieldguide removed 2026-05-15: PDF-only product, no live web rendering.
   // The fieldguide.html file is deprecated to a redirect stub; the access_fieldguide
   // column on clients remains in the schema as harmless residue.
+  // The "Mythic Tapestry ↗" link goes to the PUBLIC full tapestry (absolute URL,
+  // no client_id) — distinct from the "My Tapestry" panel, which is the client's
+  // own selectable figures. This avoids the two-same-name links problem and the
+  // empty client-scoped page.
   const externalLinks = [
-    { href: 'index.html',             label: 'Map ↗',         flag: null },
-    { href: 'ancestral-weaving.html', label: 'Weaving ↗',     flag: 'access_weaving' },
-    { href: 'ancestral-catalog.html', label: 'Catalog ↗',     flag: 'access_catalog' },
-    { href: 'tapestry.html',          label: 'Tapestry ↗',    flag: null },
-    { href: 'convergence.html',       label: 'Convergence ↗', flag: 'access_convergence' },
+    { href: 'index.html',             label: 'Map ↗',              flag: null },
+    { href: 'ancestral-weaving.html', label: 'Weaving ↗',          flag: 'access_weaving' },
+    { href: 'ancestral-catalog.html', label: 'Catalog ↗',          flag: 'access_catalog' },
+    { href: 'https://christypaxtonwade.com/tapestry', label: 'Mythic Tapestry ↗', flag: null, absolute: true },
+    { href: 'convergence.html',       label: 'Convergence ↗',      flag: 'access_convergence' },
   ];
 
   externalLinks.forEach(l => {
@@ -1926,7 +2017,7 @@ function buildNav() {
     }
     const a = document.createElement('a');
     a.className = 'sidebar-nav-item';
-    a.href = l.href + cid;
+    a.href = l.absolute ? l.href : (l.href + cid);
     a.target = '_blank';
     a.rel = 'noopener';
     a.textContent = l.label;
@@ -1961,6 +2052,7 @@ const ADMIN_HASH_MAP = {
 };
 const CLIENT_HASH_MAP = {
   '#signal-reading': 'panel-signal-reading',
+  '#messages':       'panel-client-messages',
   '#my-weaving':     'panel-my-weaving',
   '#my-convergence': 'panel-my-convergence',
   '#my-catalog':     'panel-my-catalog',
@@ -2056,6 +2148,7 @@ function startPreview(clientId) {
   const targetPanel = firstTab?.dataset.panel || 'panel-my-weaving';
   showPanel(targetPanel);
   if (targetPanel === 'panel-signal-reading') loadSignalReading();
+  else if (targetPanel === 'panel-client-messages') loadMyMessages();
   else if (targetPanel === 'panel-my-weaving') loadMyWeaving();
   else if (targetPanel === 'panel-my-convergence') loadMyConvergence();
   else if (targetPanel === 'panel-my-catalog') loadMyCatalog();
@@ -2269,10 +2362,94 @@ function cdSnapshotCard(d) {
 // a sticky tab strip — so it's scannable instead of one long uniform scroll.
 // Every card is still rendered (hidden sections stay in the DOM), so all the
 // existing save/toggle wiring by element id continues to work unchanged.
+// ── Messaging (admin ↔ client) — shared helpers ───────
+let unreadByClient = {};
+function msgThreadHtml(rows, viewerSide) {
+  if (!rows.length) return '<div class="empty" style="padding:2rem 1rem;text-align:center">No messages yet.</div>';
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return rows.map(m => {
+    const mine = m.sender === viewerSide;
+    const who = m.sender === 'admin' ? 'Christy' : 'Client';
+    const when = m.created_at ? new Date(m.created_at).toLocaleString() : '';
+    return `<div style="display:flex;justify-content:${mine ? 'flex-end' : 'flex-start'};margin-bottom:0.6rem">
+      <div style="max-width:78%;padding:0.6rem 0.9rem;border-radius:12px;background:${mine ? 'rgba(184,146,74,0.16)' : 'var(--surface-2)'};border:1px solid var(--border)">
+        <div style="white-space:pre-wrap;font-size:15px;color:var(--text-secondary);line-height:1.6">${esc(m.body)}</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:0.3rem">${mine ? 'You' : esc(who)} · ${esc(when)}</div>
+      </div></div>`;
+  }).join('');
+}
+async function postMessageApi(clientId, bodyText) {
+  const ok = await ensureFreshToken();
+  if (!ok) { forceReauth('Your session expired — please sign in again.'); throw new Error('SESSION_EXPIRED'); }
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/post-client-message`, {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ client_id: clientId, body: bodyText })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+  return data;
+}
+async function markMessagesReadApi(clientId) {
+  try {
+    await ensureFreshToken();
+    await fetch(`${SUPABASE_URL}/rest/v1/rpc/mark_messages_read`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_client_id: clientId })
+    });
+  } catch (_) { /* non-fatal */ }
+}
+async function loadUnreadCounts() {
+  if (!isAdmin) return;
+  const rows = await rest('client_messages?sender=eq.client&read_at=is.null&select=client_id').catch(() => []);
+  unreadByClient = {};
+  (Array.isArray(rows) ? rows : []).forEach(r => { unreadByClient[r.client_id] = (unreadByClient[r.client_id] || 0) + 1; });
+  if (document.getElementById('clients-list')) renderClientList();
+}
+
+// ── Messaging — admin side (client detail Messages tab) ──
+function cdMessagesCard(d) {
+  return `
+    <div class="cd-card full">
+      <h3 class="cd-card-title">Messages</h3>
+      <p class="cd-value muted" style="margin-bottom:1rem;font-size:14px">A private thread with this client. They see it in their portal; you each get an email when a new message arrives.</p>
+      <div id="cd-msg-thread" style="max-height:440px;overflow:auto;padding:0.75rem;border:1px solid var(--border);border-radius:8px;margin-bottom:1rem">Loading…</div>
+      <textarea class="form-textarea" id="cd-msg-body" rows="3" placeholder="Write a message to this client…"></textarea>
+      <div class="cd-actions" style="margin-top:0.75rem">
+        <button class="btn btn-gold btn-sm" onclick="cdSendMessage()">Send</button>
+        <span class="cd-status" id="cd-msg-status"></span>
+      </div>
+    </div>`;
+}
+async function loadClientMessages() {
+  const el = document.getElementById('cd-msg-thread');
+  if (!el || !currentDetailClient) return;
+  const rows = await rest(`client_messages?client_id=eq.${currentDetailClient}&order=created_at.asc&select=id,sender,body,created_at,read_at`).catch(() => []);
+  el.innerHTML = msgThreadHtml(Array.isArray(rows) ? rows : [], 'admin');
+  el.scrollTop = el.scrollHeight;
+  await markMessagesReadApi(currentDetailClient);
+  loadUnreadCounts();
+}
+async function cdSendMessage() {
+  const ta = document.getElementById('cd-msg-body');
+  const status = document.getElementById('cd-msg-status');
+  const text = ta.value.trim();
+  if (!text) return;
+  status.textContent = 'Sending…';
+  try {
+    await postMessageApi(currentDetailClient, text);
+    ta.value = ''; status.textContent = '';
+    await loadClientMessages();
+  } catch (e) { if (e.message !== 'SESSION_EXPIRED') status.textContent = 'Failed: ' + e.message; }
+}
+
 function renderClientDetail(d) {
   const sections = [
     { key: 'overview',  label: 'Overview',
       html: `${cdSnapshotCard(d)}${cdQuickActions(d)}` },
+    { key: 'messages',  label: 'Messages',
+      html: cdMessagesCard(d) },
     { key: 'details',   label: 'Details',
       html: `<div class="cd-grid">${cdIdentityCard(d)}${cdLifecycleCard(d)}</div>${cdAccessCard(d)}` },
     { key: 'intake',    label: 'Intake',
@@ -2300,6 +2477,7 @@ function cdShowSection(key) {
   document.querySelectorAll('#client-detail-content .cd-tab').forEach(b => {
     b.classList.toggle('active', b.dataset.sec === key);
   });
+  if (key === 'messages') loadClientMessages();
   window.scrollTo(0, 0);
 }
 
@@ -2403,14 +2581,22 @@ function cdLifecycleCard(d) {
       `<option value="${v}"${c.client_relationship===v?' selected':''}>${l}</option>`).join('');
   const statusOpts = ['signals_tier1','tier2_quiz','pending','submitted','reviewed','activated','application_submitted','application_accepted','application_declined'].map(s =>
     `<option value="${s}"${c.intake_status===s?' selected':''}>${cdStatusPlain(s)}</option>`).join('');
+  // "Came in for" — editable. Populated automatically by the intake form when
+  // present, but you can set it by hand for anyone. Preserves any existing value
+  // even if it isn't in the standard list.
+  const OFFERINGS = ['First Signal','The Signals Reading','First Listen','Your Signal Decoded','Sovereign Signal','The Lineage Session','Weaving Extension','Convergence Update','The Descent Cohort','Mirror Work','Other'];
+  const offeringList = c.entry_offering && !OFFERINGS.includes(c.entry_offering) ? [c.entry_offering, ...OFFERINGS] : OFFERINGS;
+  const entryOpts = `<option value=""${!c.entry_offering?' selected':''}>— not set —</option>` +
+    offeringList.map(o => `<option value="${cdEsc(o)}"${c.entry_offering===o?' selected':''}>${cdEsc(o)}</option>`).join('');
+  const intakeDate = c.intake_submitted_at ? new Date(c.intake_submitted_at).toISOString().slice(0,10) : '';
   return `
     <div class="cd-card">
       <h3 class="cd-card-title">Lifecycle</h3>
       <p class="cd-value muted" style="margin-bottom:1rem;font-size:14px">Where this person is in your process, and how they came in. The Snapshot above shows the dated history; portal access is set in the Portal Access card below.</p>
-      <div class="cd-row"><div class="cd-label">Came in for</div>
-        <div class="cd-value${c.entry_offering ? '' : ' muted'}">${cdEsc(c.entry_offering) || '— none recorded —'}</div></div>
-      <div class="cd-row"><div class="cd-label">Intake submitted</div>
-        <div class="cd-value${c.intake_submitted_at ? '' : ' muted'}">${c.intake_submitted_at ? new Date(c.intake_submitted_at).toLocaleString() : '— no intake form on file —'}</div></div>
+      <div class="cd-row stack"><div class="cd-label">Came in for <span style="opacity:0.88;font-weight:400">(auto-filled by the intake form; you can set it by hand)</span></div>
+        <select class="form-select" id="cd-f-entry">${entryOpts}</select></div>
+      <div class="cd-row stack"><div class="cd-label">Intake submitted <span style="opacity:0.88;font-weight:400">(set automatically on the Lineage intake; adjust or clear as needed)</span></div>
+        <input class="form-input" type="date" id="cd-f-intake-date" value="${intakeDate}"></div>
       <div class="cd-row stack"><div class="cd-label">Relationship <span style="opacity:0.88;font-weight:400">(how they came by access — paid, comp, trade…)</span></div>
         <select class="form-select" id="cd-f-relationship">${relOpts}</select></div>
       <div class="cd-row stack"><div class="cd-label">Stage <span style="opacity:0.88;font-weight:400">(where they are in your process)</span></div>
@@ -3247,7 +3433,10 @@ async function cdSaveLifecycle() {
   const status = document.getElementById('cd-lifecycle-status');
   status.textContent = 'saving…';
   try {
+    const intakeDateVal = document.getElementById('cd-f-intake-date').value;
     await restPatch('clients', currentDetailClient, {
+      entry_offering:      document.getElementById('cd-f-entry').value || null,
+      intake_submitted_at: intakeDateVal ? new Date(intakeDateVal + 'T00:00:00').toISOString() : null,
       client_relationship: document.getElementById('cd-f-relationship').value || null,
       intake_status:       document.getElementById('cd-f-status').value
     });
@@ -3401,6 +3590,7 @@ async function populateOverview() {
     <div class="stat-card"><div class="stat-number">${convs.length}</div><div class="stat-label">Convergences</div></div>
   `;
   // Full client list now lives in #clients-list in the same panel — renderClientList() handles it.
+  loadUnreadCounts();
 }
 
 // ════════════════════════════════════════════════════
@@ -3418,10 +3608,13 @@ function renderClientList() {
     } else {
       accessPill = `<span class="client-badge" style="color:var(--text-faint);font-style:italic">— needs email —</span>`;
     }
+    const unread = unreadByClient[c.id] || 0;
+    const unreadBadge = unread ? `<span class="client-badge" style="background:#c07060;color:#fff" title="Unread messages">${unread} new</span>` : '';
     return `
     <div class="client-row" style="cursor:pointer" onclick="showClientDetail('${c.id}')">
       <div><div class="client-name">${c.name}</div><div class="client-meta">${c.email || '—'}${c.notes ? ' · ' + c.notes.slice(0,60) + '…' : ''}</div></div>
       <div style="display:flex;gap:0.5rem;flex-shrink:0;align-items:center" onclick="event.stopPropagation()">
+        ${unreadBadge}
         ${accessPill}
         <button class="btn btn-gold btn-sm" onclick="showClientDetail('${c.id}')">Open</button>
         <button class="btn btn-outline btn-sm" onclick="startPreview('${c.id}')">Preview</button>
@@ -3503,7 +3696,8 @@ function populateWeavingClientSelect() {
 
   const aSel = document.getElementById('ancestor-select');
   aSel.innerHTML = '<option value="">— Choose ancestor —</option>';
-  allAncestors.filter(a => a.status === 'weaving' || a.status === 'catalog').forEach(a => {
+  allAncestors.filter(a => a.status === 'weaving' || a.status === 'catalog')
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '')).forEach(a => {
     aSel.innerHTML += `<option value="${a.id}">${a.name}${a.dates ? ' · ' + a.dates : ''}</option>`;
   });
 }
@@ -3535,7 +3729,8 @@ async function loadClientWeaving() {
   const assignedIds = new Set(rows.map(r => r.ancestor_id));
   const aSel = document.getElementById('ancestor-select');
   aSel.innerHTML = '<option value="">— Choose ancestor —</option>';
-  allAncestors.filter(a => (a.status === 'weaving' || a.status === 'catalog') && !assignedIds.has(a.id)).forEach(a => {
+  allAncestors.filter(a => (a.status === 'weaving' || a.status === 'catalog') && !assignedIds.has(a.id))
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '')).forEach(a => {
     aSel.innerHTML += `<option value="${a.id}">${a.name}${a.dates ? ' · ' + a.dates : ''}</option>`;
   });
 
@@ -3548,19 +3743,45 @@ async function loadClientWeaving() {
     freqMap[r.client_ancestor_id].push(name);
   });
 
-  container.innerHTML = `
-    <div class="section-header"><div class="section-title">Weaving — ${rows.length} ancestor${rows.length!==1?'s':''}</div></div>
-    <div class="ancestor-list">
-      ${rows.map(a => `<div class="ancestor-row">
+  const sideSelect = (a) => `<select class="form-select" style="width:auto;min-width:118px;font-size:13px" onchange="updateClientAncestorSide('${a.id}', this.value)">
+    <option value=""${!a.lineage_side?' selected':''}>— side —</option>
+    <option value="maternal"${a.lineage_side==='maternal'?' selected':''}>Maternal</option>
+    <option value="paternal"${a.lineage_side==='paternal'?' selected':''}>Paternal</option>
+    <option value="both"${a.lineage_side==='both'?' selected':''}>Both / chosen</option>
+    <option value="unknown"${a.lineage_side==='unknown'?' selected':''}>Unknown</option>
+  </select>`;
+  const rowHtml = (a) => `<div class="ancestor-row">
         <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
         <div class="ancestor-name-block">
-          <div class="ancestor-name-text">${a.name}</div>
-          <div class="ancestor-dates">${a.dates||''} ${a.location ? '· '+a.location : ''}</div>
+          <div class="ancestor-name-text">${a.name}${a.ancestor_id ? '' : ' <span style="font-size:12px;color:var(--gold)">· personal</span>'}</div>
+          <div class="ancestor-dates">${a.dates||''} ${a.location ? '· '+a.location : ''}${a.relation_to_client ? ' · '+a.relation_to_client : ''}</div>
         </div>
         <span class="ancestor-freq-count">${(freqMap[a.id]||[]).length} freq${(freqMap[a.id]||[]).length!==1?'s':''}</span>
+        ${sideSelect(a)}
         <button class="btn btn-outline btn-sm" onclick="removeClientAncestor('${a.id}','${clientId}')" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Remove</button>
-      </div>`).join('')}
-    </div>`;
+      </div>`;
+  // Group by lineage side. Ordering within each group stays chronological (rows
+  // arrive ordered by sort_year). 'unknown' and unset fold into one group.
+  const groups = [
+    { key: 'maternal', label: 'Maternal line',        items: [] },
+    { key: 'paternal', label: 'Paternal line',        items: [] },
+    { key: 'both',     label: 'Both / chosen',        items: [] },
+    { key: 'unknown',  label: 'Unknown / unspecified', items: [] },
+  ];
+  rows.forEach(a => {
+    const s = a.lineage_side;
+    if (s === 'maternal') groups[0].items.push(a);
+    else if (s === 'paternal') groups[1].items.push(a);
+    else if (s === 'both') groups[2].items.push(a);
+    else groups[3].items.push(a);
+  });
+  const sections = groups.filter(g => g.items.length).map(g =>
+    `<div class="section-header" style="margin-top:1.25rem"><div class="section-title">${g.label} — ${g.items.length}</div></div>
+     <div class="ancestor-list">${g.items.map(rowHtml).join('')}</div>`
+  ).join('');
+  container.innerHTML = `
+    <div class="section-header"><div class="section-title">Weaving — ${rows.length} ancestor${rows.length!==1?'s':''}</div></div>
+    ${sections}`;
 }
 
 async function addAncestorToClient() {
@@ -3571,7 +3792,8 @@ async function addAncestorToClient() {
   if (!clientId || !ancestorId) { msgEl.innerHTML = '<div class="msg msg-error">Select both a client and an ancestor.</div>'; return; }
   const ancestor = allAncestors.find(a => a.id === ancestorId);
   if (!ancestor) return;
-  const payload = { client_id: clientId, ancestor_id: ancestorId, slug: ancestor.slug, name: ancestor.name, epithet: ancestor.epithet||null, dates: ancestor.dates||null, era: ancestor.era||null, sort_year: ancestor.sort_year||0, status: ancestor.status||'catalog' };
+  const side = document.getElementById('ancestor-side').value || null;
+  const payload = { client_id: clientId, ancestor_id: ancestorId, slug: ancestor.slug, name: ancestor.name, epithet: ancestor.epithet||null, dates: ancestor.dates||null, era: ancestor.era||null, sort_year: ancestor.sort_year||0, status: ancestor.status||'catalog', lineage_side: side };
   const result = await restPost('client_ancestors', payload);
   if (result && !result.code) {
     const caId = Array.isArray(result) ? result[0]?.id : result?.id;
@@ -3596,6 +3818,54 @@ async function removeClientAncestor(clientAncestorId, clientId) {
   await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${clientAncestorId}`);
   await restDelete(`client_ancestors?id=eq.${clientAncestorId}`);
   loadClientWeaving();
+}
+
+async function updateClientAncestorSide(caId, value) {
+  try {
+    await restPatch('client_ancestors', caId, { lineage_side: value || null });
+    loadClientWeaving();
+  } catch (e) { alert('Could not update lineage side: ' + (e.message || e)); }
+}
+
+function toggleNewPersonalAncestor() {
+  const f = document.getElementById('new-personal-ancestor');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+// Create an ancestor that lives ONLY in this client's weaving (ancestor_id null) —
+// the direct-in-profile path, so personal blood ancestors skip the shared pool.
+async function createPersonalAncestor() {
+  const clientId = document.getElementById('weaving-client-select').value;
+  const msg = document.getElementById('pa-msg');
+  const v = (id) => document.getElementById(id).value.trim();
+  if (!clientId) { msg.innerHTML = '<div class="msg msg-error">Select a client first.</div>'; return; }
+  const name = v('pa-name');
+  if (!name) { msg.innerHTML = '<div class="msg msg-error">Name is required.</div>'; return; }
+  const payload = {
+    client_id: clientId,
+    ancestor_id: null,
+    name,
+    dates: v('pa-dates') || null,
+    sort_year: parseInt(document.getElementById('pa-year').value, 10) || 0,
+    relation_to_client: v('pa-relation') || null,
+    occupation: v('pa-occupation') || null,
+    lineage_side: document.getElementById('pa-side').value || null,
+    layer_terroir: v('pa-terroir') || null,
+    layer_unresolved: v('pa-unresolved') || null,
+    layer_thread: v('pa-thread') || null,
+    layer_lineage: v('pa-lineage') || null,
+    catalog_preview: v('pa-preview') || null,
+    status: 'weaving'
+  };
+  msg.textContent = 'Creating…';
+  try {
+    await restPost('client_ancestors', payload);
+    ['pa-name','pa-dates','pa-year','pa-relation','pa-occupation','pa-terroir','pa-unresolved','pa-thread','pa-lineage','pa-preview'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('pa-side').value = '';
+    document.getElementById('new-personal-ancestor').style.display = 'none';
+    msg.textContent = '';
+    loadClientWeaving();
+  } catch (e) { msg.innerHTML = '<div class="msg msg-error">Could not create: ' + (e.message || e) + '</div>'; }
 }
 
 // ════════════════════════════════════════════════════
@@ -4147,6 +4417,34 @@ async function loadProspects() {
   allProspects = Array.isArray(rows) ? rows : [];
   paintProspectsStats();
   renderProspectList();
+}
+
+function showAddProspectForm() {
+  const f = document.getElementById('add-prospect-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+async function createProspect() {
+  const name   = document.getElementById('new-prospect-name').value.trim();
+  const email  = document.getElementById('new-prospect-email').value.trim();
+  const source = document.getElementById('new-prospect-source').value || 'manual';
+  const notes  = document.getElementById('new-prospect-notes').value.trim();
+  const msg    = document.getElementById('prospect-create-msg');
+  if (!name && !email) { msg.innerHTML = '<span style="color:#d98a78">Add at least a name or an email.</span>'; return; }
+  const now = new Date().toISOString();
+  msg.textContent = 'Saving…';
+  try {
+    await restPost('prospects', {
+      name: name || null, email: email || null, source,
+      notes: notes || null, first_seen: now, last_activity: now, archived: false
+    });
+    ['new-prospect-name','new-prospect-email','new-prospect-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('add-prospect-form').style.display = 'none';
+    msg.textContent = '';
+    await loadProspects();
+  } catch (e) {
+    msg.innerHTML = '<span style="color:#d98a78">Could not create: ' + (e.message || e) + '</span>';
+  }
 }
 
 function paintProspectsStats() {
@@ -4782,28 +5080,39 @@ function renderMyCatalog(mode) {
 // ════════════════════════════════════════════════════
 // CLIENT — MY TAPESTRY (client's assigned archetypal figures)
 // ════════════════════════════════════════════════════
+// Resolve the active client for the Tapestry (own row, or the previewed client).
+function myTapestryClientId() {
+  if (isPreviewingAsClient && previewClientId) return previewClientId;
+  const myClient = allClients.find(c => c.auth_user_id === currentUser?.id || c.email === currentUser?.email);
+  return myClient?.id || null;
+}
+let _tapestryFull = [];   // cache of the full published tapestry
+let _tapestryMine = [];   // this client's rows
+
 async function loadMyTapestry() {
   const container = document.getElementById('client-tapestry-content');
-  let clientId = null;
-  if (isPreviewingAsClient && previewClientId) {
-    clientId = previewClientId;
-  } else {
-    const myClient = allClients.find(c => c.auth_user_id === currentUser.id || c.email === currentUser.email);
-    clientId = myClient?.id;
-  }
+  const clientId = myTapestryClientId();
   if (!clientId) { container.innerHTML = '<div class="empty">No tapestry available yet.</div>'; return; }
+  container.innerHTML = '<div class="empty" style="padding:2.5rem 1rem;text-align:center">Loading the tapestry…</div>';
 
-  // Fetch this client's tapestry archetypes (with the archetype detail joined).
-  const rows = await rest(`client_tapestry_archetypes?client_id=eq.${clientId}&select=id,resonance_note,strength,tapestry_archetypes(id,name,tradition,epithet,description)`);
-  if (!Array.isArray(rows) || !rows.length) {
-    container.innerHTML = '<div class="empty" style="padding:3rem 1rem;text-align:center">Your tapestry is being woven. The archetypal figures recognized in your work will appear here when Christy adds them.</div>';
-    return;
-  }
+  const [mine, full] = await Promise.all([
+    rest(`client_tapestry_archetypes?client_id=eq.${clientId}&select=id,resonance_note,strength,client_added,tapestry_archetype_id,tapestry_archetypes(id,name,tradition,epithet,description)`).catch(() => []),
+    rest(`tapestry_archetypes?select=id,name,tradition,epithet,description,draft&order=name`).catch(() => [])
+  ]);
+  _tapestryMine = Array.isArray(mine) ? mine : [];
+  _tapestryFull = (Array.isArray(full) ? full : []).filter(a => !a.draft);
+  renderMyTapestry();
+}
 
+function renderMyTapestry() {
+  const container = document.getElementById('client-tapestry-content');
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const mineIds = new Set(_tapestryMine.map(r => r.tapestry_archetype_id).filter(Boolean));
 
-  const cards = rows.map(r => {
+  // ── Your figures ──
+  const mineCards = _tapestryMine.length ? _tapestryMine.map(r => {
     const arch = r.tapestry_archetypes || {};
+    const yours = r.client_added;
     return `
       <div class="card" style="margin-bottom:1.25rem">
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem">
@@ -4811,7 +5120,11 @@ async function loadMyTapestry() {
             <div style="font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:300;font-style:italic;color:var(--text)">${esc(arch.name||'(unnamed)')}</div>
             ${arch.tradition ? `<div style="font-size:15px;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold-dim);margin-top:0.2rem">${esc(arch.tradition)}</div>` : ''}
           </div>
-          ${r.strength ? `<span class="client-badge" style="background:var(--accent);color:var(--gold)">${esc(r.strength)}</span>` : ''}
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            ${r.strength ? `<span class="client-badge" style="background:var(--accent);color:var(--gold)">${esc(r.strength)}</span>` : ''}
+            ${yours ? `<span class="client-badge" style="background:rgba(184,146,74,0.14);color:var(--gold)">added by you</span>
+              <button class="btn btn-outline btn-sm" onclick="cdTapestryRemove('${r.id}', this)">Remove</button>` : ''}
+          </div>
         </div>
         ${arch.epithet ? `<div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--text-dim);margin-bottom:0.85rem">${esc(arch.epithet)}</div>` : ''}
         ${arch.description ? `<div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:1.85;color:var(--text-secondary);margin-bottom:0.85rem">${esc(arch.description)}</div>` : ''}
@@ -4820,11 +5133,92 @@ async function loadMyTapestry() {
           <div style="font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;color:var(--text-secondary);line-height:1.7">${esc(r.resonance_note)}</div>
         </div>` : ''}
       </div>`;
+  }).join('') : '<div class="empty" style="padding:2rem 1rem;text-align:center">No figures in your tapestry yet — explore the full Mythic Tapestry below and add the ones you connect with.</div>';
+
+  // ── Browse the full tapestry (filtered client-side) ──
+  const q = (document.getElementById('tap-search')?.value || '').trim().toLowerCase();
+  const list = _tapestryFull.filter(a => !q || `${a.name} ${a.tradition||''} ${a.epithet||''}`.toLowerCase().includes(q));
+  const browse = list.map(a => {
+    const inProfile = mineIds.has(a.id);
+    return `
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding:0.85rem 0;border-bottom:1px solid var(--border)">
+        <div style="min-width:0">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-style:italic;color:var(--text)">${esc(a.name)}${a.tradition?` <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold-dim);font-style:normal"> · ${esc(a.tradition)}</span>`:''}</div>
+          ${a.epithet ? `<div style="font-size:14px;font-style:italic;color:var(--text-dim);margin-top:0.15rem">${esc(a.epithet)}</div>` : ''}
+        </div>
+        ${inProfile
+          ? '<span class="client-badge" style="color:var(--text-dim);white-space:nowrap">in your tapestry</span>'
+          : `<button class="btn btn-gold btn-sm" style="white-space:nowrap" onclick="cdTapestryAdd('${a.id}', this)">Add</button>`}
+      </div>`;
   }).join('');
 
   container.innerHTML = `
-    <div style="margin-bottom:1.25rem;font-size:15px;color:var(--text-dim)">${rows.length} archetypal ${rows.length === 1 ? 'figure' : 'figures'} recognized in your work</div>
-    ${cards}`;
+    <div style="margin-bottom:1.25rem;font-size:15px;color:var(--text-dim)">${_tapestryMine.length} ${_tapestryMine.length === 1 ? 'figure' : 'figures'} in your tapestry</div>
+    ${mineCards}
+    <div style="margin:2.5rem 0 1rem;padding-top:1.5rem;border-top:1px solid var(--border)">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-weight:400;font-size:22px;color:var(--text);margin:0 0 0.4rem">Explore the Mythic Tapestry</h2>
+      <div style="font-size:15px;color:var(--text-dim);margin-bottom:1rem">${_tapestryFull.length} figures across many traditions. Add any that speak to you — they'll join your tapestry above.</div>
+      <input class="form-input" id="tap-search" placeholder="Search by name, tradition, or epithet…" value="${esc(q)}" oninput="renderMyTapestry()" style="margin-bottom:1rem">
+      <div>${browse || '<div class="empty">No figures match that search.</div>'}</div>
+    </div>`;
+  // keep focus + caret in the search box across re-renders
+  const s = document.getElementById('tap-search');
+  if (s && q) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); }
+}
+
+async function cdTapestryAdd(archetypeId, btn) {
+  const clientId = myTapestryClientId();
+  if (!clientId) return;
+  if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
+  try {
+    await restPost('client_tapestry_archetypes', { client_id: clientId, tapestry_archetype_id: archetypeId, client_added: true });
+    await loadMyTapestry();
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Add'; }
+    alert('Could not add that figure: ' + (e.message || e));
+  }
+}
+
+async function cdTapestryRemove(rowId, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Removing…'; }
+  try {
+    await restDelete(`client_tapestry_archetypes?id=eq.${rowId}`);
+    await loadMyTapestry();
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Remove'; }
+    alert('Could not remove that figure: ' + (e.message || e));
+  }
+}
+
+// ── Messaging — client side (their Messages panel) ──
+function myMessagesClientId() {
+  if (isPreviewingAsClient && previewClientId) return previewClientId;
+  const mc = allClients.find(c => c.auth_user_id === currentUser?.id || c.email === currentUser?.email);
+  return mc?.id || null;
+}
+async function loadMyMessages() {
+  const el = document.getElementById('client-messages-content');
+  const cid = myMessagesClientId();
+  if (!cid) { el.innerHTML = '<div class="empty">No messages available.</div>'; return; }
+  const rows = await rest(`client_messages?client_id=eq.${cid}&order=created_at.asc&select=id,sender,body,created_at,read_at`).catch(() => []);
+  el.innerHTML = `
+    <div id="my-msg-thread" style="max-height:460px;overflow:auto;padding:0.75rem;border:1px solid var(--border);border-radius:8px;margin-bottom:1rem">${msgThreadHtml(Array.isArray(rows) ? rows : [], 'client')}</div>
+    <textarea class="form-textarea" id="my-msg-body" rows="3" placeholder="Write a message to Christy…"></textarea>
+    <div style="margin-top:0.75rem"><button class="btn btn-gold btn-sm" onclick="myMessagesSend()">Send</button> <span class="cd-status" id="my-msg-status"></span></div>`;
+  const t = document.getElementById('my-msg-thread'); if (t) t.scrollTop = t.scrollHeight;
+  await markMessagesReadApi(cid);
+}
+async function myMessagesSend() {
+  const ta = document.getElementById('my-msg-body');
+  const status = document.getElementById('my-msg-status');
+  const text = ta.value.trim();
+  if (!text) return;
+  status.textContent = 'Sending…';
+  try {
+    await postMessageApi(myMessagesClientId(), text);
+    ta.value = ''; status.textContent = '';
+    await loadMyMessages();
+  } catch (e) { if (e.message !== 'SESSION_EXPIRED') status.textContent = 'Failed: ' + e.message; }
 }
 
 // ════════════════════════════════════════════════════
