@@ -4681,17 +4681,29 @@ async function convertProspectToClient(prospectId) {
 // ════════════════════════════════════════════════════
 async function loadAllConvergences() {
   const container = document.getElementById('convergence-admin-content');
+  // Ordered newest-first from the query, so within each client group the desc
+  // order is preserved as we bucket them.
   const convs = await rest('convergences?select=*,clients(name)&order=created_at.desc');
   if (!Array.isArray(convs) || !convs.length) {
     container.innerHTML = '<div class="empty">No convergences generated yet.</div>';
     return;
   }
-  container.innerHTML = convs.map(c => `
+  // Group by client; each client's list stays most-recent → least-recent.
+  const groups = new Map();
+  convs.forEach(c => {
+    const key = c.client_id || 'none';
+    if (!groups.has(key)) groups.set(key, { name: c.clients?.name || 'Unknown client', items: [] });
+    groups.get(key).items.push(c);
+  });
+  // Client groups sorted alphabetically by name, so a client is easy to locate.
+  const sorted = [...groups.values()].sort((a, b) => a.name.localeCompare(b.name));
+
+  const card = (c) => `
     <div class="convergence-card">
       <div class="convergence-card-header">
         <div>
           <div class="convergence-card-title">${c.title || 'The Convergence'}</div>
-          <div class="convergence-card-meta">${c.clients?.name || '—'} · ${new Date(c.created_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</div>
+          <div class="convergence-card-meta">${new Date(c.created_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</div>
         </div>
         <div style="display:flex;align-items:center;gap:0.75rem">
           <span class="convergence-status ${c.status==='published'?'status-published':'status-draft'}">${c.status}</span>
@@ -4705,7 +4717,12 @@ async function loadAllConvergences() {
           <div class="freq-bar-wrap"><div class="freq-bar" style="width:${Math.max(10,100-i*15)}%"></div></div>
         </div>`).join('')}
       </div>` : ''}
-    </div>`).join('');
+    </div>`;
+
+  container.innerHTML = sorted.map(g => `
+    <div class="section-header" style="margin-top:1.75rem"><div class="section-title">${cdEsc(g.name)} — ${g.items.length} convergence${g.items.length!==1?'s':''}</div></div>
+    ${g.items.map(card).join('')}
+  `).join('');
 }
 
 // ════════════════════════════════════════════════════
