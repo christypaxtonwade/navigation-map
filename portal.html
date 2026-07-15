@@ -1181,6 +1181,18 @@ body::before {
         </div>
       </div>
 
+      <!-- ══ ADMIN: Follow-ups (paid readers · personal-nudge surface) ══ -->
+      <div class="panel" id="panel-followups">
+        <div class="panel-header">
+          <div class="eyebrow">After the reading</div>
+          <div class="panel-title">Follow-ups</div>
+          <p class="panel-sub">Paid Signals readers and where they are after their reading. The automated sequence runs on its own; this is where you catch the warm ones for a personal note.</p>
+        </div>
+        <div id="followups-content">
+          <div class="loading"><span class="loading-glyph">✦</span>Loading follow-ups…</div>
+        </div>
+      </div>
+
       <!-- ══ ADMIN: Prospect Detail (per-prospect view) ══ -->
       <div class="panel" id="panel-prospect-detail">
         <div class="panel-header">
@@ -1928,6 +1940,7 @@ function buildNav() {
   const adminTabs = [
     { id: 'panel-overview',           label: 'Overview' },
     { id: 'panel-prospects',          label: 'Prospects' },
+    { id: 'panel-followups',          label: 'Follow-ups' },
     { id: 'panel-weaving',            label: 'Weaving Builder' },
     { id: 'panel-convergence-admin',  label: 'All Convergences' },
     { id: 'panel-ancestor-research',  label: 'Ancestor Research' },
@@ -1982,6 +1995,7 @@ function buildNav() {
       if (t.id === 'panel-ancestor-research') initAncestorResearch();
       if (t.id === 'panel-tapestry') loadTapestryManager();
       if (t.id === 'panel-prospects') loadProspects();
+      if (t.id === 'panel-followups') loadFollowups();
     };
     panelGroup.appendChild(btn);
   });
@@ -2045,6 +2059,7 @@ const ADMIN_HASH_MAP = {
   '#overview':            'panel-overview',
   '#clients':             'panel-overview',  // legacy alias — merged into overview
   '#prospects':           'panel-prospects',
+  '#followups':           'panel-followups',
   '#weaving':             'panel-weaving',
   '#convergences':        'panel-convergence-admin',
   '#ancestor-research':   'panel-ancestor-research',
@@ -4417,6 +4432,57 @@ async function loadProspects() {
   allProspects = Array.isArray(rows) ? rows : [];
   paintProspectsStats();
   renderProspectList();
+}
+
+// ── Follow-ups (paid readers after a reading) ──────────
+const FU_ADVANCED = ['submitted','reviewed','activated','application_submitted','application_accepted'];
+function fuAdvanced(c) { return !!c && (c.intake_submitted_at != null || FU_ADVANCED.includes(c.intake_status)); }
+async function openClientMessages(id) { if (!id) return; await showClientDetail(id); cdShowSection('messages'); }
+
+async function loadFollowups() {
+  const el = document.getElementById('followups-content');
+  el.innerHTML = '<div class="loading"><span class="loading-glyph">✦</span>Loading follow-ups…</div>';
+  const rows = await rest('signals_tier2_readings?select=id,client_name,email,created_at,email_sent_at,viewed_at,followup_1_at,followup_2_at,followup_3_at,followup_stopped,client_id,clients(name,intake_status,intake_submitted_at,auth_user_id)&order=created_at.desc').catch(() => []);
+  const list = Array.isArray(rows) ? rows : [];
+  if (!list.length) { el.innerHTML = '<div class="empty" style="padding:2.5rem 1rem;text-align:center">No paid readings yet.</div>'; return; }
+
+  const days = (r) => { const ts = r.email_sent_at || r.created_at; return ts ? Math.floor((Date.now() - new Date(ts).getTime()) / 86400000) : null; };
+  const warm = [], converted = [], cooling = [];
+  list.forEach(r => {
+    if (fuAdvanced(r.clients)) converted.push(r);
+    else if (r.viewed_at && !r.followup_stopped) warm.push(r);
+    else cooling.push(r);
+  });
+
+  const touches = (r) => [r.followup_1_at, r.followup_2_at, r.followup_3_at].filter(Boolean).length;
+  const row = (r, showActions) => {
+    const name = cdEsc(r.client_name || (r.clients && r.clients.name) || r.email || '—');
+    const d = days(r);
+    const seq = r.followup_stopped ? 'sequence stopped' : `${touches(r)}/3 follow-ups sent`;
+    const viewed = r.viewed_at ? '<span class="client-badge" style="background:rgba(109,216,178,0.15);color:var(--teal)">opened reading</span>' : '<span class="client-badge" style="color:var(--text-dim)">not opened</span>';
+    return `
+      <div class="client-row" style="cursor:default">
+        <div><div class="client-name">${name}</div>
+          <div class="client-meta">${cdEsc(r.email || '')}${d != null ? ' · reading ' + d + ' day' + (d===1?'':'s') + ' ago' : ''} · ${seq}</div></div>
+        <div style="display:flex;gap:0.5rem;flex-shrink:0;align-items:center">
+          ${viewed}
+          ${showActions && r.client_id ? `<button class="btn btn-outline btn-sm" onclick="showClientDetail('${r.client_id}')">Open</button>
+          <button class="btn btn-gold btn-sm" onclick="openClientMessages('${r.client_id}')">Message</button>` : ''}
+        </div>
+      </div>`;
+  };
+
+  const section = (title, sub, items, showActions) => items.length
+    ? `<div class="section-header" style="margin-top:1.5rem"><div class="section-title">${title} — ${items.length}</div></div>
+       ${sub ? `<p class="cd-value muted" style="font-size:14px;margin-bottom:0.75rem">${sub}</p>` : ''}
+       <div class="client-list">${items.map(r => row(r, showActions)).join('')}</div>`
+    : '';
+
+  el.innerHTML =
+    section('Warm — worth a personal note', 'Opened their reading, haven\'t gone deeper yet, and the sequence hasn\'t been stopped. These are your best candidates for a personal message.', warm, true) +
+    section('Converted', 'Have moved into intake or deeper work — the sequence stops itself for these.', converted, true) +
+    section('Cooling', 'Haven\'t opened their reading, or unsubscribed from follow-ups.', cooling, true) ||
+    '<div class="empty">No follow-ups to show.</div>';
 }
 
 function showAddProspectForm() {
