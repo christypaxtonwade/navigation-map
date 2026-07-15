@@ -1998,15 +1998,15 @@ function buildNav() {
   // Fieldguide removed 2026-05-15: PDF-only product, no live web rendering.
   // The fieldguide.html file is deprecated to a redirect stub; the access_fieldguide
   // column on clients remains in the schema as harmless residue.
-  // The "Mythic Tapestry ↗" link goes to the PUBLIC full tapestry (absolute URL,
-  // no client_id) — distinct from the "My Tapestry" panel, which is the client's
-  // own selectable figures. This avoids the two-same-name links problem and the
-  // empty client-scoped page.
+  // "Mythic Tapestry ↗" opens the PLATFORM tapestry page (the same tapestry.html
+  // that map / catalog / weaving link to), WITHOUT a client_id — so it shows the
+  // full canonical tapestry, not the empty client-scoped view. (noClient = don't
+  // append the active client's id.) Distinct from the "My Tapestry" panel.
   const externalLinks = [
     { href: 'index.html',             label: 'Map ↗',              flag: null },
     { href: 'ancestral-weaving.html', label: 'Weaving ↗',          flag: 'access_weaving' },
     { href: 'ancestral-catalog.html', label: 'Catalog ↗',          flag: 'access_catalog' },
-    { href: 'https://christypaxtonwade.com/tapestry', label: 'Mythic Tapestry ↗', flag: null, absolute: true },
+    { href: 'tapestry.html',          label: 'Mythic Tapestry ↗',  flag: null, noClient: true },
     { href: 'convergence.html',       label: 'Convergence ↗',      flag: 'access_convergence' },
   ];
 
@@ -2017,7 +2017,7 @@ function buildNav() {
     }
     const a = document.createElement('a');
     a.className = 'sidebar-nav-item';
-    a.href = l.absolute ? l.href : (l.href + cid);
+    a.href = l.absolute ? l.href : (l.href + (l.noClient ? '' : cid));
     a.target = '_blank';
     a.rel = 'noopener';
     a.textContent = l.label;
@@ -5213,7 +5213,7 @@ function renderMyTapestry() {
     ${mineCards}
     <div style="margin:2.5rem 0 1rem;padding-top:1.5rem;border-top:1px solid var(--border)">
       <h2 style="font-family:'Cormorant Garamond',serif;font-weight:400;font-size:22px;color:var(--text);margin:0 0 0.4rem">Explore the Mythic Tapestry</h2>
-      <div style="font-size:15px;color:var(--text-dim);margin-bottom:1rem">${_tapestryFull.length} figures across many traditions. Open any figure to read it in full, and add the ones that speak to you. You can also open the <a href="https://christypaxtonwade.com/tapestry" target="_blank" rel="noopener" style="color:var(--gold)">full public tapestry ↗</a>.</div>
+      <div style="font-size:15px;color:var(--text-dim);margin-bottom:1rem">${_tapestryFull.length} figures across many traditions. Open any figure to read it in full, and add the ones that speak to you. You can also open the <a href="tapestry.html" target="_blank" rel="noopener" style="color:var(--gold)">full Mythic Tapestry ↗</a>.</div>
       <input class="form-input" id="tap-search" placeholder="Search by name, tradition, or epithet…" value="${esc(q)}" oninput="renderMyTapestry()" style="margin-bottom:1rem">
       <div>${browse || '<div class="empty">No figures match that search.</div>'}</div>
     </div>`;
