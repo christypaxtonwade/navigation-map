@@ -877,7 +877,53 @@ async function init() {
   }
 }
 
-init();
+// ══════════════════════════════════════════════════
+// ACCESS GATE — added 2026-08-06 (see decisions.md)
+// The Fieldguide is a PDF-only product not yet published for purchase
+// (2026-05-15 decision). This page renders ONLY for the authenticated admin
+// session, using the same portal_session storage pattern as ancestral-weaving /
+// convergence / catalog. Clients, logged-out visitors, and admin-in-preview
+// (?preview=1 — so preview-as-client stays honest) get a brief notice and are
+// returned to the Map with client_id/preview params preserved.
+// ══════════════════════════════════════════════════
+(function fieldguideGate() {
+  const ADMIN_EMAIL = 'christypaxtonwade@gmail.com';
+
+  function getSession() {
+    try {
+      const stored = sessionStorage.getItem('portal_session') || localStorage.getItem('portal_session');
+      if (!stored) return null;
+      const s = JSON.parse(stored);
+      if (s.expires_at && Date.now() > s.expires_at) return null;
+      return s;
+    } catch { return null; }
+  }
+
+  const session = getSession();
+  const params = new URLSearchParams(window.location.search);
+  const isPreview = params.get('preview') === '1';
+  const isAdmin = !!(session && session.user && session.user.email === ADMIN_EMAIL);
+
+  if (isAdmin && !isPreview) {
+    console.log('[gate] admin session — rendering Fieldguide');
+    init();
+    return;
+  }
+
+  console.log('[gate] no admin session (or preview mode) — Fieldguide is not yet published; redirecting to Map');
+  document.body.innerHTML = `
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem">
+      <div style="max-width:560px">
+        <span style="font-size:1.5rem;color:var(--gold);display:block;margin-bottom:1.25rem">✦</span>
+        <h1 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:400;font-style:italic;color:var(--ink);margin-bottom:1rem">The Fieldguide</h1>
+        <p style="font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;color:var(--ink-secondary);line-height:1.85;margin-bottom:1.5rem">The complete Fieldguide — every Field and Subterrain at full depth — arrives as a designed edition. Until then, the terrain itself is open on the Map.</p>
+        <a href="index.html${window.location.search}" style="font-size:15px;font-weight:500;color:var(--gold);letter-spacing:0.08em;text-decoration:none;border-bottom:1px solid var(--border-strong);padding-bottom:2px">Return to the Navigation Map →</a>
+      </div>
+    </div>`;
+  setTimeout(function () {
+    window.location.replace('index.html' + window.location.search);
+  }, 3800);
+})();
 </script>
 
 <style>
@@ -918,7 +964,7 @@ init();
     <a class="ext-footer-link" href="https://christypaxtonwade.com/sky">Sky</a>
     <a class="ext-footer-link" href="https://christypaxtonwade.com/life">Life</a>
     <a class="ext-footer-link" href="https://christypaxtonwade.com/mirror">Mirror</a>
-    <a class="ext-footer-link" href="https://thealchemyofmidlife.substack.com" target="_blank" rel="noopener">Substack ↗</a>
+    <a class="ext-footer-link" href="https://christywade.substack.com" target="_blank" rel="noopener">Substack ↗</a>
     <a class="ext-footer-link" href="https://christypaxtonwade.com/sky/tapestry">Tapestry ↗</a>
   </div>
   <span class="ext-footer-copyright">© Christy Paxton Wade</span>

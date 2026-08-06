@@ -180,6 +180,13 @@ body::before {
   max-width: 72ch;
 }
 
+.corr-fieldguide-note {
+  display: inline-block; margin-top: 1.75rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; font-weight: 400; font-style: italic;
+  color: var(--ink-dim);
+  letter-spacing: 0.02em;
+}
 .corr-fieldguide-link {
   display: inline-block; margin-top: 1.75rem;
   font-family: 'Jost', sans-serif;
@@ -227,7 +234,6 @@ body::before {
   <p class="header-sub">The sky structure of an earth map. Consulted when sitting down. The map and Fieldguide help with the earthly terrain; this page names what turns above it.</p>
   <div class="header-links">
     <a href="index.html" class="header-link">The Navigation Map ↗</a>
-    <a href="fieldguide.html" class="header-link">The Fieldguide ↗</a>
     <a href="ancestral-weaving.html" class="header-link">Ancestral Weaving ↗</a>
     <a href="ancestral-catalog.html" class="header-link">Ancestral Catalog ↗</a>
     <a href="tapestry.html" class="header-link">Mythic Tapestry ↗</a>
@@ -252,7 +258,6 @@ body::before {
   <p class="footer-note">The correspondences are a living architecture. They turn with the wheel.</p>
   <div class="header-links" style="margin-top:1rem">
     <a href="index.html" class="header-link">The Navigation Map ↗</a>
-    <a href="fieldguide.html" class="header-link">The Fieldguide ↗</a>
   </div>
 </div>
 
@@ -261,6 +266,39 @@ body::before {
 <script>
 const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+
+// ── Admin detection — added 2026-08-06 (see decisions.md) ──
+// The Fieldguide is not yet published for purchase, so the per-Field
+// "Walk this field in the Fieldguide →" links (and the header/footer
+// Fieldguide nav links) render ONLY for the authenticated admin session,
+// via the same portal_session storage pattern as the other platform pages.
+// Admin-in-preview (?preview=1) sees the client version, so previews stay honest.
+const ADMIN_EMAIL = 'christypaxtonwade@gmail.com';
+const IS_ADMIN = (function () {
+  try {
+    const stored = sessionStorage.getItem('portal_session') || localStorage.getItem('portal_session');
+    if (!stored) return false;
+    const s = JSON.parse(stored);
+    if (s.expires_at && Date.now() > s.expires_at) return false;
+    if (new URLSearchParams(window.location.search).get('preview') === '1') return false;
+    return !!(s.user && s.user.email === ADMIN_EMAIL);
+  } catch { return false; }
+})();
+
+// Reveal the header/footer Fieldguide nav links for admin only.
+if (IS_ADMIN) {
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.header-links').forEach(function (wrap) {
+      const a = document.createElement('a');
+      a.href = 'fieldguide.html' + window.location.search;
+      a.className = 'header-link';
+      a.textContent = 'The Fieldguide ↗';
+      const mapLink = wrap.querySelector('a[href^="index.html"]');
+      if (mapLink && mapLink.nextSibling) wrap.insertBefore(a, mapLink.nextSibling);
+      else wrap.appendChild(a);
+    });
+  });
+}
 
 const ARC_META = {
   descent:    { title: 'The Descent',    glyph: '↓', sub: 'Fields I – VII' },
@@ -308,7 +346,9 @@ function renderCorrespondenceCard(field, delay) {
       </div>
       ${rulersHtml}
       ${principleHtml}
-      <a href="fieldguide.html#field-${field.number}" class="corr-fieldguide-link">Walk this field in the Fieldguide →</a>
+      ${IS_ADMIN
+        ? `<a href="fieldguide.html#field-${field.number}" class="corr-fieldguide-link">Walk this field in the Fieldguide →</a>`
+        : `<span class="corr-fieldguide-note">This Field at full depth lives in the Fieldguide — arriving as a designed edition.</span>`}
     </div>`;
 }
 
