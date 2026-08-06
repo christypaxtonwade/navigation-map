@@ -388,6 +388,77 @@ async function loadCorrespondences() {
 }
 
 loadCorrespondences();
+
+// ── Platform chrome: param threading + link gating — added 2026-08-06 (see decisions.md) ──
+// This page previously had no session awareness. Its outbound platform links
+// dropped the client_id/preview params, so an admin preview-as-client journey
+// that passed through this page landed on the ADMIN CANONICAL weaving/catalog/
+// convergence views. Same pattern as tapestry.html / ancestral-weaving.html:
+// resolve the active client context, thread params on platform links, and hide
+// links the active client's access flags don't grant. Tapestry is deliberately
+// NOT flag-gated (universal for all clients per the July 2026 audit decision).
+(async function astroChromeBoot() {
+  function getSession() {
+    try {
+      const stored = sessionStorage.getItem('portal_session') || localStorage.getItem('portal_session');
+      if (!stored) return null;
+      const s = JSON.parse(stored);
+      if (s.expires_at && Date.now() > s.expires_at) return null;
+      return s;
+    } catch { return null; }
+  }
+  const session = getSession();
+  const params = new URLSearchParams(window.location.search);
+  const cidParam = params.get('client_id') || sessionStorage.getItem('active_client_id');
+  const isPreview = params.get('preview') === '1';
+  const previewSuffix = isPreview ? '&preview=1' : '';
+  const isAdminSession = !!(session && session.user && session.user.email === ADMIN_EMAIL);
+  let activeClient = null;
+  try {
+    if (session && session.user) {
+      if (isAdminSession && cidParam) {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/clients?id=eq.${encodeURIComponent(cidParam)}&select=*&limit=1`, {
+          headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` }
+        });
+        const rows = await r.json();
+        activeClient = Array.isArray(rows) ? rows[0] || null : null;
+      } else if (!isAdminSession) {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/clients?auth_user_id=eq.${encodeURIComponent(session.user.id)}&select=*&limit=1`, {
+          headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` }
+        });
+        const rows = await r.json();
+        activeClient = Array.isArray(rows) ? rows[0] || null : null;
+      }
+    }
+  } catch (e) { console.warn('[astro chrome] context resolution failed', e); }
+  if (activeClient) sessionStorage.setItem('active_client_id', activeClient.id);
+
+  const LINK_FLAG_MAP = {
+    'ancestral-weaving.html': 'access_weaving',
+    'ancestral-catalog.html': 'access_catalog',
+    'convergence.html':       'access_convergence',
+  };
+  const THREAD_PAGES = ['index.html', 'portal.html', 'ancestral-weaving.html', 'ancestral-catalog.html', 'tapestry.html', 'convergence.html'];
+  const cid = activeClient ? activeClient.id : null;
+
+  function gateLink(a) {
+    const href = a.getAttribute('href') || '';
+    const baseHref = href.split('?')[0].split('#')[0];
+    for (const [page, flag] of Object.entries(LINK_FLAG_MAP)) {
+      if (baseHref === page || baseHref === '/' + page || baseHref.endsWith('/' + page)) {
+        if (activeClient && !activeClient[flag]) { a.style.display = 'none'; return; }
+      }
+    }
+    if (!cid) return;
+    const threadable = THREAD_PAGES.some(p => baseHref === p || baseHref === '/' + p || baseHref.endsWith('/' + p));
+    if (!threadable || href.includes('client_id=') || href.includes('#')) return;
+    const sep = href.includes('?') ? '&' : '?';
+    a.setAttribute('href', `${href}${sep}client_id=${encodeURIComponent(cid)}${previewSuffix}`);
+  }
+  function gateAll() { document.querySelectorAll('a[href]').forEach(gateLink); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', gateAll);
+  else gateAll();
+})();
 </script>
 </body>
 </html>

@@ -844,6 +844,24 @@ const ERA_GROUPS = [
     // Don't redirect on transient errors — let the page try to render its canonical view.
   }
 
+  // ── Page-level access gate — added 2026-08-06 (see decisions.md) ──
+  // The portal sidebar hides ungated links, but direct navigation (typed URL,
+  // stale link, un-threaded cross-page link) must be enforced here too.
+  // Any active client context — a signed-in client, or admin viewing/previewing
+  // as one — requires this page's access flag (granted after a Lineage Session).
+  // Admin canonical view (no activeClient) is untouched. Admin in preview mode
+  // with no resolvable client context returns to the portal instead of falling
+  // through to the canonical view.
+  if (activeClient && !activeClient.access_weaving) {
+    console.warn('[chrome] active client lacks access_weaving — returning to portal');
+    window.location.replace(`/portal.html?client_id=${encodeURIComponent(activeClient.id)}${previewSuffix}`);
+    return;
+  }
+  if (isAdmin && isPreview && !activeClient) {
+    console.warn('[chrome] preview mode with no client context — returning to portal');
+    window.location.replace('/portal.html');
+    return;
+  }
   if (activeClient) sessionStorage.setItem('active_client_id', activeClient.id);
   console.log('[chrome] activeClient:', activeClient ? activeClient.name : '(none / canonical)');
 
