@@ -1113,7 +1113,7 @@ body::before {
         <div class="panel-header">
           <div class="eyebrow">Top of Funnel</div>
           <div class="panel-title">Prospects</div>
-          <p class="panel-sub">People who aren't yet clients. The Kit and Calendly auto-feeds aren't connected yet, so add prospects by hand with the button below (or seed them as those integrations land).</p>
+          <p class="panel-sub">People who aren't yet clients. Every woman who takes <em>Which Gate Are You At?</em> lands here automatically as a <strong>Threshold</strong> prospect, with her gate and the post she came from; the Journey letters run on their own. Add anyone else by hand with the button below.</p>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
           <button class="btn btn-gold btn-sm" onclick="showAddProspectForm()">+ New Prospect</button>
@@ -1131,6 +1131,7 @@ body::before {
               <div class="form-group"><label class="form-label">Source</label>
                 <select class="form-select" id="new-prospect-source">
                   <option value="manual">Manual</option>
+                  <option value="threshold">Threshold · Which Gate Are You At?</option>
                   <option value="kit_pdf">Kit · Architecture PDF</option>
                   <option value="kit_signals">Kit · Signals Quiz</option>
                   <option value="kit_signals_t2">Kit · Signals Tier 2</option>
@@ -1154,6 +1155,8 @@ body::before {
           <span class="eyebrow" style="margin:0">Filter:</span>
           <select class="form-select" id="prospects-source-filter" style="width:auto;min-width:160px" onchange="renderProspectList()">
             <option value="">All sources</option>
+            <option value="threshold">Threshold · Which Gate</option>
+            <option value="seven_gates">Seven Gates</option>
             <option value="kit_pdf">Kit · Architecture PDF</option>
             <option value="kit_signals">Kit · Signals Quiz</option>
             <option value="kit_signals_t2">Kit · Signals Tier 2</option>
@@ -4513,6 +4516,20 @@ async function createProspect() {
   }
 }
 
+// Threshold (Which Gate Are You At?) data lives in source_data.threshold: {gate, gate_name, source_tag, journey_day, subscribed_at}.
+const GATE_SHORT = { 1: 'The Old Identity', 2: 'The Descent', 3: 'The Stripping', 4: 'The Underworld', 5: 'The Witness', 6: 'The Price', 7: 'The Return' };
+function thresholdInfo(p) { return p && p.source_data && p.source_data.threshold ? p.source_data.threshold : null; }
+function thresholdBadge(p) {
+  const t = thresholdInfo(p); if (!t || !t.gate) return '';
+  return `<span class="client-badge" style="background:rgba(138,106,47,0.18);color:var(--gold)">Gate ${t.gate} · ${GATE_SHORT[t.gate] || ''}</span>`;
+}
+function thresholdMeta(p) {
+  const t = thresholdInfo(p); if (!t) return '';
+  const day = t.journey_day ? ` · Journey day ${t.journey_day} of 5` : '';
+  const via = t.source_tag ? ` · via ${String(t.source_tag).replace(/[<>&]/g, '')}` : '';
+  return day + via;
+}
+
 function paintProspectsStats() {
   const total      = allProspects.length;
   const active     = allProspects.filter(p => !p.archived && !p.converted_to_client_id).length;
@@ -4522,8 +4539,12 @@ function paintProspectsStats() {
   const bySource    = {};
   allProspects.forEach(p => { bySource[p.source] = (bySource[p.source] || 0) + 1; });
   const topSource = Object.entries(bySource).sort((a,b) => b[1] - a[1])[0];
+  const thresholdCount = allProspects.filter(p => thresholdInfo(p)).length;
+  const thresholdWeek  = allProspects.filter(p => { const t = thresholdInfo(p); return t && t.subscribed_at && new Date(t.subscribed_at).getTime() > weekCutoff; }).length;
 
   document.getElementById('prospects-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-number">${thresholdCount}</div><div class="stat-label">Threshold · took the assessment</div></div>
+    <div class="stat-card"><div class="stat-number">${thresholdWeek}</div><div class="stat-label">Threshold · last 7 days</div></div>
     <div class="stat-card"><div class="stat-number">${total}</div><div class="stat-label">Total prospects</div></div>
     <div class="stat-card"><div class="stat-number">${active}</div><div class="stat-label">Active</div></div>
     <div class="stat-card"><div class="stat-number">${newThisWeek}</div><div class="stat-label">New (7 days)</div></div>
@@ -4561,6 +4582,8 @@ function renderProspectList() {
     kit_pdf:        'Architecture PDF',
     kit_signals:    'Signals Quiz',
     kit_signals_t2: 'Signals Tier 2',
+    threshold:      'Threshold · Which Gate',
+    seven_gates:    'Seven Gates',
     kit_substack:   'Substack',
     kit_other:      'Kit · other',
     calendly:       'Calendly',
@@ -4581,9 +4604,10 @@ function renderProspectList() {
       <div class="client-row" style="cursor:pointer" onclick="showProspectDetail('${p.id}')">
         <div>
           <div class="client-name">${esc(p.name || p.email)}</div>
-          <div class="client-meta">${esc(p.email)}${p.name ? '' : ''} · first seen ${fmtDate(p.first_seen)} · last activity ${fmtDate(p.last_activity)}</div>
+          <div class="client-meta">${esc(p.email)}${p.name ? '' : ''} · first seen ${fmtDate(p.first_seen)} · last activity ${fmtDate(p.last_activity)}${thresholdMeta(p)}</div>
         </div>
         <div style="display:flex;gap:0.5rem;flex-shrink:0;align-items:center" onclick="event.stopPropagation()">
+          ${thresholdBadge(p)}
           <span class="client-badge" style="background:var(--accent);color:var(--text-dim)">${SOURCE_LABELS[p.source] || p.source}</span>
           ${statusBadge}
           <button class="btn btn-gold btn-sm" onclick="showProspectDetail('${p.id}')">Open</button>
@@ -4608,6 +4632,8 @@ async function showProspectDetail(prospectId) {
     kit_pdf: 'Architecture PDF (Kit)',
     kit_signals: 'Signals Quiz (Kit)',
     kit_signals_t2: 'Signals Tier 2 (Kit)',
+    threshold: 'Threshold · Which Gate Are You At?',
+    seven_gates: 'Seven Gates walk',
     kit_substack: 'Substack (Kit)',
     kit_other: 'Kit · other tag',
     calendly: 'Calendly booking',
@@ -4666,6 +4692,14 @@ async function showProspectDetail(prospectId) {
       </div>
     </div>
 
+    ${(() => { const t = thresholdInfo(p); if (!t) return ''; return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title">Which Gate Are You At?</h3>
+      <div class="cd-row"><div class="cd-label">Gate</div><div class="cd-value">${t.gate ? 'Gate ' + t.gate + ' · ' + (GATE_SHORT[t.gate] || '') : 'not recorded'}</div></div>
+      <div class="cd-row"><div class="cd-label">Came from</div><div class="cd-value">${esc(t.source_tag || 'threshold')}</div></div>
+      <div class="cd-row"><div class="cd-label">Journey</div><div class="cd-value">${t.journey_day ? 'Day ' + t.journey_day + ' of 5 sent' : 'not started'}</div></div>
+      <div class="cd-row"><div class="cd-label">Took it</div><div class="cd-value">${t.subscribed_at ? fmtDateTime(t.subscribed_at) : '—'}${t.returning ? ' (returning)' : ''}</div></div>
+    </div>`; })()}
     <div class="cd-card full" style="margin-bottom:1.25rem">
       <h3 class="cd-card-title">Source data</h3>
       ${sourceDataHtml}
