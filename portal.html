@@ -1113,7 +1113,7 @@ body::before {
         <div class="panel-header">
           <div class="eyebrow">Top of Funnel</div>
           <div class="panel-title">Prospects</div>
-          <p class="panel-sub">People who aren't yet clients. Every woman who takes <em>Which Gate Are You At?</em> lands here automatically as a <strong>Threshold</strong> prospect, with her gate and the post she came from; the Journey letters run on their own. Add anyone else by hand with the button below.</p>
+          <p class="panel-sub">People who aren't yet clients. Every woman who takes <em>Where Do You Stand?</em> lands here automatically as a <strong>Threshold</strong> prospect, with her gate and the post she came from; the Journey letters run on their own. Add anyone else by hand with the button below.</p>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
           <button class="btn btn-gold btn-sm" onclick="showAddProspectForm()">+ New Prospect</button>
@@ -1131,7 +1131,7 @@ body::before {
               <div class="form-group"><label class="form-label">Source</label>
                 <select class="form-select" id="new-prospect-source">
                   <option value="manual">Manual</option>
-                  <option value="threshold">Threshold · Which Gate Are You At?</option>
+                  <option value="threshold">Threshold · Where Do You Stand?</option>
                   <option value="kit_pdf">Kit · Architecture PDF</option>
                   <option value="kit_signals">Kit · Signals Quiz</option>
                   <option value="kit_signals_t2">Kit · Signals Tier 2</option>
@@ -4516,7 +4516,7 @@ async function createProspect() {
   }
 }
 
-// Threshold (Which Gate Are You At?) data lives in source_data.threshold: {gate, gate_name, source_tag, journey_day, subscribed_at}.
+// Threshold (Where Do You Stand?) data lives in source_data.threshold: {gate, gate_name, source_tag, journey_day, subscribed_at}.
 const GATE_SHORT = { 1: 'The Old Identity', 2: 'The Descent', 3: 'The Stripping', 4: 'The Underworld', 5: 'The Witness', 6: 'The Price', 7: 'The Return' };
 function thresholdInfo(p) { return p && p.source_data && p.source_data.threshold ? p.source_data.threshold : null; }
 function thresholdBadge(p) {
@@ -4632,7 +4632,7 @@ async function showProspectDetail(prospectId) {
     kit_pdf: 'Architecture PDF (Kit)',
     kit_signals: 'Signals Quiz (Kit)',
     kit_signals_t2: 'Signals Tier 2 (Kit)',
-    threshold: 'Threshold · Which Gate Are You At?',
+    threshold: 'Threshold · Where Do You Stand?',
     seven_gates: 'Seven Gates walk',
     kit_substack: 'Substack (Kit)',
     kit_other: 'Kit · other tag',
@@ -4694,7 +4694,7 @@ async function showProspectDetail(prospectId) {
 
     ${(() => { const t = thresholdInfo(p); if (!t) return ''; return `
     <div class="cd-card full" style="margin-bottom:1.25rem">
-      <h3 class="cd-card-title">Which Gate Are You At?</h3>
+      <h3 class="cd-card-title">Where Do You Stand?</h3>
       <div class="cd-row"><div class="cd-label">Gate</div><div class="cd-value">${t.gate ? 'Gate ' + t.gate + ' · ' + (GATE_SHORT[t.gate] || '') : 'not recorded'}</div></div>
       <div class="cd-row"><div class="cd-label">Came from</div><div class="cd-value">${esc(t.source_tag || 'threshold')}</div></div>
       <div class="cd-row"><div class="cd-label">Journey</div><div class="cd-value">${t.journey_day ? 'Day ' + t.journey_day + ' of 5 sent' : 'not started'}</div></div>
