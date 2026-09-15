@@ -2262,7 +2262,17 @@ async function loadClientDetail() {
       fieldById = Object.fromEntries(fs.map(f => [f.id, f]));
     }
 
-    currentDetailData = { client, birth, hd, gk, ancestors, convs, refByNum, fieldById, resonance: resonance || [], allTapestry: allTapestry || [], planets: planets || [], sig1: sig1 || [], sig2: sig2 || [], recentConv, convSections: convSections || [] };
+    // The Threshold (Where Do You Stand? + The Seven Gates), matched by email. Admin-only read policies.
+    let threshold = null, sevenGates = [];
+    if (client.email) {
+      const em = encodeURIComponent(String(client.email).trim().toLowerCase());
+      [threshold, sevenGates] = await Promise.all([
+        rest(`threshold_subscribers?email=eq.${em}&select=gate,source,day_sent,last_sent_at,unsubscribed,enrolled_seven_gates,created_at&limit=1`).then(r => (Array.isArray(r) && r[0]) || null).catch(() => null),
+        rest(`seven_gates_enrollments?email=eq.${em}&select=walk,amount_cents,welcome_sent_at,unsubscribed,refunded_at,created_at&order=created_at.desc`).catch(() => [])
+      ]);
+    }
+
+    currentDetailData = { client, birth, hd, gk, ancestors, convs, refByNum, fieldById, resonance: resonance || [], allTapestry: allTapestry || [], planets: planets || [], sig1: sig1 || [], sig2: sig2 || [], recentConv, convSections: convSections || [], threshold, sevenGates: Array.isArray(sevenGates) ? sevenGates : [] };
 
     document.getElementById('cd-title').textContent = client.name || '—';
     document.getElementById('cd-subtitle').textContent =
@@ -2321,6 +2331,27 @@ function cdLoginLine(c) {
 // Snapshot — the "who is this and what have they done" card. Everything here is
 // built from data already loaded in loadClientDetail (no extra queries): the
 // client record, their free/paid Signals readings, weaving, and convergences.
+// The Threshold card: the client's Where Do You Stand? result and Seven Gates enrollment, matched by email.
+function cdThresholdCard(d) {
+  const t = d.threshold, sg = (d.sevenGates || []);
+  if (!t && !sg.length) return '';
+  const gateLine = t && t.gate ? `Gate ${t.gate} · ${GATE_SHORT[t.gate] || ''}` : 'gate not recorded';
+  const journey = t ? (t.unsubscribed ? 'left the letters' : (t.day_sent >= 5 ? 'all five letters sent' : `day ${t.day_sent || 0} of 5 sent`)) : '';
+  const rows = [];
+  if (t) {
+    rows.push(['Result', gateLine]);
+    rows.push(['Took it', cdShortDate(t.created_at) + (t.source && t.source !== 'threshold' ? ` · via ${cdEsc(t.source)}` : '')]);
+    rows.push(['Threshold Journey', journey + (t.last_sent_at ? ` (last letter ${cdShortDate(t.last_sent_at)})` : '')]);
+  }
+  sg.forEach(e => rows.push(['The Seven Gates', `${e.walk || 'walk 1'} · enrolled ${cdShortDate(e.created_at)}${e.amount_cents ? ' · $' + (e.amount_cents / 100) : ''}${e.refunded_at ? ' · refunded' : ''}${e.welcome_sent_at ? ' · welcome sent' : ''}`]));
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title">The Threshold</h3>
+      ${rows.map(r => `<div class="cd-row"><div class="cd-label" style="min-width:160px">${r[0]}</div><div class="cd-value">${r[1]}</div></div>`).join('')}
+      <div class="cd-value muted" style="margin-top:0.6rem;font-size:14px">Matched by email from Where Do You Stand? and Seven Gates enrollment. The gate is where she stood the day she took it; a retake overwrites it.</div>
+    </div>`;
+}
+
 function cdSnapshotCard(d) {
   const c = d.client || {};
   const sig1 = d.sig1 || [], sig2 = d.sig2 || [], convs = d.convs || [], anc = d.ancestors || [];
@@ -2335,6 +2366,8 @@ function cdSnapshotCard(d) {
     if (r.email_captured_at) ev.push([r.email_captured_at, 'Gave their email on the quiz']);
   });
   sig2.forEach(r => { if (r.created_at) ev.push([r.created_at, 'Purchased the Signals Reading ($44)']); });
+  if (d.threshold && d.threshold.created_at) ev.push([d.threshold.created_at, 'Took Where Do You Stand?' + (d.threshold.gate ? ` — Gate ${d.threshold.gate} · ${GATE_SHORT[d.threshold.gate] || ''}` : '')]);
+  (d.sevenGates || []).forEach(e => { if (e.created_at) ev.push([e.created_at, 'Enrolled in The Seven Gates' + (e.refunded_at ? ' (refunded)' : '')]); });
   if (c.intake_submitted_at) ev.push([c.intake_submitted_at, 'Submitted the intake form' + (c.entry_offering ? ` — ${c.entry_offering}` : '')]);
   convs.forEach(cv => { if (cv.created_at) ev.push([cv.created_at, (cv.title || 'Convergence') + ' generated']); });
   ev.sort((a, b) => new Date(a[0]) - new Date(b[0]));
@@ -2353,7 +2386,9 @@ function cdSnapshotCard(d) {
     chip(convs.length > 0, `Convergence · ${convs.length}`),
     chip(sig1.length > 0, `Free quiz · ${sig1.length}`),
     chip(sig2.length > 0, `Signals Reading · ${sig2.length}`),
-    chip(hasMirrorApp, 'Mirror application ' + (hasMirrorApp ? '✓' : '—'))
+    chip(hasMirrorApp, 'Mirror application ' + (hasMirrorApp ? '✓' : '—')),
+    chip(!!(d.threshold && d.threshold.gate), d.threshold && d.threshold.gate ? `Threshold · Gate ${d.threshold.gate}` : 'Threshold —'),
+    chip((d.sevenGates || []).some(e => !e.refunded_at), 'Seven Gates ' + ((d.sevenGates || []).some(e => !e.refunded_at) ? '✓' : '—'))
   ].join(' ');
 
   const relPlain = c.client_relationship ? c.client_relationship.replace(/_/g, ' ') : '';
@@ -2473,7 +2508,7 @@ function renderClientDetail(d) {
     { key: 'intake',    label: 'Intake',
       html: `${cdIntakePatternsCard(d)}${cdMirrorAppCard(d)}` },
     { key: 'chart',     label: 'Chart & Signals',
-      html: `<div class="cd-grid">${cdBirthDataCard(d)}${cdChartSummaryCard(d)}</div>${cdSignalProfileCard(d)}` },
+      html: `<div class="cd-grid">${cdBirthDataCard(d)}${cdChartSummaryCard(d)}</div>${cdThresholdCard(d)}${cdSignalProfileCard(d)}` },
     { key: 'ancestral', label: 'Ancestral',
       html: `${cdWeavingCard(d)}${cdResonanceCard(d)}${cdConvergencesCard(d)}` },
     { key: 'admin',     label: 'Admin',
