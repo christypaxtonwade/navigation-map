@@ -505,6 +505,12 @@ async function init() {
     page.innerHTML = `<div class="error-box">Not signed in. Open this page from the portal (it shares your login), or sign in at the portal first, then reopen.</div>`;
     return;
   }
+  // Admin only. This page carries the internal brief and engine weightings; a signed-in
+  // client is sent to their own client-facing chart instead.
+  if (((readPortalSession().session.user || {}).email || '').toLowerCase() !== 'christypaxtonwade@gmail.com') {
+    window.location.replace('my-chart.html');
+    return;
+  }
   try {
     const [client] = await sb(`clients?id=eq.${CLIENT_ID}&limit=1`);
     if (!client) throw new Error('Client not found');

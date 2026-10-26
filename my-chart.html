@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Chart · Navigation Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* readability-standard.md v3 — walnut frame, vellum reading surface. Floor: 15px, opacity 0.88. */
+:root {
+  --bg: #1c1812; --surface: #251f18; --surface-2: #2e261e;
+  --text: #f0e6cc; --text-secondary: #d4c7a8; --text-dim: #b8a98a;
+  --gold: #b08030; --gold-bright: #c9a04a; --gold-dim: rgba(176,128,48,0.72);
+  --border: rgba(176,128,48,0.18);
+  --vellum: #e8dcbb; --vellum-dark: #ddd0a8; --vellum-deeper: #d3c599;
+  --ink: #14110a; --ink-secondary: #2b2414; --ink-dim: #4e4228; --ink-gold: #7a5618;
+  --mythic: #3d2f70; --conceptual: #165a42; --somatic: #7a3216;
+  --text-body: 1.15rem; --text-body-sm: 1.05rem; --text-label: 0.94rem;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Cormorant Garamond', Georgia, serif; font-size: 16px; line-height: 1.6; min-height: 100vh; }
+.frame { max-width: 920px; margin: 0 auto; padding: 2.5rem 1rem 5rem; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+.eyebrow { font-family: 'Jost', sans-serif; font-size: var(--text-label); font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-bright); }
+.btn { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.6rem 1.1rem; border-radius: 3px; border: 1px solid var(--gold); background: transparent; color: var(--gold-bright); cursor: pointer; text-decoration: none; display: inline-block; }
+.btn:hover { background: rgba(176,128,48,0.12); }
+.btn-solid { background: var(--gold); color: #1c1812; }
+.btn-solid:hover { background: var(--gold-bright); }
+.btn[disabled] { opacity: 0.88; cursor: wait; }
+.msg { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; font-size: var(--text-body); color: var(--text-secondary); }
+
+/* admin bar (dark frame) */
+.adminbar { background: var(--surface); border: 1px solid var(--gold-dim); border-radius: 4px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; align-items: center; }
+.adminbar b { color: var(--text); font-weight: 500; }
+.adminbar label { display: inline-flex; gap: 0.45rem; align-items: center; cursor: pointer; }
+.adminbar .status { color: var(--gold-bright); }
+.draftnote { width: 100%; color: var(--text-dim); }
+
+/* vellum reading surface */
+.sheet { background: var(--vellum); color: var(--ink); border-radius: 4px; padding: 3rem 3.25rem 3.5rem; position: relative; }
+.sheet::before { content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px; background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent); opacity: 0.6; }
+.title { font-size: 2.6rem; font-weight: 500; line-height: 1.15; color: var(--ink); margin: 0.4rem 0 0.4rem; }
+.subtitle { font-style: italic; font-size: var(--text-body); color: var(--ink-dim); }
+.sheet .eyebrow { color: var(--ink-gold); }
+section.part { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(122,86,24,0.35); }
+h2 { font-size: 1.95rem; font-weight: 500; color: var(--ink); line-height: 1.2; margin-bottom: 0.9rem; }
+h3 { font-size: 1.4rem; font-weight: 600; color: var(--ink); line-height: 1.25; margin: 1.6rem 0 0.35rem; }
+h4 { font-family: 'Jost', sans-serif; font-size: var(--text-label); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-gold); margin: 1.5rem 0 0.4rem; }
+p.t { font-size: var(--text-body); font-weight: 400; color: var(--ink-secondary); margin-bottom: 0.85rem; }
+p.lead { font-size: 1.22rem; color: var(--ink); }
+.meta { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; color: var(--ink-dim); letter-spacing: 0.03em; margin-bottom: 0.5rem; }
+.stage { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-gold); margin-right: 0.4rem; }
+.group { margin: 1.4rem 0 1.8rem; padding-left: 1.1rem; border-left: 2px solid rgba(122,86,24,0.45); }
+.group.gk { padding-left: 1.25rem; }
+.wheel { display: block; width: 100%; max-width: 560px; margin: 1.5rem auto 0.5rem; }
+.bars { margin: 0.6rem 0 1rem; }
+.bar { display: grid; grid-template-columns: 9.5rem 1fr 3.5rem; gap: 0.75rem; align-items: center; font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-secondary); margin: 0.3rem 0; }
+.bar .track { height: 8px; border: 1px solid var(--ink-dim); border-radius: 4px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--ink-gold); }
+.hidden-note { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-dim); font-style: italic; }
+
+/* edit controls (admin only) */
+.ed { position: relative; }
+.ed .pen { display: none; font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-gold); background: var(--vellum-dark); border: 1px solid var(--ink-gold); border-radius: 3px; padding: 0.05rem 0.5rem; margin-left: 0.4rem; cursor: pointer; vertical-align: middle; }
+body.editing .ed .pen { display: inline-block; }
+.ed.overridden { box-shadow: -6px 0 0 -3px var(--somatic); }
+.editor { background: var(--vellum-dark); border: 1px solid var(--ink-gold); border-radius: 4px; padding: 0.9rem; margin: 0.4rem 0 1rem; }
+.editor textarea { width: 100%; min-height: 8rem; font-family: 'Cormorant Garamond', Georgia, serif; font-size: var(--text-body); color: var(--ink); background: #f3ead2; border: 1px solid var(--ink-dim); border-radius: 3px; padding: 0.6rem; line-height: 1.5; }
+.editor .row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; align-items: center; }
+.editor .btn { color: var(--ink); border-color: var(--ink-gold); font-size: 15px; padding: 0.4rem 0.8rem; }
+.editor .btn-solid { background: var(--ink-gold); color: var(--vellum); }
+.editor .why { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-dim); width: 100%; }
+
+@media (max-width: 640px) {
+  .sheet { padding: 2rem 1.25rem 2.5rem; }
+  .title { font-size: 2rem; }
+  .bar { grid-template-columns: 6.5rem 1fr 3rem; }
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="frame">
+  <div class="topbar">
+    <span class="eyebrow">Navigation Map · Chart Analysis</span>
+    <span id="actions"></span>
+  </div>
+  <div id="adminbar"></div>
+  <div id="root"><div class="msg">Loading your chart…</div></div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+const ADMIN_EMAIL = 'christypaxtonwade@gmail.com';
+
+// ── Session (shared with the portal via storage — same shape as chart-admin.html) ──
+function readPortalSession() {
+  for (const store of [sessionStorage, localStorage]) {
+    try { const raw = store.getItem('portal_session'); if (!raw) continue; const s = JSON.parse(raw); if (s?.access_token) return s; } catch {}
+  }
+  return null;
+}
+function writePortalSession(s) { const p = JSON.stringify(s); try { sessionStorage.setItem('portal_session', p); } catch {} try { localStorage.setItem('portal_session', p); } catch {} }
+let _refresh = null;
+async function token() {
+  const s = readPortalSession(); if (!s) return null;
+  const now = Date.now(), expired = s.expires_at && now > s.expires_at;
+  if (s.expires_at && now < s.expires_at - 60000) return s.access_token;
+  if (!s.refresh_token) return expired ? null : s.access_token;
+  if (!_refresh) _refresh = (async () => {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, { method: 'POST', headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: s.refresh_token }) });
+      const d = await r.json(); if (!r.ok || !d.access_token) return null;
+      const f = { access_token: d.access_token, refresh_token: d.refresh_token || s.refresh_token, expires_at: Date.now() + (d.expires_in || 3600) * 1000, user: d.user || s.user };
+      writePortalSession(f); return f.access_token;
+    } catch { return null; } finally { _refresh = null; }
+  })();
+  return _refresh;
+}
+async function api(path, opts = {}) {
+  const t = await token(); if (!t) throw new Error('SESSION_EXPIRED');
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...opts, headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${t}`, 'Content-Type': 'application/json', ...(opts.headers || {}) } });
+  if (res.status === 401) throw new Error('SESSION_EXPIRED');
+  if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+  return res.status === 204 || opts.method === 'DELETE' || (opts.headers && opts.headers.Prefer === 'return=minimal') ? null : res.json();
+}
+const get = (p) => api(p).catch(e => { if (e.message === 'SESSION_EXPIRED') throw e; console.warn(p, e); return []; });
+
+// ── Utilities ──
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const md = s => esc(s).replace(/\*([^*]+)\*/g, '<i>$1</i>');           // *Subterrain* → italic
+const plain = s => String(s ?? '').replace(/\*([^*]+)\*/g, '$1');
+const cap = s => String(s || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII'];
+const ORD = n => n + ({ 1: 'st', 2: 'nd', 3: 'rd' }[(n % 100 > 10 && n % 100 < 14) ? 0 : n % 10] || 'th');
+function fmtDate(d) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(d || '')); if (!m) return d || ''; return new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); }
+function fmtTime(t) { const m = String(t || '').match(/^(\d{1,2}):(\d{2})/); if (!m) return ''; let h = +m[1]; const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${h}:${m[2]} ${ap}`; }
+
+const BODY_ORDER = ['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','ascendant','midheaven','imum_coeli','north_node','south_node','chiron','lilith','ceres','pallas_athena','juno','vesta','astraea','hygeia','eris','haumea','sedna','nessus','chariklo'];
+const BODY_GROUPS = [
+  ['The Lights and Planets', ['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto']],
+  ['The Angles and Nodes', ['ascendant','midheaven','imum_coeli','north_node','south_node']],
+  ['Chiron, Lilith and the Minor Bodies', ['chiron','lilith','ceres','pallas_athena','juno','vesta','astraea','hygeia','eris','haumea','sedna','nessus','chariklo']],
+];
+const ASPECT_BODIES = new Set(['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','ascendant','midheaven','chiron','north_node']);
+const ELEMENTS = { aries:'Fire', leo:'Fire', sagittarius:'Fire', taurus:'Earth', virgo:'Earth', capricorn:'Earth', gemini:'Air', libra:'Air', aquarius:'Air', cancer:'Water', scorpio:'Water', pisces:'Water' };
+const MODES = { aries:'Cardinal', cancer:'Cardinal', libra:'Cardinal', capricorn:'Cardinal', taurus:'Fixed', leo:'Fixed', scorpio:'Fixed', aquarius:'Fixed', gemini:'Mutable', virgo:'Mutable', sagittarius:'Mutable', pisces:'Mutable' };
+const BALANCE = ['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','ascendant','midheaven','chiron'];
+const SEQUENCES = [
+  ['gk_activation', [['lifes_work', true], ['evolution'], ['radiance'], ['purpose']]],
+  ['gk_venus', [['attraction'], ['iq'], ['eq'], ['sq'], ['core', true]]],
+  ['gk_pearl', [['vocation'], ['culture'], ['brand'], ['pearl', true]]],
+];
+
+// ── State ──
+const params = new URLSearchParams(location.search);
+const S = { isAdmin: false, editing: false, preview: params.get('preview') === '1', clientId: null, D: null };
+
+async function init() {
+  const root = document.getElementById('root');
+  const sess = readPortalSession();
+  if (!sess) { root.innerHTML = `<div class="msg">Please sign in to your portal first, then open your chart from there. <br><br><a class="btn" href="portal.html">Go to the portal</a></div>`; return; }
+  S.isAdmin = (sess.user?.email || '').toLowerCase() === ADMIN_EMAIL && !S.preview;
+  try {
+    if (params.get('client_id')) S.clientId = params.get('client_id');
+    else if (!S.isAdmin && sess.user?.id) { const [me] = await get(`clients?auth_user_id=eq.${sess.user.id}&select=id&limit=1`); S.clientId = me?.id; }
+    if (!S.clientId) { root.innerHTML = `<div class="msg">${S.isAdmin ? 'Open this page from a client in the portal (it needs ?client_id=…).' : 'We could not find your client record. Please return to the portal.'}</div>`; return; }
+    await load();
+    render();
+  } catch (e) {
+    root.innerHTML = `<div class="msg">${e.message === 'SESSION_EXPIRED' ? 'Your session has expired. Please sign in to the portal again, then reopen your chart.' : 'Something went wrong loading the chart: ' + esc(e.message)}</div>`;
+  }
+}
+
+async function load() {
+  const id = S.clientId;
+  const [client] = await get(`clients?id=eq.${id}&select=id,name,pronouns,access_chart&limit=1`);
+  if (!client) throw new Error('Client not found');
+  const q = {
+    birth: get(`chart_birth_data?client_id=eq.${id}&limit=1`),
+    planets: get(`chart_planets?client_id=eq.${id}&side=eq.personality&select=body,longitude,zodiac_sign,zodiac_degree,house,retrograde`),
+    astro: get(`chart_astrology?client_id=eq.${id}&limit=1`),
+    aspects: get(`chart_aspects?client_id=eq.${id}&select=body_a,body_b,aspect_type,orb,applying&order=orb.asc`),
+    hd: get(`chart_human_design?client_id=eq.${id}&limit=1`),
+    gk: get(`chart_gene_keys?client_id=eq.${id}&limit=1`),
+    gkRef: get(`gene_keys_reference?select=number,shadow,gift,siddhi,theme,primary_field_id,shadow_field_id,gift_field_id,siddhi_field_id`),
+    gkDesc: get(`gene_keys_descriptions?select=number,shadow_desc,gift_desc,siddhi_desc,status`),
+    gkSubs: get(`gene_keys_subterrains?select=gene_key_number,subterrain_id,level,weight`),
+    fields: get(`fields?select=id,number,name,tagline,arc&order=number`),
+    subs: get(`subterrains?select=id,name,field_id,description`),
+    signFields: get(`sign_field_activations?select=sign_name,field_id,is_secondary`),
+    houseFields: get(`house_field_activations?select=house_number,field_id,is_secondary`),
+    astSubs: get(`asteroid_subterrain_archetypes?select=body_name,subterrain_id,field_id,is_secondary`),
+    weights: get(`chart_body_weights?select=body_name,body_weight`),
+    channels: get(`hd_channels_reference?select=gate_a,gate_b,name,quality`),
+    ref: get(`chart_reference_text?select=kind,key,title,body`),
+    over: get(`client_chart_text?client_id=eq.${id}&select=section_key,body`),
+  };
+  const D = { client };
+  for (const [k, p] of Object.entries(q)) D[k] = await p;
+  D.birth = D.birth[0] || null; D.astro = D.astro[0] || null; D.hd = D.hd[0] || null; D.gk = D.gk[0] || null;
+  D.fieldById = Object.fromEntries(D.fields.map(f => [f.id, f]));
+  D.subById = Object.fromEntries(D.subs.map(s => [s.id, s]));
+  D.gkByNum = Object.fromEntries(D.gkRef.map(g => [g.number, g]));
+  D.gkDesc.forEach(x => { if (D.gkByNum[x.number]) Object.assign(D.gkByNum[x.number], x); });
+  D.REF = {}; D.ref.forEach(r => { (D.REF[r.kind] = D.REF[r.kind] || {})[r.key] = r; });
+  D.OVER = Object.fromEntries(D.over.map(o => [o.section_key, o.body]));
+  D.weightOf = Object.fromEntries(D.weights.map(w => [w.body_name, Number(w.body_weight) || 0.5]));
+  S.D = D;
+}
+
+// ── Text resolution ──
+// Every editable block has a key. A per-client override (client_chart_text) wins over
+// the default; an empty override hides the block for this client. `src` names the
+// reference row the default came from, so an admin can also save to the reference.
+function ref(kind, key) { return S.D.REF[kind]?.[key] || null; }
+function refBody(kind, key) { return ref(kind, key)?.body || ''; }
+function refTitle(kind, key, fb) { return ref(kind, key)?.title || fb; }
+function block(key, def, src, cls = 't') {
+  const has = Object.prototype.hasOwnProperty.call(S.D.OVER, key);
+  const text = has ? S.D.OVER[key] : def;
+  return { t: 'p', key, text, def, src, cls, overridden: has, hidden: has && !text.trim() };
+}
+
+// ── Model ──
+// The page and the PDF render from the same list of nodes.
+function buildModel() {
+  const D = S.D, M = [];
+  const name = D.client.name || 'Client';
+  const b = D.birth;
+  const birthLine = b ? [fmtDate(b.birth_date), fmtTime(b.birth_time), b.birth_place].filter(Boolean).join(' · ') : '';
+  M.push({ t: 'title', text: name, sub: birthLine });
+  M.push(block('section:intro', refBody('section', 'intro'), { kind: 'section', key: 'intro' }, 't lead'));
+  M.push(block('section:how_to_read', refBody('section', 'how_to_read'), { kind: 'section', key: 'how_to_read' }));
+
+  // Map activations per body
+  const s2f = {}, h2f = {}, b2s = {};
+  D.signFields.forEach(x => (s2f[x.sign_name] = s2f[x.sign_name] || []).push(x));
+  D.houseFields.forEach(x => (h2f[x.house_number] = h2f[x.house_number] || []).push(x));
+  D.astSubs.forEach(x => (b2s[x.body_name] = b2s[x.body_name] || []).push(x));
+  const byBody = Object.fromEntries(D.planets.map(p => [p.body, p]));
+  const fieldScore = {}, fieldSources = {}, subHits = {};
+  const credit = (fid, w, label) => { if (!fid || !D.fieldById[fid]) return; fieldScore[fid] = (fieldScore[fid] || 0) + w; (fieldSources[fid] = fieldSources[fid] || new Set()).add(label); };
+  const creditSub = (sid, label) => { if (!D.subById[sid]) return; (subHits[sid] = subHits[sid] || new Set()).add(label); };
+  const fieldsFor = p => {
+    const seen = new Map();
+    [...(s2f[p.zodiac_sign] || []), ...(h2f[p.house] || [])].forEach(x => { const f = D.fieldById[x.field_id]; if (f && !seen.has(f.id)) seen.set(f.id, { f, sec: x.is_secondary }); });
+    return [...seen.values()];
+  };
+
+  // ── The Sky
+  if (D.planets.length) {
+    M.push({ t: 'h2', text: refTitle('section', 'sky', 'The Sky at Your Birth') });
+    M.push(block('section:sky', refBody('section', 'sky'), { kind: 'section', key: 'sky' }));
+    M.push({ t: 'wheel' });
+    for (const [gname, bodies] of BODY_GROUPS) {
+      const present = bodies.filter(x => byBody[x]);
+      if (!present.length) continue;
+      M.push({ t: 'h4', text: gname });
+      for (const body of present) {
+        const p = byBody[body];
+        const title = refTitle('body', body, cap(body));
+        const deg = p.zodiac_degree != null ? Math.floor(Number(p.zodiac_degree)) + '°' : '';
+        const sign = cap(p.zodiac_sign);
+        const pos = [deg && sign ? `${deg} ${sign}` : sign, p.house ? `${ORD(p.house)} house` : '', p.retrograde ? 'retrograde' : ''].filter(Boolean).join(' · ');
+        const fl = fieldsFor(p);
+        const w = D.weightOf[body] ?? 0.5;
+        fl.forEach(x => credit(x.f.id, x.sec ? w * 0.5 : w, title));
+        const subs = (b2s[body] || []).map(x => D.subById[x.subterrain_id]).filter(Boolean);
+        subs.forEach(s => { creditSub(s.id, title); credit(s.field_id, w * 0.5, title); });
+        const mapLine = [fl.length ? 'On the Map: ' + fl.map(x => `Field ${ROMAN[x.f.number]} · ${x.f.name}`).join('; ') : '', subs.length ? 'Subterrain: ' + subs.map(s => s.name).join(', ') : ''].filter(Boolean).join(' — ');
+        const signTxt = refBody('sign', p.zodiac_sign), houseTxt = refBody('house', String(p.house));
+        const def = [refBody('body', body),
+          signTxt ? `In ${sign}, it is ${signTxt}` : '',
+          houseTxt ? `In the ${ORD(p.house)} house, it does its work in ${houseTxt}.` : ''].filter(Boolean).join(' ');
+        M.push({ t: 'group', children: [
+          { t: 'h3', text: `${title}` }, { t: 'meta', text: pos }, ...(mapLine ? [{ t: 'meta', text: mapLine }] : []),
+          block(`place:${body}`, def, null),
+        ] });
+      }
+    }
+
+    // Aspects
+    const asp = D.aspects.filter(a => ASPECT_BODIES.has(a.body_a) && ASPECT_BODIES.has(a.body_b)).slice(0, 12);
+    if (asp.length) {
+      M.push({ t: 'h2', text: refTitle('section', 'aspects', 'Conversations Between Planets') });
+      M.push(block('section:aspects', refBody('section', 'aspects'), { kind: 'section', key: 'aspects' }));
+      asp.forEach(a => {
+        const A = refTitle('body', a.body_a, cap(a.body_a)), B = refTitle('body', a.body_b, cap(a.body_b));
+        const kind = refTitle('aspect', a.aspect_type, cap(a.aspect_type));
+        M.push({ t: 'h3', text: `${A} ${kind.toLowerCase()} ${B}`, small: true });
+        M.push({ t: 'meta', text: `Orb ${Number(a.orb).toFixed(1)}°${a.applying === true ? ' · applying' : a.applying === false ? ' · separating' : ''}` });
+        M.push(block(`aspect:${a.body_a}:${a.body_b}:${a.aspect_type}`, `${A} and ${B} are ${refBody('aspect', a.aspect_type)}`, null));
+      });
+    }
+
+    // Temperament
+    const el = { Fire: 0, Earth: 0, Air: 0, Water: 0 }, mo = { Cardinal: 0, Fixed: 0, Mutable: 0 }; let n = 0;
+    BALANCE.forEach(x => { const p = byBody[x]; if (p && ELEMENTS[p.zodiac_sign]) { el[ELEMENTS[p.zodiac_sign]]++; mo[MODES[p.zodiac_sign]]++; n++; } });
+    if (n) {
+      M.push({ t: 'h2', text: refTitle('section', 'balance', 'Temperament') });
+      M.push(block('section:balance', refBody('section', 'balance'), { kind: 'section', key: 'balance' }));
+      M.push({ t: 'bars', rows: Object.entries(el).map(([k, v]) => ({ label: k, v, pct: Math.round(v / n * 100) })) });
+      M.push({ t: 'bars', rows: Object.entries(mo).map(([k, v]) => ({ label: k, v, pct: Math.round(v / n * 100) })) });
+      const topE = Object.entries(el).sort((a, b) => b[1] - a[1])[0][0], lowE = Object.entries(el).sort((a, b) => a[1] - b[1])[0][0];
+      const topM = Object.entries(mo).sort((a, b) => b[1] - a[1])[0][0];
+      M.push(block('temperament:summary', `Your chart leans toward ${topE} and ${topM} energy. ${refBody('temperament', topE)} ${refBody('temperament', topM)} ${el[lowE] <= 1 ? `${lowE} is quiet in the chart; what it carries is something you may seek out in people, places or practice.` : ''}`.trim(), null));
+    }
+  }
+
+  // ── Human Design
+  const hd = D.hd;
+  if (hd) {
+    M.push({ t: 'h2', text: refTitle('section', 'hd', 'Human Design') });
+    M.push(block('section:hd', refBody('section', 'hd'), { kind: 'section', key: 'hd' }));
+    const add = (kind, key, label) => { const r = ref(kind, key); if (!r) return; M.push({ t: 'h3', text: r.title || label }); M.push(block(`hd:${kind}:${key}`, r.body, { kind, key })); };
+    add('hd_type', hd.type, cap(hd.type));
+    add('hd_authority', hd.authority, cap(hd.authority) + ' Authority');
+    if (hd.profile) {
+      const [c, u] = String(hd.profile).split('/');
+      M.push({ t: 'h3', text: `Profile ${hd.profile}` });
+      const lc = ref('hd_line', c), lu = ref('hd_line', u);
+      M.push(block(`hd:profile:${hd.profile}`, [lc ? `Your conscious ${lc.title.replace(/^Line \d · /, '')} line (${c}) ${lc.body}` : '', lu ? `Your unconscious ${lu.title.replace(/^Line \d · /, '')} line (${u}) ${lu.body}` : ''].filter(Boolean).join(' '), null));
+    }
+    add('hd_definition', hd.definition_type, cap(hd.definition_type));
+    const dc = hd.defined_centers || [], oc = hd.open_centers || [];
+    if (dc.length) { M.push({ t: 'h4', text: 'Defined centers — where you are consistent' }); dc.forEach(c => { const r = ref('hd_center_defined', c); if (r) M.push(block(`hd:center_defined:${c}`, `${r.title}. ${r.body.replace(/^Defined: /, '')}`, { kind: 'hd_center_defined', key: c })); }); }
+    if (oc.length) { M.push({ t: 'h4', text: 'Open centers — where you take in and learn' }); oc.forEach(c => { const r = ref('hd_center_open', c); if (r) M.push(block(`hd:center_open:${c}`, `${r.title}. ${r.body.replace(/^Open: /, '')}`, { kind: 'hd_center_open', key: c })); }); }
+    const chans = (hd.defined_channels || []).map(([a, b]) => D.channels.find(c => (c.gate_a === a && c.gate_b === b) || (c.gate_a === b && c.gate_b === a)) || { gate_a: a, gate_b: b });
+    if (chans.length) {
+      M.push({ t: 'h4', text: 'Defined channels — your fixed circuitry' });
+      chans.forEach(c => M.push(block(`hd:channel:${c.gate_a}-${c.gate_b}`, `Channel ${c.gate_a}–${c.gate_b}${c.name ? ', ' + c.name : ''}.${c.quality ? ' ' + c.quality.replace(/^\w/, m => m.toUpperCase()) + (/[.]$/.test(c.quality) ? '' : '.') : ''}`, null)));
+    }
+  }
+
+  // ── Gene Keys
+  const gk = D.gk;
+  if (gk) {
+    M.push({ t: 'h2', text: refTitle('section', 'gk', 'The Gene Keys') });
+    M.push(block('section:gk', refBody('section', 'gk'), { kind: 'section', key: 'gk' }));
+    for (const [secKey, spheres] of SEQUENCES) {
+      M.push({ t: 'h2b', text: refTitle('section', secKey, cap(secKey)) });
+      M.push(block(`section:${secKey}`, refBody('section', secKey), { kind: 'section', key: secKey }));
+      for (const [sp] of spheres) {
+        const num = gk[`gk_${sp}`], line = gk[`gk_${sp}_line`];
+        if (!num) continue;
+        const g = D.gkByNum[num]; if (!g) continue;
+        const sphereTitle = refTitle('sphere', sp, cap(sp));
+        const home = D.fieldById[g.primary_field_id];
+        const w = (sp === 'lifes_work' || sp === 'evolution' || sp === 'radiance' || sp === 'purpose' || sp === 'core') ? 1 : 0.6;
+        const label = `Gene Key ${num} (${sphereTitle})`;
+        [['shadow', g.shadow_field_id], ['gift', g.gift_field_id], ['siddhi', g.siddhi_field_id]].forEach(([, fid]) => fid && credit(fid, w * 0.4, label));
+        if (home) credit(home.id, w, label);
+        const subs = D.gkSubs.filter(x => x.gene_key_number === num).map(x => ({ s: D.subById[x.subterrain_id], level: x.level })).filter(x => x.s);
+        subs.forEach(x => creditSub(x.s.id, label));
+        const stageField = fid => { const f = D.fieldById[fid] || home; return f ? `Field ${ROMAN[f.number]} · ${f.name}` : ''; };
+        const mapLine = [home ? `On the Map: Field ${ROMAN[home.number]} · ${home.name}` : '', subs.length ? 'Subterrains: ' + subs.map(x => x.s.name).join(', ') : ''].filter(Boolean).join(' — ');
+        M.push({ t: 'group', cls: 'gk', children: [
+          { t: 'eyebrow', text: sphereTitle },
+          { t: 'h3', text: `Gene Key ${num}.${line} · ${g.shadow} → ${g.gift} → ${g.siddhi}` },
+          block(`sphere:${sp}`, refBody('sphere', sp), { kind: 'sphere', key: sp }),
+          ...(mapLine ? [{ t: 'meta', text: mapLine }] : []),
+          { ...block(`gk:${num}:shadow`, g.shadow_desc || '', { gk: num, col: 'shadow_desc' }), stage: `Shadow · ${g.shadow}`, stageMeta: stageField(g.shadow_field_id) },
+          { ...block(`gk:${num}:gift`, g.gift_desc || '', { gk: num, col: 'gift_desc' }), stage: `Gift · ${g.gift}`, stageMeta: stageField(g.gift_field_id) },
+          { ...block(`gk:${num}:siddhi`, g.siddhi_desc || '', { gk: num, col: 'siddhi_desc' }), stage: `Siddhi · ${g.siddhi}`, stageMeta: stageField(g.siddhi_field_id) },
+        ] });
+      }
+    }
+  }
+
+  // ── The Map: where the three systems converge
+  const ranked = Object.entries(fieldScore).map(([id, s]) => ({ f: D.fieldById[id], s })).filter(x => x.f).sort((a, b) => b.s - a.s);
+  if (ranked.length) {
+    M.push({ t: 'h2', text: refTitle('section', 'map', 'Your Frequencies on the Map') });
+    M.push(block('section:map', refBody('section', 'map'), { kind: 'section', key: 'map' }));
+    const max = ranked[0].s;
+    M.push({ t: 'bars', rows: ranked.slice(0, 8).map(x => ({ label: `${ROMAN[x.f.number]} · ${x.f.name}`, v: '', pct: Math.round(x.s / max * 100) })), wide: true });
+    ranked.slice(0, 6).forEach((x, i) => {
+      const f = x.f, src = [...(fieldSources[f.id] || [])];
+      const astro = src.filter(s => !s.startsWith('Gene Key')), keys = src.filter(s => s.startsWith('Gene Key'));
+      const subs = Object.keys(subHits).map(id => D.subById[id]).filter(s => s && s.field_id === f.id);
+      const both = astro.length && keys.length;
+      const interp = `${i === 0 ? 'This is the most concentrated terrain in your design.' : both ? 'Your chart and your Gene Keys both point here.' : 'This terrain is part of your design.'} ${astro.length ? `In your chart it is lit by ${listJoin(astro)}.` : ''} ${keys.length ? `In your Gene Keys it is carried by ${listJoin(keys)}.` : ''}`.replace(/\s+/g, ' ').trim();
+      M.push({ t: 'group', children: [
+        { t: 'h3', text: `Field ${ROMAN[f.number]} · ${f.name}` },
+        ...(f.arc ? [{ t: 'meta', text: `${cap(f.arc)} arc` }] : []),
+        block(`field:${f.number}:tagline`, f.tagline || '', null, 't lead'),
+        block(`field:${f.number}:interp`, interp, null),
+        ...subs.flatMap(s => [{ t: 'h4', text: s.name }, block(`sub:${s.id}`, `${s.description || ''} ${subHits[s.id] ? `(Through ${listJoin([...subHits[s.id]])}.)` : ''}`.trim(), null)]),
+      ] });
+    });
+    const rest = ranked.slice(6).map(x => `Field ${ROMAN[x.f.number]} · ${x.f.name}`);
+    if (rest.length) M.push(block('map:rest', `Also present in your design, more quietly: ${listJoin(rest)}.`, null));
+  }
+
+  M.push({ t: 'h2', text: refTitle('section', 'closing', 'Carrying This Forward') });
+  M.push(block('section:closing', refBody('section', 'closing'), { kind: 'section', key: 'closing' }));
+  return M;
+}
+function listJoin(a) { a = [...new Set(a)]; return a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
+
+// ── HTML render ──
+function nodeHTML(n) {
+  switch (n.t) {
+    case 'title': return `<div class="eyebrow">Chart Analysis</div><h1 class="title">${esc(n.text)}</h1>${n.sub ? `<div class="subtitle">${esc(n.sub)}</div>` : ''}`;
+    case 'h2': return `</section><section class="part"><h2>${esc(n.text)}</h2>`;
+    case 'h2b': return `<h2 style="font-size:1.6rem;margin-top:2.2rem">${esc(n.text)}</h2>`;
+    case 'h3': return `<h3>${esc(n.text)}</h3>`;
+    case 'h4': return `<h4>${esc(n.text)}</h4>`;
+    case 'eyebrow': return `<div class="eyebrow" style="margin-top:0.2rem">${esc(n.text)}</div>`;
+    case 'meta': return `<div class="meta">${esc(n.text)}</div>`;
+    case 'wheel': return `<div id="wheel-wrap">${wheelSVG()}</div>`;
+    case 'bars': return `<div class="bars">${n.rows.map(r => `<div class="bar"${n.wide ? ' style="grid-template-columns:13rem 1fr 0"' : ''}><span>${esc(r.label)}</span><span class="track"><span class="fill" style="display:block;width:${r.pct}%"></span></span><span>${n.wide ? '' : r.v}</span></div>`).join('')}</div>`;
+    case 'group': return `<div class="group ${n.cls || ''}">${n.children.map(nodeHTML).join('')}</div>`;
+    case 'p': {
+      if (!n.text && !S.isAdmin) return '';
+      const pen = S.isAdmin ? `<button class="pen" data-key="${esc(n.key)}">Edit</button>` : '';
+      const stage = n.stage ? `<span class="stage">${esc(n.stage)}</span>` : '';
+      const sm = n.stage && n.stageMeta ? `<div class="meta" style="margin:0.9rem 0 0.15rem">${stage}${esc(n.stageMeta)}</div>` : (stage ? `<div style="margin-top:0.9rem">${stage}</div>` : '');
+      if (n.hidden) return S.isAdmin ? `${sm}<p class="t ed overridden"><span class="hidden-note">Hidden for this client.</span>${pen}</p>` : '';
+      if (!n.text) return `${sm}<p class="t ed"><span class="hidden-note">No text yet.</span>${pen}</p>`;
+      return `${sm}<p class="${n.cls} ed${n.overridden ? ' overridden' : ''}" data-key="${esc(n.key)}">${md(n.text)}${pen}</p>`;
+    }
+  }
+  return '';
+}
+function render() {
+  const D = S.D;
+  const actions = document.getElementById('actions'), bar = document.getElementById('adminbar'), root = document.getElementById('root');
+  if (!S.isAdmin && !D.client.access_chart) {
+    actions.innerHTML = `<a class="btn" href="portal.html">Back to portal</a>`;
+    root.innerHTML = `<div class="msg">Your chart analysis is being prepared. It will appear here once it is ready.</div>`; return;
+  }
+  if (!D.planets.length && !D.gk && !D.hd) {
+    actions.innerHTML = `<a class="btn" href="portal.html">Back to portal</a>`;
+    root.innerHTML = `<div class="msg">${S.isAdmin ? 'No chart has been computed for this client yet. Enter birth data in Chart Admin first.' : 'Your chart has not been calculated yet.'}</div>`; return;
+  }
+  S.model = buildModel();
+  actions.innerHTML = `<button class="btn btn-solid" id="btn-pdf">Download PDF</button> <a class="btn" href="portal.html${S.preview ? '?preview=1' : ''}">Back to portal</a>`;
+  document.getElementById('btn-pdf').onclick = e => downloadPdf(e.target);
+  if (S.isAdmin) {
+    const drafts = D.gkDesc.filter(g => g.status === 'draft').length;
+    const overrides = Object.keys(D.OVER).length;
+    bar.innerHTML = `<div class="adminbar">
+      <span><b>Admin view</b> · ${esc(D.client.name || '')}</span>
+      <label><input type="checkbox" id="ab-edit" ${S.editing ? 'checked' : ''}> Show edit controls</label>
+      <label><input type="checkbox" id="ab-access" ${D.client.access_chart ? 'checked' : ''}> Visible to client</label>
+      <span>${overrides} edit${overrides === 1 ? '' : 's'} for this client</span>
+      <span class="status" id="ab-status"></span>
+      ${drafts ? `<span class="draftnote">${drafts} of 64 Gene Keys descriptions are still drafts (voice pass pending). Edits marked with a rust edge are specific to this client.</span>` : ''}
+    </div>`;
+    document.getElementById('ab-edit').onchange = e => { S.editing = e.target.checked; document.body.classList.toggle('editing', S.editing); };
+    document.getElementById('ab-access').onchange = async e => {
+      const st = document.getElementById('ab-status'); st.textContent = 'saving…';
+      try { await api(`clients?id=eq.${D.client.id}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ access_chart: e.target.checked }) }); D.client.access_chart = e.target.checked; st.textContent = e.target.checked ? 'now visible to client' : 'hidden from client'; }
+      catch (err) { st.textContent = 'failed: ' + err.message; e.target.checked = !e.target.checked; }
+    };
+  }
+  document.body.classList.toggle('editing', S.isAdmin && S.editing);
+  root.innerHTML = `<div class="sheet" id="sheet"><section>${S.model.map(nodeHTML).join('')}</section></div>`;
+  if (S.isAdmin) root.querySelectorAll('.pen').forEach(b => b.onclick = () => openEditor(b.dataset.key));
+}
+
+// ── Admin editing ──
+function findNode(key, list = S.model) { for (const n of list) { if (n.key === key) return n; if (n.children) { const f = findNode(key, n.children); if (f) return f; } } return null; }
+function openEditor(key) {
+  const n = findNode(key); if (!n) return;
+  document.querySelectorAll('.editor').forEach(e => e.remove());
+  const host = document.querySelector(`.pen[data-key="${CSS.escape(key)}"]`).closest('p');
+  const ed = document.createElement('div'); ed.className = 'editor';
+  const refLabel = n.src ? (n.src.gk ? `Gene Key ${n.src.gk} reference (every client with this key)` : `the reference text (every client)`) : '';
+  ed.innerHTML = `<textarea>${esc(n.hidden ? n.def : n.text)}</textarea>
+    <div class="row">
+      <button class="btn btn-solid" data-a="client">Save for this client</button>
+      ${n.src ? `<button class="btn" data-a="ref">Save to reference</button>` : ''}
+      ${n.overridden ? `<button class="btn" data-a="reset">Reset to default</button>` : ''}
+      <button class="btn" data-a="hide">Hide for this client</button>
+      <button class="btn" data-a="cancel">Cancel</button>
+      <span class="why">Wrap a Subterrain name in *asterisks* for italics.${n.src ? ` “Save to reference” changes ${refLabel}.` : ' This passage is assembled from reference pieces, so edits apply to this client only.'}</span>
+    </div>`;
+  host.after(ed);
+  ed.querySelector('textarea').focus();
+  ed.querySelectorAll('button').forEach(b => b.onclick = () => saveEdit(n, b.dataset.a, ed.querySelector('textarea').value, ed));
+}
+async function saveEdit(n, action, value, ed) {
+  if (action === 'cancel') { ed.remove(); return; }
+  const D = S.D, cid = D.client.id;
+  ed.querySelectorAll('button').forEach(b => b.disabled = true);
+  try {
+    if (action === 'client' || action === 'hide') {
+      const body = action === 'hide' ? '' : value.trim();
+      await api(`client_chart_text?on_conflict=client_id,section_key`, { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ client_id: cid, section_key: n.key, body, updated_at: new Date().toISOString() }) });
+      D.OVER[n.key] = body;
+    } else if (action === 'reset') {
+      await api(`client_chart_text?client_id=eq.${cid}&section_key=eq.${encodeURIComponent(n.key)}`, { method: 'DELETE', headers: { Prefer: 'return=minimal' } });
+      delete D.OVER[n.key];
+    } else if (action === 'ref') {
+      const v = value.trim();
+      if (!confirm('Save this text to the reference? It will change this passage for every client.')) { ed.querySelectorAll('button').forEach(b => b.disabled = false); return; }
+      if (n.src.gk) { await api(`gene_keys_descriptions?number=eq.${n.src.gk}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ [n.src.col]: v }) }); D.gkByNum[n.src.gk][n.src.col] = v; }
+      else { await api(`chart_reference_text?kind=eq.${n.src.kind}&key=eq.${encodeURIComponent(n.src.key)}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ body: v, updated_at: new Date().toISOString() }) }); const r = D.REF[n.src.kind]?.[n.src.key]; if (r) r.body = v; }
+      if (Object.prototype.hasOwnProperty.call(D.OVER, n.key)) { await api(`client_chart_text?client_id=eq.${cid}&section_key=eq.${encodeURIComponent(n.key)}`, { method: 'DELETE', headers: { Prefer: 'return=minimal' } }); delete D.OVER[n.key]; }
+    }
+    const y = window.scrollY; render(); window.scrollTo(0, y);
+    document.getElementById('ab-status').textContent = 'saved · ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    alert('Save failed: ' + e.message);
+    ed.querySelectorAll('button').forEach(b => b.disabled = false);
+  }
+}
+
+// ── Chart wheel (SVG) ──
+const GLYPH = { sun: '☉', moon: '☽', mercury: '☿', venus: '♀', mars: '♂', jupiter: '♃', saturn: '♄', uranus: '♅', neptune: '♆', pluto: '♇', chiron: '⚷', north_node: '☊', south_node: '☋', lilith: '⚸' };
+const SIGN_GLYPH = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
+const SIGN_ABBR = ['Ari', 'Tau', 'Gem', 'Can', 'Leo', 'Vir', 'Lib', 'Sco', 'Sag', 'Cap', 'Aqu', 'Pis'];
+function wheelSVG(forPrint) {
+  const D = S.D, pl = Object.fromEntries(D.planets.map(p => [p.body, p]));
+  const asc = Number(D.astro?.ascendant ?? pl.ascendant?.longitude ?? 0);
+  const C = 300, R1 = 288, R2 = 248, R3 = 212, R4 = 120;
+  const ang = L => (180 + (L - asc)) * Math.PI / 180;            // Ascendant at 9 o'clock, counter-clockwise
+  const pt = (L, r) => [C + r * Math.cos(ang(L)), C - r * Math.sin(ang(L))];
+  const ink = '#14110a', gold = '#7a5618', dim = '#4e4228';
+  const sym = forPrint ? 'font-family="DejaVu Sans, Segoe UI Symbol, Apple Symbols, sans-serif"' : 'font-family="Segoe UI Symbol, Apple Symbols, Noto Sans Symbols 2, DejaVu Sans, sans-serif"';
+  let s = `<svg class="wheel" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Natal chart wheel">`;
+  s += `<rect width="600" height="600" fill="${forPrint ? '#ffffff' : 'none'}"/>`;
+  [R1, R2, R3, R4].forEach((r, i) => s += `<circle cx="${C}" cy="${C}" r="${r}" fill="none" stroke="${i === 3 ? dim : ink}" stroke-width="${i === 0 ? 1.6 : 1}"/>`);
+  for (let i = 0; i < 12; i++) {
+    const L = i * 30, [x1, y1] = pt(L, R2), [x2, y2] = pt(L, R1);
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${ink}" stroke-width="1"/>`;
+    for (let d = 5; d < 30; d += 5) { const [a, b] = pt(L + d, R2), [c, e] = pt(L + d, R2 + (d % 10 ? 5 : 8)); s += `<line x1="${a}" y1="${b}" x2="${c}" y2="${e}" stroke="${dim}" stroke-width="0.7"/>`; }
+    const [tx, ty] = pt(L + 15, (R1 + R2) / 2);
+    s += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="central" font-size="22" fill="${gold}" ${sym}>${SIGN_GLYPH[i]}&#xFE0E;</text>`;
+  }
+  const cusps = Array.isArray(D.astro?.house_cusps) ? D.astro.house_cusps.map(Number) : (D.astro?.house_cusps ? Object.values(D.astro.house_cusps).map(Number) : []);
+  cusps.forEach((L, i) => {
+    const angular = i % 3 === 0, [x1, y1] = pt(L, R4), [x2, y2] = pt(L, angular ? R1 + 8 : R3);
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${ink}" stroke-width="${angular ? 2 : 0.8}"/>`;
+    const next = cusps[(i + 1) % 12], span = ((next - L) + 360) % 360, [nx, ny] = pt(L + span / 2, R4 + 14);
+    s += `<text x="${nx}" y="${ny}" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="Jost, Arial, sans-serif" fill="${dim}">${i + 1}</text>`;
+  });
+  if (cusps.length) { const [ax, ay] = pt(cusps[0], R1 + 14); s += `<text x="${ax - 10}" y="${ay}" text-anchor="end" dominant-baseline="central" font-size="14" font-family="Jost, Arial, sans-serif" fill="${ink}">ASC</text>`; const [mx, my] = pt(cusps[9], R1 + 14); s += `<text x="${mx}" y="${my - 6}" text-anchor="middle" font-size="14" font-family="Jost, Arial, sans-serif" fill="${ink}">MC</text>`; }
+  // aspect lines among the major bodies
+  D.aspects.filter(a => GLYPH[a.body_a] && GLYPH[a.body_b] && pl[a.body_a] && pl[a.body_b] && a.aspect_type !== 'conjunction' && a.aspect_type !== 'quincunx').forEach(a => {
+    const [x1, y1] = pt(Number(pl[a.body_a].longitude), R4), [x2, y2] = pt(Number(pl[a.body_b].longitude), R4);
+    const soft = a.aspect_type === 'trine' || a.aspect_type === 'sextile';
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${soft ? gold : ink}" stroke-width="${soft ? 0.9 : 1.1}" ${soft ? 'stroke-dasharray="5 4"' : ''} opacity="0.9"/>`;
+  });
+  // bodies, spread to avoid overlap
+  const bodies = Object.keys(GLYPH).filter(b => pl[b]).map(b => ({ b, L: Number(pl[b].longitude), d: Number(pl[b].longitude) })).sort((a, b) => a.L - b.L);
+  for (let pass = 0; pass < 6; pass++) for (let i = 0; i < bodies.length; i++) { const a = bodies[i], b = bodies[(i + 1) % bodies.length]; let gap = ((b.d - a.d) + 360) % 360; if (bodies.length > 1 && gap < 7) { const push = (7 - gap) / 2; a.d -= push; b.d += push; } }
+  bodies.forEach(({ b, L, d }) => {
+    const [x, y] = pt(d, (R3 + R4) / 2 + 18), [tx, ty] = pt(L, R3), [tx2, ty2] = pt(L, R3 - 7);
+    s += `<line x1="${tx}" y1="${ty}" x2="${tx2}" y2="${ty2}" stroke="${ink}" stroke-width="1.2"/>`;
+    s += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="21" fill="${ink}" ${sym}>${GLYPH[b]}&#xFE0E;</text>`;
+    const deg = Math.floor(Number(pl[b].zodiac_degree) || (L % 30)), [dx, dy] = pt(d, (R3 + R4) / 2 - 8);
+    s += `<text x="${dx}" y="${dy}" text-anchor="middle" dominant-baseline="central" font-size="11" font-family="Jost, Arial, sans-serif" fill="${dim}">${deg}°${pl[b].retrograde ? 'r' : ''}</text>`;
+  });
+  return s + `</svg>`;
+}
+async function wheelPNG() {
+  const svg = wheelSVG(true);
+  const img = new Image(); const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+  await new Promise((ok, no) => { img.onload = ok; img.onerror = no; img.src = url; });
+  const cv = document.createElement('canvas'); cv.width = 1200; cv.height = 1200;
+  cv.getContext('2d').drawImage(img, 0, 0, 1200, 1200); URL.revokeObjectURL(url);
+  const c2 = cv.getContext('2d'); return cv.toDataURL('image/jpeg', 0.9);
+}
+
+// ── PDF (from the same model; white page, ink text, no fills — prints cleanly in black and white) ──
+function pdfText(s) {
+  return plain(s).replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, m => m === '—' ? ' - ' : '-').replace(/→/g, '>').replace(/…/g, '...').replace(/°/g, '°').replace(/[^\x00-\xFF]/g, '');
+}
+async function downloadPdf(btn) {
+  const JS = window.jspdf && window.jspdf.jsPDF; if (!JS) { alert('The PDF tool is still loading. Try again in a moment.'); return; }
+  btn.disabled = true; btn.textContent = 'Preparing…';
+  try {
+    const doc = new JS({ unit: 'pt', format: 'letter' });
+    const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 64, maxW = W - 2 * M;
+    const INK = [20, 17, 10], DIM = [62, 52, 32], GOLD = [90, 63, 16];
+    let y = M, page = 1;
+    const name = S.D.client.name || 'Client';
+    const footer = () => { doc.setFont('times', 'normal'); doc.setFontSize(10.5); doc.setTextColor(...DIM); doc.text(pdfText(`${name} · Chart Analysis · ${page}`), W / 2, H - 34, { align: 'center' }); };
+    const newPage = () => { footer(); doc.addPage(); page++; y = M; };
+    const need = h => { if (y + h > H - M) newPage(); };
+    const write = (text, { size = 12.5, font = 'normal', color = INK, lead = 1.42, after = 8, indent = 0, family = 'times', keep = 0 } = {}) => {
+      doc.setFont(family, font); doc.setFontSize(size); doc.setTextColor(...color);
+      const lines = doc.splitTextToSize(pdfText(text), maxW - indent);
+      const lh = size * lead;
+      need(Math.min(lines.length, 3) * lh + keep);
+      lines.forEach(l => { need(lh); doc.text(l, M + indent, y + size); y += lh; });
+      y += after;
+    };
+    const rule = () => { need(14); doc.setDrawColor(...GOLD); doc.setLineWidth(0.6); doc.line(M, y, W - M, y); y += 14; };
+    let ind = 0;
+    const walk = async (n) => {
+      switch (n.t) {
+        case 'title':
+          y = H * 0.32;
+          write('NAVIGATION MAP · CHART ANALYSIS', { size: 11, family: 'helvetica', color: GOLD, after: 14 });
+          write(n.text, { size: 32, after: 8, lead: 1.2 });
+          if (n.sub) write(n.sub, { size: 13, font: 'italic', color: DIM, after: 18 });
+          rule(); newPage(); break;
+        case 'h2': if (y > M + 4) newPage(); write(n.text, { size: 22, after: 6, lead: 1.2 }); rule(); break;
+        case 'h2b': need(120); y += 10; write(n.text, { size: 18, after: 6, lead: 1.2, keep: 80 }); break;
+        case 'h3': y += 6; write(n.text, { size: 14.5, font: 'bold', after: 3, indent: ind, keep: 95 }); break;
+        case 'h4': y += 6; write(n.text.toUpperCase(), { size: 10.5, family: 'helvetica', font: 'bold', color: GOLD, after: 4, indent: ind, keep: 120 }); break;
+        case 'eyebrow': write(n.text.toUpperCase(), { size: 10.5, family: 'helvetica', font: 'bold', color: GOLD, after: 2, indent: ind, keep: 60 }); break;
+        case 'meta': write(n.text, { size: 11, family: 'helvetica', color: DIM, after: 4, indent: ind }); break;
+        case 'wheel': { const png = await wheelPNG(); const sz = Math.min(maxW, 400); need(sz + 10); doc.addImage(png, 'JPEG', (W - sz) / 2, y, sz, sz); y += sz + 14; break; }
+        case 'bars': n.rows.forEach(r => { need(18); doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(...INK); doc.text(pdfText(r.label), M, y + 11); const bx = M + (n.wide ? 200 : 110), bw = maxW - (n.wide ? 200 : 160); doc.setDrawColor(...DIM); doc.setLineWidth(0.6); doc.rect(bx, y + 3, bw, 8); doc.setFillColor(...INK); doc.rect(bx, y + 3, bw * r.pct / 100, 8, 'F'); if (!n.wide) doc.text(String(r.v), W - M, y + 11, { align: 'right' }); y += 18; }); y += 8; break;
+        case 'group': y += 4; ind = 12; for (const c of n.children) await walk(c); ind = 0; y += 6; break;
+        case 'p':
+          if (n.hidden || !n.text) break;
+          if (n.stage) { y += 4; write(n.stage.toUpperCase() + (n.stageMeta ? '   ' + n.stageMeta : ''), { size: 10.5, family: 'helvetica', font: 'bold', color: GOLD, after: 3, indent: ind, keep: 50 }); }
+          write(n.text, { size: n.cls.includes('lead') ? 13.5 : 12.5, indent: ind });
+          break;
+      }
+    };
+    for (const n of S.model) await walk(n);
+    footer();
+    doc.save(`chart-analysis-${(name).toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf`);
+  } catch (e) { alert('PDF failed: ' + e.message); }
+  btn.disabled = false; btn.textContent = 'Download PDF';
+}
+
+init();
+</script>
+</body>
+</html>

@@ -2025,6 +2025,7 @@ function buildNav() {
     { href: 'ancestral-catalog.html', label: 'Catalog ↗',          flag: 'access_catalog' },
     { href: 'tapestry.html',          label: 'Mythic Tapestry ↗',  flag: null, noClient: true },
     { href: 'convergence.html',       label: 'Convergence ↗',      flag: 'access_convergence' },
+    { href: 'my-chart.html',          label: 'My Chart ↗',         flag: 'access_chart' },
   ];
 
   externalLinks.forEach(l => {
@@ -2582,6 +2583,7 @@ function cdQuickActions(d) {
       <div class="cd-actions">
         <button class="btn btn-gold btn-sm" onclick="startPreview('${d.client.id}')">Preview as Client</button>
         <a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${cid}" target="_blank">Open Full Chart ↗</a>
+        <a class="btn btn-outline btn-sm" href="my-chart.html?client_id=${cid}" target="_blank">Open Their Chart (client view) ↗</a>
         <a class="btn btn-outline btn-sm" href="ancestral-weaving.html?client_id=${cid}" target="_blank">Open Their Weaving ↗</a>
         <a class="btn btn-outline btn-sm" href="ancestral-catalog.html?client_id=${cid}" target="_blank">Open Their Catalog ↗</a>
         <a class="btn btn-outline btn-sm" href="tapestry.html?client_id=${cid}" target="_blank">Open Their Tapestry ↗</a>
@@ -2684,6 +2686,7 @@ function cdAccessCard(d) {
     { key: 'access_weaving',     label: 'My Weaving',     hint: 'their ancestral weaving, rendered in the portal' },
     { key: 'access_convergence', label: 'My Convergence', hint: 'their full Convergence + PDF + history' },
     { key: 'access_catalog',     label: 'My Catalog',     hint: 'their ancestors as a sortable catalog (usually with the weaving)' },
+    { key: 'access_chart',       label: 'My Chart',       hint: 'their chart analysis — astrology, Human Design, Gene Keys and the Map — with PDF' },
   ];
   const autoRow = (on, name, note) =>
     `<div class="cd-row"><div class="cd-label" style="min-width:150px">${name}</div><div class="cd-value">${on ? '<span style="color:var(--gold)">On</span>' : '<span class="muted">Off</span>'} — ${note}</div></div>`;
@@ -3489,7 +3492,8 @@ async function cdSaveAccess() {
     await restPatch('clients', currentDetailClient, {
       access_weaving:     document.getElementById('cd-f-access_weaving').checked,
       access_catalog:     document.getElementById('cd-f-access_catalog').checked,
-      access_convergence: document.getElementById('cd-f-access_convergence').checked
+      access_convergence: document.getElementById('cd-f-access_convergence').checked,
+      access_chart:       document.getElementById('cd-f-access_chart').checked
     });
     await loadClients();
     status.textContent = 'saved · ' + new Date().toLocaleTimeString();
