@@ -534,6 +534,8 @@ async function init() {
 
     // Astrology: natal placements + the Map activations each one drives.
     const placements  = await sb(`chart_planets?client_id=eq.${CLIENT_ID}&side=eq.personality&select=body,zodiac_sign,zodiac_degree,longitude,house,retrograde&order=body`).catch(() => []);
+    // Aspects are computed once, server-side (recompute_chart_aspects), and read here — the same set the synthesis uses.
+    const aspects     = await sb(`chart_aspects?client_id=eq.${CLIENT_ID}&select=body_a,body_b,aspect_type,orb,applying&order=orb.asc`).catch(() => []);
     const bodyWeights = await sb(`chart_body_weights?select=body_name,body_tier,body_weight,is_angle`).catch(() => []);
     const signFields  = await sb(`sign_field_activations?select=sign_name,field_id,is_secondary`).catch(() => []);
     const houseFields = await sb(`house_field_activations?select=house_number,field_id,is_secondary`).catch(() => []);
@@ -549,7 +551,7 @@ async function init() {
     const synthesis = (await sb(`client_chart_synthesis?client_id=eq.${CLIENT_ID}&select=synthesis_text,model,updated_at`).catch(() => []))[0] || null;
 
     page.innerHTML = render({ client, birth, hd, gk, refByNum, fieldById, matches,
-      placements, bodyWeights, signFields, houseFields, astSubs, subById, convergence, synthesis });
+      placements, aspects, bodyWeights, signFields, houseFields, astSubs, subById, convergence, synthesis });
     wireNotes(birth);
     wireSaveAndRecompute(client);
     wireCityAutocomplete();
@@ -583,14 +585,14 @@ function hourOptions(sel) { let o = '<option value="">Hr</option>'; for (let h =
 function timeFrom12(h, m, ap) { h = parseInt(h, 10); m = parseInt(m, 10); if (isNaN(h) || isNaN(m) || !ap) return ''; let h24 = h % 12; if (ap === 'PM') h24 += 12; return String(h24).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':00'; }
 
 function render({ client, birth, hd, gk, refByNum, fieldById, matches,
-                 placements, bodyWeights, signFields, houseFields, astSubs, subById, convergence, synthesis }) {
+                 placements, aspects, bodyWeights, signFields, houseFields, astSubs, subById, convergence, synthesis }) {
   return `
     ${renderHeader(client, birth)}
     ${renderSynthesis({ synthesis })}
     <div class="no-pdf">${renderBirthForm(birth)}</div>
     ${renderAstrology({ placements, bodyWeights, signFields, houseFields, astSubs, fieldById, subById })}
     ${renderChartAnalysis({ placements, signFields, houseFields, fieldById })}
-    ${renderAspects({ placements })}
+    ${renderAspects({ aspects })}
     ${renderChartQuizConvergence({ convergence })}
     ${renderHD(hd)}
     ${renderActivation(gk, refByNum, fieldById)}
@@ -1101,45 +1103,28 @@ function renderChartAnalysis(d) {
   </div>`;
 }
 
-// ── Aspects (major geometric relationships between the core bodies) ──
-const ASPECT_DEFS = [
-  { name:'Conjunction', glyph:'☌', angle:0,   orb:8 },
-  { name:'Opposition',  glyph:'☍', angle:180, orb:8 },
-  { name:'Trine',       glyph:'△', angle:120, orb:7 },
-  { name:'Square',      glyph:'□', angle:90,  orb:7 },
-  { name:'Sextile',     glyph:'⚹', angle:60,  orb:5 }
-];
-const ASPECT_BODIES = ['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','chiron','north_node','ascendant','midheaven'];
+// ── Aspects — read from chart_aspects (computed server-side by recompute_chart_aspects) ──
+// One source: the same rows feed this table and the AI synthesis. Orb rules live in the
+// database function chart_body_orb(); nothing is recomputed in the page.
+const ASPECT_GLYPHS = { conjunction:'☌', opposition:'☍', trine:'△', square:'□', sextile:'⚹', quincunx:'⚻' };
 
 function renderAspects(d) {
-  const placements = (d.placements||[]).filter(p => ASPECT_BODIES.includes(p.body) && p.longitude!=null);
-  if (placements.length < 2) return '';
-  const found = [];
-  for (let i=0;i<placements.length;i++){
-    for (let j=i+1;j<placements.length;j++){
-      const a=placements[i], b=placements[j];
-      let sep = Math.abs(Number(a.longitude)-Number(b.longitude)) % 360;
-      if (sep>180) sep = 360-sep;
-      for (const asp of ASPECT_DEFS){
-        const orb = Math.abs(sep-asp.angle);
-        if (orb<=asp.orb){ found.push({ a:a.body, b:b.body, asp, orb }); break; }
-      }
-    }
-  }
-  if (!found.length) return `<div class="section"><div class="section-title">Aspects</div><div class="matches-empty">No major aspects within orb among the core bodies.</div></div>`;
-  found.sort((x,y)=>x.orb-y.orb);
+  const rows = d.aspects || [];
+  if (!rows.length) return `<div class="section"><div class="section-title">Aspects</div><div class="matches-empty">No aspects stored for this chart yet. Recompute the chart to calculate them.</div></div>`;
   const nm = b => ASTRO_BODY_NAMES[b] || astroCap(b.replace(/_/g,' '));
-  const rows = found.map(f => `<tr>
-    <td class="astro-body">${escapeHtml(nm(f.a))}</td>
-    <td class="ctr astro-aspect-glyph" title="${f.asp.name}">${f.asp.glyph}</td>
-    <td class="astro-body">${escapeHtml(nm(f.b))}</td>
-    <td class="astro-pos">${f.asp.name}</td>
-    <td class="astro-pos num">${f.orb.toFixed(1)}°</td>
+  const motion = a => a === true ? 'applying' : a === false ? 'separating' : '—';
+  const body = rows.map(f => `<tr>
+    <td class="astro-body">${escapeHtml(nm(f.body_a))}</td>
+    <td class="ctr astro-aspect-glyph" title="${escapeHtml(f.aspect_type)}">${ASPECT_GLYPHS[f.aspect_type] || ''}</td>
+    <td class="astro-body">${escapeHtml(nm(f.body_b))}</td>
+    <td class="astro-pos">${escapeHtml(astroCap(f.aspect_type))}</td>
+    <td class="astro-pos num">${Number(f.orb).toFixed(2)}°</td>
+    <td class="astro-pos">${motion(f.applying)}</td>
   </tr>`).join('');
   return `<div class="section">
-    <div class="section-title">Aspects · ${found.length}</div>
-    <div class="section-intro">The major geometric relationships among the core bodies — conjunction, opposition, trine, square, sextile — tightest first. Orbs: 8° conjunction/opposition, 7° trine/square, 5° sextile.</div>
-    <table class="astro-table"><thead><tr><th>Body</th><th class="ctr">Aspect</th><th>Body</th><th>Type</th><th class="num">Orb</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="section-title">Aspects · ${rows.length}</div>
+    <div class="section-intro">Conjunction, opposition, square, trine, sextile and quincunx across every computed body, tightest first. Orb per pair = the average of the two bodies' orbs (Sun/Moon 10°, Mercury–Saturn 8°, Uranus–Pluto 7°, angles 6°, Chiron and Nodes 5°, asteroids and Lilith 3°), scaled by aspect (conjunction/opposition full, square/trine 85%, sextile 60%, quincunx 40%). South Node and IC show conjunctions only.</div>
+    <table class="astro-table"><thead><tr><th>Body</th><th class="ctr">Aspect</th><th>Body</th><th>Type</th><th class="num">Orb</th><th>Motion</th></tr></thead><tbody>${body}</tbody></table>
   </div>`;
 }
 
@@ -1661,8 +1646,16 @@ function wireSaveAndRecompute(client) {
         const err = await res.text();
         throw new Error(`compute-chart ${res.status}: ${err}`);
       }
-      btn.textContent = 'Saved · refreshing…';
-      setTimeout(() => location.reload(), 600);
+      // compute-chart computes planets, houses, asteroids and aspects in one call and reports gaps.
+      const out = await res.json().catch(() => ({}));
+      if (out.complete === false && Array.isArray(out.warnings) && out.warnings.length) {
+        btn.textContent = 'Saved · incomplete';
+        status.textContent = out.warnings.join(' · ') + ' — missing bodies are retried automatically every 30 minutes.';
+        setTimeout(() => location.reload(), 6000);
+      } else {
+        btn.textContent = 'Saved · refreshing…';
+        setTimeout(() => location.reload(), 600);
+      }
     } catch (e) {
       btn.disabled = false;
       btn.textContent = orig;
