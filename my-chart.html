@@ -71,6 +71,17 @@ body.editing .ed .pen { display: inline-block; }
 .editor .btn-solid { background: var(--ink-gold); color: var(--vellum); }
 .editor .why { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-dim); width: 100%; }
 
+/* Embedded in the admin portal (client page → Chart → Client view) */
+body.embed { background: #fbf7ec; min-height: 0; }
+body.embed .frame { max-width: none; padding: 0.75rem; }
+body.embed .topbar { margin-bottom: 0.75rem; }
+body.embed .topbar .eyebrow { color: var(--ink-gold); }
+body.embed .adminbar { background: #efe7d2; border-color: rgba(122,86,24,0.35); color: var(--ink-secondary); }
+body.embed .adminbar b { color: var(--ink); }
+body.embed .adminbar .status, body.embed .draftnote { color: var(--ink-dim); }
+body.embed .btn { color: var(--ink-gold); border-color: var(--ink-gold); }
+body.embed .btn-solid { background: var(--ink-gold); color: #fbf7ec; }
+body.embed .msg { background: #efe7d2; color: var(--ink-secondary); border-color: rgba(122,86,24,0.35); }
 @media (max-width: 640px) {
   .sheet { padding: 2rem 1.25rem 2.5rem; }
   .title { font-size: 2rem; }
@@ -155,7 +166,14 @@ const SEQUENCES = [
 
 // ── State ──
 const params = new URLSearchParams(location.search);
-const S = { isAdmin: false, editing: false, preview: params.get('preview') === '1', clientId: null, D: null };
+const S = { isAdmin: false, editing: false, preview: params.get('preview') === '1', embed: params.get('embed') === '1', clientId: null, D: null };
+if (S.embed) {
+  document.body.classList.add('embed');
+  // Report height to the portal so the frame sizes to the page.
+  const post = () => { try { parent.postMessage({ type: 'my-chart-height', height: document.documentElement.scrollHeight }, location.origin); } catch {} };
+  new ResizeObserver(post).observe(document.body);
+  window.addEventListener('load', post);
+}
 
 async function init() {
   const root = document.getElementById('root');
@@ -437,7 +455,7 @@ function render() {
     root.innerHTML = `<div class="msg">${S.isAdmin ? 'No chart has been computed for this client yet. Enter birth data in Chart Admin first.' : 'Your chart has not been calculated yet.'}</div>`; return;
   }
   S.model = buildModel();
-  actions.innerHTML = `<button class="btn btn-solid" id="btn-pdf">Download PDF</button> <a class="btn" href="portal.html${S.preview ? '?preview=1' : ''}">Back to portal</a>`;
+  actions.innerHTML = `<button class="btn btn-solid" id="btn-pdf">Download PDF</button>${S.embed ? '' : ` <a class="btn" href="portal.html${S.preview ? '?preview=1' : ''}">Back to portal</a>`}`;
   document.getElementById('btn-pdf').onclick = e => downloadPdf(e.target);
   if (S.isAdmin) {
     const drafts = D.gkDesc.filter(g => g.status === 'draft').length;
@@ -445,13 +463,14 @@ function render() {
     bar.innerHTML = `<div class="adminbar">
       <span><b>Admin view</b> · ${esc(D.client.name || '')}</span>
       <label><input type="checkbox" id="ab-edit" ${S.editing ? 'checked' : ''}> Show edit controls</label>
-      <label><input type="checkbox" id="ab-access" ${D.client.access_chart ? 'checked' : ''}> Visible to client</label>
+      ${S.embed ? '' : `<label><input type="checkbox" id="ab-access" ${D.client.access_chart ? 'checked' : ''}> Visible to client</label>`}
       <span>${overrides} edit${overrides === 1 ? '' : 's'} for this client</span>
       <span class="status" id="ab-status"></span>
       ${drafts ? `<span class="draftnote">${drafts} of 64 Gene Keys descriptions are still drafts (voice pass pending). Edits marked with a rust edge are specific to this client.</span>` : ''}
     </div>`;
     document.getElementById('ab-edit').onchange = e => { S.editing = e.target.checked; document.body.classList.toggle('editing', S.editing); };
-    document.getElementById('ab-access').onchange = async e => {
+    const abAccess = document.getElementById('ab-access');
+    if (abAccess) abAccess.onchange = async e => {
       const st = document.getElementById('ab-status'); st.textContent = 'saving…';
       try { await api(`clients?id=eq.${D.client.id}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ access_chart: e.target.checked }) }); D.client.access_chart = e.target.checked; st.textContent = e.target.checked ? 'now visible to client' : 'hidden from client'; }
       catch (err) { st.textContent = 'failed: ' + err.message; e.target.checked = !e.target.checked; }

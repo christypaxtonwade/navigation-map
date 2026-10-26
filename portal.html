@@ -10,37 +10,43 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #09090f;
-  --surface: #0f1018;
-  --surface-2: #161722;
-  --border: rgba(180,155,100,0.14);
-  --border-hover: rgba(180,155,100,0.28);
-  --gold: #c9a87c;
-  --gold-bright: #dfc090;
-  --gold-dim: rgba(201,168,124,0.7);
-  --accent: rgba(201,168,124,0.08);
-  --text: #ede8dc;
-  --text-secondary: #c8c0b0;
-  --text-dim: #b3aa9f;
-  --text-faint: #9a9088;
-  --teal: #6dd8b2;
-  --teal-dim: rgba(109,216,178,0.15);
-  --amber: #f5aa88;
-  --amber-dim: rgba(245,170,136,0.15);
-  --red: #c07060;
+  /* v4 vellum (2026-10-26): light reading surfaces, ink text, walnut sidebar.
+     Contrast vs --surface: text 17.6 · secondary 14.4 · dim 9.2 · faint 6.5 · gold 6.2 */
+  --bg: #f4eedd;
+  --surface: #fbf7ec;
+  --surface-2: #efe7d2;
+  --border: rgba(122,86,24,0.22);
+  --border-hover: rgba(122,86,24,0.45);
+  --gold: #7a5618;
+  --gold-bright: #5e4110;
+  --gold-dim: #806024;
+  --accent: rgba(122,86,24,0.08);
+  --text: #14110a;
+  --text-secondary: #2b2414;
+  --text-dim: #4e4228;
+  --text-faint: #665839;
+  --teal: #165a42;
+  --teal-dim: rgba(22,90,66,0.10);
+  --amber: #7a3216;
+  --amber-dim: rgba(122,50,22,0.08);
+  --red: #9a3b2a;
+  --walnut: #1c1812;
+  --side-text: #d4c7a8;
+  --side-label: #b8a98a;
+  --side-active: #c9a04a;
 }
 
 html { scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--text);
-  font-family: 'Jost', sans-serif; font-weight: 300;
+  font-family: 'Jost', sans-serif; font-weight: 400;
   font-size: 15px; min-height: 100vh; overflow-x: hidden;
 }
 body::before {
   content: ''; position: fixed; inset: 0;
   background-image:
-    linear-gradient(rgba(201,168,124,0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(201,168,124,0.018) 1px, transparent 1px);
+    linear-gradient(rgba(122,86,24,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122,86,24,0.018) 1px, transparent 1px);
   background-size: 52px 52px; pointer-events: none; z-index: 0;
 }
 
@@ -76,7 +82,7 @@ body::before {
 }
 .login-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.9rem; font-weight: 300; font-style: italic;
+  font-size: 1.9rem; font-weight: 400; font-style: italic;
   color: var(--text); text-align: center; margin-bottom: 0.4rem;
 }
 .login-sub {
@@ -98,7 +104,7 @@ body::before {
   width: 100%; background: var(--bg); border: 1px solid var(--border);
   border-radius: 6px; padding: 10px 14px;
   color: var(--text); font-family: 'Jost', sans-serif;
-  font-size: 15px; font-weight: 300; outline: none;
+  font-size: 15px; font-weight: 400; outline: none;
   transition: border-color 0.2s;
 }
 .field-input:focus { border-color: var(--gold-dim); }
@@ -111,7 +117,7 @@ body::before {
   cursor: pointer; transition: background 0.2s; margin-top: 0.5rem;
 }
 .btn-primary:hover { background: var(--gold-bright); }
-.btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; }
+.btn-primary:disabled { background: #d8cfb8; color: #4e4228; cursor: not-allowed; }
 
 .login-error {
   font-size: 15px; color: var(--red); text-align: center;
@@ -138,7 +144,7 @@ body::before {
 .app-top-bar {
   grid-area: topbar;
   position: sticky; top: 0; z-index: 100;
-  background: rgba(9,9,15,0.95); backdrop-filter: blur(8px);
+  background: rgba(251,247,236,0.95); backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
   padding: 0 2rem;
   display: flex; align-items: center; justify-content: space-between;
@@ -157,7 +163,7 @@ body::before {
   text-transform: uppercase; padding: 3px 8px; border-radius: 10px;
 }
 .role-admin {
-  background: var(--teal-dim); border: 1px solid rgba(109,216,178,0.22);
+  background: var(--teal-dim); border: 1px solid rgba(22,90,66,0.22);
   color: var(--teal);
 }
 .role-client {
@@ -175,10 +181,10 @@ body::before {
 }
 .field-lock:hover { color: var(--text-dim); border-color: var(--border-hover); }
 .field-lock.locked {
-  background: rgba(201,168,124,0.08); border-color: rgba(201,168,124,0.45);
+  background: rgba(122,86,24,0.08); border-color: rgba(122,86,24,0.45);
   color: var(--gold);
 }
-.field-lock.locked:hover { background: rgba(201,168,124,0.14); }
+.field-lock.locked:hover { background: rgba(122,86,24,0.14); }
 .field-locked-wrap {
   border-left: 2px solid var(--gold); padding-left: 0.875rem; margin-left: -0.875rem;
 }
@@ -193,7 +199,7 @@ body::before {
 }
 .btn-view-toggle:hover { border-color: var(--border-hover); color: var(--gold-bright); }
 .btn-view-toggle.previewing {
-  background: var(--amber-dim); border-color: rgba(245,170,136,0.3);
+  background: var(--amber-dim); border-color: rgba(122,50,22,0.3);
   color: var(--amber);
 }
 
@@ -201,7 +207,7 @@ body::before {
   font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
   letter-spacing: 0.1em; text-transform: uppercase;
   padding: 6px 12px; border-radius: 5px; cursor: pointer;
-  background: transparent; border: 1px solid rgba(255,255,255,0.08);
+  background: transparent; border: 1px solid rgba(122,86,24,0.18);
   color: var(--text-faint); transition: all 0.2s;
 }
 .btn-signout:hover { border-color: var(--border); color: var(--text-dim); }
@@ -343,7 +349,7 @@ body::before {
 .panel-header { margin-bottom: 2rem; }
 .panel-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 2rem; font-weight: 300; font-style: italic;
+  font-size: 2rem; font-weight: 400; font-style: italic;
   color: var(--text); margin-bottom: 0.3rem;
 }
 .panel-sub { font-size: 15px; color: var(--text-dim); line-height: 1.7; }
@@ -371,7 +377,7 @@ body::before {
 }
 .stat-number {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 2.4rem; font-weight: 300; color: var(--gold); line-height: 1;
+  font-size: 2.4rem; font-weight: 400; color: var(--gold); line-height: 1;
   margin-bottom: 0.3rem;
 }
 .stat-label { font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); }
@@ -407,7 +413,7 @@ body::before {
 .client-badge {
   font-size: 15px; font-weight: 500; letter-spacing: 0.1em;
   text-transform: uppercase; padding: 3px 8px; border-radius: 10px;
-  background: var(--teal-dim); border: 1px solid rgba(109,216,178,0.22);
+  background: var(--teal-dim); border: 1px solid rgba(22,90,66,0.22);
   color: var(--teal); white-space: nowrap; flex-shrink: 0;
 }
 
@@ -475,10 +481,10 @@ body::before {
 
 /* Era colors */
 .era-mythic    { background: rgba(196,190,248,0.6); }
-.era-ancient   { background: rgba(245,170,136,0.6); }
-.era-medieval  { background: rgba(201,168,124,0.7); }
-.era-early-modern { background: rgba(109,216,178,0.5); }
-.era-modern    { background: rgba(201,168,124,0.4); }
+.era-ancient   { background: rgba(122,50,22,0.6); }
+.era-medieval  { background: rgba(122,86,24,0.7); }
+.era-early-modern { background: rgba(22,90,66,0.5); }
+.era-modern    { background: rgba(122,86,24,0.4); }
 
 /* ── Convergence panel ── */
 .convergence-card {
@@ -500,7 +506,7 @@ body::before {
   text-transform: uppercase; padding: 3px 8px; border-radius: 10px;
 }
 .status-published {
-  background: var(--teal-dim); border: 1px solid rgba(109,216,178,0.22);
+  background: var(--teal-dim); border: 1px solid rgba(22,90,66,0.22);
   color: var(--teal);
 }
 .status-draft {
@@ -535,7 +541,7 @@ body::before {
   width: 100%; background: var(--bg); border: 1px solid var(--border);
   border-radius: 6px; padding: 9px 12px;
   color: var(--text); font-family: 'Jost', sans-serif;
-  font-size: 15px; font-weight: 300; outline: none;
+  font-size: 15px; font-weight: 400; outline: none;
   transition: border-color 0.2s;
 }
 .form-input:focus, .form-select:focus, .form-textarea:focus {
@@ -550,7 +556,7 @@ body::before {
   font-size: 15px; padding: 8px 12px; border-radius: 6px; margin-bottom: 1rem;
 }
 .msg-success {
-  background: var(--teal-dim); border: 1px solid rgba(109,216,178,0.22);
+  background: var(--teal-dim); border: 1px solid rgba(22,90,66,0.22);
   color: var(--teal);
 }
 .msg-error {
@@ -579,7 +585,7 @@ body::before {
 /* ── Preview banner ── */
 .preview-banner {
   grid-area: preview;
-  background: var(--amber-dim); border-bottom: 1px solid rgba(245,170,136,0.25);
+  background: var(--amber-dim); border-bottom: 1px solid rgba(122,50,22,0.25);
   padding: 8px 2rem; text-align: center;
   font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--amber); display: none;
@@ -592,7 +598,7 @@ body::before {
 }
 .freq-label { font-size: 15px; color: var(--text-secondary); width: 200px; flex-shrink: 0; }
 .freq-bar-wrap {
-  flex: 1; height: 4px; background: rgba(255,255,255,0.05);
+  flex: 1; height: 4px; background: rgba(122,86,24,0.10);
   border-radius: 2px; overflow: hidden;
 }
 .freq-bar { height: 100%; background: var(--gold); border-radius: 2px; }
@@ -639,11 +645,11 @@ body::before {
   text-transform: uppercase; padding: 4px 10px; border-radius: 10px;
 }
 .verify-verified {
-  background: var(--teal-dim); border: 1px solid rgba(109,216,178,0.22);
+  background: var(--teal-dim); border: 1px solid rgba(22,90,66,0.22);
   color: var(--teal);
 }
 .verify-ambiguous {
-  background: var(--amber-dim); border: 1px solid rgba(245,170,136,0.3);
+  background: var(--amber-dim); border: 1px solid rgba(122,50,22,0.3);
   color: var(--amber);
 }
 .verify-not_found {
@@ -698,7 +704,7 @@ body::before {
 .chip-strength-label {
   font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--text-faint); padding-left: 5px;
-  border-left: 1px solid rgba(255,255,255,0.1); margin-left: 2px;
+  border-left: 1px solid rgba(122,86,24,0.2); margin-left: 2px;
   cursor: pointer;
 }
 .chip-strength-label:hover { color: var(--gold); }
@@ -708,7 +714,7 @@ body::before {
 .chip-add-select, .chip-strength-select {
   background: var(--bg); border: 1px solid var(--border);
   border-radius: 6px; padding: 7px 10px; color: var(--text);
-  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 300;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400;
   outline: none; transition: border-color 0.2s; appearance: none;
 }
 .chip-add-select { flex: 1; }
@@ -724,7 +730,7 @@ body::before {
 .btn-chip-add:hover { border-color: var(--border-hover); color: var(--gold-bright); }
 .confirm-bar {
   position: sticky; bottom: 0; z-index: 50;
-  background: rgba(9,9,15,0.97); backdrop-filter: blur(8px);
+  background: rgba(251,247,236,0.97); backdrop-filter: blur(8px);
   border-top: 1px solid var(--border); padding: 1rem 1.5rem;
   display: flex; align-items: center; justify-content: space-between;
   gap: 1rem; flex-wrap: wrap; margin: 2rem -2rem -2.5rem;
@@ -801,7 +807,7 @@ body::before {
   display: inline-flex; align-items: center; gap: 0.4rem;
   font-size: 15px; padding: 4px 10px 4px 12px;
   border-radius: 20px; background: var(--teal-dim);
-  border: 1px solid rgba(109,216,178,0.22); color: var(--teal);
+  border: 1px solid rgba(22,90,66,0.22); color: var(--teal);
 }
 .client-assignment-chip .chip-remove { color: var(--teal); }
 .client-assignment-chip .chip-remove:hover { color: var(--red); }
@@ -809,7 +815,7 @@ body::before {
 /* ── Save bar ── */
 .editor-save-bar {
   position: sticky; bottom: 0; z-index: 50;
-  background: rgba(9,9,15,0.97); backdrop-filter: blur(8px);
+  background: rgba(251,247,236,0.97); backdrop-filter: blur(8px);
   border-top: 1px solid var(--border); padding: 1rem 1.5rem;
   display: flex; align-items: center; justify-content: flex-end;
   gap: 1rem; margin: 2rem -2rem -2.5rem;
@@ -823,15 +829,15 @@ body::before {
 .cd-card.full { grid-column: 1 / -1; }
 /* Client-detail section tabs — one focused group at a time instead of one long scroll */
 .cd-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; position: sticky; top: 0; z-index: 5;
-  background: var(--bg, #14110b); padding: 0.6rem 0 0.9rem; margin-bottom: 1.25rem;
+  background: var(--bg); padding: 0.6rem 0 0.9rem; margin-bottom: 1.25rem;
   border-bottom: 1px solid var(--border); }
-.cd-tab { font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.1em;
+.cd-tab { font-family: 'Jost', sans-serif; font-size:15px; font-weight: 500; letter-spacing: 0.1em;
   text-transform: uppercase; color: var(--text-dim); background: transparent;
   border: 1px solid var(--border); border-radius: 999px; padding: 0.5rem 1.1rem; cursor: pointer;
   transition: all 0.18s; }
 .cd-tab:hover { color: var(--gold); border-color: var(--gold); }
-.cd-tab.active { color: var(--bg, #14110b); background: var(--gold); border-color: var(--gold); }
-.cd-tier-legend { font-size: 14px; line-height: 1.5; }
+.cd-tab.active { color: var(--bg); background: var(--gold); border-color: var(--gold); }
+.cd-tier-legend { font-size:15px; line-height: 1.5; }
 .cd-tier-legend .cd-tier-row { display: grid; grid-template-columns: 150px 1fr; gap: 1rem;
   padding: 0.55rem 0; border-bottom: 1px solid var(--border); }
 .cd-tier-legend .cd-tier-row:last-child { border-bottom: none; }
@@ -981,6 +987,90 @@ body::before {
   border-top: 1px solid var(--border);
   font-size: 15px; color: var(--text-faint); font-style: italic;
 }
+
+/* ════════════════════════════════════════════════════
+   v4 VELLUM LAYER (2026-10-26) — walnut sidebar, client header, offerings
+════════════════════════════════════════════════════ */
+body { font-weight: 400; }
+.app-top-bar { background: rgba(251,247,236,0.96); }
+.app-sidebar { background: var(--walnut); border-right: 1px solid rgba(176,128,48,0.3); }
+/* Walnut runs the full height of the sidebar column, not just the menu */
+@media (min-width: 801px) { .app-shell { background: linear-gradient(to right, var(--walnut) 240px, transparent 240px); } }
+.app-sidebar .sidebar-nav-item { color: var(--side-text); }
+.app-sidebar .sidebar-nav-item:hover { color: #f0e6cc; background: rgba(201,160,74,0.10); }
+.app-sidebar .sidebar-nav-item.active { color: var(--side-active); border-left-color: var(--side-active); background: rgba(201,160,74,0.12); }
+.app-sidebar .sidebar-group-label { color: var(--side-label); padding-top: 1.1rem; }
+.app-sidebar .sidebar-group-label:first-child { padding-top: 0; }
+.app-sidebar .sidebar-divider { border-top-color: rgba(176,128,48,0.3); }
+.app-footer { background: var(--surface); }
+.btn-gold, .btn-primary { color: #fbf7ec; }
+.cd-tab.active { color: #fbf7ec; }
+.panel-title { font-weight: 400; color: var(--text); }
+
+/* Clients toolbar */
+.list-toolbar { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; margin: 0 0 1rem; }
+.list-toolbar .form-input, .list-toolbar .form-select { width: auto; min-width: 200px; background: var(--surface); }
+.list-toolbar .grow { flex: 1 1 260px; }
+.client-row { align-items: flex-start; }
+.client-row .client-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.45rem; }
+.tag { font-family: 'Jost', sans-serif; font-size: 15px; letter-spacing: 0.02em; color: var(--text-dim);
+  border: 1px solid var(--border); border-radius: 4px; padding: 1px 8px; white-space: nowrap; background: var(--surface); }
+.tag.on { color: var(--gold); border-color: var(--border-hover); background: var(--accent); }
+.tag.status { color: var(--text); font-weight: 500; }
+.tag.alert { color: #fff; background: var(--red); border-color: var(--red); }
+.stat-strip { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-family: 'Jost', sans-serif; font-size: 15px;
+  color: var(--text-dim); margin: -0.75rem 0 1.5rem; }
+.stat-strip b { color: var(--text); font-weight: 500; }
+
+/* Client header — sticky, carries identity, access, actions and tabs */
+.cd-head { position: sticky; top: 56px; z-index: 20; background: var(--bg); margin: -2.5rem -2rem 1.5rem; padding: 1.25rem 2rem 0;
+  border-bottom: 1px solid var(--border); }
+.cd-back { font-family: 'Jost', sans-serif; font-size: 15px; letter-spacing: 0.06em; color: var(--gold); background: none;
+  border: none; cursor: pointer; padding: 0; margin-bottom: 0.5rem; }
+.cd-back:hover { color: var(--gold-bright); text-decoration: underline; }
+.cd-head-main { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+.cd-head .panel-title { font-size: 2.1rem; margin-bottom: 0.15rem; }
+.cd-head .panel-sub { line-height: 1.5; }
+.cd-head-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.cd-head-meta { display: flex; gap: 0.5rem 1rem; flex-wrap: wrap; align-items: center; margin: 0.75rem 0 0.25rem;
+  font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dim); }
+.access-chip { font-family: 'Jost', sans-serif; font-size: 15px; padding: 3px 11px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-dim); transition: all 0.15s; }
+.access-chip:hover { border-color: var(--gold); }
+.access-chip.on { background: var(--teal-dim); border-color: rgba(22,90,66,0.45); color: var(--teal); }
+.access-chip.on::before { content: '✓ '; }
+.cd-head .cd-tabs { position: static; background: transparent; border-bottom: none; margin: 0.75rem 0 0; padding: 0 0 0.9rem; }
+.cd-subnav { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; width: fit-content; margin-bottom: 1.25rem; }
+.cd-subnav button { font-family: 'Jost', sans-serif; font-size: 15px; letter-spacing: 0.06em; padding: 8px 18px; border: none;
+  background: var(--surface); color: var(--text-dim); cursor: pointer; }
+.cd-subnav button + button { border-left: 1px solid var(--border); }
+.cd-subnav button.active { background: var(--gold); color: #fbf7ec; }
+.chart-frame { width: 100%; border: 1px solid var(--border); border-radius: 8px; min-height: 70vh; background: var(--surface); display: block; }
+.cd-note { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dim); margin: 0 0 1rem; line-height: 1.5; }
+
+/* Offerings tracker */
+.off-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; }
+.off-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.4rem 1.5rem; }
+.off-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.55rem; font-weight: 500; color: var(--text); margin-bottom: 0.15rem; }
+.off-card .off-sub { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dim); margin-bottom: 1rem; line-height: 1.45; }
+.off-nums { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; margin-bottom: 0.9rem; }
+.off-num { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dim); }
+.off-num b { display: block; font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 500; color: var(--gold); line-height: 1.1; }
+.off-section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+.off-section > h3 { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 0.25rem; }
+.off-table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; }
+.off-table th { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; text-align: left; color: var(--text-dim);
+  padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--border-hover); white-space: nowrap; }
+.off-table td { font-size: 15px; color: var(--text); padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+.off-table tr.link { cursor: pointer; }
+.off-table tr.link:hover td { background: var(--accent); }
+.off-table .who { font-weight: 500; }
+.off-table .sub { color: var(--text-dim); }
+@media (max-width: 800px) {
+  .cd-head { margin: -1.5rem -1rem 1.25rem; padding: 1rem 1rem 0; top: 0; }
+  .off-table { display: block; overflow-x: auto; }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 </head>
@@ -1049,36 +1139,21 @@ body::before {
       <!-- ══ ADMIN: Overview (the operational hub — stats + tier reference + full client list) ══ -->
       <div class="panel" id="panel-overview">
         <div class="panel-header">
-          <div class="eyebrow">Map Guide & Portal</div>
-          <div class="panel-title">Overview</div>
+          <div class="eyebrow">People</div>
+          <div class="panel-title">Clients</div>
           <p class="panel-sub" id="overview-sub">Loading…</p>
         </div>
-        <div class="stat-grid" id="overview-stats"></div>
-
-        <!-- Collapsible tier reference -->
-        <div class="tier-ref" id="tier-ref-clients">
-          <div class="tier-ref-head" onclick="document.getElementById('tier-ref-clients').classList.toggle('open')">
-            <span class="tier-ref-title">How portal access works</span>
-            <span class="tier-ref-caret">›</span>
-          </div>
-          <div class="tier-ref-body">
-            <p class="footnote" style="margin-top:0">There are no access tiers. Access follows what a client has done. Two steps: first they need a <strong>portal login</strong> (your Invite button — until then they can't enter at all); then, once inside, they see the pieces below.</p>
-
-            <h4>Always available<span class="tier-meta">every client</span></h4>
-            <p>The <strong>Map</strong> (public on the website), <strong>Tapestry</strong>, and their own <strong>Signals reading</strong> once they've completed one.</p>
-
-            <h4>After a Lineage Session, or manual<span class="tier-meta">you flip the switch</span></h4>
-            <p>Their <strong>Weaving</strong>, <strong>Catalog</strong>, and <strong>Convergence</strong> — turned on per client in the Portal Access card on their page.</p>
-
-            <h4>Not yet available<span class="tier-meta">off for everyone</span></h4>
-            <p>The <strong>Fieldguide</strong> — off until it is published.</p>
-
-            <p class="footnote">Each client's page shows exactly where they stand: whether they have a login, what they've completed, and which pieces are on.</p>
-          </div>
-        </div>
-
-        <div class="section-header">
-          <div class="section-title">All Clients</div>
+        <div class="stat-strip" id="overview-stats"></div>
+        <div class="list-toolbar">
+          <input class="form-input grow" id="clients-search" placeholder="Search by name or email" oninput="renderClientList()">
+          <select class="form-select" id="clients-filter" onchange="renderClientList()">
+            <option value="">Everyone</option>
+            <option value="active">Active clients</option>
+            <option value="login">Has a portal login</option>
+            <option value="nologin">No login yet</option>
+            <option value="unread">Unread messages</option>
+            <option value="leads">Leads (quiz / reading only)</option>
+          </select>
           <button class="btn btn-gold btn-sm" onclick="showAddClientForm()">+ New Client</button>
         </div>
         <div id="add-client-form" style="display:none;margin-bottom:1.5rem;">
@@ -1106,6 +1181,30 @@ body::before {
           </div>
         </div>
         <div class="client-list" id="clients-list"></div>
+        <div style="margin-top:2rem">
+        <!-- Collapsible tier reference -->
+        <div class="tier-ref" id="tier-ref-clients">
+          <div class="tier-ref-head" onclick="document.getElementById('tier-ref-clients').classList.toggle('open')">
+            <span class="tier-ref-title">How portal access works</span>
+            <span class="tier-ref-caret">›</span>
+          </div>
+          <div class="tier-ref-body">
+            <p class="footnote" style="margin-top:0">There are no access tiers. Access follows what a client has done. Two steps: first they need a <strong>portal login</strong> (your Invite button — until then they can't enter at all); then, once inside, they see the pieces below.</p>
+
+            <h4>Always available<span class="tier-meta">every client</span></h4>
+            <p>The <strong>Map</strong> (public on the website), <strong>Tapestry</strong>, and their own <strong>Signals reading</strong> once they've completed one.</p>
+
+            <h4>After a Lineage Session, or manual<span class="tier-meta">you flip the switch</span></h4>
+            <p>Their <strong>Weaving</strong>, <strong>Catalog</strong>, and <strong>Convergence</strong> — turned on per client in the Portal Access card on their page.</p>
+
+            <h4>Not yet available<span class="tier-meta">off for everyone</span></h4>
+            <p>The <strong>Fieldguide</strong> — off until it is published.</p>
+
+            <p class="footnote">Each client's page shows exactly where they stand: whether they have a login, what they've completed, and which pieces are on.</p>
+          </div>
+        </div>
+
+        </div>
       </div>
 
       <!-- ══ ADMIN: Prospects (top-of-funnel surface — table populated by webhooks, deferred) ══ -->
@@ -1184,6 +1283,16 @@ body::before {
         </div>
       </div>
 
+      <!-- ══ ADMIN: Offerings tracker (every part of the offering system) ══ -->
+      <div class="panel" id="panel-offerings">
+        <div class="panel-header">
+          <div class="eyebrow">The offering system</div>
+          <div class="panel-title">Offerings</div>
+          <p class="panel-sub">Every door into the work and who is moving through it — The Threshold, The Seven Gates, the Signals readings and the 1:1 offerings. Click a person to open their client page.</p>
+        </div>
+        <div id="offerings-content"><div class="loading"><span class="loading-glyph">✦</span>Loading offerings…</div></div>
+      </div>
+
       <!-- ══ ADMIN: Follow-ups (paid readers · personal-nudge surface) ══ -->
       <div class="panel" id="panel-followups">
         <div class="panel-header">
@@ -1211,11 +1320,17 @@ body::before {
 
       <!-- ══ ADMIN: Client Detail (per-client dashboard) ══ -->
       <div class="panel" id="panel-client-detail">
-        <div class="panel-header">
-          <button class="btn btn-outline btn-sm" onclick="showPanel('panel-overview');renderClientList()" style="margin-bottom:1rem">← All Clients</button>
-          <div class="eyebrow">Client · Admin</div>
-          <div class="panel-title" id="cd-title">—</div>
-          <p class="panel-sub" id="cd-subtitle">—</p>
+        <div class="cd-head">
+          <button class="cd-back" onclick="showPanel('panel-overview');renderClientList()">← All clients</button>
+          <div class="cd-head-main">
+            <div>
+              <div class="panel-title" id="cd-title">—</div>
+              <p class="panel-sub" id="cd-subtitle">—</p>
+            </div>
+            <div class="cd-head-actions" id="cd-head-actions"></div>
+          </div>
+          <div class="cd-head-meta" id="cd-head-meta"></div>
+          <div class="cd-tabs" id="cd-head-tabs"></div>
         </div>
         <div id="client-detail-content">
           <div class="empty">No client selected.</div>
@@ -1260,7 +1375,7 @@ body::before {
               <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)">
                 <button class="btn btn-outline btn-sm" style="width:100%" onclick="toggleNewPersonalAncestor()">+ New personal ancestor for this client</button>
                 <div id="new-personal-ancestor" style="display:none;margin-top:1rem">
-                  <p style="font-size:13px;color:var(--text-dim);margin-bottom:0.75rem">Held in this client's weaving only — not added to the shared pool.</p>
+                  <p style="font-size:15px;color:var(--text-dim);margin-bottom:0.75rem">Held in this client's weaving only — not added to the shared pool.</p>
                   <input class="form-input" id="pa-name" placeholder="Name *" style="margin-bottom:0.5rem">
                   <input class="form-input" id="pa-dates" placeholder="Dates (e.g. 1850–1912)" style="margin-bottom:0.5rem">
                   <input class="form-input" id="pa-year" type="number" placeholder="Approx. year (for ordering)" style="margin-bottom:0.5rem">
@@ -1274,7 +1389,7 @@ body::before {
                     <option value="unknown">Unknown</option>
                   </select>
                   <details style="margin-bottom:0.5rem">
-                    <summary style="cursor:pointer;font-size:14px;color:var(--text-dim);margin:0.25rem 0 0.6rem">Layers (optional — write now or later)</summary>
+                    <summary style="cursor:pointer;font-size:15px;color:var(--text-dim);margin:0.25rem 0 0.6rem">Layers (optional — write now or later)</summary>
                     <textarea class="form-textarea" id="pa-terroir" placeholder="Terroir" rows="2" style="margin-bottom:0.4rem"></textarea>
                     <textarea class="form-textarea" id="pa-unresolved" placeholder="The Unresolved" rows="2" style="margin-bottom:0.4rem"></textarea>
                     <textarea class="form-textarea" id="pa-thread" placeholder="The Living Thread" rows="2" style="margin-bottom:0.4rem"></textarea>
@@ -1396,7 +1511,7 @@ body::before {
 
         <!-- ═══ GENERATE MODE ═══ -->
         <div id="ar-generate-mode">
-          <div id="ar-promote-banner" style="display:none;max-width:720px;margin-bottom:1rem;padding:0.75rem 1rem;border-radius:6px;border:1px solid rgba(201,168,124,0.4);background:rgba(201,168,124,0.06);color:var(--gold);font-size:15px;line-height:1.5"></div>
+          <div id="ar-promote-banner" style="display:none;max-width:720px;margin-bottom:1rem;padding:0.75rem 1rem;border-radius:6px;border:1px solid rgba(122,86,24,0.4);background:rgba(122,86,24,0.06);color:var(--gold);font-size:15px;line-height:1.5"></div>
           <p class="panel-sub" style="margin-bottom:1.5rem">Enter a name and context. The AI verifies identity, determines catalog vs weaving status, and generates the full record. Review and edit all fields before confirming to the database.</p>
 
           <div class="card" id="ancestor-research-form" style="max-width:720px;margin-bottom:2rem">
@@ -1473,7 +1588,7 @@ body::before {
                 <option value="">— Choose an ancestor —</option>
               </select>
             </div>
-            <div id="aug-ancestor-summary" style="display:none;padding:0.875rem 1rem;border:1px solid var(--border);border-radius:6px;margin-bottom:1.25rem;background:rgba(201,168,124,0.04)"></div>
+            <div id="aug-ancestor-summary" style="display:none;padding:0.875rem 1rem;border:1px solid var(--border);border-radius:6px;margin-bottom:1.25rem;background:rgba(122,86,24,0.04)"></div>
             <div class="form-group" id="aug-findings-wrap" style="display:none">
               <label class="form-label">New Findings <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">paste sources, transcripts, dates, names, places, anything you've located</span></label>
               <textarea class="form-textarea" id="aug-new-findings" rows="8" placeholder="e.g. 1851 UK Census, Liverpool ED 12, Household 47: John Detton, age 38, journeyman cooper, b. Birkenhead; wife Mary, 35, b. Glasgow; sons Robert (12), James (8) — confirms 1849 arrival in Liverpool from Glasgow, contradicting earlier assumption of Edinburgh origin. Also: Glasgow Trades House records show John apprenticed to Andrew McTavish 1825–1832."></textarea>
@@ -1487,7 +1602,7 @@ body::before {
               <div id="aug-pdf-list" style="margin-top:0.5rem"></div>
               <div id="aug-pdf-msg" style="margin-top:0.4rem;font-size:15px"></div>
             </div>
-            <div id="aug-also-log" style="display:none;margin-bottom:1rem;padding:0.75rem 0.875rem;border:1px dashed var(--border);border-radius:6px;background:rgba(201,168,124,0.02)">
+            <div id="aug-also-log" style="display:none;margin-bottom:1rem;padding:0.75rem 0.875rem;border:1px dashed var(--border);border-radius:6px;background:rgba(122,86,24,0.02)">
               <label style="display:flex;gap:0.5rem;align-items:center;font-size:15px;cursor:pointer;margin-bottom:0.5rem">
                 <input type="checkbox" id="aug-also-log-check"> Also log these findings to the research findings log
               </label>
@@ -1871,7 +1986,8 @@ async function enterApp() {
   badge.textContent = isAdmin ? 'Admin' : 'Client';
   badge.className = 'app-role-badge ' + (isAdmin ? 'role-admin' : 'role-client');
 
-  document.getElementById('btn-toggle-view').style.display = isAdmin ? 'block' : 'none';
+  // Preview lives on each client's page now (one control, not two).
+  document.getElementById('btn-toggle-view').style.display = 'none';
 
   buildNav();
   await Promise.all([loadClients(), loadAncestors()]);
@@ -1909,6 +2025,8 @@ async function enterApp() {
       if (startPanel === 'panel-overview') { populateOverview(); renderClientList(); }
       if (startPanel === 'panel-prospects') loadProspects();
       if (startPanel === 'panel-convergence-admin') loadAllConvergences();
+      if (startPanel === 'panel-offerings') loadOfferings();
+      if (startPanel === 'panel-followups') loadFollowups();
     }
   } else {
     showPanel(startPanel);
@@ -1940,14 +2058,20 @@ function buildNav() {
   // Admin work panels. Labels chosen to NOT collide with the external "open page"
   // links below (Weaving ↗, Catalog ↗, Tapestry ↗, Convergence ↗): these are the
   // build/manage surfaces; the ↗ links open the rendered page in a new tab.
+  // Grouped by what the work is: people first, then the offering system, then the
+  // build tools. Group labels render as headings in the walnut sidebar.
   const adminTabs = [
-    { id: 'panel-overview',           label: 'Overview' },
+    { group: 'People' },
+    { id: 'panel-overview',           label: 'Clients' },
     { id: 'panel-prospects',          label: 'Prospects' },
     { id: 'panel-followups',          label: 'Follow-ups' },
+    { group: 'Offerings' },
+    { id: 'panel-offerings',          label: 'Offering Tracker' },
+    { group: 'Build' },
     { id: 'panel-weaving',            label: 'Weaving Builder' },
-    { id: 'panel-convergence-admin',  label: 'All Convergences' },
     { id: 'panel-ancestor-research',  label: 'Ancestor Research' },
     { id: 'panel-tapestry',           label: 'Tapestry Builder' },
+    { id: 'panel-convergence-admin',  label: 'Convergences' },
   ];
   // Phase C: client tabs derived from access_* flags on the active client.
   // Phase F: Signal Reading prepended when signals_reading is on record (no flag).
@@ -1982,6 +2106,13 @@ function buildNav() {
   const tabs = (isAdmin && !isPreviewingAsClient) ? adminTabs : clientTabs;
 
   tabs.forEach(t => {
+    if (t.group) {
+      const h = document.createElement('div');
+      h.className = 'sidebar-group-label';
+      h.textContent = t.group;
+      panelGroup.appendChild(h);
+      return;
+    }
     if (t.href) {
       const a = document.createElement('a');
       a.className = 'sidebar-nav-item';
@@ -2011,6 +2142,7 @@ function buildNav() {
       if (t.id === 'panel-tapestry') loadTapestryManager();
       if (t.id === 'panel-prospects') loadProspects();
       if (t.id === 'panel-followups') loadFollowups();
+      if (t.id === 'panel-offerings') loadOfferings();
     };
     panelGroup.appendChild(btn);
   });
@@ -2039,7 +2171,17 @@ function buildNav() {
     { href: 'convergence.html',       label: 'Convergence ↗',      flag: 'access_convergence' },
   ];
 
+  // Admin (not previewing): reference pages only. Weaving / Convergence pages are
+  // per-client and are opened from each client's page instead.
+  const adminReference = isAdmin && !isPreviewingAsClient;
+  if (adminReference) {
+    const h = document.createElement('div');
+    h.className = 'sidebar-group-label';
+    h.textContent = 'Reference';
+    externalGroup.appendChild(h);
+  }
   externalLinks.forEach(l => {
+    if (adminReference && (l.flag === 'access_weaving' || l.flag === 'access_convergence')) return;
     if (l.flag && !isAdmin) {
       // Client must have the flag true on their own row.
       if (!activeClient || !activeClient[l.flag]) return;
@@ -2071,8 +2213,9 @@ function getActiveClientObject() {
 // ── Hash routing ──────────────────────────────────────
 // Maps URL hash → panel ID for browser back/forward support
 const ADMIN_HASH_MAP = {
-  '#overview':            'panel-overview',
-  '#clients':             'panel-overview',  // legacy alias — merged into overview
+  '#clients':             'panel-overview',
+  '#overview':            'panel-overview',  // legacy alias
+  '#offerings':           'panel-offerings',
   '#prospects':           'panel-prospects',
   '#followups':           'panel-followups',
   '#weaving':             'panel-weaving',
@@ -2092,7 +2235,7 @@ const CLIENT_DETAIL_HASH_RX = /^#client\/([0-9a-fA-F-]+)$/;
 
 function hashForPanel(panelId) {
   const all = { ...ADMIN_HASH_MAP, ...CLIENT_HASH_MAP };
-  return Object.keys(all).find(h => all[h] === panelId) || '#overview';
+  return Object.keys(all).find(h => all[h] === panelId) || '#clients';
 }
 function panelForHash(hash) {
   // Dynamic: #client/{id} → panel-client-detail (admin only, side-effect: load the detail)
@@ -2223,6 +2366,7 @@ async function showClientDetail(clientId) {
   activatePanel('panel-client-detail');
   document.getElementById('cd-title').textContent = '—';
   document.getElementById('cd-subtitle').textContent = '—';
+  ['cd-head-actions', 'cd-head-meta', 'cd-head-tabs'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = ''; });
   document.getElementById('client-detail-content').innerHTML =
     '<div class="empty">Loading…</div>';
   await loadClientDetail();
@@ -2288,7 +2432,7 @@ async function loadClientDetail() {
 
     document.getElementById('cd-title').textContent = client.name || '—';
     document.getElementById('cd-subtitle').textContent =
-      [client.email, client.entry_offering].filter(Boolean).join(' · ');
+      [client.email, client.pronouns, client.entry_offering ? 'came in for ' + client.entry_offering : ''].filter(Boolean).join(' · ');
 
     wrap.innerHTML = renderClientDetail(currentDetailData);
     wireClientDetail();
@@ -2329,15 +2473,15 @@ function cdShortDate(v) {
 // it's clicked, a client has no login and cannot enter the portal at all.
 function cdLoginLine(c) {
   if (c.auth_user_id) {
-    return `<div style="font-size:14px;color:var(--text-secondary)"><i class="ti"></i>Portal login: <span style="color:var(--gold)">active</span> — they can sign in.</div>`;
+    return `<div style="font-size:15px;color:var(--text-secondary)"><i class="ti"></i>Portal login: <span style="color:var(--gold)">active</span> — they can sign in.</div>`;
   }
   if (c.email) {
-    return `<div style="display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap;font-size:14px;color:var(--text-secondary)">
+    return `<div style="display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap;font-size:15px;color:var(--text-secondary)">
       <span>Portal login: <span class="muted">not invited yet</span> — they can't enter the portal.</span>
       <button class="btn btn-gold btn-sm" onclick="inviteClient('${c.id}', this)">Invite to portal</button>
     </div>`;
   }
-  return `<div style="font-size:14px" class="muted">Portal login: add an email above before they can be invited.</div>`;
+  return `<div style="font-size:15px" class="muted">Portal login: add an email above before they can be invited.</div>`;
 }
 
 // Snapshot — the "who is this and what have they done" card. Everything here is
@@ -2360,7 +2504,7 @@ function cdThresholdCard(d) {
     <div class="cd-card full" style="margin-bottom:1.25rem">
       <h3 class="cd-card-title">The Threshold</h3>
       ${rows.map(r => `<div class="cd-row"><div class="cd-label" style="min-width:160px">${r[0]}</div><div class="cd-value">${r[1]}</div></div>`).join('')}
-      <div class="cd-value muted" style="margin-top:0.6rem;font-size:14px">Matched by email from Where Do You Stand? and Seven Gates enrollment. The gate is where she stood the day she took it; a retake overwrites it.</div>
+      <div class="cd-value muted" style="margin-top:0.6rem;font-size:15px">Matched by email from Where Do You Stand? and Seven Gates enrollment. The gate is where she stood the day she took it; a retake overwrites it.</div>
     </div>`;
 }
 
@@ -2391,7 +2535,7 @@ function cdSnapshotCard(d) {
     // (rendered below the dated list)
   }
 
-  const chip = (on, label) => `<span style="font-size:14px;padding:4px 12px;border-radius:14px;border:1px solid var(--border);${on ? 'background:var(--accent);color:var(--gold)' : 'color:var(--text-dim);opacity:0.65'}">${label}</span>`;
+  const chip = (on, label) => `<span class="tag${on ? ' on' : ''}">${label}</span>`;
   const chips = [
     chip(hasChart, 'Chart ' + (hasChart ? '✓' : '—')),
     chip(anc.length > 0, `Weaving · ${anc.length}`),
@@ -2408,15 +2552,8 @@ function cdSnapshotCard(d) {
 
   return `
     <div class="cd-card full" style="margin-bottom:1.25rem;border-left:3px solid var(--gold)">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.8rem;flex-wrap:wrap">
-        <div>
-          <h3 class="cd-card-title" style="margin-bottom:0.25rem">Snapshot</h3>
-          <div class="cd-value muted">${idLine || '—'}</div>
-        </div>
-        <span class="sp-pill" style="color:var(--gold);white-space:nowrap">${cdEsc(cdStatusPlain(c.intake_status))}</span>
-      </div>
+      <h3 class="cd-card-title" style="margin-bottom:0.25rem">What they have done</h3>
       <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin:1.1rem 0 1rem">${chips}</div>
-      ${cdLoginLine(c)}
       <div class="cd-label" style="margin:1.2rem 0 0.5rem">Activity</div>
       ${timeline}
       ${hasMirrorApp ? '<div class="cd-row"><div class="cd-label" style="min-width:132px">—</div><div class="cd-value">Mirror Work application on file (see below)</div></div>' : ''}
@@ -2439,7 +2576,7 @@ function msgThreadHtml(rows, viewerSide) {
     return `<div style="display:flex;justify-content:${mine ? 'flex-end' : 'flex-start'};margin-bottom:0.6rem">
       <div style="max-width:78%;padding:0.6rem 0.9rem;border-radius:12px;background:${mine ? 'rgba(184,146,74,0.16)' : 'var(--surface-2)'};border:1px solid var(--border)">
         <div style="white-space:pre-wrap;font-size:15px;color:var(--text-secondary);line-height:1.6">${esc(m.body)}</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:0.3rem">${mine ? 'You' : esc(who)} · ${esc(when)}</div>
+        <div style="font-size:15px;color:var(--text-dim);margin-top:0.3rem">${mine ? 'You' : esc(who)} · ${esc(when)}</div>
       </div></div>`;
   }).join('');
 }
@@ -2478,7 +2615,7 @@ function cdMessagesCard(d) {
   return `
     <div class="cd-card full">
       <h3 class="cd-card-title">Messages</h3>
-      <p class="cd-value muted" style="margin-bottom:1rem;font-size:14px">A private thread with this client. They see it in their portal; you each get an email when a new message arrives.</p>
+      <p class="cd-value muted" style="margin-bottom:1rem;font-size:15px">A private thread with this client. They see it in their portal; you each get an email when a new message arrives.</p>
       <div id="cd-msg-thread" style="max-height:440px;overflow:auto;padding:0.75rem;border:1px solid var(--border);border-radius:8px;margin-bottom:1rem">Loading…</div>
       <textarea class="form-textarea" id="cd-msg-body" rows="3" placeholder="Write a message to this client…"></textarea>
       <div class="cd-actions" style="margin-top:0.75rem">
@@ -2509,40 +2646,151 @@ async function cdSendMessage() {
   } catch (e) { if (e.message !== 'SESSION_EXPIRED') status.textContent = 'Failed: ' + e.message; }
 }
 
+// The client page: a sticky header (identity, status, login, access, actions,
+// tabs) over one focused section at a time. Tabs follow the work of a session.
+// Every card is still rendered (hidden sections stay in the DOM), so the
+// existing save/toggle wiring by element id keeps working.
+const CD_ACCESS = [
+  ['access_chart',       'Chart'],
+  ['access_weaving',     'Weaving'],
+  ['access_catalog',     'Catalog'],
+  ['access_convergence', 'Convergence'],
+];
+function cdHeaderHtml(d) {
+  const c = d.client || {};
+  const cid = encodeURIComponent(c.id);
+  const actions = `
+    <button class="btn btn-gold btn-sm" onclick="startPreview('${c.id}')">Preview as client</button>
+    <button class="btn btn-outline btn-sm" onclick="cdShowSection('messages')">Message</button>
+    <a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${cid}" target="_blank" rel="noopener">Working chart ↗</a>`;
+  const login = c.auth_user_id
+    ? '<span class="tag on">Portal login active</span>'
+    : (c.email ? `<button class="btn btn-outline btn-sm" onclick="inviteClient('${c.id}', this)">Invite to portal</button>` : '<span class="tag">Add an email to invite</span>');
+  const chips = CD_ACCESS.map(([k, l]) =>
+    `<button class="access-chip${c[k] ? ' on' : ''}" title="Click to turn ${c[k] ? 'off' : 'on'}" onclick="cdToggleAccess('${k}', this)">${l}</button>`).join('');
+  return { actions, meta: `
+    <span class="tag status">${cdEsc(cdStatusPlain(c.intake_status))}</span>
+    ${login}
+    <span style="margin-left:0.25rem">They see:</span> ${chips}
+    <span class="cd-status" id="cd-head-status"></span>` };
+}
+async function cdToggleAccess(key, btn) {
+  const c = currentDetailData && currentDetailData.client; if (!c) return;
+  const next = !c[key];
+  const st = document.getElementById('cd-head-status');
+  btn.disabled = true; st.textContent = 'saving…';
+  try {
+    await restPatch('clients', c.id, { [key]: next });
+    c[key] = next;
+    const row = allClients.find(x => x.id === c.id); if (row) row[key] = next;
+    btn.classList.toggle('on', next); btn.title = `Click to turn ${next ? 'off' : 'on'}`;
+    const box = document.getElementById('cd-f-' + key); if (box) box.checked = next;
+    st.textContent = `${btn.textContent.replace('✓', '').trim()} ${next ? 'on' : 'off'} for this client`;
+  } catch (e) { st.textContent = 'failed: ' + e.message; }
+  btn.disabled = false;
+}
+
+function cdChartTab(d) {
+  const c = d.client;
+  const hasChart = !!(d.birth || d.gk || d.hd);
+  const clientView = hasChart ? `
+      <p class="cd-note">Exactly what ${cdEsc(c.name || 'this client')} reads${c.access_chart ? '' : ' once you turn Chart on in the header'}. Turn on <b>Show edit controls</b> inside to change a passage for this client only or for every client.</p>
+      <iframe class="chart-frame" id="cd-chart-frame" title="Client chart" loading="lazy"></iframe>`
+    : `<div class="cd-card full"><div class="cd-value muted">No chart yet. Enter birth data in the working chart to compute it.</div>
+        <div class="cd-actions" style="margin-top:1rem"><a class="btn btn-gold btn-sm" href="chart-admin.html?client_id=${encodeURIComponent(c.id)}" target="_blank" rel="noopener">Enter birth data ↗</a></div></div>`;
+  return `
+    <div class="cd-subnav">
+      <button class="active" data-chart="client" onclick="cdChartView('client')">Client view</button>
+      <button data-chart="working" onclick="cdChartView('working')">Working view</button>
+    </div>
+    <div id="cd-chart-client">${clientView}</div>
+    <div id="cd-chart-working" style="display:none">
+      <div class="cd-grid">${cdBirthDataCard(d)}${cdChartSummaryCard(d)}</div>
+      <div class="cd-card full" style="margin-bottom:1.25rem">
+        <h3 class="sp-card-title">Placements &amp; Gene Keys</h3>
+        ${cdChartPlacementsBlock(d)}
+        ${cdGeneKeysBlock(d)}
+      </div>
+    </div>`;
+}
+function cdChartView(which) {
+  document.querySelectorAll('.cd-subnav button[data-chart]').forEach(b => b.classList.toggle('active', b.dataset.chart === which));
+  const cv = document.getElementById('cd-chart-client'), wv = document.getElementById('cd-chart-working');
+  if (cv) cv.style.display = which === 'client' ? 'block' : 'none';
+  if (wv) wv.style.display = which === 'working' ? 'block' : 'none';
+  if (which === 'client') cdLoadChartFrame();
+}
+function cdLoadChartFrame() {
+  const f = document.getElementById('cd-chart-frame');
+  if (!f || f.dataset.loaded === currentDetailClient) return;
+  f.dataset.loaded = currentDetailClient;
+  f.src = `my-chart.html?client_id=${encodeURIComponent(currentDetailClient)}&embed=1`;
+}
+// my-chart.html (embed mode) reports its height so the frame never scrolls on its own.
+window.addEventListener('message', e => {
+  if (e.origin !== window.location.origin || !e.data || e.data.type !== 'my-chart-height') return;
+  const f = document.getElementById('cd-chart-frame');
+  if (f) f.style.height = Math.max(600, Number(e.data.height) || 0) + 'px';
+});
+
+function cdSignalsTab(d) {
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="sp-card-title">Signals Readings</h3>
+      ${cdTier2HistoryBlock(d)}
+      ${cdTier1HistoryBlock(d)}
+    </div>
+    ${cdThresholdCard(d)}`;
+}
+
 function renderClientDetail(d) {
+  const cid = encodeURIComponent(d.client.id);
+  const pages = `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title">Their pages</h3>
+      <div class="cd-actions">
+        <a class="btn btn-outline btn-sm" href="ancestral-weaving.html?client_id=${cid}" target="_blank" rel="noopener">Weaving ↗</a>
+        <a class="btn btn-outline btn-sm" href="ancestral-catalog.html?client_id=${cid}" target="_blank" rel="noopener">Catalog ↗</a>
+        <a class="btn btn-outline btn-sm" href="tapestry.html?client_id=${cid}" target="_blank" rel="noopener">Tapestry ↗</a>
+        <a class="btn btn-outline btn-sm" href="convergence.html?client_id=${cid}" target="_blank" rel="noopener">Convergence ↗</a>
+      </div>
+    </div>`;
   const sections = [
     { key: 'overview',  label: 'Overview',
-      html: `${cdSnapshotCard(d)}${cdQuickActions(d)}` },
+      html: `${cdSnapshotCard(d)}` },
+    { key: 'chart',     label: 'Chart',
+      html: cdChartTab(d) },
+    { key: 'signals',   label: 'Signals',
+      html: cdSignalsTab(d) },
+    { key: 'ancestral', label: 'Ancestral',
+      html: `${cdWeavingCard(d)}${cdResonanceCard(d)}${cdConvergencesCard(d)}<div class="cd-card full" style="margin-bottom:1.25rem">${cdConvergenceEditorBlock(d)}</div>${pages}` },
     { key: 'messages',  label: 'Messages',
       html: cdMessagesCard(d) },
-    { key: 'details',   label: 'Details',
-      html: `<div class="cd-grid">${cdIdentityCard(d)}${cdLifecycleCard(d)}</div>${cdAccessCard(d)}` },
     { key: 'intake',    label: 'Intake',
       html: `${cdIntakePatternsCard(d)}${cdMirrorAppCard(d)}` },
-    { key: 'chart',     label: 'Chart & Signals',
-      html: `<div class="cd-grid">${cdBirthDataCard(d)}${cdChartSummaryCard(d)}</div>${cdThresholdCard(d)}${cdSignalProfileCard(d)}` },
-    { key: 'ancestral', label: 'Ancestral',
-      html: `${cdWeavingCard(d)}${cdResonanceCard(d)}${cdConvergencesCard(d)}` },
-    { key: 'admin',     label: 'Admin',
-      html: `${cdAdminNotesCard(d)}${cdDangerZoneCard(d)}` },
+    { key: 'record',    label: 'Record',
+      html: `<div class="cd-grid">${cdIdentityCard(d)}${cdLifecycleCard(d)}</div>${cdAccessCard(d)}${cdAdminNotesCard(d)}${cdDangerZoneCard(d)}` },
   ];
-  const tabs = sections.map((s, i) =>
+  const head = cdHeaderHtml(d);
+  document.getElementById('cd-head-actions').innerHTML = head.actions;
+  document.getElementById('cd-head-meta').innerHTML = head.meta;
+  document.getElementById('cd-head-tabs').innerHTML = sections.map((s, i) =>
     `<button class="cd-tab${i === 0 ? ' active' : ''}" data-sec="${s.key}" onclick="cdShowSection('${s.key}')">${s.label}</button>`
   ).join('');
-  const bodies = sections.map((s, i) =>
+  return sections.map((s, i) =>
     `<div class="cd-section" id="cd-sec-${s.key}" style="display:${i === 0 ? 'block' : 'none'}">${s.html}</div>`
   ).join('');
-  return `<div class="cd-tabs">${tabs}</div>${bodies}`;
 }
 
 function cdShowSection(key) {
   document.querySelectorAll('#client-detail-content .cd-section').forEach(el => {
     el.style.display = (el.id === 'cd-sec-' + key) ? 'block' : 'none';
   });
-  document.querySelectorAll('#client-detail-content .cd-tab').forEach(b => {
+  document.querySelectorAll('#cd-head-tabs .cd-tab').forEach(b => {
     b.classList.toggle('active', b.dataset.sec === key);
   });
   if (key === 'messages') loadClientMessages();
+  if (key === 'chart') cdLoadChartFrame();
   window.scrollTo(0, 0);
 }
 
@@ -2550,10 +2798,10 @@ function cdDangerZoneCard(d) {
   const c = d.client || {};
   return `
     <div class="cd-card full" style="border-color: rgba(192,112,96,0.45)">
-      <h3 class="cd-card-title" style="color:#d98a78">Danger Zone</h3>
+      <h3 class="cd-card-title" style="color:#9a3b2a">Danger Zone</h3>
       <p class="sp-dim" style="margin-bottom:0.8rem">Permanently delete this client and all of their chart data, Gene Keys, convergences, and Signals readings. This cannot be undone. Use for test records or clients you intend to remove entirely.</p>
       <div class="cd-actions">
-        <button class="btn btn-outline btn-sm" style="border-color:#c07060;color:#d98a78" onclick="cdDeleteClient('${c.id}', this)">Delete client</button>
+        <button class="btn btn-outline btn-sm" style="border-color:#c07060;color:#9a3b2a" onclick="cdDeleteClient('${c.id}', this)">Delete client</button>
         <span class="cd-status" id="cd-delete-status"></span>
       </div>
     </div>`;
@@ -2658,7 +2906,7 @@ function cdLifecycleCard(d) {
   return `
     <div class="cd-card">
       <h3 class="cd-card-title">Lifecycle</h3>
-      <p class="cd-value muted" style="margin-bottom:1rem;font-size:14px">Where this person is in your process, and how they came in. The Snapshot above shows the dated history; portal access is set in the Portal Access card below.</p>
+      <p class="cd-value muted" style="margin-bottom:1rem;font-size:15px">Where this person is in your process, and how they came in. The Snapshot above shows the dated history; portal access is set in the Portal Access card below.</p>
       <div class="cd-row stack"><div class="cd-label">Came in for <span style="opacity:0.88;font-weight:400">(auto-filled by the intake form; you can set it by hand)</span></div>
         <select class="form-select" id="cd-f-entry">${entryOpts}</select></div>
       <div class="cd-row stack"><div class="cd-label">Intake submitted <span style="opacity:0.88;font-weight:400">(set automatically on the Lineage intake; adjust or clear as needed)</span></div>
@@ -2713,7 +2961,7 @@ function cdAccessCard(d) {
         ${autoRow(true, 'Tapestry', 'on for every client')}
         ${autoRow(false, 'Fieldguide', 'off for everyone until it is published')}
       </div>
-      <p class="cd-value" style="margin-bottom:0.75rem; font-size:14px; font-weight:500">Turn on after a Lineage Session (or manually):</p>
+      <p class="cd-value" style="margin-bottom:0.75rem; font-size:15px; font-weight:500">Turn on after a Lineage Session (or manually):</p>
       <div class="access-grid">
         ${flags.map(f => `
           <label class="access-item">
@@ -2881,7 +3129,7 @@ function cdResonanceCard(d) {
       <div style="flex:1">
         <div class="name">${cdEsc(t.name || '—')}</div>
         ${meta ? `<div class="meta">${meta}</div>` : ''}
-        ${x.resonance_note ? `<div style="font-size:15px;color:var(--text-dim);font-style:italic;margin-top:0.4rem;padding:0.4rem 0.65rem;border-left:2px solid rgba(201,168,124,0.25);background:rgba(201,168,124,0.03)">${cdEsc(x.resonance_note)}</div>` : ''}
+        ${x.resonance_note ? `<div style="font-size:15px;color:var(--text-dim);font-style:italic;margin-top:0.4rem;padding:0.4rem 0.65rem;border-left:2px solid rgba(122,86,24,0.25);background:rgba(122,86,24,0.03)">${cdEsc(x.resonance_note)}</div>` : ''}
       </div>
       <span class="status-pill">${cdEsc(x.strength || 'noted')}</span>
       <button class="btn btn-outline btn-sm" onclick="cdRemoveResonance('${cdEsc(x.id)}')" title="Remove this resonance" style="color:var(--red);border-color:rgba(192,112,96,0.3);margin-left:0.5rem">Remove</button>
@@ -3194,9 +3442,9 @@ function cdReadingModel(r) {
 }
 function cdConvergenceHtml(cv) {
   if (!cv || !cv.fields.length) return '';
-  const bar = (key, pct, faded) => `<div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.25rem"><span class="sp-dim" style="width:74px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase">${key}</span><span style="flex:1;height:7px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden"><span style="display:block;height:100%;width:${pct}%;background:${faded ? 'rgba(184,146,74,0.5)' : 'var(--gold)'};border-radius:3px"></span></span></div>`;
-  const fields = cv.fields.map(f => `<div style="margin-bottom:0.8rem"><div style="font-size:13px;letter-spacing:0.06em;text-transform:uppercase">${cdEsc(f.roman)} · ${cdEsc(f.name)}</div><div class="sp-dim" style="margin:0.1rem 0 0.3rem">${cdEsc(CD_FIELD_GLOSS[f.roman] || '')}</div>${bar('In answers', f.quizPct, false)}${bar('In chart', f.chartPct, true)}</div>`).join('');
-  const freqs = cv.freqs.length ? `<div style="margin-top:1rem"><div class="sp-reading-label">The five strongest frequencies</div>${cv.freqs.map(s => `<div style="padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.12)"><b>${cdEsc(s.name)}</b> <span class="sp-dim">${cdEsc(s.field)}</span>${s.note ? `<div class="sp-dim" style="margin-top:0.1rem">${cdEsc(s.note)}</div>` : ''}</div>`).join('')}</div>` : '';
+  const bar = (key, pct, faded) => `<div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.25rem"><span class="sp-dim" style="width:74px;font-size:15px;letter-spacing:0.06em;text-transform:uppercase">${key}</span><span style="flex:1;height:7px;background:rgba(122,86,24,0.18);border-radius:3px;overflow:hidden"><span style="display:block;height:100%;width:${pct}%;background:${faded ? 'rgba(184,146,74,0.5)' : 'var(--gold)'};border-radius:3px"></span></span></div>`;
+  const fields = cv.fields.map(f => `<div style="margin-bottom:0.8rem"><div style="font-size:15px;letter-spacing:0.06em;text-transform:uppercase">${cdEsc(f.roman)} · ${cdEsc(f.name)}</div><div class="sp-dim" style="margin:0.1rem 0 0.3rem">${cdEsc(CD_FIELD_GLOSS[f.roman] || '')}</div>${bar('In answers', f.quizPct, false)}${bar('In chart', f.chartPct, true)}</div>`).join('');
+  const freqs = cv.freqs.length ? `<div style="margin-top:1rem"><div class="sp-reading-label">The five strongest frequencies</div>${cv.freqs.map(s => `<div style="padding:0.4rem 0;border-bottom:1px solid rgba(122,86,24,0.22)"><b>${cdEsc(s.name)}</b> <span class="sp-dim">${cdEsc(s.field)}</span>${s.note ? `<div class="sp-dim" style="margin-top:0.1rem">${cdEsc(s.note)}</div>` : ''}</div>`).join('')}</div>` : '';
   return `<div class="sp-reading"><div class="sp-reading-label">Your Signal Map · top 5</div>${fields}${freqs}</div>`;
 }
 
@@ -3496,6 +3744,7 @@ async function cdSaveLifecycle() {
 }
 
 async function cdSaveAccess() {
+  // (The chips in the client header save instantly; this card saves all four at once.)
   const status = document.getElementById('cd-access-status');
   status.textContent = 'saving…';
   try {
@@ -3507,6 +3756,8 @@ async function cdSaveAccess() {
       access_chart:       document.getElementById('cd-f-access_chart').checked
     });
     await loadClients();
+    const fresh = allClients.find(x => x.id === currentDetailClient);
+    if (fresh && currentDetailData) { Object.assign(currentDetailData.client, fresh); const h = cdHeaderHtml(currentDetailData); document.getElementById('cd-head-meta').innerHTML = h.meta; }
     status.textContent = 'saved · ' + new Date().toLocaleTimeString();
   } catch (e) { status.textContent = 'failed: ' + e.message; }
 }
@@ -3530,7 +3781,10 @@ function stopPreview() {
   document.getElementById('btn-toggle-view').classList.remove('previewing');
   buildNav();
   updateSiteLinksForActiveClient();
+  // Return to the client page the preview was started from, when there is one.
+  if (currentDetailClient) { showClientDetail(currentDetailClient); return; }
   showPanel('panel-overview');
+  populateOverview(); renderClientList();
 }
 
 function showView(id) {
@@ -3628,17 +3882,18 @@ async function populateOverview() {
   const weavings = Array.isArray(weavingData) ? weavingData : [];
 
   document.getElementById('overview-sub').textContent =
-    `${allClients.length} client${allClients.length !== 1 ? 's' : ''} · ${allAncestors.filter(a=>a.status!=='keynote').length} ancestors · ${allAncestors.filter(a=>a.status==='keynote').length} keynote cards · ${convs.length} convergence${convs.length !== 1 ? 's' : ''} generated`;
+    'Everyone with a client record. Open a person for their chart, readings, weaving, messages and access.';
 
   const assignable = allAncestors.filter(a => a.status === 'weaving' || a.status === 'catalog');
   const keynotes   = allAncestors.filter(a => a.status === 'keynote');
 
+  const withLogin = allClients.filter(c => c.auth_user_id).length;
   document.getElementById('overview-stats').innerHTML = `
-    <div class="stat-card"><div class="stat-number">${allClients.length}</div><div class="stat-label">Clients</div></div>
-    <div class="stat-card"><div class="stat-number">${assignable.length}</div><div class="stat-label">Assignable Ancestors</div></div>
-    <div class="stat-card"><div class="stat-number">${keynotes.length}</div><div class="stat-label">Keynote Cards</div></div>
-    <div class="stat-card"><div class="stat-number">${weavings.length}</div><div class="stat-label">Assigned Ancestors</div></div>
-    <div class="stat-card"><div class="stat-number">${convs.length}</div><div class="stat-label">Convergences</div></div>
+    <span><b>${allClients.length}</b> people</span>
+    <span><b>${withLogin}</b> with a portal login</span>
+    <span><b>${assignable.length}</b> assignable ancestors</span>
+    <span><b>${weavings.length}</b> assigned</span>
+    <span><b>${convs.length}</b> convergences</span>
   `;
   // Full client list now lives in #clients-list in the same panel — renderClientList() handles it.
   loadUnreadCounts();
@@ -3649,27 +3904,42 @@ async function populateOverview() {
 // ════════════════════════════════════════════════════
 function renderClientList() {
   const el = document.getElementById('clients-list');
+  if (!el) return;
   if (!allClients.length) { el.innerHTML = '<div class="empty">No clients yet.</div>'; return; }
-  el.innerHTML = allClients.map(c => {
-    let accessPill;
-    if (c.auth_user_id) {
-      accessPill = `<span class="client-badge" style="background:rgba(109,216,178,0.15);color:var(--teal)">Login ✓</span>`;
-    } else if (c.email) {
-      accessPill = `<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();inviteClient('${c.id}', this)">Invite</button>`;
-    } else {
-      accessPill = `<span class="client-badge" style="color:var(--text-faint);font-style:italic">— needs email —</span>`;
-    }
+  const q = (document.getElementById('clients-search')?.value || '').trim().toLowerCase();
+  const f = document.getElementById('clients-filter')?.value || '';
+  const LEAD = ['signals_tier1', 'tier2_quiz'];
+  const list = allClients.filter(c => {
+    if (q && !(`${c.name || ''} ${c.email || ''}`.toLowerCase().includes(q))) return false;
+    if (f === 'active')  return c.intake_status === 'activated' || c.intake_status === 'application_accepted';
+    if (f === 'login')   return !!c.auth_user_id;
+    if (f === 'nologin') return !c.auth_user_id;
+    if (f === 'unread')  return (unreadByClient[c.id] || 0) > 0;
+    if (f === 'leads')   return LEAD.includes(c.intake_status);
+    return true;
+  });
+  if (!list.length) { el.innerHTML = '<div class="empty">No one matches that search.</div>'; return; }
+  const ACCESS = [['access_chart', 'Chart'], ['access_weaving', 'Weaving'], ['access_catalog', 'Catalog'], ['access_convergence', 'Convergence']];
+  el.innerHTML = list.map(c => {
     const unread = unreadByClient[c.id] || 0;
-    const unreadBadge = unread ? `<span class="client-badge" style="background:#c07060;color:#fff" title="Unread messages">${unread} new</span>` : '';
+    const login = c.auth_user_id
+      ? '<span class="tag on">Portal login</span>'
+      : (c.email ? `<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();inviteClient('${c.id}', this)">Invite to portal</button>` : '<span class="tag">needs an email</span>');
+    const access = ACCESS.filter(([k]) => c[k]).map(([, l]) => `<span class="tag on">${l}</span>`).join('');
     return `
-    <div class="client-row" style="cursor:pointer" onclick="showClientDetail('${c.id}')">
-      <div><div class="client-name">${c.name}</div><div class="client-meta">${c.email || '—'}${c.notes ? ' · ' + c.notes.slice(0,60) + '…' : ''}</div></div>
+    <div class="client-row" onclick="showClientDetail('${c.id}')">
+      <div style="min-width:0">
+        <div class="client-name">${cdEsc(c.name || '—')}</div>
+        <div class="client-meta">${cdEsc([c.email, c.entry_offering].filter(Boolean).join(' · ') || '—')}</div>
+        <div class="client-tags">
+          <span class="tag status">${cdEsc(cdStatusPlain(c.intake_status))}</span>
+          ${access}
+          ${unread ? `<span class="tag alert">${unread} new message${unread === 1 ? '' : 's'}</span>` : ''}
+        </div>
+      </div>
       <div style="display:flex;gap:0.5rem;flex-shrink:0;align-items:center" onclick="event.stopPropagation()">
-        ${unreadBadge}
-        ${accessPill}
+        ${login}
         <button class="btn btn-gold btn-sm" onclick="showClientDetail('${c.id}')">Open</button>
-        <button class="btn btn-outline btn-sm" onclick="startPreview('${c.id}')">Preview</button>
-        <a href="chart-admin.html?client_id=${c.id}" class="btn btn-outline btn-sm" target="_blank">Chart ↗</a>
       </div>
     </div>`;
   }).join('');
@@ -3794,7 +4064,7 @@ async function loadClientWeaving() {
     freqMap[r.client_ancestor_id].push(name);
   });
 
-  const sideSelect = (a) => `<select class="form-select" style="width:auto;min-width:118px;font-size:13px" onchange="updateClientAncestorSide('${a.id}', this.value)">
+  const sideSelect = (a) => `<select class="form-select" style="width:auto;min-width:118px;font-size:15px" onchange="updateClientAncestorSide('${a.id}', this.value)">
     <option value=""${!a.lineage_side?' selected':''}>— side —</option>
     <option value="maternal"${a.lineage_side==='maternal'?' selected':''}>Maternal</option>
     <option value="paternal"${a.lineage_side==='paternal'?' selected':''}>Paternal</option>
@@ -3804,7 +4074,7 @@ async function loadClientWeaving() {
   const rowHtml = (a) => `<div class="ancestor-row">
         <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
         <div class="ancestor-name-block">
-          <div class="ancestor-name-text">${a.name}${a.ancestor_id ? '' : ' <span style="font-size:12px;color:var(--gold)">· personal</span>'}</div>
+          <div class="ancestor-name-text">${a.name}${a.ancestor_id ? '' : ' <span style="font-size:15px;color:var(--gold)">· personal</span>'}</div>
           <div class="ancestor-dates">${a.dates||''} ${a.location ? '· '+a.location : ''}${a.relation_to_client ? ' · '+a.relation_to_client : ''}</div>
         </div>
         <span class="ancestor-freq-count">${(freqMap[a.id]||[]).length} freq${(freqMap[a.id]||[]).length!==1?'s':''}</span>
@@ -3948,7 +4218,7 @@ function renderTapestryList() {
     <div onclick="editTapestryArchetype('${t.id}')" style="cursor:pointer;padding:0.65rem 0.875rem;border:1px solid ${t.id === tapestryEditingId ? 'var(--gold-dim)' : 'var(--border)'};border-radius:6px;margin-bottom:0.4rem;background:${t.id === tapestryEditingId ? 'var(--accent)' : 'transparent'};transition:all 0.15s">
       <div style="display:flex;align-items:center;gap:0.5rem">
         <div style="font-size:15px;font-weight:500;color:var(--text);flex:1">${esc(t.name)}</div>
-        ${t.draft ? `<span style="font-size:15px;letter-spacing:0.12em;text-transform:uppercase;color:#c98870;background:rgba(168,110,74,0.12);border:1px solid rgba(168,110,74,0.35);padding:1px 6px;border-radius:3px">Draft</span>` : ''}
+        ${t.draft ? `<span style="font-size:15px;letter-spacing:0.12em;text-transform:uppercase;color:#9a3b2a;background:rgba(168,110,74,0.12);border:1px solid rgba(168,110,74,0.35);padding:1px 6px;border-radius:3px">Draft</span>` : ''}
       </div>
       ${t.tradition ? `<div style="font-size:15px;color:var(--text-faint);margin-top:0.15rem">${esc(t.tradition)}</div>` : ''}
       ${t.epithet ? `<div style="font-size:15px;color:var(--gold);font-style:italic;margin-top:0.15rem">${esc(t.epithet)}</div>` : ''}
@@ -3991,7 +4261,7 @@ function renderTapestryEditor(t, isNew) {
   clearPdfState('tap');
   el.innerHTML = `
     <!-- Draft with AI -->
-    <div class="card" style="margin-bottom:1.5rem;border:1.5px dashed rgba(201,168,124,0.45);background:rgba(201,168,124,0.06)">
+    <div class="card" style="margin-bottom:1.5rem;border:1.5px dashed rgba(122,86,24,0.45);background:rgba(122,86,24,0.06)">
       <div class="editor-section-title">AI Re-draft Inputs <span style="color:var(--gold);font-size:15px;letter-spacing:0.1em">PROMPT FIELDS · NOT THE RECORD</span></div>
       <p style="font-size:15px;color:var(--amber);margin-bottom:1rem;line-height:1.6"><strong>These fields configure the AI re-draft only.</strong> They do not save to the archetype. To edit the record itself, scroll down to the <em>Edit archetype</em> card. Clicking <em>✦ Draft Profile</em> below will overwrite the editor fields with a fresh AI draft.</p>
       <div class="editor-grid-2" style="margin-bottom:1rem">
@@ -4026,7 +4296,7 @@ function renderTapestryEditor(t, isNew) {
     </div>
 
     <!-- Identity (the actual editable record) -->
-    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(109,216,178,0.30)">
+    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(22,90,66,0.30)">
       <div class="editor-section-title">${isNew ? 'New archetype' : 'Edit archetype'} <span style="color:var(--teal);font-size:15px;letter-spacing:0.1em">THESE FIELDS SAVE TO THE RECORD</span></div>
       <div class="editor-grid-2" style="margin-bottom:1rem">
         <div class="form-group" style="margin-bottom:0">
@@ -4059,7 +4329,7 @@ function renderTapestryEditor(t, isNew) {
     </div>
 
     <!-- Layers -->
-    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(109,216,178,0.15)">
+    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(22,90,66,0.15)">
       <div class="editor-section-title">Four Layers <span style="color:var(--teal);font-size:15px;letter-spacing:0.1em">PARALLEL TO ANCESTOR LAYERS</span></div>
       <p style="font-size:15px;color:var(--text-faint);margin-bottom:1.25rem;line-height:1.6">Same registers as ancestor weaving entries. Terroir adapted as Culture &amp; Origin — the geographical and cultural ground the figure arose from. Length spec: Terroir 150–220 · Unresolved 150–220 · Thread 200–280 · Lineage 150–200.</p>
       <div class="form-group">
@@ -4161,7 +4431,7 @@ function renderTapestryEditor(t, isNew) {
 
     <div class="editor-save-bar">
       <div id="tap-save-msg" style="font-size:15px"></div>
-      ${!isNew && t.draft ? `<button class="btn btn-outline" onclick="publishTapestryArchetype()" style="color:#c98870;border-color:rgba(168,110,74,0.45)" title="Make this archetype visible on the public Tapestry page">Publish →</button>` : ''}
+      ${!isNew && t.draft ? `<button class="btn btn-outline" onclick="publishTapestryArchetype()" style="color:#9a3b2a;border-color:rgba(168,110,74,0.45)" title="Make this archetype visible on the public Tapestry page">Publish →</button>` : ''}
       ${!isNew && !t.draft ? `<button class="btn btn-outline" onclick="unpublishTapestryArchetype()" style="color:var(--text-dim);border-color:var(--border)" title="Move this archetype back to draft (hidden from public page)">Unpublish</button>` : ''}
       ${!isNew ? `<button class="btn btn-outline" onclick="deleteTapestryArchetype()" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Delete</button>` : ''}
       <button class="btn btn-gold" onclick="saveTapestryArchetype()">${isNew ? 'Create archetype →' : 'Save changes →'}</button>
@@ -4245,7 +4515,7 @@ function renderImageSuggestions(suggestions) {
   el.innerHTML = `
     <div style="font-size:15px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem">AI image leads — research these, then paste the URL above</div>
     ${lastImageSuggestions.map((s, i) => `
-      <div style="border:1px solid var(--border);border-radius:6px;padding:0.65rem 0.875rem;margin-bottom:0.5rem;background:rgba(201,168,124,0.03)">
+      <div style="border:1px solid var(--border);border-radius:6px;padding:0.65rem 0.875rem;margin-bottom:0.5rem;background:rgba(122,86,24,0.03)">
         <div style="display:flex;justify-content:space-between;gap:0.5rem;align-items:flex-start;margin-bottom:0.4rem">
           <div style="flex:1">
             <div style="font-size:15px;font-weight:500;color:var(--text)">${esc(s.title || 'Untitled work')}</div>
@@ -4461,6 +4731,117 @@ async function deleteTapestryArchetype() {
 // ════════════════════════════════════════════════════
 let allProspects = [];
 
+// ════════════════════════════════════════════════════
+// ADMIN — OFFERING TRACKER (every door into the work)
+// ════════════════════════════════════════════════════
+function offClientFor(email, clientId) {
+  if (clientId) { const c = allClients.find(x => x.id === clientId); if (c) return c; }
+  const em = String(email || '').trim().toLowerCase();
+  return em ? (allClients.find(x => String(x.email || '').trim().toLowerCase() === em) || null) : null;
+}
+function offRow(cells, email, clientId) {
+  const c = offClientFor(email, clientId);
+  const attrs = c ? ` class="link" onclick="showClientDetail('${c.id}')" title="Open ${cdEsc(c.name || '')}"` : '';
+  return `<tr${attrs}>${cells.map(x => `<td>${x}</td>`).join('')}</tr>`;
+}
+function offWho(name, email, clientId) {
+  const c = offClientFor(email, clientId);
+  return `<div class="who">${cdEsc(name || (c && c.name) || email || '—')}</div><div class="sub">${cdEsc(email || '')}${c ? '' : ' · not a client yet'}</div>`;
+}
+async function loadOfferings() {
+  const el = document.getElementById('offerings-content');
+  el.innerHTML = '<div class="loading"><span class="loading-glyph">✦</span>Loading offerings…</div>';
+  if (!allClients.length) await loadClients();
+  const safe = p => rest(p).then(r => Array.isArray(r) ? r : []).catch(() => []);
+  const [subs, enrolls, letters, free, paid] = await Promise.all([
+    safe('threshold_subscribers?select=email,first_name,gate,source,day_sent,last_sent_at,unsubscribed,enrolled_seven_gates,created_at&order=created_at.desc'),
+    safe('seven_gates_enrollments?select=email,name,walk,amount_cents,welcome_sent_at,unsubscribed,refunded_at,created_at&order=created_at.desc'),
+    safe('seven_gates_letters?select=walk,week,subject,send_at,sent_at&order=week.asc'),
+    safe('signals_readings?select=email,client_id,created_at,field_name,source&order=created_at.desc'),
+    safe('signals_tier2_readings?select=client_name,email,client_id,created_at,viewed_at,followup_stopped&order=created_at.desc'),
+  ]);
+  const d = cdShortDate;
+  const n = (v, l) => `<div class="off-num"><b>${v}</b>${l}</div>`;
+
+  // The Threshold
+  const inJourney = subs.filter(s => !s.unsubscribed && (s.day_sent || 0) < 5).length;
+  const finished = subs.filter(s => (s.day_sent || 0) >= 5).length;
+  const enrolledFromT = subs.filter(s => s.enrolled_seven_gates).length;
+  const byGate = [1,2,3,4,5,6,7].map(g => `Gate ${g}: ${subs.filter(s => Number(s.gate) === g).length}`).join(' · ');
+  // The Seven Gates
+  const activeEnr = enrolls.filter(e => !e.refunded_at);
+  const revenue = activeEnr.reduce((t, e) => t + (e.amount_cents || 0), 0) / 100;
+  const sentLetters = letters.filter(l => l.sent_at).length;
+  const nextLetter = letters.filter(l => !l.sent_at).sort((a, b) => new Date(a.send_at) - new Date(b.send_at))[0];
+  // Signals
+  const opened = paid.filter(p => p.viewed_at).length;
+  // 1:1 and containers, from what each client came in for
+  const byOffering = {};
+  allClients.forEach(c => { if (c.entry_offering) (byOffering[c.entry_offering] = byOffering[c.entry_offering] || []).push(c); });
+
+  el.innerHTML = `
+    <div class="off-grid">
+      <div class="off-card"><h3>The Threshold</h3><div class="off-sub">Where Do You Stand? and the five-day Journey letters.</div>
+        <div class="off-nums">${n(subs.length, 'took it')}${n(inJourney, 'in the Journey')}${n(enrolledFromT, 'went on to the walk')}</div></div>
+      <div class="off-card"><h3>The Seven Gates</h3><div class="off-sub">The live walk and its weekly letters.</div>
+        <div class="off-nums">${n(activeEnr.length, 'enrolled')}${n('$' + revenue.toLocaleString(), 'received')}${n(letters.length ? `${sentLetters}/${letters.length}` : '—', 'letters sent')}</div></div>
+      <div class="off-card"><h3>Signals</h3><div class="off-sub">The free quiz and the $44 Signals Reading.</div>
+        <div class="off-nums">${n(free.length, 'free quizzes')}${n(paid.length, 'paid readings')}${n(opened, 'opened')}</div></div>
+      <div class="off-card"><h3>1:1 and containers</h3><div class="off-sub">Clients by what they came in for.</div>
+        <div class="off-nums">${n(Object.values(byOffering).reduce((t, a) => t + a.length, 0), 'clients')}${n(Object.keys(byOffering).length, 'offerings')}</div></div>
+    </div>
+
+    <div class="off-section">
+      <h3>The Threshold · Where Do You Stand?</h3>
+      <div class="cd-note">${byGate} · ${finished} finished all five letters · ${subs.filter(s => s.unsubscribed).length} left the letters</div>
+      ${subs.length ? `<table class="off-table"><thead><tr><th>Person</th><th>Gate</th><th>Journey</th><th>Took it</th><th>Seven Gates</th></tr></thead><tbody>
+        ${subs.map(s => offRow([
+          offWho(s.first_name, s.email),
+          s.gate ? `Gate ${s.gate} · ${GATE_SHORT[s.gate] || ''}` : '—',
+          s.unsubscribed ? 'left the letters' : ((s.day_sent || 0) >= 5 ? 'all five sent' : `day ${s.day_sent || 0} of 5`),
+          d(s.created_at),
+          s.enrolled_seven_gates ? 'enrolled' : '—'
+        ], s.email)).join('')}</tbody></table>` : '<div class="cd-value muted">No one yet.</div>'}
+    </div>
+
+    <div class="off-section">
+      <h3>The Seven Gates</h3>
+      <div class="cd-note">${letters.length ? `${sentLetters} of ${letters.length} weekly letters sent${nextLetter ? ` · next: week ${nextLetter.week}${nextLetter.subject ? ' — ' + cdEsc(nextLetter.subject) : ''}, ${d(nextLetter.send_at)}` : ''}` : 'Weekly letters are not visible from here.'}${enrolls.length - activeEnr.length ? ` · ${enrolls.length - activeEnr.length} refunded` : ''}</div>
+      ${enrolls.length ? `<table class="off-table"><thead><tr><th>Person</th><th>Walk</th><th>Paid</th><th>Enrolled</th><th>Welcome</th></tr></thead><tbody>
+        ${enrolls.map(e => offRow([
+          offWho(e.name, e.email),
+          cdEsc(e.walk || 'walk 1'),
+          e.refunded_at ? 'refunded' : (e.amount_cents ? '$' + (e.amount_cents / 100) : 'comp'),
+          d(e.created_at),
+          e.welcome_sent_at ? 'sent' : '—'
+        ], e.email)).join('')}</tbody></table>` : '<div class="cd-value muted">No enrollments yet.</div>'}
+    </div>
+
+    <div class="off-section">
+      <h3>Signals · paid readings</h3>
+      <div class="cd-note">${free.length} free quizzes taken. Follow-up timing and personal notes live under Follow-ups.</div>
+      ${paid.length ? `<table class="off-table"><thead><tr><th>Person</th><th>Reading</th><th>Opened</th><th>Where they are now</th></tr></thead><tbody>
+        ${paid.map(p => { const c = offClientFor(p.email, p.client_id); return offRow([
+          offWho(p.client_name, p.email, p.client_id),
+          d(p.created_at),
+          p.viewed_at ? 'opened' : 'not opened',
+          c ? cdEsc(cdStatusPlain(c.intake_status)) : '—'
+        ], p.email, p.client_id); }).join('')}</tbody></table>` : '<div class="cd-value muted">No paid readings yet.</div>'}
+    </div>
+
+    <div class="off-section">
+      <h3>1:1 and containers</h3>
+      <div class="cd-note">Grouped by what each client came in for (set on their Record tab). The course is sold through Stripe and is not tracked in the portal yet.</div>
+      ${Object.keys(byOffering).length ? `<table class="off-table"><thead><tr><th>Offering</th><th>Person</th><th>Where they are</th><th>Portal</th></tr></thead><tbody>
+        ${Object.entries(byOffering).sort((a, b) => a[0].localeCompare(b[0])).flatMap(([o, list]) => list.map((c, i) => offRow([
+          i === 0 ? `<div class="who">${cdEsc(o)}</div><div class="sub">${list.length} ${list.length === 1 ? 'person' : 'people'}</div>` : '',
+          `<div class="who">${cdEsc(c.name || '—')}</div><div class="sub">${cdEsc(c.email || '')}</div>`,
+          cdEsc(cdStatusPlain(c.intake_status)),
+          c.auth_user_id ? 'login active' : 'no login'
+        ], c.email, c.id))).join('')}</tbody></table>` : '<div class="cd-value muted">No client has an offering recorded yet.</div>'}
+    </div>`;
+}
+
 async function loadProspects() {
   const list = document.getElementById('prospects-list');
   list.innerHTML = '<div class="loading"><span class="loading-glyph">✦</span>Loading prospects…</div>';
@@ -4495,7 +4876,7 @@ async function loadFollowups() {
     const name = cdEsc(r.client_name || (r.clients && r.clients.name) || r.email || '—');
     const d = days(r);
     const seq = r.followup_stopped ? 'sequence stopped' : `${touches(r)}/3 follow-ups sent`;
-    const viewed = r.viewed_at ? '<span class="client-badge" style="background:rgba(109,216,178,0.15);color:var(--teal)">opened reading</span>' : '<span class="client-badge" style="color:var(--text-dim)">not opened</span>';
+    const viewed = r.viewed_at ? '<span class="client-badge" style="background:rgba(22,90,66,0.15);color:var(--teal)">opened reading</span>' : '<span class="client-badge" style="color:var(--text-dim)">not opened</span>';
     return `
       <div class="client-row" style="cursor:default">
         <div><div class="client-name">${name}</div>
@@ -4510,7 +4891,7 @@ async function loadFollowups() {
 
   const section = (title, sub, items, showActions) => items.length
     ? `<div class="section-header" style="margin-top:1.5rem"><div class="section-title">${title} — ${items.length}</div></div>
-       ${sub ? `<p class="cd-value muted" style="font-size:14px;margin-bottom:0.75rem">${sub}</p>` : ''}
+       ${sub ? `<p class="cd-value muted" style="font-size:15px;margin-bottom:0.75rem">${sub}</p>` : ''}
        <div class="client-list">${items.map(r => row(r, showActions)).join('')}</div>`
     : '';
 
@@ -4532,7 +4913,7 @@ async function createProspect() {
   const source = document.getElementById('new-prospect-source').value || 'manual';
   const notes  = document.getElementById('new-prospect-notes').value.trim();
   const msg    = document.getElementById('prospect-create-msg');
-  if (!name && !email) { msg.innerHTML = '<span style="color:#d98a78">Add at least a name or an email.</span>'; return; }
+  if (!name && !email) { msg.innerHTML = '<span style="color:#9a3b2a">Add at least a name or an email.</span>'; return; }
   const now = new Date().toISOString();
   msg.textContent = 'Saving…';
   try {
@@ -4545,7 +4926,7 @@ async function createProspect() {
     msg.textContent = '';
     await loadProspects();
   } catch (e) {
-    msg.innerHTML = '<span style="color:#d98a78">Could not create: ' + (e.message || e) + '</span>';
+    msg.innerHTML = '<span style="color:#9a3b2a">Could not create: ' + (e.message || e) + '</span>';
   }
 }
 
@@ -4627,7 +5008,7 @@ function renderProspectList() {
   list.innerHTML = filtered.map(p => {
     let statusBadge;
     if (p.converted_to_client_id) {
-      statusBadge = `<span class="client-badge" style="background:rgba(109,216,178,0.15);color:var(--teal)">Converted ✓</span>`;
+      statusBadge = `<span class="client-badge" style="background:rgba(22,90,66,0.15);color:var(--teal)">Converted ✓</span>`;
     } else if (p.archived) {
       statusBadge = `<span class="client-badge" style="color:var(--text-faint)">Archived</span>`;
     } else {
@@ -4930,7 +5311,7 @@ async function loadSignalReading() {
   }
 
   const secCard = (heading, body) => body
-    ? `<div class="cd-card full" style="margin-bottom:1rem"><h3 class="cd-card-title">${cdEsc(heading)}</h3><div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:1.95;color:var(--text-secondary);margin-top:0.6rem;white-space:pre-wrap">${cdEsc(body)}</div></div>`
+    ? `<div class="cd-card full" style="margin-bottom:1rem"><h3 class="cd-card-title">${cdEsc(heading)}</h3><div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:400;line-height:1.95;color:var(--text-secondary);margin-top:0.6rem;white-space:pre-wrap">${cdEsc(body)}</div></div>`
     : '';
 
   // ── Tier 2 (paid) readings — the full written reading ──
@@ -4947,7 +5328,7 @@ async function loadSignalReading() {
     return `
       <div style="border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.5rem">
-          <div><span class="cd-card-title">Signals Reading</span>${i === 0 ? ' <span class="sp-pill" style="color:var(--gold)">latest</span>' : ''}<div style="font-size:14px;color:var(--text-dim)">${cdEsc(dateStr)}${m.born ? ' · ' + cdEsc(m.born) : ''}</div></div>
+          <div><span class="cd-card-title">Signals Reading</span>${i === 0 ? ' <span class="sp-pill" style="color:var(--gold)">latest</span>' : ''}<div style="font-size:15px;color:var(--text-dim)">${cdEsc(dateStr)}${m.born ? ' · ' + cdEsc(m.born) : ''}</div></div>
           <div style="display:flex;gap:0.5rem;align-items:center">${link}${i === 0 ? '' : `<button class="btn btn-outline btn-sm" onclick="crToggle('${bodyId}', this)">View</button>`}</div>
         </div>
         <div id="${bodyId}" style="display:${open ? 'block' : 'none'};margin-top:0.75rem">
@@ -4970,15 +5351,15 @@ async function loadSignalReading() {
     if (r.offering_label) rows.push(['Suggested door', r.offering_label]);
     const summary = rows.map(([l, v]) => `<div class="cd-row"><div class="cd-label">${cdEsc(l)}</div><div class="cd-value">${cdEsc(v)}</div></div>`).join('');
     const tags = Array.isArray(r.tags) && r.tags.length
-      ? `<div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.85rem">${r.tags.map(t => `<span style="font-size:14px;padding:4px 11px;border-radius:14px;background:var(--accent);border:1px solid var(--border);color:var(--gold)">${cdEsc(t)}</span>`).join('')}</div>`
+      ? `<div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.85rem">${r.tags.map(t => `<span style="font-size:15px;padding:4px 11px;border-radius:14px;background:var(--accent);border:1px solid var(--border);color:var(--gold)">${cdEsc(t)}</span>`).join('')}</div>`
       : '';
     const txt = r.reading_text || (r.reading_html ? String(r.reading_html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '');
-    const prose = txt ? `<div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:1.95;color:var(--text-secondary);margin-top:0.85rem;white-space:pre-wrap">${cdEsc(txt)}</div>` : '';
+    const prose = txt ? `<div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:400;line-height:1.95;color:var(--text-secondary);margin-top:0.85rem;white-space:pre-wrap">${cdEsc(txt)}</div>` : '';
     const open = i === 0;
     return `
       <div style="border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.5rem">
-          <div><span class="cd-card-title">Free Signals Snapshot</span><div style="font-size:14px;color:var(--text-dim)">${cdEsc(dateStr)}</div></div>
+          <div><span class="cd-card-title">Free Signals Snapshot</span><div style="font-size:15px;color:var(--text-dim)">${cdEsc(dateStr)}</div></div>
           ${open ? '' : `<button class="btn btn-outline btn-sm" onclick="crToggle('${bodyId}', this)">View</button>`}
         </div>
         <div id="${bodyId}" style="display:${open ? 'block' : 'none'};margin-top:0.5rem">
@@ -5127,7 +5508,7 @@ async function loadMyConvergence() {
 
   let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
     <div>
-      <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;font-style:italic;color:var(--text)">${conv.title||'The Convergence'}</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:400;font-style:italic;color:var(--text)">${conv.title||'The Convergence'}</div>
       <div style="font-size:15px;color:var(--text-dim);margin-top:0.25rem">Generated ${new Date(conv.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</div>
     </div>
     <a href="convergence.html?client_id=${encodeURIComponent(clientId)}" class="btn btn-outline" target="_blank">Open Full Convergence ↗</a>
@@ -5145,7 +5526,7 @@ async function loadMyConvergence() {
         <div class="convergence-card-title">${s.title}</div>
         <span class="convergence-status ${s.section_type==='pattern'?'status-published':'status-draft'}">${s.section_type}</span>
       </div>
-      <div class="convergence-card-body" style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:2;color:var(--text-secondary)">
+      <div class="convergence-card-body" style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:400;line-height:2;color:var(--text-secondary)">
         ${text.split('\n\n').map(p=>p.trim()?`<p style="margin-bottom:0.75rem">${p}</p>`:'').join('')}
       </div>
     </div>`;
@@ -5283,7 +5664,7 @@ function renderMyTapestry() {
       <div class="card" style="margin-bottom:1.25rem">
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem">
           <div>
-            <div style="font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:300;font-style:italic;color:var(--text)">${esc(arch.name||'(unnamed)')}</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:400;font-style:italic;color:var(--text)">${esc(arch.name||'(unnamed)')}</div>
             ${arch.tradition ? `<div style="font-size:15px;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold-dim);margin-top:0.2rem">${esc(arch.tradition)}</div>` : ''}
           </div>
           <div style="display:flex;align-items:center;gap:0.5rem">
@@ -5293,7 +5674,7 @@ function renderMyTapestry() {
           </div>
         </div>
         ${arch.epithet ? `<div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--text-dim);margin-bottom:0.85rem">${esc(arch.epithet)}</div>` : ''}
-        ${arch.description ? `<div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:1.85;color:var(--text-secondary);margin-bottom:0.85rem">${esc(arch.description)}</div>` : ''}
+        ${arch.description ? `<div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:400;line-height:1.85;color:var(--text-secondary);margin-bottom:0.85rem">${esc(arch.description)}</div>` : ''}
         ${r.resonance_note ? `<div style="margin-top:0.75rem;padding-top:0.85rem;border-top:1px solid var(--border)">
           <div class="eyebrow" style="margin-bottom:0.35rem">Resonance in your work</div>
           <div style="font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;color:var(--text-secondary);line-height:1.7">${esc(r.resonance_note)}</div>
@@ -5315,7 +5696,7 @@ function renderMyTapestry() {
     const detail = `
       <div id="tap-det-${a.id}" style="display:${open ? 'block' : 'none'};padding:0.5rem 0 0.25rem">
         ${a.epithet ? `<div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--text-dim);margin-bottom:0.6rem">${esc(a.epithet)}</div>` : ''}
-        ${mainProse ? `<div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:1.85;color:var(--text-secondary)">${esc(mainProse)}</div>` : ''}
+        ${mainProse ? `<div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:400;line-height:1.85;color:var(--text-secondary)">${esc(mainProse)}</div>` : ''}
         ${layerBlock('Terroir', a.layer_terroir)}
         ${layerBlock('The Unresolved', a.layer_unresolved)}
         ${layerBlock('The Living Thread', a.layer_thread)}
@@ -5327,8 +5708,8 @@ function renderMyTapestry() {
       <div style="padding:0.85rem 0;border-bottom:1px solid var(--border)">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
           <div style="min-width:0;cursor:pointer" onclick="tapToggleExplore('${a.id}')">
-            <div style="font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-style:italic;color:var(--text)">${esc(a.name)}${meta?` <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold-dim);font-style:normal"> · ${meta}</span>`:''}</div>
-            ${a.epithet ? `<div style="font-size:14px;font-style:italic;color:var(--text-dim);margin-top:0.15rem">${esc(a.epithet)}</div>` : ''}
+            <div style="font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-style:italic;color:var(--text)">${esc(a.name)}${meta?` <span style="font-size:15px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold-dim);font-style:normal"> · ${meta}</span>`:''}</div>
+            ${a.epithet ? `<div style="font-size:15px;font-style:italic;color:var(--text-dim);margin-top:0.15rem">${esc(a.epithet)}</div>` : ''}
           </div>
           <div style="display:flex;gap:0.5rem;align-items:center;white-space:nowrap">
             <button class="btn btn-outline btn-sm" id="tap-exp-${a.id}" onclick="tapToggleExplore('${a.id}')">${open ? 'Hide' : 'Explore'}</button>
@@ -6140,7 +6521,7 @@ async function populateTriageList() {
       const clientMeta = [r.clients?.entry_offering, r.clients?.email].filter(Boolean).map(esc).join(' · ');
       const ancestorMeta = [r.dates, r.relation_to_client, r.location, r.occupation].filter(Boolean).map(esc).join(' · ');
       const notesPreview = r.intake_notes ? esc(r.intake_notes.slice(0, 200) + (r.intake_notes.length > 200 ? '…' : '')) : '';
-      return `<div style="border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:0.75rem;background:rgba(201,168,124,0.03)">
+      return `<div style="border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:0.75rem;background:rgba(122,86,24,0.03)">
         <div style="display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;margin-bottom:0.5rem">
           <div style="flex:1">
             <div style="font-size:16px;font-weight:500;color:var(--text);margin-bottom:0.15rem">${esc(r.name)}</div>
@@ -6152,7 +6533,7 @@ async function populateTriageList() {
           </div>
         </div>
         ${ancestorMeta ? `<div style="font-size:15px;color:var(--text-dim);margin-bottom:0.4rem">${ancestorMeta}</div>` : ''}
-        ${notesPreview ? `<div style="font-size:15px;color:var(--text-dim);font-style:italic;line-height:1.5;padding:0.5rem 0.75rem;border-left:2px solid rgba(201,168,124,0.25);background:rgba(201,168,124,0.03)">${notesPreview}</div>` : ''}
+        ${notesPreview ? `<div style="font-size:15px;color:var(--text-dim);font-style:italic;line-height:1.5;padding:0.5rem 0.75rem;border-left:2px solid rgba(122,86,24,0.25);background:rgba(122,86,24,0.03)">${notesPreview}</div>` : ''}
       </div>`;
     }).join('');
   } catch (err) {
@@ -6289,13 +6670,13 @@ async function loadAncestorForAugment() {
   const guidance    = (ancestor.editorial_guidance || '').trim();
 
   const lockedRow = lockedList.length
-    ? `<div style="margin-top:0.5rem;padding:0.5rem 0.75rem;border-radius:6px;background:rgba(201,168,124,0.06);border:1px solid rgba(201,168,124,0.25);font-size:15px;color:var(--gold);line-height:1.5">
+    ? `<div style="margin-top:0.5rem;padding:0.5rem 0.75rem;border-radius:6px;background:rgba(122,86,24,0.06);border:1px solid rgba(122,86,24,0.25);font-size:15px;color:var(--gold);line-height:1.5">
         <strong style="font-weight:500">${lockedList.length} author-final field${lockedList.length===1?'':'s'} locked:</strong> ${lockedList.map(esc).join(', ')}
         <div style="font-size:15px;color:var(--text-dim);margin-top:0.25rem">The AI will be told to leave these unchanged. Defense-in-depth: locked fields are also force-restored after the AI returns.</div>
       </div>` : '';
 
   const guidanceRow = guidance
-    ? `<div style="margin-top:0.5rem;padding:0.5rem 0.75rem;border-radius:6px;background:rgba(201,168,124,0.04);border:1px dashed var(--border);font-size:15px;color:var(--text-dim);line-height:1.5">
+    ? `<div style="margin-top:0.5rem;padding:0.5rem 0.75rem;border-radius:6px;background:rgba(122,86,24,0.04);border:1px dashed var(--border);font-size:15px;color:var(--text-dim);line-height:1.5">
         <div style="font-size:15px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.25rem">Standing guidance to AI</div>
         ${esc(guidance)}
       </div>` : '';
@@ -6308,7 +6689,7 @@ async function loadAncestorForAugment() {
     </div>
     <div style="font-size:15px;color:var(--text-dim);margin-bottom:0.5rem">
       ${[ancestor.dates, ancestor.location, ancestor.era].filter(Boolean).map(esc).join(' · ')}
-      <span style="margin-left:0.5rem;padding:1px 7px;border-radius:9px;background:rgba(201,168,124,0.08);border:1px solid rgba(201,168,124,0.2);color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;font-size:15px">${esc(ancestor.status || 'catalog')}</span>
+      <span style="margin-left:0.5rem;padding:1px 7px;border-radius:9px;background:rgba(122,86,24,0.08);border:1px solid rgba(122,86,24,0.2);color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;font-size:15px">${esc(ancestor.status || 'catalog')}</span>
     </div>
     <div style="font-size:15px;color:var(--text-faint)">
       ${tagList.length} frequency tag${tagList.length===1?'':'s'} · ${promptCount} open research prompt${promptCount===1?'':'s'} · sigil ${ancestor.sigil_svg ? 'present' : 'missing'}
@@ -6562,7 +6943,7 @@ function renderEditorForm(a) {
     </div>
 
     <!-- Designation -->
-    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(201,168,124,0.25)">
+    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(122,86,24,0.25)">
       <div class="editor-section-title">Where This Ancestor Appears</div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:1.25rem">
         ${[
@@ -6606,7 +6987,7 @@ function renderEditorForm(a) {
     </div>
 
     <!-- Layers -->
-    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(109,216,178,0.15)">
+    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(22,90,66,0.15)">
       <div class="editor-section-title">Four Layers <span style="color:var(--teal);font-size:15px;letter-spacing:0.1em">WEAVING STATUS ONLY</span></div>
       <p style="font-size:15px;color:var(--text-faint);margin-bottom:1.25rem;line-height:1.6">These passages appear in the Ancestral Weaving timeline and feed The Convergence. They are only displayed when Status is set to Weaving. Each layer corresponds to a register of the Navigation Map.</p>
       <div class="form-group" id="wrap-layer_terroir">
@@ -6696,7 +7077,7 @@ function renderEditorForm(a) {
     </div>
 
     <!-- Editorial Guidance -->
-    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(201,168,124,0.25)">
+    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(122,86,24,0.25)">
       <div class="editor-section-title">Editorial Guidance for the AI <span style="color:var(--gold);font-size:15px;letter-spacing:0.1em">PER ANCESTOR</span></div>
       <p style="font-size:15px;color:var(--text-faint);margin-bottom:1rem;line-height:1.6">Standing guidance the AI receives on every Generate or Augment call for this ancestor. Use to correct repeating misreadings — mythic-pattern misidentification, register drift, sentimentalization. Treated as the highest-priority editorial direction in the prompt, above default style heuristics.</p>
       <textarea class="form-textarea" id="ed-editorial-guidance" rows="4" placeholder="e.g. The AI keeps reading her as Boudicca-pattern. She is Caroline-pattern — sovereign through endurance, not through action. Her authority is the held line, not the crossing. Do not reach for warrior imagery in layer_thread.">${esc(editorEditorialGuidance)}</textarea>
@@ -6791,7 +7172,7 @@ function renderResearchPromptsEditor() {
     return;
   }
   el.innerHTML = editorResearchPrompts.map((p, i) => `
-    <div style="display:flex;gap:0.5rem;align-items:flex-start;padding:0.5rem 0.75rem;border:1px solid var(--border);border-radius:6px;margin-bottom:0.4rem;background:rgba(201,168,124,0.04)">
+    <div style="display:flex;gap:0.5rem;align-items:flex-start;padding:0.5rem 0.75rem;border:1px solid var(--border);border-radius:6px;margin-bottom:0.4rem;background:rgba(122,86,24,0.04)">
       <span style="color:var(--gold);flex-shrink:0;font-weight:500;min-width:1.5em">${i+1}.</span>
       <span style="flex:1;font-size:15px;color:var(--text-dim);line-height:1.5">${esc(p)}</span>
       <button class="btn-chip-remove" onclick="removeResearchPrompt(${i})" title="Remove">×</button>
@@ -6821,13 +7202,13 @@ function renderFindingsList() {
   el.innerHTML = editorFindings.map(f => {
     const date = f.finding_date ? new Date(f.finding_date).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—';
     const typeBadge = f.source_type
-      ? `<span style="font-size:15px;padding:1px 7px;border-radius:9px;background:rgba(201,168,124,0.08);border:1px solid rgba(201,168,124,0.2);color:var(--gold);text-transform:uppercase;letter-spacing:0.06em">${esc(f.source_type)}</span>`
+      ? `<span style="font-size:15px;padding:1px 7px;border-radius:9px;background:rgba(122,86,24,0.08);border:1px solid rgba(122,86,24,0.2);color:var(--gold);text-transform:uppercase;letter-spacing:0.06em">${esc(f.source_type)}</span>`
       : '';
     const link = f.url
       ? `<a href="${esc(f.url)}" target="_blank" rel="noopener" style="color:var(--gold);font-size:15px;text-decoration:underline">scan/source ↗</a>`
       : '';
     return `
-      <div style="padding:0.75rem 0.875rem;border:1px solid var(--border);border-radius:6px;margin-bottom:0.5rem;background:rgba(201,168,124,0.03)">
+      <div style="padding:0.75rem 0.875rem;border:1px solid var(--border);border-radius:6px;margin-bottom:0.5rem;background:rgba(122,86,24,0.03)">
         <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.35rem;font-size:15px;color:var(--text-dim)">
           <span>${esc(date)}</span>
           ${typeBadge}
@@ -6963,7 +7344,7 @@ function renderPdfList(mode) {
   if (!list.length) { el.innerHTML = ''; return; }
 
   el.innerHTML = list.map((p, i) => `
-    <div style="border:1px solid var(--border);border-radius:6px;padding:0.65rem 0.875rem;margin-bottom:0.5rem;background:rgba(201,168,124,0.04)">
+    <div style="border:1px solid var(--border);border-radius:6px;padding:0.65rem 0.875rem;margin-bottom:0.5rem;background:rgba(122,86,24,0.04)">
       <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem">
         <span style="font-size:15px;font-weight:500;color:var(--text);flex:1">${esc(p.filename)}</span>
         <span style="font-size:15px;color:var(--text-faint)">${fmtBytes(p.size)}</span>
