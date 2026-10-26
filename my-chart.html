@@ -8,60 +8,107 @@
 <style>
 /* readability-standard.md v3 — walnut frame, vellum reading surface. Floor: 15px, opacity 0.88. */
 :root {
-  --bg: #1c1812; --surface: #251f18; --surface-2: #2e261e;
+  --bg: #1c1812; --surface: #251f18;
   --text: #f0e6cc; --text-secondary: #d4c7a8; --text-dim: #b8a98a;
   --gold: #b08030; --gold-bright: #c9a04a; --gold-dim: rgba(176,128,48,0.72);
   --border: rgba(176,128,48,0.18);
-  --vellum: #e8dcbb; --vellum-dark: #ddd0a8; --vellum-deeper: #d3c599;
+  --vellum: #e8dcbb; --vellum-dark: #ddd0a8; --paper: #f4ecd6; --paper-2: #efe5ca;
   --ink: #14110a; --ink-secondary: #2b2414; --ink-dim: #4e4228; --ink-gold: #7a5618;
-  --mythic: #3d2f70; --conceptual: #165a42; --somatic: #7a3216;
-  --text-body: 1.15rem; --text-body-sm: 1.05rem; --text-label: 0.94rem;
+  --rule: rgba(122,86,24,0.35); --somatic: #7a3216;
+  --text-body: 1.12rem; --text-label: 0.94rem;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--text); font-family: 'Cormorant Garamond', Georgia, serif; font-size: 16px; line-height: 1.6; min-height: 100vh; }
-.frame { max-width: 920px; margin: 0 auto; padding: 2.5rem 1rem 5rem; }
-.topbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+.frame { max-width: 980px; margin: 0 auto; padding: 2.5rem 1rem 5rem; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
 .eyebrow { font-family: 'Jost', sans-serif; font-size: var(--text-label); font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-bright); }
-.btn { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.6rem 1.1rem; border-radius: 3px; border: 1px solid var(--gold); background: transparent; color: var(--gold-bright); cursor: pointer; text-decoration: none; display: inline-block; }
+.btn { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.55rem 1rem; border-radius: 3px; border: 1px solid var(--gold); background: transparent; color: var(--gold-bright); cursor: pointer; text-decoration: none; display: inline-block; }
 .btn:hover { background: rgba(176,128,48,0.12); }
 .btn-solid { background: var(--gold); color: #1c1812; }
-.btn-solid:hover { background: var(--gold-bright); }
 .btn[disabled] { opacity: 0.88; cursor: wait; }
 .msg { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; font-size: var(--text-body); color: var(--text-secondary); }
 
-/* admin bar (dark frame) */
-.adminbar { background: var(--surface); border: 1px solid var(--gold-dim); border-radius: 4px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; align-items: center; }
+/* admin bar */
+.adminbar { background: var(--surface); border: 1px solid var(--gold-dim); border-radius: 6px; padding: 0.9rem 1.2rem; margin-bottom: 1.25rem; font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-secondary); }
+.ab-row { display: flex; flex-wrap: wrap; gap: 0.6rem 1.5rem; align-items: center; }
 .adminbar b { color: var(--text); font-weight: 500; }
 .adminbar label { display: inline-flex; gap: 0.45rem; align-items: center; cursor: pointer; }
 .adminbar .status { color: var(--gold-bright); }
-.draftnote { width: 100%; color: var(--text-dim); }
+.ab-sections { margin-top: 0.8rem; border-top: 1px solid var(--border); padding-top: 0.7rem; }
+.ab-sections summary { cursor: pointer; font-weight: 500; color: var(--text); }
+.ab-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.8rem 1.2rem; margin: 0.8rem 0; }
+.ab-groups fieldset { border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem 0.8rem 0.7rem; }
+.ab-groups legend { padding: 0 0.3rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold-bright); }
+.ab-groups label { display: flex; margin: 0.3rem 0; }
+.ab-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.draftnote { margin-top: 0.7rem; color: var(--text-dim); }
 
-/* vellum reading surface */
-.sheet { background: var(--vellum); color: var(--ink); border-radius: 4px; padding: 3rem 3.25rem 3.5rem; position: relative; }
-.sheet::before { content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px; background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent); opacity: 0.6; }
-.title { font-size: 2.6rem; font-weight: 500; line-height: 1.15; color: var(--ink); margin: 0.4rem 0 0.4rem; }
-.subtitle { font-style: italic; font-size: var(--text-body); color: var(--ink-dim); }
+/* the reading surface */
+.sheet { background: var(--vellum); color: var(--ink); border-radius: 6px; padding: 3rem 3rem 3.5rem; }
 .sheet .eyebrow { color: var(--ink-gold); }
-section.part { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(122,86,24,0.35); }
-h2 { font-size: 1.95rem; font-weight: 500; color: var(--ink); line-height: 1.2; margin-bottom: 0.9rem; }
-h3 { font-size: 1.4rem; font-weight: 600; color: var(--ink); line-height: 1.25; margin: 1.6rem 0 0.35rem; }
-h4 { font-family: 'Jost', sans-serif; font-size: var(--text-label); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-gold); margin: 1.5rem 0 0.4rem; }
-p.t { font-size: var(--text-body); font-weight: 400; color: var(--ink-secondary); margin-bottom: 0.85rem; }
-p.lead { font-size: 1.22rem; color: var(--ink); }
-.meta { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; color: var(--ink-dim); letter-spacing: 0.03em; margin-bottom: 0.5rem; }
-.stage { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-gold); margin-right: 0.4rem; }
-.group { margin: 1.4rem 0 1.8rem; padding-left: 1.1rem; border-left: 2px solid rgba(122,86,24,0.45); }
-.group.gk { padding-left: 1.25rem; }
-.wheel { display: block; width: 100%; max-width: 560px; margin: 1.5rem auto 0.5rem; }
-.bars { margin: 0.6rem 0 1rem; }
-.bar { display: grid; grid-template-columns: 9.5rem 1fr 3.5rem; gap: 0.75rem; align-items: center; font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-secondary); margin: 0.3rem 0; }
-.bar .track { height: 8px; border: 1px solid var(--ink-dim); border-radius: 4px; overflow: hidden; }
-.bar .fill { height: 100%; background: var(--ink-gold); }
+.cover { padding: 1rem 0 0.5rem; }
+.title { font-size: 2.7rem; font-weight: 500; line-height: 1.12; color: var(--ink); margin: 0.35rem 0; }
+.subtitle { font-style: italic; font-size: var(--text-body); color: var(--ink-dim); }
+section.part { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--rule); }
+h2 { font-size: 2.05rem; font-weight: 500; color: var(--ink); line-height: 1.2; margin: 0.25rem 0 1rem; }
+h3 { font-size: 1.35rem; font-weight: 600; color: var(--ink); line-height: 1.25; margin: 1.4rem 0 0.4rem; }
+h4 { font-family: 'Jost', sans-serif; font-size: var(--text-label); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-gold); margin: 0 0 0.5rem; }
+p.t { font-size: var(--text-body); color: var(--ink-secondary); margin-bottom: 0.8rem; max-width: 68ch; }
+p.lead { font-size: 1.24rem; color: var(--ink); }
+.meta { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; color: var(--ink-dim); margin-bottom: 0.45rem; }
+.callout { background: var(--paper); border-left: 4px solid var(--ink-gold); border-radius: 0 6px 6px 0; padding: 1rem 1.25rem 0.4rem; margin: 1.2rem 0; }
+.toc { border: 1px solid var(--rule); border-radius: 6px; padding: 1rem 1.25rem; margin-top: 1.4rem; background: var(--paper); }
+.toc ol { columns: 2; column-gap: 2rem; padding-left: 1.3rem; font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-secondary); }
+.toc li { margin: 0.2rem 0; break-inside: avoid; }
+.toc a { color: var(--ink-secondary); text-decoration: none; border-bottom: 1px solid var(--rule); }
+.toc a:hover { color: var(--ink-gold); }
+.cards { display: grid; gap: 1rem; margin: 1rem 0; }
+.cards.c2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.card { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem 1.25rem 0.5rem; }
+.card-h { font-size: 1.4rem; font-weight: 600; color: var(--ink); line-height: 1.2; margin-bottom: 0.2rem; }
+.card p.t { font-size: 1.08rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.35rem 0 0.7rem; }
+.chip { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-gold); border: 1px solid var(--rule); border-radius: 999px; padding: 1px 10px; background: #fbf6e8; }
+.tablewrap { overflow-x: auto; margin: 1rem 0 1.25rem; }
+.tbl { width: 100%; border-collapse: collapse; background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; }
+.tbl th { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-gold); text-align: left; padding: 0.6rem 0.8rem; border-bottom: 2px solid var(--rule); }
+.tbl td { font-size: 1.05rem; color: var(--ink-secondary); padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--rule); vertical-align: top; line-height: 1.45; }
+.tbl td.first { font-weight: 600; color: var(--ink); white-space: nowrap; }
+.tbl.kv td.first { width: 30%; font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-dim); }
+.tbl.kv td { font-size: 1.15rem; color: var(--ink); }
+.tbl.points td:nth-child(3) { min-width: 16rem; }
+.bul { list-style: none; margin: 0.3rem 0 1rem; }
+.bul li { font-size: 1.08rem; color: var(--ink-secondary); padding: 0.3rem 0 0.3rem 1.1rem; position: relative; line-height: 1.45; }
+.bul li::before { content: ''; position: absolute; left: 0; top: 0.85rem; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-gold); }
+.bul b { color: var(--ink); }
+.cols2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.5rem; margin: 1.25rem 0; }
+.cols2 .col { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 1rem 1.2rem 0.3rem; }
+.wheel { display: block; width: 100%; max-width: 540px; margin: 1rem auto 0.5rem; }
+.bars { margin: 0.4rem 0 1rem; }
+.bar { display: grid; grid-template-columns: 8rem 1fr 2.5rem; gap: 0.75rem; align-items: center; font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-secondary); margin: 0.35rem 0; }
+.bar.wide { grid-template-columns: 15rem 1fr 0; }
+.bar .track { height: 10px; border: 1px solid var(--ink-dim); border-radius: 5px; overflow: hidden; background: #fbf6e8; }
+.bar .fill { display: block; height: 100%; background: var(--ink-gold); }
+/* Gene Keys panels: the key on top, its three registers side by side beneath */
+.gk { border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; margin: 1.25rem 0; background: var(--paper); }
+.gk-top { padding: 1.1rem 1.3rem 0.4rem; border-bottom: 1px solid var(--rule); background: #fbf6e8; }
+.gk-sphere { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-gold); }
+.gk-num { font-size: 1.85rem; font-weight: 600; color: var(--ink); line-height: 1.15; margin-top: 0.15rem; }
+.gk-arc { font-size: 1.3rem; font-style: italic; color: var(--ink-secondary); margin: 0.1rem 0 0.2rem; }
+.gk-arc span { font-style: normal; color: var(--ink-gold); }
+.gk-stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.gk-stage { padding: 1rem 1.15rem 0.4rem; }
+.gk-stage + .gk-stage { border-left: 1px solid var(--rule); }
+.gk-stage-h { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); }
+.gk-stage p.t { font-size: 1.05rem; line-height: 1.5; }
+.field { margin: 1.25rem 0; }
+.field .sub { border-top: 1px solid var(--rule); padding-top: 0.6rem; margin-top: 0.6rem; }
+.field .sub-h { font-size: 1.15rem; font-weight: 600; color: var(--ink); margin-bottom: 0.2rem; }
+.field .sub-h .meta { display: inline; font-weight: 400; }
 .hidden-note { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-dim); font-style: italic; }
 
 /* edit controls (admin only) */
-.ed { position: relative; }
-.ed .pen { display: none; font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-gold); background: var(--vellum-dark); border: 1px solid var(--ink-gold); border-radius: 3px; padding: 0.05rem 0.5rem; margin-left: 0.4rem; cursor: pointer; vertical-align: middle; }
+.ed .pen { display: none; font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-gold); background: var(--vellum-dark); border: 1px solid var(--ink-gold); border-radius: 3px; padding: 0 0.5rem; margin-left: 0.4rem; cursor: pointer; vertical-align: middle; }
 body.editing .ed .pen { display: inline-block; }
 .ed.overridden { box-shadow: -6px 0 0 -3px var(--somatic); }
 .editor { background: var(--vellum-dark); border: 1px solid var(--ink-gold); border-radius: 4px; padding: 0.9rem; margin: 0.4rem 0 1rem; }
@@ -76,16 +123,21 @@ body.embed { background: #fbf7ec; min-height: 0; }
 body.embed .frame { max-width: none; padding: 0.75rem; }
 body.embed .topbar { margin-bottom: 0.75rem; }
 body.embed .topbar .eyebrow { color: var(--ink-gold); }
-body.embed .adminbar { background: #efe7d2; border-color: rgba(122,86,24,0.35); color: var(--ink-secondary); }
-body.embed .adminbar b { color: var(--ink); }
+body.embed .adminbar { background: #efe7d2; border-color: var(--rule); color: var(--ink-secondary); }
+body.embed .adminbar b, body.embed .ab-sections summary { color: var(--ink); }
 body.embed .adminbar .status, body.embed .draftnote { color: var(--ink-dim); }
+body.embed .ab-groups fieldset { border-color: var(--rule); }
+body.embed .ab-groups legend { color: var(--ink-gold); }
 body.embed .btn { color: var(--ink-gold); border-color: var(--ink-gold); }
 body.embed .btn-solid { background: var(--ink-gold); color: #fbf7ec; }
-body.embed .msg { background: #efe7d2; color: var(--ink-secondary); border-color: rgba(122,86,24,0.35); }
-@media (max-width: 640px) {
-  .sheet { padding: 2rem 1.25rem 2.5rem; }
-  .title { font-size: 2rem; }
-  .bar { grid-template-columns: 6.5rem 1fr 3rem; }
+body.embed .msg { background: #efe7d2; color: var(--ink-secondary); border-color: var(--rule); }
+@media (max-width: 760px) {
+  .sheet { padding: 2rem 1.1rem 2.5rem; }
+  .title { font-size: 2.1rem; }
+  .cards.c2, .cols2, .gk-stages { grid-template-columns: 1fr; }
+  .gk-stage + .gk-stage { border-left: none; border-top: 1px solid var(--rule); }
+  .toc ol { columns: 1; }
+  .bar.wide { grid-template-columns: 9rem 1fr 0; }
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
@@ -166,7 +218,7 @@ const SEQUENCES = [
 
 // ── State ──
 const params = new URLSearchParams(location.search);
-const S = { isAdmin: false, editing: false, preview: params.get('preview') === '1', embed: params.get('embed') === '1', clientId: null, D: null };
+const S = { isAdmin: false, editing: false, sectionsOpen: false, preview: params.get('preview') === '1', embed: params.get('embed') === '1', clientId: null, D: null };
 if (S.embed) {
   document.body.classList.add('embed');
   // Report height to the portal so the frame sizes to the page.
@@ -193,7 +245,7 @@ async function init() {
 
 async function load() {
   const id = S.clientId;
-  const [client] = await get(`clients?id=eq.${id}&select=id,name,pronouns,access_chart&limit=1`);
+  const [client] = await get(`clients?id=eq.${id}&select=id,name,pronouns,access_chart,chart_sections&limit=1`);
   if (!client) throw new Error('Client not found');
   const q = {
     birth: get(`chart_birth_data?client_id=eq.${id}&limit=1`),
@@ -241,18 +293,43 @@ function block(key, def, src, cls = 't') {
   return { t: 'p', key, text, def, src, cls, overridden: has, hidden: has && !text.trim() };
 }
 
+// ── Sections ──
+// What the analysis can include. clients.chart_sections holds the chosen keys
+// (null = everything). Each section starts on its own page in the PDF.
+const SECTIONS = [
+  { key: 'intro',         label: 'Introduction',                 group: 'Framing' },
+  { key: 'wheel',         label: 'Chart wheel',                  group: 'Astrology' },
+  { key: 'big3',          label: 'Sun, Moon & Rising',           group: 'Astrology' },
+  { key: 'planets',       label: 'Planets',                      group: 'Astrology' },
+  { key: 'points',        label: 'Angles, nodes & minor bodies', group: 'Astrology' },
+  { key: 'aspects',       label: 'Aspects',                      group: 'Astrology' },
+  { key: 'temperament',   label: 'Temperament',                  group: 'Astrology' },
+  { key: 'hd',            label: 'Human Design',                 group: 'Human Design' },
+  { key: 'gk_activation', label: 'Activation Sequence',          group: 'Gene Keys' },
+  { key: 'gk_venus',      label: 'Venus Sequence',               group: 'Gene Keys' },
+  { key: 'gk_pearl',      label: 'Pearl Sequence',               group: 'Gene Keys' },
+  { key: 'map',           label: 'Frequencies on the Map',       group: 'The Map' },
+  { key: 'closing',       label: 'Closing',                      group: 'Framing' },
+];
+function included(key) {
+  const sel = S.D.client.chart_sections;
+  return !Array.isArray(sel) || sel.includes(key);
+}
+function listJoin(a) { a = [...new Set(a)]; return a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
+const fieldLabel = f => `${ROMAN[f.number]} · ${f.name}`;
+
 // ── Model ──
-// The page and the PDF render from the same list of nodes.
+// The page and the PDF both render from this list. Node types:
+//   section {key,title,eyebrow,children}  p (editable block)  h3  meta  callout {children}
+//   cards {cols, items:[{title,meta,chips,children}]}  table {head,rows,cls}  bullets {items}
+//   bars {rows}  wheel  gk {sphere,num,line,arc,map,children,stages:[{label,field,p}]}  toc {items}
 function buildModel() {
   const D = S.D, M = [];
   const name = D.client.name || 'Client';
   const b = D.birth;
   const birthLine = b ? [fmtDate(b.birth_date), fmtTime(b.birth_time), b.birth_place].filter(Boolean).join(' · ') : '';
-  M.push({ t: 'title', text: name, sub: birthLine });
-  M.push(block('section:intro', refBody('section', 'intro'), { kind: 'section', key: 'intro' }, 't lead'));
-  M.push(block('section:how_to_read', refBody('section', 'how_to_read'), { kind: 'section', key: 'how_to_read' }));
 
-  // Map activations per body
+  // Map activations, gathered as sections are built, feed the closing Map section.
   const s2f = {}, h2f = {}, b2s = {};
   D.signFields.forEach(x => (s2f[x.sign_name] = s2f[x.sign_name] || []).push(x));
   D.houseFields.forEach(x => (h2f[x.house_number] = h2f[x.house_number] || []).push(x));
@@ -266,209 +343,275 @@ function buildModel() {
     [...(s2f[p.zodiac_sign] || []), ...(h2f[p.house] || [])].forEach(x => { const f = D.fieldById[x.field_id]; if (f && !seen.has(f.id)) seen.set(f.id, { f, sec: x.is_secondary }); });
     return [...seen.values()];
   };
+  // Credit every placement to the Map whether or not its section is shown.
+  const P = {};
+  D.planets.forEach(p => {
+    const title = refTitle('body', p.body, cap(p.body));
+    const w = D.weightOf[p.body] ?? 0.5;
+    const fl = fieldsFor(p);
+    fl.forEach(x => credit(x.f.id, x.sec ? w * 0.5 : w, title));
+    const subs = (b2s[p.body] || []).map(x => D.subById[x.subterrain_id]).filter(Boolean);
+    subs.forEach(s => { creditSub(s.id, title); credit(s.field_id, w * 0.5, title); });
+    const deg = p.zodiac_degree != null ? Math.floor(Number(p.zodiac_degree)) + '°' : '';
+    const sign = cap(p.zodiac_sign);
+    const signTxt = refBody('sign', p.zodiac_sign), houseTxt = refBody('house', String(p.house));
+    P[p.body] = {
+      title, sign, fields: fl.map(x => x.f), subs,
+      pos: [deg && sign ? `${deg} ${sign}` : sign, p.house ? `${ORD(p.house)} house` : '', p.retrograde ? 'retrograde' : ''].filter(Boolean).join(' · '),
+      text: [refBody('body', p.body), signTxt ? `In ${sign}, it is ${signTxt}` : '', houseTxt ? `In the ${ORD(p.house)} house, it does its work in ${houseTxt}.` : ''].filter(Boolean).join(' '),
+    };
+  });
+  const placeCard = body => {
+    const x = P[body];
+    return { title: body === 'ascendant' ? `Rising in ${x.sign}` : `${x.title} in ${x.sign}`, meta: x.pos,
+      chips: [...x.fields.map(fieldLabel), ...x.subs.map(s => s.name)], children: [block(`place:${body}`, x.text, null)] };
+  };
 
-  // ── The Sky
+  // ── Cover + introduction
+  M.push({ t: 'cover', text: name, sub: birthLine });
+  const contents = SECTIONS.filter(s => s.key !== 'intro' && included(s.key)).map(s => ({ key: s.key, label: s.label }));
+  if (included('intro')) {
+    M.push({ t: 'section', key: 'intro', title: refTitle('section', 'intro', 'Your Chart Analysis'), eyebrow: 'Introduction', children: [
+      block('section:intro', refBody('section', 'intro'), { kind: 'section', key: 'intro' }, 't lead'),
+      { t: 'callout', title: refTitle('section', 'how_to_read', 'How to read this'), children: [block('section:how_to_read', refBody('section', 'how_to_read'), { kind: 'section', key: 'how_to_read' })] },
+      { t: 'toc', items: contents },
+    ] });
+  }
+
+  // ── Astrology
   if (D.planets.length) {
-    M.push({ t: 'h2', text: refTitle('section', 'sky', 'The Sky at Your Birth') });
-    M.push(block('section:sky', refBody('section', 'sky'), { kind: 'section', key: 'sky' }));
-    M.push({ t: 'wheel' });
-    for (const [gname, bodies] of BODY_GROUPS) {
-      const present = bodies.filter(x => byBody[x]);
-      if (!present.length) continue;
-      M.push({ t: 'h4', text: gname });
-      for (const body of present) {
-        const p = byBody[body];
-        const title = refTitle('body', body, cap(body));
-        const deg = p.zodiac_degree != null ? Math.floor(Number(p.zodiac_degree)) + '°' : '';
-        const sign = cap(p.zodiac_sign);
-        const pos = [deg && sign ? `${deg} ${sign}` : sign, p.house ? `${ORD(p.house)} house` : '', p.retrograde ? 'retrograde' : ''].filter(Boolean).join(' · ');
-        const fl = fieldsFor(p);
-        const w = D.weightOf[body] ?? 0.5;
-        fl.forEach(x => credit(x.f.id, x.sec ? w * 0.5 : w, title));
-        const subs = (b2s[body] || []).map(x => D.subById[x.subterrain_id]).filter(Boolean);
-        subs.forEach(s => { creditSub(s.id, title); credit(s.field_id, w * 0.5, title); });
-        const mapLine = [fl.length ? 'On the Map: ' + fl.map(x => `Field ${ROMAN[x.f.number]} · ${x.f.name}`).join('; ') : '', subs.length ? 'Subterrain: ' + subs.map(s => s.name).join(', ') : ''].filter(Boolean).join(' — ');
-        const signTxt = refBody('sign', p.zodiac_sign), houseTxt = refBody('house', String(p.house));
-        const def = [refBody('body', body),
-          signTxt ? `In ${sign}, it is ${signTxt}` : '',
-          houseTxt ? `In the ${ORD(p.house)} house, it does its work in ${houseTxt}.` : ''].filter(Boolean).join(' ');
-        M.push({ t: 'group', children: [
-          { t: 'h3', text: `${title}` }, { t: 'meta', text: pos }, ...(mapLine ? [{ t: 'meta', text: mapLine }] : []),
-          block(`place:${body}`, def, null),
-        ] });
-      }
-    }
-
-    // Aspects
+    if (included('wheel')) M.push({ t: 'section', key: 'wheel', title: refTitle('section', 'sky', 'The Sky at Your Birth'), eyebrow: 'Astrology', children: [
+      block('section:sky', refBody('section', 'sky'), { kind: 'section', key: 'sky' }),
+      { t: 'wheel' },
+      { t: 'meta', text: 'Tropical zodiac · Placidus houses. Solid lines: squares and oppositions. Dashed lines: trines and sextiles.' },
+    ] });
+    const big = ['sun', 'moon', 'ascendant'].filter(x => P[x]);
+    if (included('big3') && big.length) M.push({ t: 'section', key: 'big3', title: 'Sun, Moon & Rising', eyebrow: 'Astrology', children: [
+      { t: 'callout', children: [{ t: 'p', key: '_big3', text: 'The three placements that carry the most weight: the Sun is the core of who you are becoming, the Moon is what you need, and the Rising sign is how you meet the world.', cls: 't', fixed: true }] },
+      { t: 'cards', cols: 1, items: big.map(placeCard) },
+    ] });
+    const pl = ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'].filter(x => P[x]);
+    if (included('planets') && pl.length) M.push({ t: 'section', key: 'planets', title: 'The Planets', eyebrow: 'Astrology', children: [
+      { t: 'cards', cols: 2, items: pl.map(placeCard) },
+    ] });
+    const pts = ['midheaven', 'imum_coeli', 'north_node', 'south_node', 'chiron', 'lilith', 'ceres', 'pallas_athena', 'juno', 'vesta', 'astraea', 'hygeia', 'eris', 'haumea', 'sedna', 'nessus', 'chariklo'].filter(x => P[x]);
+    if (included('points') && pts.length) M.push({ t: 'section', key: 'points', title: 'Angles, Nodes & Minor Bodies', eyebrow: 'Astrology', children: [
+      block('section:points', 'The angles and nodes describe direction; Chiron, Lilith and the minor bodies name the finer currents, and on the Map they light specific Subterrains.', null),
+      { t: 'table', head: ['Body', 'Position', 'What it carries', 'On the Map'], cls: 'points',
+        rows: pts.map(x => [P[x].title, P[x].pos, refBody('body', x), [...P[x].fields.map(f => `Field ${fieldLabel(f)}`), ...P[x].subs.map(s => s.name)].join('; ') || '—']) },
+    ] });
     const asp = D.aspects.filter(a => ASPECT_BODIES.has(a.body_a) && ASPECT_BODIES.has(a.body_b)).slice(0, 12);
-    if (asp.length) {
-      M.push({ t: 'h2', text: refTitle('section', 'aspects', 'Conversations Between Planets') });
-      M.push(block('section:aspects', refBody('section', 'aspects'), { kind: 'section', key: 'aspects' }));
-      asp.forEach(a => {
-        const A = refTitle('body', a.body_a, cap(a.body_a)), B = refTitle('body', a.body_b, cap(a.body_b));
-        const kind = refTitle('aspect', a.aspect_type, cap(a.aspect_type));
-        M.push({ t: 'h3', text: `${A} ${kind.toLowerCase()} ${B}`, small: true });
-        M.push({ t: 'meta', text: `Orb ${Number(a.orb).toFixed(1)}°${a.applying === true ? ' · applying' : a.applying === false ? ' · separating' : ''}` });
-        M.push(block(`aspect:${a.body_a}:${a.body_b}:${a.aspect_type}`, `${A} and ${B} are ${refBody('aspect', a.aspect_type)}`, null));
-      });
-    }
-
-    // Temperament
+    if (included('aspects') && asp.length) M.push({ t: 'section', key: 'aspects', title: refTitle('section', 'aspects', 'Conversations Between Planets'), eyebrow: 'Astrology', children: [
+      block('section:aspects', refBody('section', 'aspects'), { kind: 'section', key: 'aspects' }),
+      { t: 'table', head: ['Between', 'Aspect', 'Orb', 'What it means'], cls: 'aspects',
+        rows: asp.map(a => [`${refTitle('body', a.body_a, cap(a.body_a))} and ${refTitle('body', a.body_b, cap(a.body_b))}`, refTitle('aspect', a.aspect_type, cap(a.aspect_type)),
+          `${Number(a.orb).toFixed(1)}°${a.applying === true ? ', applying' : a.applying === false ? ', separating' : ''}`, cap1(refBody('aspect', a.aspect_type))]) },
+    ] });
     const el = { Fire: 0, Earth: 0, Air: 0, Water: 0 }, mo = { Cardinal: 0, Fixed: 0, Mutable: 0 }; let n = 0;
     BALANCE.forEach(x => { const p = byBody[x]; if (p && ELEMENTS[p.zodiac_sign]) { el[ELEMENTS[p.zodiac_sign]]++; mo[MODES[p.zodiac_sign]]++; n++; } });
-    if (n) {
-      M.push({ t: 'h2', text: refTitle('section', 'balance', 'Temperament') });
-      M.push(block('section:balance', refBody('section', 'balance'), { kind: 'section', key: 'balance' }));
-      M.push({ t: 'bars', rows: Object.entries(el).map(([k, v]) => ({ label: k, v, pct: Math.round(v / n * 100) })) });
-      M.push({ t: 'bars', rows: Object.entries(mo).map(([k, v]) => ({ label: k, v, pct: Math.round(v / n * 100) })) });
+    if (included('temperament') && n) {
       const topE = Object.entries(el).sort((a, b) => b[1] - a[1])[0][0], lowE = Object.entries(el).sort((a, b) => a[1] - b[1])[0][0];
       const topM = Object.entries(mo).sort((a, b) => b[1] - a[1])[0][0];
-      M.push(block('temperament:summary', `Your chart leans toward ${topE} and ${topM} energy. ${refBody('temperament', topE)} ${refBody('temperament', topM)} ${el[lowE] <= 1 ? `${lowE} is quiet in the chart; what it carries is something you may seek out in people, places or practice.` : ''}`.trim(), null));
+      M.push({ t: 'section', key: 'temperament', title: refTitle('section', 'balance', 'Temperament'), eyebrow: 'Astrology', children: [
+        block('section:balance', refBody('section', 'balance'), { kind: 'section', key: 'balance' }),
+        { t: 'h3', text: 'Elements' }, { t: 'bars', rows: Object.entries(el).map(([k, v]) => ({ label: k, v, pct: Math.round(v / n * 100) })) },
+        { t: 'h3', text: 'Modalities' }, { t: 'bars', rows: Object.entries(mo).map(([k, v]) => ({ label: k, v, pct: Math.round(v / n * 100) })) },
+        { t: 'callout', title: 'What this shows', children: [block('temperament:summary', `Your chart leans toward ${topE} and ${topM} energy. ${refBody('temperament', topE)} ${refBody('temperament', topM)} ${el[lowE] <= 1 ? `${lowE} is quiet in the chart; what it carries is something you may seek out in people, places or practice.` : ''}`.trim(), null)] },
+      ] });
     }
   }
 
   // ── Human Design
   const hd = D.hd;
-  if (hd) {
-    M.push({ t: 'h2', text: refTitle('section', 'hd', 'Human Design') });
-    M.push(block('section:hd', refBody('section', 'hd'), { kind: 'section', key: 'hd' }));
-    const add = (kind, key, label) => { const r = ref(kind, key); if (!r) return; M.push({ t: 'h3', text: r.title || label }); M.push(block(`hd:${kind}:${key}`, r.body, { kind, key })); };
-    add('hd_type', hd.type, cap(hd.type));
-    add('hd_authority', hd.authority, cap(hd.authority) + ' Authority');
+  if (hd && included('hd')) {
+    const ch = [block('section:hd', refBody('section', 'hd'), { kind: 'section', key: 'hd' })];
+    const T = ref('hd_type', hd.type), A = ref('hd_authority', hd.authority), Df = ref('hd_definition', hd.definition_type);
+    ch.push({ t: 'table', cls: 'kv', head: ['Your design', ''], rows: [
+      ['Type', T?.title || cap(hd.type)], ['Authority', A?.title || cap(hd.authority)], ['Profile', hd.profile || '—'], ['Definition', Df?.title || cap(hd.definition_type)],
+    ] });
+    const cards = [];
+    if (T) cards.push({ title: T.title, meta: 'Type', children: [block(`hd:hd_type:${hd.type}`, T.body, { kind: 'hd_type', key: hd.type })] });
+    if (A) cards.push({ title: A.title, meta: 'Authority — how you decide', children: [block(`hd:hd_authority:${hd.authority}`, A.body, { kind: 'hd_authority', key: hd.authority })] });
     if (hd.profile) {
-      const [c, u] = String(hd.profile).split('/');
-      M.push({ t: 'h3', text: `Profile ${hd.profile}` });
-      const lc = ref('hd_line', c), lu = ref('hd_line', u);
-      M.push(block(`hd:profile:${hd.profile}`, [lc ? `Your conscious ${lc.title.replace(/^Line \d · /, '')} line (${c}) ${lc.body}` : '', lu ? `Your unconscious ${lu.title.replace(/^Line \d · /, '')} line (${u}) ${lu.body}` : ''].filter(Boolean).join(' '), null));
+      const [c, u] = String(hd.profile).split('/'); const lc = ref('hd_line', c), lu = ref('hd_line', u);
+      cards.push({ title: `Profile ${hd.profile}`, meta: 'Profile — your role', children: [block(`hd:profile:${hd.profile}`, [lc ? `Your conscious ${lc.title.replace(/^Line \d · /, '')} line (${c}) ${lc.body}` : '', lu ? `Your unconscious ${lu.title.replace(/^Line \d · /, '')} line (${u}) ${lu.body}` : ''].filter(Boolean).join(' '), null)] });
     }
-    add('hd_definition', hd.definition_type, cap(hd.definition_type));
+    if (Df) cards.push({ title: Df.title, meta: 'Definition', children: [block(`hd:hd_definition:${hd.definition_type}`, Df.body, { kind: 'hd_definition', key: hd.definition_type })] });
+    ch.push({ t: 'cards', cols: 2, items: cards });
     const dc = hd.defined_centers || [], oc = hd.open_centers || [];
-    if (dc.length) { M.push({ t: 'h4', text: 'Defined centers — where you are consistent' }); dc.forEach(c => { const r = ref('hd_center_defined', c); if (r) M.push(block(`hd:center_defined:${c}`, `${r.title}. ${r.body.replace(/^Defined: /, '')}`, { kind: 'hd_center_defined', key: c })); }); }
-    if (oc.length) { M.push({ t: 'h4', text: 'Open centers — where you take in and learn' }); oc.forEach(c => { const r = ref('hd_center_open', c); if (r) M.push(block(`hd:center_open:${c}`, `${r.title}. ${r.body.replace(/^Open: /, '')}`, { kind: 'hd_center_open', key: c })); }); }
+    const centerItems = (list, kind) => list.map(c => { const r = ref(kind, c); return r ? { label: r.title, text: r.body.replace(/^(Defined|Open): /, '') } : null; }).filter(Boolean);
+    ch.push({ t: 'cols', items: [
+      { title: 'Defined centers — where you are consistent', list: centerItems(dc, 'hd_center_defined') },
+      { title: 'Open centers — where you take in and learn', list: centerItems(oc, 'hd_center_open') },
+    ] });
     const chans = (hd.defined_channels || []).map(([a, b]) => D.channels.find(c => (c.gate_a === a && c.gate_b === b) || (c.gate_a === b && c.gate_b === a)) || { gate_a: a, gate_b: b });
-    if (chans.length) {
-      M.push({ t: 'h4', text: 'Defined channels — your fixed circuitry' });
-      chans.forEach(c => M.push(block(`hd:channel:${c.gate_a}-${c.gate_b}`, `Channel ${c.gate_a}–${c.gate_b}${c.name ? ', ' + c.name : ''}.${c.quality ? ' ' + c.quality.replace(/^\w/, m => m.toUpperCase()) + (/[.]$/.test(c.quality) ? '' : '.') : ''}`, null)));
-    }
+    if (chans.length) ch.push({ t: 'h3', text: 'Defined channels — your fixed circuitry' }, { t: 'bullets', items: chans.map(c => ({ label: `Channel ${c.gate_a}–${c.gate_b}${c.name ? ' · ' + c.name : ''}`, text: c.quality ? cap1(c.quality) : '' })) });
+    M.push({ t: 'section', key: 'hd', title: refTitle('section', 'hd', 'Human Design'), eyebrow: 'Human Design', children: ch });
   }
 
   // ── Gene Keys
   const gk = D.gk;
   if (gk) {
-    M.push({ t: 'h2', text: refTitle('section', 'gk', 'The Gene Keys') });
-    M.push(block('section:gk', refBody('section', 'gk'), { kind: 'section', key: 'gk' }));
+    let first = true;
     for (const [secKey, spheres] of SEQUENCES) {
-      M.push({ t: 'h2b', text: refTitle('section', secKey, cap(secKey)) });
-      M.push(block(`section:${secKey}`, refBody('section', secKey), { kind: 'section', key: secKey }));
+      const cards = [];
       for (const [sp] of spheres) {
         const num = gk[`gk_${sp}`], line = gk[`gk_${sp}_line`];
         if (!num) continue;
         const g = D.gkByNum[num]; if (!g) continue;
         const sphereTitle = refTitle('sphere', sp, cap(sp));
         const home = D.fieldById[g.primary_field_id];
-        const w = (sp === 'lifes_work' || sp === 'evolution' || sp === 'radiance' || sp === 'purpose' || sp === 'core') ? 1 : 0.6;
+        const w = (['lifes_work', 'evolution', 'radiance', 'purpose', 'core'].includes(sp)) ? 1 : 0.6;
         const label = `Gene Key ${num} (${sphereTitle})`;
-        [['shadow', g.shadow_field_id], ['gift', g.gift_field_id], ['siddhi', g.siddhi_field_id]].forEach(([, fid]) => fid && credit(fid, w * 0.4, label));
+        [g.shadow_field_id, g.gift_field_id, g.siddhi_field_id].forEach(fid => fid && credit(fid, w * 0.4, label));
         if (home) credit(home.id, w, label);
-        const subs = D.gkSubs.filter(x => x.gene_key_number === num).map(x => ({ s: D.subById[x.subterrain_id], level: x.level })).filter(x => x.s);
-        subs.forEach(x => creditSub(x.s.id, label));
-        const stageField = fid => { const f = D.fieldById[fid] || home; return f ? `Field ${ROMAN[f.number]} · ${f.name}` : ''; };
-        const mapLine = [home ? `On the Map: Field ${ROMAN[home.number]} · ${home.name}` : '', subs.length ? 'Subterrains: ' + subs.map(x => x.s.name).join(', ') : ''].filter(Boolean).join(' — ');
-        M.push({ t: 'group', cls: 'gk', children: [
-          { t: 'eyebrow', text: sphereTitle },
-          { t: 'h3', text: `Gene Key ${num}.${line} · ${g.shadow} → ${g.gift} → ${g.siddhi}` },
-          block(`sphere:${sp}`, refBody('sphere', sp), { kind: 'sphere', key: sp }),
-          ...(mapLine ? [{ t: 'meta', text: mapLine }] : []),
-          { ...block(`gk:${num}:shadow`, g.shadow_desc || '', { gk: num, col: 'shadow_desc' }), stage: `Shadow · ${g.shadow}`, stageMeta: stageField(g.shadow_field_id) },
-          { ...block(`gk:${num}:gift`, g.gift_desc || '', { gk: num, col: 'gift_desc' }), stage: `Gift · ${g.gift}`, stageMeta: stageField(g.gift_field_id) },
-          { ...block(`gk:${num}:siddhi`, g.siddhi_desc || '', { gk: num, col: 'siddhi_desc' }), stage: `Siddhi · ${g.siddhi}`, stageMeta: stageField(g.siddhi_field_id) },
-        ] });
+        const subs = D.gkSubs.filter(x => x.gene_key_number === num).map(x => D.subById[x.subterrain_id]).filter(Boolean);
+        subs.forEach(s => creditSub(s.id, label));
+        const stageField = fid => { const f = D.fieldById[fid] || home; return f ? `Field ${fieldLabel(f)}` : ''; };
+        cards.push({ t: 'gk', sphere: sphereTitle, num, line, arc: [g.shadow, g.gift, g.siddhi],
+          map: [home ? `Field ${fieldLabel(home)}` : '', subs.map(s => s.name).join(', ')].filter(Boolean),
+          children: [block(`sphere:${sp}`, refBody('sphere', sp), { kind: 'sphere', key: sp })],
+          stages: [
+            { label: 'Shadow', name: g.shadow, field: stageField(g.shadow_field_id), p: block(`gk:${num}:shadow`, g.shadow_desc || '', { gk: num, col: 'shadow_desc' }) },
+            { label: 'Gift', name: g.gift, field: stageField(g.gift_field_id), p: block(`gk:${num}:gift`, g.gift_desc || '', { gk: num, col: 'gift_desc' }) },
+            { label: 'Siddhi', name: g.siddhi, field: stageField(g.siddhi_field_id), p: block(`gk:${num}:siddhi`, g.siddhi_desc || '', { gk: num, col: 'siddhi_desc' }) },
+          ] });
       }
+      if (!included(secKey) || !cards.length) continue;
+      const ch = [];
+      if (first) ch.push({ t: 'callout', title: refTitle('section', 'gk', 'The Gene Keys'), children: [block('section:gk', refBody('section', 'gk'), { kind: 'section', key: 'gk' })] });
+      first = false;
+      ch.push(block(`section:${secKey}`, refBody('section', secKey), { kind: 'section', key: secKey }), ...cards);
+      M.push({ t: 'section', key: secKey, title: refTitle('section', secKey, cap(secKey)), eyebrow: 'Gene Keys', children: ch });
     }
   }
 
-  // ── The Map: where the three systems converge
+  // ── The Map
   const ranked = Object.entries(fieldScore).map(([id, s]) => ({ f: D.fieldById[id], s })).filter(x => x.f).sort((a, b) => b.s - a.s);
-  if (ranked.length) {
-    M.push({ t: 'h2', text: refTitle('section', 'map', 'Your Frequencies on the Map') });
-    M.push(block('section:map', refBody('section', 'map'), { kind: 'section', key: 'map' }));
+  if (ranked.length && included('map')) {
+    const ch = [block('section:map', refBody('section', 'map'), { kind: 'section', key: 'map' })];
     const max = ranked[0].s;
-    M.push({ t: 'bars', rows: ranked.slice(0, 8).map(x => ({ label: `${ROMAN[x.f.number]} · ${x.f.name}`, v: '', pct: Math.round(x.s / max * 100) })), wide: true });
+    ch.push({ t: 'bars', wide: true, rows: ranked.slice(0, 8).map(x => ({ label: fieldLabel(x.f), v: '', pct: Math.round(x.s / max * 100) })) });
     ranked.slice(0, 6).forEach((x, i) => {
       const f = x.f, src = [...(fieldSources[f.id] || [])];
       const astro = src.filter(s => !s.startsWith('Gene Key')), keys = src.filter(s => s.startsWith('Gene Key'));
       const subs = Object.keys(subHits).map(id => D.subById[id]).filter(s => s && s.field_id === f.id);
       const both = astro.length && keys.length;
-      const interp = `${i === 0 ? 'This is the most concentrated terrain in your design.' : both ? 'Your chart and your Gene Keys both point here.' : 'This terrain is part of your design.'} ${astro.length ? `In your chart it is lit by ${listJoin(astro)}.` : ''} ${keys.length ? `In your Gene Keys it is carried by ${listJoin(keys)}.` : ''}`.replace(/\s+/g, ' ').trim();
-      M.push({ t: 'group', children: [
-        { t: 'h3', text: `Field ${ROMAN[f.number]} · ${f.name}` },
-        ...(f.arc ? [{ t: 'meta', text: `${cap(f.arc)} arc` }] : []),
-        block(`field:${f.number}:tagline`, f.tagline || '', null, 't lead'),
-        block(`field:${f.number}:interp`, interp, null),
-        ...subs.flatMap(s => [{ t: 'h4', text: s.name }, block(`sub:${s.id}`, `${s.description || ''} ${subHits[s.id] ? `(Through ${listJoin([...subHits[s.id]])}.)` : ''}`.trim(), null)]),
-      ] });
+      const lead = i === 0 ? 'The most concentrated terrain in your design.' : both ? 'Your chart and your Gene Keys both point here.' : 'This terrain is part of your design.';
+      ch.push({ t: 'field', title: `Field ${fieldLabel(f)}`, meta: f.arc ? `${cap(f.arc)} arc` : '',
+        children: [block(`field:${f.number}:tagline`, f.tagline || '', null, 't lead')],
+        lead: block(`field:${f.number}:interp`, lead, null),
+        lit: [astro.length ? { label: 'In your chart', text: listJoin(astro) } : null, keys.length ? { label: 'In your Gene Keys', text: listJoin(keys) } : null].filter(Boolean),
+        subs: subs.map(s => ({ label: s.name, p: block(`sub:${s.id}`, s.description || '', null), via: subHits[s.id] ? listJoin([...subHits[s.id]]) : '' })) });
     });
-    const rest = ranked.slice(6).map(x => `Field ${ROMAN[x.f.number]} · ${x.f.name}`);
-    if (rest.length) M.push(block('map:rest', `Also present in your design, more quietly: ${listJoin(rest)}.`, null));
+    const rest = ranked.slice(6).map(x => `Field ${fieldLabel(x.f)}`);
+    if (rest.length) ch.push({ t: 'callout', title: 'Also present, more quietly', children: [block('map:rest', listJoin(rest) + '.', null)] });
+    M.push({ t: 'section', key: 'map', title: refTitle('section', 'map', 'Your Frequencies on the Map'), eyebrow: 'The Map', children: ch });
   }
 
-  M.push({ t: 'h2', text: refTitle('section', 'closing', 'Carrying This Forward') });
-  M.push(block('section:closing', refBody('section', 'closing'), { kind: 'section', key: 'closing' }));
+  if (included('closing')) M.push({ t: 'section', key: 'closing', title: refTitle('section', 'closing', 'Carrying This Forward'), eyebrow: 'Closing', children: [
+    block('section:closing', refBody('section', 'closing'), { kind: 'section', key: 'closing' }, 't lead'),
+  ] });
   return M;
 }
-function listJoin(a) { a = [...new Set(a)]; return a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
+const cap1 = s => String(s || '').replace(/^\s*\w/, c => c.toUpperCase());
 
 // ── HTML render ──
+function pHTML(n) {
+  if (!n) return '';
+  if (n.fixed) return `<p class="${n.cls}">${md(n.text)}</p>`;
+  if (!n.text && !S.isAdmin) return '';
+  const pen = S.isAdmin ? `<button class="pen" data-key="${esc(n.key)}">Edit</button>` : '';
+  if (n.hidden) return S.isAdmin ? `<p class="t ed overridden"><span class="hidden-note">Hidden for this client.</span>${pen}</p>` : '';
+  if (!n.text) return `<p class="t ed"><span class="hidden-note">No text yet.</span>${pen}</p>`;
+  return `<p class="${n.cls} ed${n.overridden ? ' overridden' : ''}" data-key="${esc(n.key)}">${md(n.text)}${pen}</p>`;
+}
 function nodeHTML(n) {
   switch (n.t) {
-    case 'title': return `<div class="eyebrow">Chart Analysis</div><h1 class="title">${esc(n.text)}</h1>${n.sub ? `<div class="subtitle">${esc(n.sub)}</div>` : ''}`;
-    case 'h2': return `</section><section class="part"><h2>${esc(n.text)}</h2>`;
-    case 'h2b': return `<h2 style="font-size:1.6rem;margin-top:2.2rem">${esc(n.text)}</h2>`;
+    case 'cover': return `<header class="cover"><div class="eyebrow">Chart Analysis</div><h1 class="title">${esc(n.text)}</h1>${n.sub ? `<div class="subtitle">${esc(n.sub)}</div>` : ''}</header>`;
+    case 'section': return `<section class="part" id="sec-${n.key}"><div class="eyebrow">${esc(n.eyebrow || '')}</div><h2>${esc(n.title)}</h2>${n.children.map(nodeHTML).join('')}</section>`;
+    case 'p': return pHTML(n);
     case 'h3': return `<h3>${esc(n.text)}</h3>`;
-    case 'h4': return `<h4>${esc(n.text)}</h4>`;
-    case 'eyebrow': return `<div class="eyebrow" style="margin-top:0.2rem">${esc(n.text)}</div>`;
     case 'meta': return `<div class="meta">${esc(n.text)}</div>`;
+    case 'callout': return `<div class="callout">${n.title ? `<h4>${esc(n.title)}</h4>` : ''}${n.children.map(nodeHTML).join('')}</div>`;
+    case 'toc': return n.items.length ? `<div class="toc"><h4>In this analysis</h4><ol>${n.items.map(i => `<li><a href="#sec-${i.key}">${esc(i.label)}</a></li>`).join('')}</ol></div>` : '';
     case 'wheel': return `<div id="wheel-wrap">${wheelSVG()}</div>`;
-    case 'bars': return `<div class="bars">${n.rows.map(r => `<div class="bar"${n.wide ? ' style="grid-template-columns:13rem 1fr 0"' : ''}><span>${esc(r.label)}</span><span class="track"><span class="fill" style="display:block;width:${r.pct}%"></span></span><span>${n.wide ? '' : r.v}</span></div>`).join('')}</div>`;
-    case 'group': return `<div class="group ${n.cls || ''}">${n.children.map(nodeHTML).join('')}</div>`;
-    case 'p': {
-      if (!n.text && !S.isAdmin) return '';
-      const pen = S.isAdmin ? `<button class="pen" data-key="${esc(n.key)}">Edit</button>` : '';
-      const stage = n.stage ? `<span class="stage">${esc(n.stage)}</span>` : '';
-      const sm = n.stage && n.stageMeta ? `<div class="meta" style="margin:0.9rem 0 0.15rem">${stage}${esc(n.stageMeta)}</div>` : (stage ? `<div style="margin-top:0.9rem">${stage}</div>` : '');
-      if (n.hidden) return S.isAdmin ? `${sm}<p class="t ed overridden"><span class="hidden-note">Hidden for this client.</span>${pen}</p>` : '';
-      if (!n.text) return `${sm}<p class="t ed"><span class="hidden-note">No text yet.</span>${pen}</p>`;
-      return `${sm}<p class="${n.cls} ed${n.overridden ? ' overridden' : ''}" data-key="${esc(n.key)}">${md(n.text)}${pen}</p>`;
-    }
+    case 'cards': return `<div class="cards c${n.cols}">${n.items.map(c => `<div class="card"><div class="card-h">${esc(c.title)}</div>${c.meta ? `<div class="meta">${esc(c.meta)}</div>` : ''}${c.chips && c.chips.length ? `<div class="chips">${c.chips.map(x => `<span class="chip">${esc(x)}</span>`).join('')}</div>` : ''}${c.children.map(nodeHTML).join('')}</div>`).join('')}</div>`;
+    case 'table': return `<div class="tablewrap"><table class="tbl ${n.cls || ''}">${n.head.some(Boolean) ? `<thead><tr>${n.head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead>` : ''}<tbody>${n.rows.map(r => `<tr>${r.map((c, i) => `<td${i === 0 ? ' class="first"' : ''}>${md(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    case 'bullets': return `<ul class="bul">${n.items.map(i => `<li><b>${esc(i.label)}</b>${i.text ? ` — ${md(i.text)}` : ''}</li>`).join('')}</ul>`;
+    case 'cols': return `<div class="cols2">${n.items.map(c => `<div class="col"><h4>${esc(c.title)}</h4><ul class="bul">${c.list.map(i => `<li><b>${esc(i.label)}</b> — ${md(i.text)}</li>`).join('') || '<li>None</li>'}</ul></div>`).join('')}</div>`;
+    case 'bars': return `<div class="bars">${n.rows.map(r => `<div class="bar${n.wide ? ' wide' : ''}"><span>${esc(r.label)}</span><span class="track"><span class="fill" style="width:${r.pct}%"></span></span><span>${n.wide ? '' : r.v}</span></div>`).join('')}</div>`;
+    case 'gk': return `<div class="gk">
+        <div class="gk-top">
+          <div class="gk-sphere">${esc(n.sphere)}</div>
+          <div class="gk-num">Gene Key ${n.num}.${n.line}</div>
+          <div class="gk-arc">${n.arc.map(esc).join(' <span>→</span> ')}</div>
+          ${n.map.length ? `<div class="chips">${n.map.map(x => `<span class="chip">${esc(x)}</span>`).join('')}</div>` : ''}
+          ${n.children.map(nodeHTML).join('')}
+        </div>
+        <div class="gk-stages">${n.stages.map(s => `<div class="gk-stage"><div class="gk-stage-h">${s.label} · ${esc(s.name)}</div><div class="meta">${esc(s.field)}</div>${pHTML(s.p)}</div>`).join('')}</div>
+      </div>`;
+    case 'field': return `<div class="card field"><div class="card-h">${esc(n.title)}</div>${n.meta ? `<div class="meta">${esc(n.meta)}</div>` : ''}${n.children.map(nodeHTML).join('')}${pHTML(n.lead)}
+        ${n.lit.length ? `<ul class="bul">${n.lit.map(l => `<li><b>${esc(l.label)}:</b> ${esc(l.text)}</li>`).join('')}</ul>` : ''}
+        ${n.subs.length ? `<h4>Subterrains</h4>${n.subs.map(s => `<div class="sub"><div class="sub-h">${esc(s.label)}${s.via ? ` <span class="meta">· through ${esc(s.via)}</span>` : ''}</div>${pHTML(s.p)}</div>`).join('')}` : ''}</div>`;
   }
   return '';
 }
+
+function adminBarHTML() {
+  const D = S.D;
+  const drafts = D.gkDesc.filter(g => g.status === 'draft').length;
+  const overrides = Object.keys(D.OVER).length;
+  const sel = Array.isArray(D.client.chart_sections) ? D.client.chart_sections : SECTIONS.map(s => s.key);
+  const groups = [...new Set(SECTIONS.map(s => s.group))];
+  return `<div class="adminbar">
+      <div class="ab-row">
+        <span><b>Admin view</b> · ${esc(D.client.name || '')}</span>
+        <label><input type="checkbox" id="ab-edit" ${S.editing ? 'checked' : ''}> Show edit controls</label>
+        ${S.embed ? '' : `<label><input type="checkbox" id="ab-access" ${D.client.access_chart ? 'checked' : ''}> Visible to client</label>`}
+        <span>${overrides} edit${overrides === 1 ? '' : 's'} for this client</span>
+        <span class="status" id="ab-status"></span>
+      </div>
+      <details class="ab-sections" ${S.sectionsOpen ? 'open' : ''}>
+        <summary>Sections to include in ${esc((D.client.name || 'the client').split(' ')[0])}'s copy · ${sel.length} of ${SECTIONS.length}</summary>
+        <div class="ab-groups">${groups.map(g => `<fieldset><legend>${g}</legend>${SECTIONS.filter(s => s.group === g).map(s => `<label><input type="checkbox" class="ab-sec" value="${s.key}" ${sel.includes(s.key) ? 'checked' : ''}> ${s.label}</label>`).join('')}</fieldset>`).join('')}</div>
+        <div class="ab-actions"><button class="btn btn-solid" id="ab-sec-save">Save sections</button> <button class="btn" id="ab-sec-all">Include everything</button></div>
+      </details>
+      ${drafts ? `<div class="draftnote">${drafts} of 64 Gene Keys descriptions are still drafts (voice pass pending). Passages with a rust edge are edited for this client only.</div>` : ''}
+    </div>`;
+}
+async function saveSections(all) {
+  const st = document.getElementById('ab-status');
+  const keys = all ? null : [...document.querySelectorAll('.ab-sec')].filter(x => x.checked).map(x => x.value);
+  st.textContent = 'saving…';
+  try {
+    await api(`clients?id=eq.${S.D.client.id}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ chart_sections: keys }) });
+    S.D.client.chart_sections = keys; S.sectionsOpen = true;
+    render();
+    document.getElementById('ab-status').textContent = 'sections saved';
+  } catch (e) { st.textContent = 'failed: ' + e.message; }
+}
+
 function render() {
   const D = S.D;
   const actions = document.getElementById('actions'), bar = document.getElementById('adminbar'), root = document.getElementById('root');
   if (!S.isAdmin && !D.client.access_chart) {
-    actions.innerHTML = `<a class="btn" href="portal.html">Back to portal</a>`;
+    actions.innerHTML = S.embed ? '' : `<a class="btn" href="portal.html">Back to portal</a>`;
     root.innerHTML = `<div class="msg">Your chart analysis is being prepared. It will appear here once it is ready.</div>`; return;
   }
   if (!D.planets.length && !D.gk && !D.hd) {
-    actions.innerHTML = `<a class="btn" href="portal.html">Back to portal</a>`;
+    actions.innerHTML = S.embed ? '' : `<a class="btn" href="portal.html">Back to portal</a>`;
     root.innerHTML = `<div class="msg">${S.isAdmin ? 'No chart has been computed for this client yet. Enter birth data in Chart Admin first.' : 'Your chart has not been calculated yet.'}</div>`; return;
   }
   S.model = buildModel();
   actions.innerHTML = `<button class="btn btn-solid" id="btn-pdf">Download PDF</button>${S.embed ? '' : ` <a class="btn" href="portal.html${S.preview ? '?preview=1' : ''}">Back to portal</a>`}`;
   document.getElementById('btn-pdf').onclick = e => downloadPdf(e.target);
   if (S.isAdmin) {
-    const drafts = D.gkDesc.filter(g => g.status === 'draft').length;
-    const overrides = Object.keys(D.OVER).length;
-    bar.innerHTML = `<div class="adminbar">
-      <span><b>Admin view</b> · ${esc(D.client.name || '')}</span>
-      <label><input type="checkbox" id="ab-edit" ${S.editing ? 'checked' : ''}> Show edit controls</label>
-      ${S.embed ? '' : `<label><input type="checkbox" id="ab-access" ${D.client.access_chart ? 'checked' : ''}> Visible to client</label>`}
-      <span>${overrides} edit${overrides === 1 ? '' : 's'} for this client</span>
-      <span class="status" id="ab-status"></span>
-      ${drafts ? `<span class="draftnote">${drafts} of 64 Gene Keys descriptions are still drafts (voice pass pending). Edits marked with a rust edge are specific to this client.</span>` : ''}
-    </div>`;
+    bar.innerHTML = adminBarHTML();
     document.getElementById('ab-edit').onchange = e => { S.editing = e.target.checked; document.body.classList.toggle('editing', S.editing); };
+    document.querySelector('.ab-sections').ontoggle = e => { S.sectionsOpen = e.target.open; };
+    document.getElementById('ab-sec-save').onclick = () => saveSections(false);
+    document.getElementById('ab-sec-all').onclick = () => saveSections(true);
     const abAccess = document.getElementById('ab-access');
     if (abAccess) abAccess.onchange = async e => {
       const st = document.getElementById('ab-status'); st.textContent = 'saving…';
@@ -477,12 +620,134 @@ function render() {
     };
   }
   document.body.classList.toggle('editing', S.isAdmin && S.editing);
-  root.innerHTML = `<div class="sheet" id="sheet"><section>${S.model.map(nodeHTML).join('')}</section></div>`;
+  root.innerHTML = `<div class="sheet" id="sheet">${S.model.map(nodeHTML).join('')}</div>`;
   if (S.isAdmin) root.querySelectorAll('.pen').forEach(b => b.onclick = () => openEditor(b.dataset.key));
 }
 
+function findNode(key, list = S.model) {
+  for (const n of list || []) {
+    if (!n) continue;
+    if (n.t === 'p' && n.key === key) return n;
+    const kids = [...(n.children || []), ...((n.items || []).flatMap(i => i && i.children ? i.children : [])), ...((n.stages || []).map(s => s.p)), n.lead, ...((n.subs || []).map(s => s.p))].filter(Boolean);
+    const f = findNode(key, kids); if (f) return f;
+  }
+  return null;
+}
+
+// ── PDF ──
+// Built from the same model. White page, ink text, outlined boxes and no fills,
+// so it prints cleanly in black and white. Every section starts on a new page;
+// cards and Gene Key panels are kept whole on one page.
+function pdfText(s) {
+  return plain(s).replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/—/g, ' - ').replace(/–/g, '-').replace(/→/g, '>').replace(/…/g, '...').replace(/[^\x00-\xFF]/g, '');
+}
+async function downloadPdf(btn) {
+  const JS = window.jspdf && window.jspdf.jsPDF; if (!JS) { alert('The PDF tool is still loading. Try again in a moment.'); return; }
+  btn.disabled = true; btn.textContent = 'Preparing…';
+  try {
+    const doc = new JS({ unit: 'pt', format: 'letter' });
+    const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 60, maxW = W - 2 * M, BOTTOM = H - 58;
+    const INK = [20, 17, 10], DIM = [62, 52, 32], GOLD = [90, 63, 16], RULE = [140, 122, 85];
+    const name = S.D.client.name || 'Client';
+    let y = M, page = 1;
+    const footer = () => { doc.setFont('times', 'normal'); doc.setFontSize(10.5); doc.setTextColor(...DIM); doc.text(pdfText(`${name} · Chart Analysis · ${page}`), W / 2, H - 32, { align: 'center' }); };
+    const newPage = () => { footer(); doc.addPage(); page++; y = M; };
+    const ensure = h => { if (y + h > BOTTOM) newPage(); };
+    // A "run" is wrapped text with a style; lay() measures, put() draws.
+    const STY = {
+      body:  { family: 'times', font: 'normal', size: 12, color: INK, lead: 1.38, after: 7 },
+      lead:  { family: 'times', font: 'normal', size: 13, color: INK, lead: 1.4, after: 8 },
+      h2:    { family: 'times', font: 'normal', size: 22, color: INK, lead: 1.2, after: 4 },
+      h3:    { family: 'times', font: 'bold', size: 14, color: INK, lead: 1.25, after: 3 },
+      label: { family: 'helvetica', font: 'bold', size: 10.5, color: GOLD, lead: 1.3, after: 3 },
+      meta:  { family: 'helvetica', font: 'normal', size: 10.5, color: DIM, lead: 1.35, after: 4 },
+      small: { family: 'times', font: 'normal', size: 11.5, color: INK, lead: 1.35, after: 5 },
+      cell1: { family: 'times', font: 'bold', size: 11.5, color: INK, lead: 1.35, after: 5 },
+      title: { family: 'times', font: 'normal', size: 30, color: INK, lead: 1.2, after: 8 },
+    };
+    const lay = (text, st, w) => { const s = STY[st]; doc.setFont(s.family, s.font); doc.setFontSize(s.size); const lines = text ? doc.splitTextToSize(pdfText(text), w) : []; return { lines, s, h: lines.length * s.size * s.lead + (lines.length ? s.after : 0) }; };
+    const put = (r, x) => { const s = r.s; doc.setFont(s.family, s.font); doc.setFontSize(s.size); doc.setTextColor(...s.color); r.lines.forEach(l => { doc.text(l, x, y + s.size); y += s.size * s.lead; }); if (r.lines.length) y += s.after; };
+    const flow = (text, st, x = M, w = maxW) => { const r = lay(text, st, w); const s = r.s; doc.setFont(s.family, s.font); doc.setFontSize(s.size); doc.setTextColor(...s.color); r.lines.forEach(l => { ensure(s.size * s.lead); doc.setFont(s.family, s.font); doc.setFontSize(s.size); doc.setTextColor(...s.color); doc.text(l, x, y + s.size); y += s.size * s.lead; }); if (r.lines.length) y += s.after; };
+    const txt = p => (p && !p.hidden && p.text) ? p.text : '';
+    // A boxed block: measure its runs, keep it on one page when it fits, outline it.
+    const box = (runs, pad = 12, gap = 10) => {
+      const w = maxW - 2 * pad;
+      const laid = runs.filter(r => r && r[0]).map(([t, st, indent = 0]) => ({ r: lay(t, st, w - indent), indent }));
+      const h = laid.reduce((t, x) => t + x.r.h, 0) + 2 * pad - 4;
+      if (h < BOTTOM - M) ensure(h + gap);
+      const y0 = y; y += pad;
+      laid.forEach(x => { if (y + x.r.h > BOTTOM) { doc.setDrawColor(...RULE); doc.setLineWidth(0.7); doc.rect(M, y0, maxW, y - y0); newPage(); } put(x.r, M + pad + x.indent); });
+      y += pad - 4;
+      doc.setDrawColor(...RULE); doc.setLineWidth(0.7); doc.rect(M, Math.max(y0, M - 2), maxW, y - Math.max(y0, M - 2));
+      y += gap;
+    };
+    const table = (head, rows, cls) => {
+      const widths = cls === 'kv' ? [0.32, 0.68] : cls === 'aspects' ? [0.3, 0.16, 0.16, 0.38] : [0.2, 0.2, 0.36, 0.24];
+      const cw = widths.map(f => f * maxW), pad = 5;
+      const drawRow = (cells, header) => {
+        const st = header ? 'label' : 'small';
+        const laid = cells.map((c, i) => lay(header ? String(c).toUpperCase() : c, i === 0 && !header ? 'cell1' : st, cw[i] - 2 * pad));
+        const h = Math.max(...laid.map(r => r.h)) + 2 * pad;
+        ensure(h);
+        let x = M; const y0 = y;
+        laid.forEach((r, i) => { y = y0 + pad; put(r, x + pad); x += cw[i]; });
+        y = y0 + h;
+        doc.setDrawColor(...RULE); doc.setLineWidth(header ? 1 : 0.5); doc.line(M, y, M + maxW, y);
+      };
+      if (head.some(Boolean)) drawRow(head, true);
+      rows.forEach(r => drawRow(r, false));
+      y += 10;
+    };
+    const walk = async n => {
+      switch (n.t) {
+        case 'cover':
+          y = H * 0.34;
+          flow('NAVIGATION MAP · CHART ANALYSIS', 'label');
+          y += 6; flow(n.text, 'title');
+          if (n.sub) flow(n.sub, 'meta');
+          doc.setDrawColor(...GOLD); doc.setLineWidth(0.8); doc.line(M, y + 6, M + 160, y + 6);
+          break;
+        case 'section':
+          newPage();
+          flow((n.eyebrow || '').toUpperCase(), 'label');
+          flow(n.title, 'h2');
+          doc.setDrawColor(...GOLD); doc.setLineWidth(0.6); doc.line(M, y, W - M, y); y += 14;
+          for (const c of n.children) await walk(c);
+          break;
+        case 'p': if (txt(n)) flow(n.text, n.cls.includes('lead') ? 'lead' : 'body'); break;
+        case 'h3': ensure(60); y += 4; flow(n.text, 'h3'); break;
+        case 'meta': flow(n.text, 'meta'); break;
+        case 'callout': box([[n.title ? n.title.toUpperCase() : '', 'label'], ...n.children.map(p => [txt(p), 'body'])]); break;
+        case 'toc': if (n.items.length) box([['IN THIS ANALYSIS', 'label'], ...n.items.map((t, i) => [`${i + 1}.  ${t.label}`, 'small'])]); break;
+        case 'wheel': { const img = await wheelPNG(); const sz = Math.min(maxW, 390); ensure(sz + 10); doc.addImage(img, 'JPEG', (W - sz) / 2, y, sz, sz); y += sz + 12; break; }
+        case 'cards': n.items.forEach(c => box([[c.title, 'h3'], [c.meta, 'meta'], [c.chips && c.chips.length ? 'On the Map: ' + c.chips.join(' · ') : '', 'meta'], ...c.children.map(p => [txt(p), 'body'])])); break;
+        case 'table': table(n.head, n.rows.map(r => r.map(c => plain(c))), n.cls); break;
+        case 'bullets': n.items.forEach(i => flow(`•  ${i.label}${i.text ? ' - ' + i.text : ''}`, 'small')); y += 4; break;
+        case 'cols': n.items.forEach(c => { ensure(50); flow(c.title.toUpperCase(), 'label'); (c.list.length ? c.list : [{ label: 'None', text: '' }]).forEach(i => flow(`•  ${i.label}${i.text ? ' - ' + i.text : ''}`, 'small')); y += 6; }); break;
+        case 'bars': n.rows.forEach(r => { ensure(18); doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5); doc.setTextColor(...INK); doc.text(pdfText(r.label), M, y + 11); const bx = M + (n.wide ? 190 : 100), bw = maxW - (n.wide ? 190 : 140); doc.setDrawColor(...DIM); doc.setLineWidth(0.6); doc.rect(bx, y + 3, bw, 8); doc.setFillColor(...INK); doc.rect(bx, y + 3, bw * r.pct / 100, 8, 'F'); if (!n.wide) doc.text(String(r.v), W - M, y + 11, { align: 'right' }); y += 18; }); y += 8; break;
+        case 'gk': box([
+            [n.sphere.toUpperCase(), 'label'],
+            [`Gene Key ${n.num}.${n.line}  ·  ${n.arc.join('  >  ')}`, 'h3'],
+            [n.map.length ? 'On the Map: ' + n.map.join(' · ') : '', 'meta'],
+            ...n.children.map(p => [txt(p), 'small']),
+            ...n.stages.flatMap(s => [[`${s.label.toUpperCase()} · ${s.name.toUpperCase()}   ${s.field}`, 'label'], [txt(s.p), 'body']]),
+          ]); break;
+        case 'field': box([
+            [n.title, 'h3'], [n.meta, 'meta'], ...n.children.map(p => [txt(p), 'lead']), [txt(n.lead), 'body'],
+            ...n.lit.map(l => [`${l.label}: ${l.text}`, 'small']),
+            ...(n.subs.length ? [['SUBTERRAINS', 'label']] : []),
+            ...n.subs.flatMap(s => [[s.label + (s.via ? ` (through ${s.via})` : ''), 'h3'], [txt(s.p), 'small']]),
+          ]); break;
+      }
+    };
+    for (const n of S.model) await walk(n);
+    footer();
+    doc.save(`chart-analysis-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf`);
+  } catch (e) { alert('PDF failed: ' + e.message); }
+  btn.disabled = false; btn.textContent = 'Download PDF';
+}
+
 // ── Admin editing ──
-function findNode(key, list = S.model) { for (const n of list) { if (n.key === key) return n; if (n.children) { const f = findNode(key, n.children); if (f) return f; } } return null; }
 function openEditor(key) {
   const n = findNode(key); if (!n) return;
   document.querySelectorAll('.editor').forEach(e => e.remove());
@@ -586,62 +851,6 @@ async function wheelPNG() {
   const c2 = cv.getContext('2d'); return cv.toDataURL('image/jpeg', 0.9);
 }
 
-// ── PDF (from the same model; white page, ink text, no fills — prints cleanly in black and white) ──
-function pdfText(s) {
-  return plain(s).replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, m => m === '—' ? ' - ' : '-').replace(/→/g, '>').replace(/…/g, '...').replace(/°/g, '°').replace(/[^\x00-\xFF]/g, '');
-}
-async function downloadPdf(btn) {
-  const JS = window.jspdf && window.jspdf.jsPDF; if (!JS) { alert('The PDF tool is still loading. Try again in a moment.'); return; }
-  btn.disabled = true; btn.textContent = 'Preparing…';
-  try {
-    const doc = new JS({ unit: 'pt', format: 'letter' });
-    const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 64, maxW = W - 2 * M;
-    const INK = [20, 17, 10], DIM = [62, 52, 32], GOLD = [90, 63, 16];
-    let y = M, page = 1;
-    const name = S.D.client.name || 'Client';
-    const footer = () => { doc.setFont('times', 'normal'); doc.setFontSize(10.5); doc.setTextColor(...DIM); doc.text(pdfText(`${name} · Chart Analysis · ${page}`), W / 2, H - 34, { align: 'center' }); };
-    const newPage = () => { footer(); doc.addPage(); page++; y = M; };
-    const need = h => { if (y + h > H - M) newPage(); };
-    const write = (text, { size = 12.5, font = 'normal', color = INK, lead = 1.42, after = 8, indent = 0, family = 'times', keep = 0 } = {}) => {
-      doc.setFont(family, font); doc.setFontSize(size); doc.setTextColor(...color);
-      const lines = doc.splitTextToSize(pdfText(text), maxW - indent);
-      const lh = size * lead;
-      need(Math.min(lines.length, 3) * lh + keep);
-      lines.forEach(l => { need(lh); doc.text(l, M + indent, y + size); y += lh; });
-      y += after;
-    };
-    const rule = () => { need(14); doc.setDrawColor(...GOLD); doc.setLineWidth(0.6); doc.line(M, y, W - M, y); y += 14; };
-    let ind = 0;
-    const walk = async (n) => {
-      switch (n.t) {
-        case 'title':
-          y = H * 0.32;
-          write('NAVIGATION MAP · CHART ANALYSIS', { size: 11, family: 'helvetica', color: GOLD, after: 14 });
-          write(n.text, { size: 32, after: 8, lead: 1.2 });
-          if (n.sub) write(n.sub, { size: 13, font: 'italic', color: DIM, after: 18 });
-          rule(); newPage(); break;
-        case 'h2': if (y > M + 4) newPage(); write(n.text, { size: 22, after: 6, lead: 1.2 }); rule(); break;
-        case 'h2b': need(120); y += 10; write(n.text, { size: 18, after: 6, lead: 1.2, keep: 80 }); break;
-        case 'h3': y += 6; write(n.text, { size: 14.5, font: 'bold', after: 3, indent: ind, keep: 95 }); break;
-        case 'h4': y += 6; write(n.text.toUpperCase(), { size: 10.5, family: 'helvetica', font: 'bold', color: GOLD, after: 4, indent: ind, keep: 120 }); break;
-        case 'eyebrow': write(n.text.toUpperCase(), { size: 10.5, family: 'helvetica', font: 'bold', color: GOLD, after: 2, indent: ind, keep: 60 }); break;
-        case 'meta': write(n.text, { size: 11, family: 'helvetica', color: DIM, after: 4, indent: ind }); break;
-        case 'wheel': { const png = await wheelPNG(); const sz = Math.min(maxW, 400); need(sz + 10); doc.addImage(png, 'JPEG', (W - sz) / 2, y, sz, sz); y += sz + 14; break; }
-        case 'bars': n.rows.forEach(r => { need(18); doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(...INK); doc.text(pdfText(r.label), M, y + 11); const bx = M + (n.wide ? 200 : 110), bw = maxW - (n.wide ? 200 : 160); doc.setDrawColor(...DIM); doc.setLineWidth(0.6); doc.rect(bx, y + 3, bw, 8); doc.setFillColor(...INK); doc.rect(bx, y + 3, bw * r.pct / 100, 8, 'F'); if (!n.wide) doc.text(String(r.v), W - M, y + 11, { align: 'right' }); y += 18; }); y += 8; break;
-        case 'group': y += 4; ind = 12; for (const c of n.children) await walk(c); ind = 0; y += 6; break;
-        case 'p':
-          if (n.hidden || !n.text) break;
-          if (n.stage) { y += 4; write(n.stage.toUpperCase() + (n.stageMeta ? '   ' + n.stageMeta : ''), { size: 10.5, family: 'helvetica', font: 'bold', color: GOLD, after: 3, indent: ind, keep: 50 }); }
-          write(n.text, { size: n.cls.includes('lead') ? 13.5 : 12.5, indent: ind });
-          break;
-      }
-    };
-    for (const n of S.model) await walk(n);
-    footer();
-    doc.save(`chart-analysis-${(name).toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf`);
-  } catch (e) { alert('PDF failed: ' + e.message); }
-  btn.disabled = false; btn.textContent = 'Download PDF';
-}
 
 init();
 </script>
