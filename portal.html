@@ -1048,6 +1048,15 @@ body { font-weight: 400; }
 .chart-frame { width: 100%; border: 1px solid var(--border); border-radius: 8px; min-height: 70vh; background: var(--surface); display: block; }
 .cd-note { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dim); margin: 0 0 1rem; line-height: 1.5; }
 
+/* Session worksheet */
+.ws-focus { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-style: italic; color: var(--text); line-height: 1.45; margin: 0.25rem 0 1rem; }
+.ws-h { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin: 1.4rem 0 0.25rem; }
+.ws-p { font-size: 15px; color: var(--text-secondary); line-height: 1.55; }
+.ws-prompts { padding-left: 1.4rem; margin: 0.5rem 0 0; }
+.ws-prompts li { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; color: var(--text); line-height: 1.45; margin-bottom: 0.6rem; }
+.ws-prompts .sub, .off-table .sub { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dim); }
+.ws-flow td:first-child { white-space: nowrap; }
+
 /* Offerings tracker */
 .off-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; }
 .off-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.4rem 1.5rem; }
@@ -2428,7 +2437,8 @@ async function loadClientDetail() {
       ]);
     }
 
-    currentDetailData = { client, birth, hd, gk, ancestors, convs, refByNum, fieldById, resonance: resonance || [], allTapestry: allTapestry || [], planets: planets || [], sig1: sig1 || [], sig2: sig2 || [], recentConv, convSections: convSections || [], threshold, sevenGates: Array.isArray(sevenGates) ? sevenGates : [] };
+    const worksheets = await rest(`client_session_worksheets?client_id=eq.${id}&order=created_at.desc&select=id,requests,session_minutes,content,created_at`).catch(() => []);
+    currentDetailData = { worksheets: Array.isArray(worksheets) ? worksheets : [], client, birth, hd, gk, ancestors, convs, refByNum, fieldById, resonance: resonance || [], allTapestry: allTapestry || [], planets: planets || [], sig1: sig1 || [], sig2: sig2 || [], recentConv, convSections: convSections || [], threshold, sevenGates: Array.isArray(sevenGates) ? sevenGates : [] };
 
     document.getElementById('cd-title').textContent = client.name || '—';
     document.getElementById('cd-subtitle').textContent =
@@ -2690,6 +2700,164 @@ async function cdToggleAccess(key, btn) {
   btn.disabled = false;
 }
 
+
+// ── Session worksheet ─────────────────────────────────
+// Before a 1:1: Christy enters what the client asked for (prefilled from intake), and
+// generate-session-worksheet returns a 90-minute flow, 2-3 chart elements per request,
+// what to watch for, and 3-5 journal prompts. Two PDFs: her worksheet, and a one-page
+// client handout of the prompts.
+const WS_SYSTEM = { astrology: 'Astrology', human_design: 'Human Design', gene_keys: 'Gene Keys', map: 'The Map' };
+function cdWsPrefill(c) {
+  const parts = [
+    ['Repeating pattern', c.pattern_repeating], ['In the body', c.pattern_somatic], ['Inherited', c.pattern_inherited],
+    ['Threshold', c.pattern_threshold], ['Not yet received', c.pattern_unreceived], ['Their words', c.open_remarks],
+  ].filter(([, v]) => v && String(v).trim());
+  return parts.map(([k, v]) => `${k}: ${String(v).trim()}`).join('\n');
+}
+function cdSessionTab(d) {
+  const ws = d.worksheets || [];
+  const pre = ws[0] ? ws[0].requests : cdWsPrefill(d.client);
+  const hasChart = !!(d.birth || d.gk || d.hd);
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title">What they asked for</h3>
+      <p class="cd-note">Prefilled from ${ws[0] ? 'the last worksheet' : 'their intake answers'}. Add what they asked for at booking, in their words where you can — one request per line works best.</p>
+      <textarea class="form-textarea" id="cd-ws-req" rows="6" placeholder="e.g. Why do I keep leaving jobs at the two-year mark? · My mother's illness and what I'm carrying from her · Whether to start the program in January">${cdEsc(pre)}</textarea>
+      <div class="cd-actions" style="margin-top:0.75rem">
+        <button class="btn btn-gold btn-sm" id="cd-ws-gen" onclick="cdWsGenerate(this)" ${hasChart ? '' : 'disabled title="Compute the chart first"'}>Generate 90-minute worksheet</button>
+        <span class="cd-status" id="cd-ws-status">${hasChart ? '' : 'No chart yet — enter birth data in the working chart first.'}</span>
+      </div>
+    </div>
+    <div id="cd-ws-view">${ws.length ? cdWsView(d, ws[0].id) : ''}</div>`;
+}
+function cdWsView(d, id) {
+  const ws = d.worksheets || []; const w = ws.find(x => x.id === id) || ws[0]; if (!w) return '';
+  const c = w.content || {};
+  let t = 0;
+  const clock = m => { const a = t; t += Number(m) || 0; return `${a}–${t}`; };
+  const history = ws.length > 1 ? `<select class="form-select" style="width:auto" onchange="document.getElementById('cd-ws-view').innerHTML = cdWsView(currentDetailData, this.value)">${ws.map(x => `<option value="${x.id}"${x.id === w.id ? ' selected' : ''}>${new Date(x.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</option>`).join('')}</select>` : '';
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.75rem">
+        <h3 class="cd-card-title" style="margin:0;border:none;padding:0">Session worksheet · ${w.session_minutes} minutes</h3>
+        <div class="cd-actions">${history}
+          <button class="btn btn-gold btn-sm" onclick="cdWsPdf('${w.id}', 'worksheet', this)">Worksheet PDF</button>
+          <button class="btn btn-outline btn-sm" onclick="cdWsPdf('${w.id}', 'handout', this)">Client handout PDF</button>
+        </div>
+      </div>
+      ${c.focus ? `<p class="ws-focus">${cdEsc(c.focus)}</p>` : ''}
+      <h4 class="ws-h">Flow</h4>
+      <table class="off-table ws-flow"><thead><tr><th>Minutes</th><th>Segment</th><th>What to do</th></tr></thead><tbody>
+        ${(c.flow || []).map(f => `<tr><td class="sub">${clock(f.minutes)}</td><td class="who">${cdEsc(f.segment)}</td><td>${cdEsc(f.what)}</td></tr>`).join('')}
+      </tbody></table>
+      ${(c.areas || []).map((a, i) => `
+        <h4 class="ws-h">Request ${i + 1} · ${cdEsc(a.request)}</h4>
+        <table class="off-table"><thead><tr><th>Chart element</th><th>Why it speaks to this</th><th>Open with</th></tr></thead><tbody>
+          ${(a.elements || []).map(e => `<tr><td><div class="who">${cdEsc(e.element)}</div><div class="sub">${cdEsc(WS_SYSTEM[e.system] || e.system || '')}</div></td><td>${cdEsc(e.why)}</td><td><i>${cdEsc(e.open_with)}</i></td></tr>`).join('')}
+        </tbody></table>`).join('')}
+      ${c.watch_for ? `<h4 class="ws-h">Watch for</h4><p class="ws-p">${cdEsc(c.watch_for)}</p>` : ''}
+      <h4 class="ws-h">Journal prompts · client handout</h4>
+      <ol class="ws-prompts">${(c.prompts || []).map(p => `<li>${cdEsc(p.prompt)}${p.anchor ? `<span class="sub"> — ${cdEsc(p.anchor)}</span>` : ''}</li>`).join('')}</ol>
+      <details style="margin-top:1rem"><summary class="cd-note" style="cursor:pointer;display:inline">Requests this was built from</summary><pre class="cd-pre" style="margin-top:0.5rem">${cdEsc(w.requests)}</pre></details>
+    </div>`;
+}
+async function cdWsGenerate(btn) {
+  const st = document.getElementById('cd-ws-status');
+  const requests = document.getElementById('cd-ws-req').value.trim();
+  if (requests.length < 5) { st.textContent = 'Add what they asked for first.'; return; }
+  btn.disabled = true; btn.textContent = 'Writing… (about a minute)'; st.textContent = '';
+  try {
+    const ok = await ensureFreshToken(); if (!ok) { forceReauth('Your session expired — please sign in again.'); return; }
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-session-worksheet`, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ client_id: currentDetailClient, requests, session_minutes: 90 }) });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(out.details || out.error || ('HTTP ' + res.status));
+    const rows = await rest(`client_session_worksheets?client_id=eq.${currentDetailClient}&order=created_at.desc&select=id,requests,session_minutes,content,created_at`);
+    currentDetailData.worksheets = Array.isArray(rows) ? rows : [];
+    document.getElementById('cd-ws-view').innerHTML = cdWsView(currentDetailData, out.id);
+    st.textContent = 'worksheet ready';
+  } catch (e) { st.textContent = 'failed: ' + e.message; }
+  btn.disabled = false; btn.textContent = 'Generate 90-minute worksheet';
+}
+
+// PDFs open in a small viewer with Print and Download (file keeps the client's name).
+function wsShowPdf(win, url, fname, title) {
+  const e = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  win.document.open();
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${e(title)}</title><style>
+    html, body { margin: 0; height: 100%; background: #fbf7ec; font-family: Jost, Helvetica, Arial, sans-serif; }
+    .bar { height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0 1.25rem; background: #1c1812; color: #f0e6cc; box-sizing: border-box; }
+    .bar .t { font-family: Georgia, serif; font-size: 18px; } .bar .b { display: flex; gap: 0.6rem; }
+    .bar a, .bar button { font: 500 15px Jost, Helvetica, Arial, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 16px; border-radius: 3px; border: 1px solid #c9a04a; background: transparent; color: #c9a04a; cursor: pointer; text-decoration: none; }
+    .bar .solid { background: #b08030; color: #1c1812; border-color: #b08030; }
+    iframe { display: block; width: 100%; height: calc(100% - 56px); border: 0; }
+  </style></head><body><div class="bar"><span class="t">${e(title)}</span><span class="b"><button class="solid" id="p">Print</button><a href="${url}" download="${e(fname)}">Download</a></span></div>
+  <iframe id="f" src="${url}#toolbar=0&view=FitH" title="${e(title)}"></iframe></body></html>`);
+  win.document.close();
+  win.document.getElementById('p').onclick = () => { try { const f = win.document.getElementById('f').contentWindow; f.focus(); f.print(); } catch { win.location.href = url; } };
+}
+async function cdWsPdf(id, kind, btn) {
+  const JS = window.jspdf && window.jspdf.jsPDF; if (!JS) { alert('The PDF tool is still loading. Try again in a moment.'); return; }
+  const d = currentDetailData, w = (d.worksheets || []).find(x => x.id === id); if (!w) return;
+  const win = window.open('', '_blank');
+  const c = w.content || {}, name = d.client.name || 'Client';
+  const date = new Date(w.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  try {
+    const doc = new JS({ unit: 'pt', format: 'letter' });
+    const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 54, maxW = W - 2 * M, BOTTOM = H - 50;
+    const INK = [20, 17, 10], DIM = [62, 52, 32], GOLD = [90, 63, 16], RULE = [140, 122, 85];
+    const T = s => String(s ?? '').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/—/g, ' - ').replace(/–/g, '-').replace(/→/g, '>').replace(/…/g, '...').replace(/[^\x00-\xFF]/g, '');
+    let y = M, page = 1;
+    const footer = () => { doc.setFont('times', 'normal'); doc.setFontSize(9); doc.setTextColor(...DIM); doc.text(T(`${name} · ${kind === 'handout' ? 'Journal prompts' : 'Session worksheet'} · ${page}`), W / 2, H - 28, { align: 'center' }); };
+    const ensure = h => { if (y + h > BOTTOM) { footer(); doc.addPage(); page++; y = M; } };
+    const ST = { body: ['times', 'normal', 10.5, INK, 1.35, 5], lead: ['times', 'italic', 12, INK, 1.35, 8], h1: ['times', 'normal', 22, INK, 1.2, 4], h2: ['helvetica', 'bold', 9, GOLD, 1.3, 4], meta: ['helvetica', 'normal', 9, DIM, 1.3, 4], small: ['times', 'normal', 10, INK, 1.3, 2], bold: ['times', 'bold', 10, INK, 1.3, 2], prompt: ['times', 'normal', 12.5, INK, 1.45, 0] };
+    const lay = (t, st, w) => { const [f, s2, z] = ST[st]; doc.setFont(f, s2); doc.setFontSize(z); return t ? doc.splitTextToSize(T(t), w) : []; };
+    const put = (lines, st, x) => { const [f, s2, z, col, lead, after] = ST[st]; doc.setFont(f, s2); doc.setFontSize(z); doc.setTextColor(...col); lines.forEach(l => { ensure(z * lead); doc.setFont(f, s2); doc.setFontSize(z); doc.setTextColor(...col); doc.text(l, x, y + z); y += z * lead; }); if (lines.length) y += after; };
+    const flow = (t, st) => put(lay(t, st, maxW), st, M);
+    const rule = () => { doc.setDrawColor(...GOLD); doc.setLineWidth(0.5); doc.line(M, y, W - M, y); y += 10; };
+    const table = (head, rows, widths, styles) => {
+      const cw = widths.map(f => f * maxW), pad = 4;
+      const row = (cells, header) => {
+        const laid = cells.map((cl, i) => lay(header ? String(cl).toUpperCase() : cl, header ? 'h2' : styles[i], cw[i] - 2 * pad));
+        const hgt = Math.max(...laid.map((ls, i) => ls.length * ST[header ? 'h2' : styles[i]][2] * 1.3)) + 2 * pad;
+        ensure(hgt); const y0 = y; let x = M;
+        laid.forEach((ls, i) => { y = y0 + pad; const st = header ? 'h2' : styles[i]; const [f, s2, z, col] = ST[st]; doc.setFont(f, s2); doc.setFontSize(z); doc.setTextColor(...col); ls.forEach(l => { doc.text(l, x + pad, y + z); y += z * 1.3; }); x += cw[i]; });
+        y = y0 + hgt; doc.setDrawColor(...RULE); doc.setLineWidth(header ? 0.8 : 0.4); doc.line(M, y, M + maxW, y);
+      };
+      row(head, true); rows.forEach(r => row(r, false)); y += 10;
+    };
+    if (kind === 'handout') {
+      flow('NAVIGATION MAP · JOURNAL PROMPTS', 'h2'); flow(name, 'h1'); flow(date, 'meta'); rule(); y += 6;
+      flow('Take these one at a time, over the coming weeks. Write by hand if you can, and let each one run longer than feels necessary. The key or Field named beside each prompt is the frequency it works with; your chart analysis describes it.', 'body'); y += 10;
+      (c.prompts || []).forEach((p, i) => {
+        ensure(110);
+        flow(`${i + 1}`, 'h2'); put(lay(p.prompt, 'prompt', maxW), 'prompt', M); y += 3; if (p.anchor) flow(p.anchor, 'meta');
+        doc.setDrawColor(...RULE); doc.setLineWidth(0.4); for (let k = 0; k < 3; k++) { ensure(22); y += 20; doc.line(M, y, W - M, y); } y += 16;
+      });
+    } else {
+      flow('SESSION WORKSHEET · ' + w.session_minutes + ' MINUTES', 'h2'); flow(name, 'h1'); flow(date, 'meta'); rule();
+      if (c.focus) flow(c.focus, 'lead');
+      flow('FLOW', 'h2'); let t = 0;
+      table(['Minutes', 'Segment', 'What to do'], (c.flow || []).map(f => { const a = t; t += Number(f.minutes) || 0; return [`${a}-${t}`, f.segment, f.what]; }), [0.12, 0.22, 0.66], ['small', 'bold', 'small']);
+      (c.areas || []).forEach((a, i) => {
+        ensure(80); flow(`REQUEST ${i + 1}`, 'h2'); flow(a.request, 'bold'); y += 2;
+        table(['Chart element', 'Why it speaks to this', 'Open with'], (a.elements || []).map(e => [`${e.element}\n${WS_SYSTEM[e.system] || ''}`, e.why, e.open_with]), [0.26, 0.42, 0.32], ['bold', 'small', 'small']);
+      });
+      if (c.watch_for) { ensure(60); flow('WATCH FOR', 'h2'); flow(c.watch_for, 'body'); y += 4; }
+      ensure(80); flow('JOURNAL PROMPTS · FOR THE CLIENT HANDOUT', 'h2');
+      (c.prompts || []).forEach((p, i) => flow(`${i + 1}.  ${p.prompt}${p.anchor ? '  (' + p.anchor + ')' : ''}`, 'body'));
+      y += 8; ensure(90); flow('NOTES', 'h2'); doc.setDrawColor(...RULE); doc.setLineWidth(0.4); for (let k = 0; k < 6; k++) { ensure(22); y += 20; doc.line(M, y, W - M, y); }
+    }
+    footer();
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const fname = `${kind === 'handout' ? 'journal-prompts' : 'session-worksheet'}-${slug}-${new Date(w.created_at).toISOString().slice(0, 10)}.pdf`;
+    const title = `${name} · ${kind === 'handout' ? 'Journal Prompts' : 'Session Worksheet'}`;
+    doc.setProperties({ title });
+    const url = URL.createObjectURL(new File([doc.output('blob')], fname, { type: 'application/pdf' }));
+    if (win && !win.closed) wsShowPdf(win, url, fname, title); else doc.save(fname);
+    setTimeout(() => URL.revokeObjectURL(url), 10 * 60 * 1000);
+  } catch (e) { if (win && !win.closed) win.close(); alert('PDF failed: ' + e.message); }
+}
+
 function cdChartTab(d) {
   const c = d.client;
   const hasChart = !!(d.birth || d.gk || d.hd);
@@ -2758,6 +2926,8 @@ function renderClientDetail(d) {
   const sections = [
     { key: 'overview',  label: 'Overview',
       html: `${cdSnapshotCard(d)}` },
+    { key: 'session',   label: 'Session',
+      html: cdSessionTab(d) },
     { key: 'chart',     label: 'Chart',
       html: cdChartTab(d) },
     { key: 'signals',   label: 'Signals',

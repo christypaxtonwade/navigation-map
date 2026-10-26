@@ -406,7 +406,7 @@ function buildModel() {
       const subs = D.gkSubs.filter(x => x.gene_key_number === num).map(x => D.subById[x.subterrain_id]).filter(Boolean);
       subs.forEach(s => creditSub(s.id, label));
       GKS[secKey].push({ t: 'gkc', sphere: sphereTitle, num, line, arc: [g.shadow, g.gift, g.siddhi], field: home ? `Field ${fieldLabel(home)}` : '',
-        p: block(`gk:${num}:${sp}`, AI(`gk.${sp}`) || `${g.shadow} becomes ${g.gift}. ${firstSentence(g.gift_desc)}`.trim(), null) });
+        p: block(`gk:${num}:${sp}`, AI(`gk.${sp}`) || firstSentence(g.gift_desc), null) });
     }
   }
 
@@ -703,6 +703,12 @@ async function downloadPdf(btn) {
   if (win) { try { win.document.title = 'Preparing chart analysis…'; win.document.body.style.cssText = 'font-family:Georgia,serif;font-size:18px;color:#2b2414;background:#fbf7ec;padding:3rem'; win.document.body.textContent = 'Preparing the chart analysis…'; } catch {} }
   btn.disabled = true; btn.textContent = 'Preparing…';
   try {
+    // Two passes: the first lays the whole PDF out to learn the page each section starts on;
+    // the second draws it again with those page numbers in the contents list. The contents
+    // box is the same height either way, so nothing moves between passes.
+    let wheelImg = null;
+    const build = async (tocPages) => {
+    const starts = {};
     const doc = new JS({ unit: 'pt', format: 'letter' });
     const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 54, maxW = W - 2 * M, BOTTOM = H - 50;
     const INK = [20, 17, 10], DIM = [62, 52, 32], GOLD = [90, 63, 16], RULE = [140, 122, 85];
@@ -774,6 +780,7 @@ async function downloadPdf(btn) {
           break;
         case 'section':
           if (SEC[n.key]?.chapter) newPage(); else { if (y > M + 30) y += 12; ensure(48 + firstBlockHeight(n.children[0])); }
+          starts[n.key] = page;
           if (n.eyebrow) flow(n.eyebrow.toUpperCase(), 'label');
           flow(n.title, 'h2');
           doc.setDrawColor(...GOLD); doc.setLineWidth(0.5); doc.line(M, y, W - M, y); y += 10;
@@ -786,10 +793,14 @@ async function downloadPdf(btn) {
           ensure(h + 8); const y0 = y;
           doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...GOLD); doc.text('IN THIS ANALYSIS', M + pad, y0 + pad + 8);
           doc.setFont('times', 'normal'); doc.setFontSize(10.5); doc.setTextColor(...INK);
-          n.items.forEach((it, i) => { const col = i < half ? 0 : 1, row = i < half ? i : i - half; doc.text(pdfText(`${i + 1}.  ${it.label}`), M + pad + col * (maxW / 2), y0 + pad + 14 + row * lh + 9); });
+          n.items.forEach((it, i) => {
+            const col = i < half ? 0 : 1, row = i < half ? i : i - half, x0 = M + pad + col * (maxW / 2), yy = y0 + pad + 14 + row * lh + 9;
+            doc.text(pdfText(`${i + 1}.  ${it.label}`), x0, yy);
+            if (tocPages && tocPages[it.key]) doc.text(String(tocPages[it.key]), x0 + maxW / 2 - 2 * pad - 6, yy, { align: 'right' });
+          });
           doc.setDrawColor(...RULE); doc.setLineWidth(0.6); doc.rect(M, y0, maxW, h); y = y0 + h + 8;
         } break;
-        case 'wheel': { const img = await wheelPNG(); const sz = Math.min(maxW, 300); ensure(sz + 8); doc.addImage(img, 'JPEG', (W - sz) / 2, y, sz, sz); y += sz + 8; break; }
+        case 'wheel': { const img = wheelImg || (wheelImg = await wheelPNG()); const sz = Math.min(maxW, 300); ensure(sz + 8); doc.addImage(img, 'JPEG', (W - sz) / 2, y, sz, sz); y += sz + 8; break; }
         case 'cards': boxRow(n.items.map(c => [[c.title, 'h3'], [c.meta, 'meta'], [c.chips && c.chips.length ? c.chips.join(' · ') : '', 'meta'], ...c.children.map(p => [txt(p), 'small'])]), n.cols); break;
         case 'gkgrid': boxRow(n.items.map(k => [[k.sphere.toUpperCase(), 'label'], [`Gene Key ${k.num}.${k.line}`, 'h3'], [k.arc.join('  >  '), 'quiet'], [k.field, 'meta'], [txt(k.p), 'small']]), 2); break;
         case 'table': table(n.head, n.rows.map(r => r.map(c => plain(c))), n.cls); break;
@@ -809,6 +820,11 @@ async function downloadPdf(btn) {
     };
     for (const n of S.model) await walk(n);
     footer();
+    return { doc, starts };
+    };
+    const first = await build(null);
+    const { doc } = await build(first.starts);
+    const name = S.D.client.name || 'Client';
     const fname = `chart-analysis-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf`;
     doc.setProperties({ title: `${name} · Chart Analysis` });
     const url = URL.createObjectURL(new File([doc.output('blob')], fname, { type: 'application/pdf' }));
