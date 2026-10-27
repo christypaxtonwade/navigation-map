@@ -188,42 +188,28 @@ body {
 .hd-list-value { font-size: 15px; color: var(--text-secondary); }
 
 /* ── Sequence cards (vellum surface, ink type) ── */
-.seq-grid { display: grid; gap: 1rem; }
-.seq-grid.activation { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-.seq-grid.venus      { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-.seq-grid.pearl      { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-
+.seq-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
 .seq-card {
   background: var(--vellum); color: var(--ink);
   border: 1px solid var(--vellum-deeper); border-radius: 8px;
-  padding: 1.1rem 1.25rem; min-height: 130px;
-  display: flex; flex-direction: column; gap: 0.5rem;
+  padding: 1.1rem 1.25rem;
+  display: flex; flex-direction: column; gap: 0.7rem;
 }
 .seq-card.core { border-color: var(--ink-gold); border-width: 2px; }
+.seq-top { display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: start; }
 .seq-sphere {
   font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600;
-  letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-gold);
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-gold);
 }
-.seq-gk {
-  font-size: 26px; color: var(--ink); font-weight: 500;
-  letter-spacing: -0.01em; line-height: 1;
-}
-.seq-arc {
-  font-size: 15px; color: var(--ink-secondary); font-style: italic;
-  line-height: 1.4;
-}
-.seq-meta {
-  font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-dim);
-  letter-spacing: 0.05em;
-}
-.seq-field {
-  font-size: 15px; color: var(--ink-gold);
-  border-top: 1px solid var(--vellum-deeper); padding-top: 0.5rem;
-}
-.seq-note {
-  font-size: 15px; color: var(--ink-secondary); line-height: 1.5;
-  border-top: 1px dashed var(--vellum-deeper); padding-top: 0.5rem; margin-top: auto;
-}
+.seq-gk { font-size: 30px; color: var(--ink); font-weight: 500; line-height: 1.05; margin-top: 0.15rem; }
+.seq-side { text-align: right; }
+.seq-arc { font-size: 17px; color: var(--ink); font-style: italic; line-height: 1.35; }
+.seq-field { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink-dim); margin-top: 0.2rem; text-transform: none; }
+.seq-lbl { display: block; font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-gold); margin-bottom: 0.25rem; }
+.seq-note, .seq-client { font-size: 16px; color: var(--ink-secondary); line-height: 1.55; border-top: 1px solid var(--vellum-deeper); padding-top: 0.6rem; }
+.seq-client { border-top-style: dashed; }
+.seq-pending { display: block; font-style: italic; color: var(--ink-dim); margin-top: 0.25rem; }
+.seq-meta { display: none; }
 
 /* ── Astrology placements + Map-activations table ── */
 .astro-tier-h {
@@ -580,10 +566,16 @@ async function init() {
     const synthesis = (await sb(`client_chart_synthesis?client_id=eq.${CLIENT_ID}&select=synthesis_text,model,updated_at`).catch(() => []))[0] || null;
     // What has been written from it: the client's chart text and the latest session worksheet.
     if (synthesis) {
-      synthesis.analysis = (await sb(`client_chart_analysis?client_id=eq.${CLIENT_ID}&select=status,updated_at,synthesis_at`).catch(() => []))[0] || null;
+      synthesis.analysis = (await sb(`client_chart_analysis?client_id=eq.${CLIENT_ID}&select=status,updated_at,synthesis_at,content`).catch(() => []))[0] || null;
       synthesis.worksheet = (await sb(`client_session_worksheets?client_id=eq.${CLIENT_ID}&order=created_at.desc&limit=1&select=created_at,synthesis_at`).catch(() => []))[0] || null;
     }
 
+    // Gene Keys card text: the synthesis's reading per sphere (in depth) and what the client reads.
+    const gkOver = await sb(`client_chart_text?client_id=eq.${CLIENT_ID}&section_key=like.gk:*&select=section_key,body`).catch(() => []);
+    GK_TEXT.reading = synGkReadings(synthesis?.synthesis_text);
+    GK_TEXT.client = (synthesis?.analysis?.content?.gk) || {};
+    GK_TEXT.status = synthesis?.analysis?.status || null;
+    GK_TEXT.over = Object.fromEntries((gkOver || []).map(o => [o.section_key, o.body]));
     page.innerHTML = render({ client, birth, hd, gk, refByNum, fieldById, matches,
       placements, aspects, bodyWeights, signFields, houseFields, astSubs, subById, convergence, synthesis });
     wireNotes(birth);
@@ -720,12 +712,13 @@ function downloadChartPdf(btn) {
       const body = Array.from(grid.querySelectorAll('.seq-card')).map(card => {
         const t = sel => pdfClean(((card.querySelector(sel) || {}).textContent || '').trim());
         const cf = [t('.seq-meta'), t('.seq-field')].filter(Boolean).join(' · ');
-        return [t('.seq-sphere'), t('.seq-gk'), t('.seq-arc'), cf, t('.seq-note')];
+        const rd = card.querySelector('.seq-reading'); const rdTxt = rd ? pdfClean(Array.from(rd.childNodes).filter(n => !(n.classList && n.classList.contains('seq-lbl'))).map(n => n.textContent).join('').trim()) : '';
+        return [t('.seq-sphere'), t('.seq-gk'), t('.seq-arc'), cf, rdTxt];
       });
       if (!body.length) return;
       ensure(48);
       doc.autoTable({
-        head: [['Sphere', 'Key', 'Shadow > Gift > Siddhi', 'Center · Field', 'In session']],
+        head: [['Sphere', 'Key', 'Shadow · Gift · Siddhi', 'Field', 'Reading']],
         body, startY: y, margin: { left: margin, right: margin },
         styles: { font: 'times', fontSize: 8, cellPadding: 3, textColor: [28, 23, 13], lineColor: [216, 199, 154], lineWidth: 0.4, overflow: 'linebreak', valign: 'top' },
         headStyles: { fillColor: [122, 86, 24], textColor: [255, 255, 255], fontStyle: 'bold' },
@@ -859,7 +852,6 @@ function renderHeader(client, birth) {
       <div class="header-actions">
         <a href="/portal.html" class="btn btn-back">← Portal</a>
         <button class="btn" onclick="downloadChartPdf(this)">Download PDF</button>
-        ${EMBED ? `<a class="btn" href="chart-admin.html?client_id=${encodeURIComponent(CLIENT_ID)}" target="_blank" rel="noopener">Open in new tab ↗</a>` : ''}
         <span class="last-computed">Last computed: ${computed}</span>
       </div>
     </div>`;
@@ -1158,7 +1150,7 @@ function renderAspects(d) {
   </tr>`).join('');
   return `<div class="section">
     <div class="section-title">Aspects · ${rows.length}</div>
-    <div class="section-intro">Conjunction, opposition, square, trine, sextile and quincunx across every computed body, tightest first. Orb per pair = the average of the two bodies' orbs (Sun/Moon 10°, Mercury–Saturn 8°, Uranus–Pluto 7°, angles 6°, Chiron and Nodes 5°, asteroids and Lilith 3°), scaled by aspect (conjunction/opposition full, square/trine 85%, sextile 60%, quincunx 40%). South Node and IC show conjunctions only.</div>
+    <div class="section-intro">Tightest first. Between the major bodies (Sun through Pluto, Ascendant, Midheaven, Chiron, North Node): conjunction, opposition, square, trine, sextile and quincunx under 4°, and within each pair's own orb (the average of the two bodies' orbs, scaled by aspect: conjunction and opposition full, square and trine 85%, sextile 60%, quincunx 40%). Asteroids, outer minor bodies, Lilith, South Node and IC appear only as a conjunction to a major body within 2°.</div>
     <table class="astro-table"><thead><tr><th>Body</th><th class="ctr">Aspect</th><th>Body</th><th>Type</th><th class="num">Orb</th><th>Motion</th></tr></thead><tbody>${body}</tbody></table>
   </div>`;
 }
@@ -1374,6 +1366,27 @@ function renderHD(hd) {
     </div>`;
 }
 
+// Each card carries two texts that say the same thing at two depths:
+//   Reading     — the synthesis's Gene Keys paragraph for this sphere (practitioner, in depth)
+//   Client reads — the exact teaching the client sees in my-chart.html (their override if one
+//                  exists, otherwise the generated text), concise.
+const GK_TEXT = { reading: {}, client: {}, status: null, over: {} };
+const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII'];
+const SPHERE_BY_TITLE = { "life's work": 'lifes_work', evolution: 'evolution', radiance: 'radiance', purpose: 'purpose', attraction: 'attraction', iq: 'iq', eq: 'eq', sq: 'sq', 'core wound': 'core', core: 'core', vocation: 'vocation', culture: 'culture', brand: 'brand', pearl: 'pearl' };
+// Pull "<Sphere> · <key.line> — text" paragraphs out of the synthesis's **Gene Keys** movement.
+function synGkReadings(raw) {
+  const out = {};
+  const txt = String(raw || '');
+  const m = txt.match(/\*\*\s*Gene Keys\s*\*\*([\s\S]*?)(?=\n\s*\*\*[^*\n]+\*\*\s*\n|$)/i);
+  if (!m) return out;
+  m[1].split(/\n{2,}/).forEach(par => {
+    const h = par.trim().match(/^\**\s*([A-Za-z' ]+?)\s*\**\s*[·•]\s*\d+\.\d\s*\**\s*[—–-]\s*([\s\S]+)$/);
+    if (!h) return;
+    const k = SPHERE_BY_TITLE[h[1].trim().toLowerCase().replace(/’/g, "'")];
+    if (k && !out[k]) out[k] = h[2].trim();
+  });
+  return out;
+}
 function renderSequence(title, intro, klass, gk, refByNum, fieldById, sphereKeys) {
   if (!gk) return `
     <div class="section">
@@ -1386,18 +1399,24 @@ function renderSequence(title, intro, klass, gk, refByNum, fieldById, sphereKeys
     const line = gk[`gk_${k}_line`];
     if (!num) return '';
     const ref = refByNum[num];
-    const field = ref ? fieldById[ref.shadow_field_id || ref.primary_field_id] : null;
-    const arc = ref ? `${ref.shadow} → ${ref.gift} → ${ref.siddhi}` : '';
-    const fieldStr = field ? `Field ${field.number} · ${field.name}` : '—';
+    const field = ref ? fieldById[ref.primary_field_id || ref.shadow_field_id] : null;
+    const arc = ref ? `${ref.shadow} · ${ref.gift} · ${ref.siddhi}` : '';
+    const fieldStr = field ? `Field ${ROMAN[field.number] || field.number} · ${field.name}` : '—';
     const center = ref?.hd_center ? `${ref.hd_center.replace(/_/g,' ')} center` : '';
+    const reading = GK_TEXT.reading[k];
+    const ok = `gk:${num}:${k}`;
+    const hasOver = Object.prototype.hasOwnProperty.call(GK_TEXT.over, ok);
+    const clientTxt = hasOver ? GK_TEXT.over[ok] : GK_TEXT.client[k];
+    const clientTag = hasOver ? 'your edit' : GK_TEXT.status === 'approved' ? 'approved' : GK_TEXT.status ? 'draft' : '';
     return `
       <div class="seq-card${isCore ? ' core' : ''}">
-        <div class="seq-sphere">${label}</div>
-        <div class="seq-gk">${num}.${line}</div>
-        <div class="seq-arc">${arc}</div>
-        <div class="seq-meta">${center}</div>
-        <div class="seq-field">${fieldStr}</div>
-        ${SPHERE_GUIDE[k] ? `<div class="seq-note">${SPHERE_GUIDE[k]}</div>` : ''}
+        <div class="seq-top"><div><div class="seq-sphere">${label}</div><div class="seq-gk">${num}.${line}</div></div>
+          <div class="seq-side"><div class="seq-arc">${arc}</div><div class="seq-field">${fieldStr}${center ? ' · ' + center : ''}</div></div></div>
+        <div class="seq-note seq-reading">${reading ? `<span class="seq-lbl">Reading</span>${escapeHtml(reading)}`
+          : `<span class="seq-lbl">In session</span>${SPHERE_GUIDE[k] || ''}<span class="seq-pending">Regenerate the synthesis to add this sphere's reading.</span>`}</div>
+        <div class="seq-client"><span class="seq-lbl">Client reads${clientTag ? ' · ' + clientTag : ''}</span>${clientTxt === undefined || clientTxt === null
+          ? '<span class="seq-pending">Not written yet. Generate the analysis in Client view.</span>'
+          : clientTxt === '' ? '<span class="seq-pending">Hidden from the client by your edit.</span>' : escapeHtml(clientTxt)}</div>
       </div>`;
   }).join('');
   return `
@@ -1425,7 +1444,7 @@ const SPHERE_GUIDE = {
   pearl:"Where the gift becomes prosperity — the simplest, most natural expression that also provides."
 };
 
-const ACTIVATION_INTRO = `Four keys traced from the Sun and Earth on both sides of the chart. <b>Life's Work</b> is what the body came to express. <b>Evolution</b> is the challenge that calls it forward. <b>Radiance</b> is the body's natural transmission. <b>Purpose</b> is the inherited substrate beneath. Each key's <i>shadow → gift → siddhi</i> is a frequency arc; the Map field beneath it is the terrain of consciousness most precisely activated by that sphere. <b>In practice:</b> this is the spine of a natal read (Your Signal Decoded / Sovereign Signal) — start at Life's Work, locate where they currently sit on each arc (shadow under stress, gift at their best), and let Evolution name the growing edge.`;
+const ACTIVATION_INTRO = `Four keys traced from the Sun and Earth on both sides of the chart. <b>Life's Work</b> is what the body came to express. <b>Evolution</b> is the challenge that calls it forward. <b>Radiance</b> is the body's natural transmission. <b>Purpose</b> is the inherited substrate beneath. Each key's shadow, gift and siddhi are the range of one frequency; the Map field beneath it is the terrain of consciousness most precisely activated by that sphere. <b>In practice:</b> this is the spine of a natal read (Your Signal Decoded / Sovereign Signal) — start at Life's Work, locate where they currently sit on each arc (shadow under stress, gift at their best), and let Evolution name the growing edge.`;
 
 const VENUS_INTRO = `The heart's path, six keys traced through Mars, Venus, and Jupiter. <b>Attraction</b> is what comes toward you. <b>IQ · EQ · SQ</b> are how you meet others mentally, emotionally, spiritually. <b>Core Wound</b> is the pattern at the floor of the line — the deepest unresolved frequency, transmuted into the gift on its other side. Each key's Map field shows where that pattern lands in the topography. <b>In practice:</b> this sequence is relationship and shadow work — the territory of Mirror Work. The Core Wound is the spine; the IQ/EQ/SQ keys describe how the wound distorts contact and what clean contact looks like once the gift comes online.`;
 
