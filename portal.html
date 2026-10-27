@@ -1050,6 +1050,17 @@ body { font-weight: 400; }
 .cd-subnav-link { font-size: 15px; color: var(--gold); text-decoration: none; border-bottom: 1px solid var(--border-hover); }
 .ws-stale { color: var(--amber); }
 .cd-note a { color: var(--gold); text-decoration: underline; text-decoration-color: var(--border-hover); }
+.welcome-h { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin: 2rem 0 0.9rem; }
+.welcome-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+.welcome-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.welcome-card-title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.35rem; color: var(--text); }
+.welcome-card p { font-size: 15px; line-height: 1.6; color: var(--text-secondary); flex: 1; }
+.welcome-card .btn { align-self: flex-start; }
+.welcome-how { padding-left: 1.3rem; max-width: 760px; }
+.welcome-how li { font-size: 16px; line-height: 1.65; color: var(--text-secondary); margin-bottom: 0.4rem; }
+.welcome-intro { max-width: 760px; font-size: 17px; }
+.welcome-edit { width: 100%; }
+#panel-my-chart .chart-frame { border: none; background: transparent; }
 .chart-frame { width: 100%; border: 1px solid var(--border); border-radius: 8px; min-height: 70vh; background: var(--surface); display: block; }
 .cd-note { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dim); margin: 0 0 1rem; line-height: 1.5; }
 
@@ -1482,6 +1493,18 @@ body { font-weight: 400; }
         <div id="client-catalog-content">
           <div class="loading"><span class="loading-glyph">✦</span>Loading the catalog…</div>
         </div>
+      </div>
+
+      <!-- ══ CLIENT: Welcome (first thing a client sees) ══ -->
+      <div class="panel" id="panel-welcome">
+        <div id="client-welcome-content">
+          <div class="loading"><span class="loading-glyph">✦</span>Opening your portal…</div>
+        </div>
+      </div>
+
+      <!-- ══ CLIENT: My Chart (my-chart.html embedded; same session as the portal) ══ -->
+      <div class="panel" id="panel-my-chart">
+        <iframe class="chart-frame" id="client-chart-frame" title="My Chart"></iframe>
       </div>
 
       <!-- ══ CLIENT: My Tapestry ══ -->
@@ -1940,6 +1963,15 @@ function persistSession() {
 let _refreshInflight = null;
 async function ensureFreshToken() {
   if (!accessToken) return false;
+  // Another tab (a chart or archive page) may already have renewed the session. Refresh
+  // tokens are single-use, so adopt the newer stored session instead of spending a stale one.
+  try {
+    const st = JSON.parse(localStorage.getItem('portal_session') || 'null');
+    if (st && st.access_token && st.refresh_token && (st.expires_at || 0) > (tokenExpiresAt || 0)
+        && (!currentUser || !st.user || st.user.id === currentUser.id)) {
+      accessToken = st.access_token; refreshToken = st.refresh_token; tokenExpiresAt = st.expires_at;
+    }
+  } catch {}
   // Refresh if we'll expire in the next 60 seconds (or expiry is unknown)
   const needsRefresh = !tokenExpiresAt || (Date.now() > tokenExpiresAt - 60_000);
   if (!needsRefresh) return true;
@@ -1974,6 +2006,10 @@ async function ensureFreshToken() {
   }
   return _refreshInflight;
 }
+
+// Pages embedded in the portal (My Chart, the working chart) borrow the portal's session
+// instead of renewing it separately, so the two never spend the same refresh token.
+window.portalAccessToken = async () => (await ensureFreshToken()) ? accessToken : null;
 
 // Hard auth failure — clear session and bounce to the login screen with a message.
 function forceReauth(reason) {
@@ -2044,6 +2080,8 @@ async function enterApp() {
     }
   } else {
     showPanel(startPanel);
+    if (startPanel === 'panel-welcome') renderWelcome();
+    if (startPanel === 'panel-my-chart') loadMyChartPanel();
     if (startPanel === 'panel-signal-reading') loadSignalReading();
     if (startPanel === 'panel-client-messages') loadMyMessages();
     if (startPanel === 'panel-my-weaving') loadMyWeaving();
@@ -2095,8 +2133,10 @@ function buildNav() {
   const activeClient = getActiveClientObject();
   const clientTabs = [];
   if (activeClient) {
-    // My Chart opens its own page (my-chart.html) but sits first in the client group.
-    if (activeClient.access_chart) clientTabs.push({ id: 'link-my-chart', label: 'My Chart', href: 'my-chart.html' });
+    // Welcome first: how the portal works and what this client has. My Chart opens inside
+    // the portal (embedded), not in a separate tab.
+    clientTabs.push({ id: 'panel-welcome', label: 'Welcome' });
+    if (activeClient.access_chart) clientTabs.push({ id: 'panel-my-chart', label: 'My Chart' });
     // Signal Reading is independent of access flags. The readings live in the
     // signals_readings / signals_tier2_readings tables (loaded by loadSignalReading),
     // NOT in the legacy clients.signals_reading JSONB — so we always surface the
@@ -2114,7 +2154,7 @@ function buildNav() {
   // Defensive fallback — signed-in client with no access flags shouldn't reach
   // here normally; keep My Weaving with its empty state so the page isn't blank.
   if (clientTabs.length === 0) {
-    clientTabs.push({ id: 'panel-my-weaving', label: 'My Weaving' });
+    clientTabs.push({ id: 'panel-welcome', label: 'Welcome' });
   }
 
   const tabs = (isAdmin && !isPreviewingAsClient) ? adminTabs : clientTabs;
@@ -2144,6 +2184,8 @@ function buildNav() {
     btn.onclick = () => {
       showPanel(t.id);
       if (t.id === 'panel-convergence-admin') loadAllConvergences();
+      if (t.id === 'panel-welcome') renderWelcome();
+      if (t.id === 'panel-my-chart') loadMyChartPanel();
       if (t.id === 'panel-signal-reading') loadSignalReading();
       if (t.id === 'panel-client-messages') loadMyMessages();
       if (t.id === 'panel-my-weaving') loadMyWeaving();
@@ -2196,8 +2238,8 @@ function buildNav() {
   }
   externalLinks.forEach(l => {
     if (adminReference && (l.flag === 'access_weaving' || l.flag === 'access_convergence')) return;
-    if (l.flag && !isAdmin) {
-      // Client must have the flag true on their own row.
+    if (l.flag && (!isAdmin || isPreviewingAsClient)) {
+      // Client (or the client being previewed) must have the flag true on their row.
       if (!activeClient || !activeClient[l.flag]) return;
     }
     const a = document.createElement('a');
@@ -2224,6 +2266,106 @@ function getActiveClientObject() {
   return null;
 }
 
+// ── Client: My Chart (embedded) ───────────────────────
+function loadMyChartPanel() {
+  const f = document.getElementById('client-chart-frame');
+  const c = getActiveClientObject();
+  if (!f || !c) return;
+  const src = `my-chart.html?embed=1${isPreviewingAsClient ? `&client_id=${encodeURIComponent(c.id)}&preview=1` : ''}`;
+  if (f.dataset.src !== src) { f.dataset.src = src; f.src = src; }
+}
+
+// ── Client: Welcome ───────────────────────────────────
+// What the portal is, how to use it, and what this client has, from their access flags.
+// The words live in chart_reference_text (kind 'portal_welcome') so Christy can edit them
+// from Preview as Client; WELCOME_DEFAULT is the fallback until a row exists.
+const WELCOME_DEFAULT = {
+  title: 'Welcome to your portal',
+  intro: 'This is the private space for the work you and Christy do together. What you find here is built from your chart, your lineage and your sessions, and only the two of you can see it. Sections open as the work reaches them, so this page grows with you.',
+  how: 'Use the menu on the left to move between sections. Each one is described below.\nLinks marked ↗ open a full page in a new tab; your portal stays open in this one.\nTo keep or print your chart, open My Chart and choose Generate PDF.\nQuestions between sessions go in Messages. Christy is notified by email, and you will get an email when she replies.\nOn a shared computer, sign out at the top right when you are done.',
+  sec_my_chart: 'Your astrology, Human Design and Gene Keys read together, and the Fields of the Navigation Map where they place you. Download it as a PDF to keep.',
+  sec_signal_reading: 'Your reading from the Signals from the Field quiz: your arc, your Field, your register and the frequency pattern it surfaced. If you have not taken the quiz yet, the link is here.',
+  sec_messages: 'A private thread with Christy, for questions and anything that surfaces between sessions.',
+  sec_my_weaving: 'The ancestors assembled for your lineage research, each carrying a frequency, with the layers of their story.',
+  sec_my_convergence: 'The pattern analysis generated from your ancestral weaving, with a PDF to download.',
+  sec_my_catalog: 'Every ancestor in your archive as one list, for finding a particular name.',
+  sec_my_tapestry: 'The archetypal figures recognized in your work, and the ones you choose to add from the full Mythic Tapestry.',
+  sec_map: 'The full Navigation Map of Consciousness: the thirteen Fields and the terrain within them. Opens in a new tab.',
+};
+let WELCOME_TEXT = null;
+const WELCOME_SECTIONS = [
+  ['panel-my-chart',        'My Chart',       'sec_my_chart',        c => c.access_chart],
+  ['panel-signal-reading',  'Signal Reading', 'sec_signal_reading',  () => true],
+  ['panel-client-messages', 'Messages',       'sec_messages',        () => true],
+  ['panel-my-weaving',      'My Weaving',     'sec_my_weaving',      c => c.access_weaving],
+  ['panel-my-convergence',  'My Convergence', 'sec_my_convergence',  c => c.access_convergence],
+  ['panel-my-catalog',      'My Catalog',     'sec_my_catalog',      c => c.access_catalog],
+  ['panel-my-tapestry',     'My Tapestry',    'sec_my_tapestry',     () => true],
+];
+async function renderWelcome(editing) {
+  const box = document.getElementById('client-welcome-content');
+  const c = getActiveClientObject();
+  if (!box) return;
+  if (!WELCOME_TEXT) {
+    const rows = await rest('chart_reference_text?kind=eq.portal_welcome&select=key,body').catch(() => []);
+    WELCOME_TEXT = { ...WELCOME_DEFAULT, ...Object.fromEntries((Array.isArray(rows) ? rows : []).map(r => [r.key, r.body])) };
+  }
+  const W = WELCOME_TEXT;
+  const canEdit = isAdmin && isPreviewingAsClient;
+  const first = String(c?.name || '').trim().split(/\s+/)[0] || '';
+  const txt = (k, rows) => editing
+    ? `<textarea class="form-textarea welcome-edit" data-key="${k}" rows="${rows || 4}">${cdEsc(W[k] || '')}</textarea>`
+    : cdEsc(W[k] || '');
+  const secs = c ? WELCOME_SECTIONS.filter(([, , , ok]) => ok(c)) : [];
+  const how = editing ? txt('how', 6)
+    : `<ol class="welcome-how">${String(W.how || '').split(/\n+/).filter(Boolean).map(l => `<li>${cdEsc(l)}</li>`).join('')}</ol>`;
+  box.innerHTML = `
+    <div class="panel-header">
+      <div class="eyebrow">${first ? 'Welcome, ' + cdEsc(first) : 'Welcome'}</div>
+      <div class="panel-title">${editing ? `<input class="form-input welcome-edit" data-key="title" value="${cdEsc(W.title)}">` : cdEsc(W.title)}</div>
+      <p class="panel-sub welcome-intro">${txt('intro', 4)}</p>
+      ${canEdit ? `<div class="cd-actions" style="margin-top:0.75rem">${editing
+        ? `<button class="btn btn-gold btn-sm" onclick="saveWelcome(this)">Save welcome text</button> <button class="btn btn-outline btn-sm" onclick="renderWelcome(false)">Cancel</button> <span class="cd-status" id="welcome-status">Saved text applies to every client.</span>`
+        : `<button class="btn btn-outline btn-sm" onclick="renderWelcome(true)">Edit welcome text</button> <span class="cd-status">You are seeing ${cdEsc(first || 'this client')}'s version; sections follow their access.</span>`}</div>` : ''}
+    </div>
+    <h3 class="welcome-h">What's here for you</h3>
+    <div class="welcome-grid">
+      ${secs.map(([pid, label, key]) => `
+        <div class="welcome-card">
+          <div class="welcome-card-title">${label}</div>
+          <p>${txt(key, 5)}</p>
+          ${editing ? '' : `<button class="btn btn-outline btn-sm" onclick="welcomeOpen('${pid}')">Open ${label}</button>`}
+        </div>`).join('')}
+      <div class="welcome-card">
+        <div class="welcome-card-title">The Map ↗</div>
+        <p>${txt('sec_map', 5)}</p>
+        ${editing ? '' : `<a class="btn btn-outline btn-sm" href="index.html${c ? '?client_id=' + encodeURIComponent(c.id) : ''}" target="_blank" rel="noopener">Open the Map ↗</a>`}
+      </div>
+    </div>
+    <h3 class="welcome-h">Finding your way</h3>
+    ${how}`;
+}
+function welcomeOpen(pid) {
+  const btn = document.querySelector(`#sidebar-panel-nav .sidebar-nav-item[data-panel="${pid}"]`);
+  if (btn) btn.click(); else showPanel(pid);
+}
+async function saveWelcome(btn) {
+  const st = document.getElementById('welcome-status');
+  const rows = [...document.querySelectorAll('.welcome-edit')].map(el => ({ kind: 'portal_welcome', key: el.dataset.key, title: null, body: el.value.trim(), updated_at: new Date().toISOString() }));
+  btn.disabled = true; st.textContent = 'saving…';
+  try {
+    if (!(await ensureFreshToken())) throw new Error('session expired');
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/chart_reference_text?on_conflict=kind,key`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(rows),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    rows.forEach(r => { WELCOME_TEXT[r.key] = r.body; });
+    renderWelcome(false);
+  } catch (e) { st.textContent = 'failed: ' + e.message; btn.disabled = false; }
+}
+
 // ── Hash routing ──────────────────────────────────────
 // Maps URL hash → panel ID for browser back/forward support
 const ADMIN_HASH_MAP = {
@@ -2238,6 +2380,8 @@ const ADMIN_HASH_MAP = {
   '#tapestry':            'panel-tapestry',
 };
 const CLIENT_HASH_MAP = {
+  '#welcome':        'panel-welcome',
+  '#my-chart':       'panel-my-chart',
   '#signal-reading': 'panel-signal-reading',
   '#messages':       'panel-client-messages',
   '#my-weaving':     'panel-my-weaving',
@@ -2262,7 +2406,7 @@ function panelForHash(hash) {
   return map[hash] || null;
 }
 function defaultPanel() {
-  return (isAdmin && !isPreviewingAsClient) ? 'panel-overview' : 'panel-my-weaving';
+  return (isAdmin && !isPreviewingAsClient) ? 'panel-overview' : 'panel-welcome';
 }
 
 // Listen for back/forward navigation
@@ -2329,11 +2473,11 @@ function startPreview(clientId) {
   document.getElementById('btn-toggle-view').classList.add('previewing');
   buildNav();
   updateSiteLinksForActiveClient();
-  // Choose first available client panel based on the previewed client's access flags.
-  // Defaults to My Weaving when present; otherwise picks the first tab buildNav() rendered.
+  // Lands on Welcome, the first client panel, exactly as the client sees it after signing in.
   const firstTab = document.querySelector('#sidebar-panel-nav .sidebar-nav-item[data-panel]');
-  const targetPanel = firstTab?.dataset.panel || 'panel-my-weaving';
+  const targetPanel = firstTab?.dataset.panel || 'panel-welcome';
   showPanel(targetPanel);
+  if (targetPanel === 'panel-welcome') renderWelcome();
   if (targetPanel === 'panel-signal-reading') loadSignalReading();
   else if (targetPanel === 'panel-client-messages') loadMyMessages();
   else if (targetPanel === 'panel-my-weaving') loadMyWeaving();
@@ -2921,9 +3065,8 @@ function cdLoadChartFrame() {
 }
 // my-chart.html (embed mode) reports its height so the frame never scrolls on its own.
 window.addEventListener('message', e => {
-  if (e.origin !== window.location.origin || !e.data) return;
-  const f = e.data.type === 'my-chart-height' ? document.getElementById('cd-chart-frame')
-          : e.data.type === 'chart-admin-height' ? document.getElementById('cd-working-frame') : null;
+  if (e.origin !== window.location.origin || !e.data || !/^(my-chart|chart-admin)-height$/.test(e.data.type || '')) return;
+  const f = [...document.querySelectorAll('iframe.chart-frame')].find(x => x.contentWindow === e.source);
   if (!f) return;
   if (f) f.style.height = Math.max(600, Number(e.data.height) || 0) + 'px';
 });

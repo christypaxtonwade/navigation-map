@@ -193,6 +193,9 @@ function readPortalSession() {
 function writePortalSession(s) { const p = JSON.stringify(s); try { sessionStorage.setItem('portal_session', p); } catch {} try { localStorage.setItem('portal_session', p); } catch {} }
 let _refresh = null;
 async function token() {
+  // Inside the portal, borrow its session (one owner for the refresh token, so the portal
+  // never gets signed out by this page renewing the session on its own).
+  try { if (window.parent !== window && typeof window.parent.portalAccessToken === 'function') { const t = await window.parent.portalAccessToken(); if (t) return t; } } catch {}
   const s = readPortalSession(); if (!s) return null;
   const now = Date.now(), expired = s.expires_at && now > s.expires_at;
   if (s.expires_at && now < s.expires_at - 60000) return s.access_token;

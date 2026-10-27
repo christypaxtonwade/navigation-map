@@ -407,6 +407,8 @@ function writePortalSession(session) {
 }
 let _refreshInflight = null;
 async function getFreshAccessToken() {
+  // Inside the portal, borrow its session rather than renewing it separately.
+  try { if (window.parent !== window && typeof window.parent.portalAccessToken === 'function') { const t = await window.parent.portalAccessToken(); if (t) return t; } } catch {}
   const { session } = readPortalSession();
   if (!session) return null;
   const now = Date.now();
