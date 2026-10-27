@@ -6,29 +6,30 @@
 <title>Chart · Admin · Navigation Map</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ── readability-standard.md — warm walnut frame + vellum reading surfaces ── */
+/* ── readability-standard.md v4 vellum (2026-10-26) — light page, ink type, matches portal.html ── */
 :root {
-  --bg: #1c1812;
-  --surface: #251f18;
-  --surface-2: #2e261e;
-  --text: #f0e6cc;
-  --text-secondary: #d4c7a8;
-  --text-dim: #b8a98a;
-  --text-faint: #8f826a;
-  --gold: #b08030;
-  --gold-bright: #c9a04a;
-  --gold-dim: rgba(176,128,48,0.72);
-  --border: rgba(176,128,48,0.18);
-  --accent: rgba(176,128,48,0.08);
-  /* vellum / ink for reading surfaces */
+  --bg: #f4eedd;
+  --surface: #fbf7ec;
+  --surface-2: #efe7d2;
+  --text: #14110a;
+  --text-secondary: #2b2414;
+  --text-dim: #4e4228;
+  --text-faint: #665839;
+  --gold: #7a5618;
+  --gold-bright: #5e4110;
+  --gold-dim: rgba(122,86,24,0.55);
+  --border: rgba(122,86,24,0.22);
+  --accent: rgba(122,86,24,0.08);
+  /* vellum / ink for card surfaces */
   --vellum: #e8dcbb;
   --vellum-deeper: #d3c599;
   --ink: #14110a;
   --ink-secondary: #2b2414;
   --ink-dim: #4e4228;
-  --ink-faint: #78694a;
+  --ink-faint: #665839;
   --ink-gold: #7a5618;
-  --ink-gold-bright: #a07428;
+  --ink-gold-bright: #7a3216;
+  --somatic: #7a3216;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -100,7 +101,7 @@ body {
   letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint);
 }
 .field-input, .field-select {
-  background: rgba(0,0,0,0.25); color: var(--text);
+  background: #fffdf6; color: var(--text);
   border: 1px solid var(--border); border-radius: 4px;
   padding: 9px 11px; font-family: 'Jost', sans-serif; font-size: 15px;
   outline: none; transition: border-color 0.15s;
@@ -132,9 +133,10 @@ body {
   margin-top: 0.5rem;
 }
 .btn-primary {
-  background: var(--gold); color: var(--bg); border: 1px solid var(--gold);
+  background: var(--gold); color: #fbf7ec; border: 1px solid var(--gold);
 }
-.btn-primary:hover { background: var(--gold-bright); border-color: var(--gold-bright); color: var(--bg); }
+.btn-primary:hover { background: var(--gold-bright); border-color: var(--gold-bright); color: #fbf7ec; }
+.btn[disabled] { opacity: 0.88; cursor: not-allowed; }
 .form-status {
   font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dim);
   letter-spacing: 0.05em;
@@ -147,7 +149,7 @@ body {
   background: var(--surface); border: 1px solid var(--gold-dim);
   border-top: none; border-radius: 0 0 4px 4px;
   max-height: 280px; overflow-y: auto;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 24px rgba(20,17,10,0.12);
   display: none;
 }
 .autocomplete-list.show { display: block; }
@@ -280,6 +282,25 @@ body {
 .cq-h { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.05em; color: var(--gold); margin-bottom: 0.4rem; }
 .cq-list { margin: 0; padding-left: 1.2rem; }
 .cq-list li { font-size: 15px; color: var(--text); line-height: 1.5; margin-bottom: 0.2rem; }
+.syn-read { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem 1.75rem; font-size: 17px; line-height: 1.65; color: var(--text); }
+.syn-read h4 { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); margin: 1.4rem 0 0.45rem; }
+.syn-read h4:first-child { margin-top: 0; }
+.syn-read p { margin-bottom: 0.8rem; }
+.syn-read p:last-child { margin-bottom: 0; }
+.syn-flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.75rem; margin: 0 0 1rem; }
+.syn-flow > div { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 0.7rem 0.9rem; font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-secondary); line-height: 1.45; }
+.syn-flow b { display: block; font-weight: 600; color: var(--text); letter-spacing: 0.04em; margin-bottom: 0.15rem; }
+.syn-flow .stale { border-color: rgba(122,50,22,0.45); }
+.syn-flow .stale span { color: var(--somatic); }
+.syn-edit { display: none; }
+.syn-editing .syn-read { display: none; }
+.syn-editing .syn-edit { display: block; }
+.header + .section { border-top: none; margin-top: 0; padding-top: 0.5rem; }
+body.embed { background: var(--bg); min-height: 0; }
+body.embed .page { max-width: none; padding: 0.25rem 0.25rem 2rem; }
+body.embed .client-name, body.embed .btn-back { display: none; }
+body.embed .header { margin-bottom: 1.5rem; padding-bottom: 1.25rem; }
+body.embed .section { margin-top: 2.5rem; padding-top: 1.75rem; }
 .synthesis-text { width: 100%; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 16px; line-height: 1.65; min-height: 340px; resize: vertical; }
 
 /* ── Planet positions table ── */
@@ -301,7 +322,7 @@ body {
 .planets-table td { color: var(--text-secondary); }
 .planets-table td.body-name { color: var(--text); font-weight: 500; text-transform: capitalize; }
 .planets-table td.gate { color: var(--gold); font-weight: 500; }
-.planets-table tr.design td { background: rgba(176,128,48,0.04); }
+.planets-table tr.design td { background: rgba(122,86,24,0.04); }
 .planets-table .retrograde { color: var(--ink-gold-bright); font-style: italic; }
 
 /* ── Lineage resonance matches ── */
@@ -335,9 +356,9 @@ body {
   letter-spacing: 0.12em; text-transform: uppercase;
   padding: 3px 9px; border-radius: 4px; white-space: nowrap;
 }
-.match-strength.dominant { background: rgba(176,128,48,0.18); color: var(--gold-bright); }
-.match-strength.emerging { background: rgba(176,128,48,0.10); color: var(--gold); }
-.match-strength.noted    { background: rgba(176,128,48,0.05); color: var(--text-dim); }
+.match-strength.dominant { background: rgba(122,86,24,0.18); color: var(--gold-bright); }
+.match-strength.emerging { background: rgba(122,86,24,0.10); color: var(--gold); }
+.match-strength.noted    { background: rgba(122,86,24,0.05); color: var(--text-dim); }
 
 /* ── Private notes ── */
 .notes-wrap {
@@ -362,9 +383,9 @@ body {
   font-style: italic; font-size: 1.1rem;
 }
 .error-box {
-  background: rgba(192,112,96,0.08); border: 1px solid rgba(192,112,96,0.4);
+  background: rgba(154,59,42,0.06); border: 1px solid rgba(154,59,42,0.35);
   border-radius: 8px; padding: 1.5rem;
-  color: #e09a8c; font-style: italic;
+  color: #9a3b2a; font-style: italic;
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
@@ -472,6 +493,8 @@ async function sbPatch(table, idCol, idVal, body) {
 // ── Page state ──
 const params = new URLSearchParams(window.location.search);
 const CLIENT_ID = params.get('client_id');
+const EMBED = params.get('embed') === '1';   // inside the portal's Chart tab
+if (EMBED) document.body.classList.add('embed');
 
 const SPHERE_LABELS = {
   // Activation
@@ -555,6 +578,11 @@ async function init() {
 
     // AI working brief (internal), if one has been generated.
     const synthesis = (await sb(`client_chart_synthesis?client_id=eq.${CLIENT_ID}&select=synthesis_text,model,updated_at`).catch(() => []))[0] || null;
+    // What has been written from it: the client's chart text and the latest session worksheet.
+    if (synthesis) {
+      synthesis.analysis = (await sb(`client_chart_analysis?client_id=eq.${CLIENT_ID}&select=status,updated_at,synthesis_at`).catch(() => []))[0] || null;
+      synthesis.worksheet = (await sb(`client_session_worksheets?client_id=eq.${CLIENT_ID}&order=created_at.desc&limit=1&select=created_at,synthesis_at`).catch(() => []))[0] || null;
+    }
 
     page.innerHTML = render({ client, birth, hd, gk, refByNum, fieldById, matches,
       placements, aspects, bodyWeights, signFields, houseFields, astSubs, subById, convergence, synthesis });
@@ -825,12 +853,13 @@ function renderHeader(client, birth) {
     : 'No birth data on file. Enter the data below and Save & Recompute.';
   return `
     <div class="header">
-      <div class="eyebrow">Chart · Admin</div>
+      <div class="eyebrow">Working chart${EMBED ? '' : ' · Admin'}</div>
       <div class="client-name">${client.name}</div>
       <div class="birth-line">${birthLine}</div>
       <div class="header-actions">
         <a href="/portal.html" class="btn btn-back">← Portal</a>
         <button class="btn" onclick="downloadChartPdf(this)">Download PDF</button>
+        ${EMBED ? `<a class="btn" href="chart-admin.html?client_id=${encodeURIComponent(CLIENT_ID)}" target="_blank" rel="noopener">Open in new tab ↗</a>` : ''}
         <span class="last-computed">Last computed: ${computed}</span>
       </div>
     </div>`;
@@ -1171,28 +1200,70 @@ function renderChartQuizConvergence(d) {
 }
 
 // ── Chart Synthesis (AI working brief, internal) ──
+// The source reading. The client's chart text (generate-client-chart-analysis) and the session
+// worksheets (generate-session-worksheet) are both written from the saved version, so it is
+// edited here first. The textarea stays in the DOM (hidden in read view) — the PDF reads it.
+function synMarkdown(raw) {
+  const out = [];
+  String(raw || '').split(/\n{2,}/).forEach(block => {
+    const t = block.trim(); if (!t) return;
+    const h = t.match(/^\*\*(.+?)\*\*\s*$/);
+    if (h) { out.push(`<h4>${escapeHtml(h[1])}</h4>`); return; }
+    out.push(`<p>${escapeHtml(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>')}</p>`);
+  });
+  return out.join('');
+}
+function synWhen(t) { return t ? new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''; }
+function synDownstream(s) {
+  const same = t => t && Math.abs(new Date(s.updated_at) - new Date(t)) <= 1000;
+  const an = s.analysis, ws = s.worksheet;
+  const anTxt = !an ? 'Not written yet. Generate it in Client view.'
+    : same(an.synthesis_at) ? `Written from this version · ${an.status === 'approved' ? 'approved, the client sees it' : 'draft, only you see it'}.`
+    : 'Written from an earlier version. Regenerate in Client view to bring it in line.';
+  const wsTxt = !ws ? 'None yet. Generate one on the Session tab.'
+    : same(ws.synthesis_at) ? `Latest (${synWhen(ws.created_at)}) written from this version.`
+    : `Latest (${synWhen(ws.created_at)}) written from an earlier version.`;
+  return `<div class="syn-flow no-pdf">
+      <div><b>This synthesis</b><span>Saved ${escapeHtml(synWhen(s.updated_at))}. The source for everything below.</span></div>
+      <div class="${an && !same(an.synthesis_at) ? 'stale' : ''}"><b>Client chart text</b><span>${anTxt}</span></div>
+      <div class="${ws && !same(ws.synthesis_at) ? 'stale' : ''}"><b>Session worksheet</b><span>${wsTxt}</span></div>
+    </div>`;
+}
 function renderSynthesis(d) {
   const s = d.synthesis;
-  const updated = s?.updated_at ? new Date(s.updated_at).toLocaleString() : '';
   const has = s && s.synthesis_text;
-  return `<div class="section">
-    <div class="section-title">Chart Synthesis · working brief (internal)</div>
-    <div class="section-intro">An AI synthesis of this client's chart, Gene Keys, Human Design, Map terrain, and — if present — their Signals convergence, written in your voice for your eyes. Editable; regenerate after a recompute. Never shown to the client.</div>
+  return `<div class="section" id="synthesis-section">
+    <div class="section-title">Chart Synthesis · source reading (internal)</div>
+    <div class="section-intro">Your working interpretation of this chart, its Gene Keys, Human Design, Map terrain and, if present, the Signals convergence. The client's chart text and the session worksheets are written from the saved version, so they stay one reading at different depths. Edit here first. Never shown to the client.</div>
     ${has ? `
-      <textarea class="field-input synthesis-text" id="synthesis-text" rows="16">${escapeHtml(s.synthesis_text)}</textarea>
-      <div class="form-actions" style="margin-top:0.65rem">
-        <button class="btn btn-primary" onclick="cdSaveSynthesis()">Save edits</button>
+      ${synDownstream(s)}
+      <div class="syn-read" id="synthesis-read">${synMarkdown(s.synthesis_text)}</div>
+      <div class="syn-edit"><textarea class="field-input synthesis-text" id="synthesis-text" rows="18">${escapeHtml(s.synthesis_text)}</textarea></div>
+      <div class="form-actions no-pdf" style="margin-top:0.75rem">
+        <button class="btn" id="syn-edit-btn" onclick="synToggleEdit(true)">Edit</button>
+        <button class="btn btn-primary syn-edit" onclick="cdSaveSynthesis()">Save edits</button>
+        <button class="btn syn-edit" onclick="synToggleEdit(false)">Cancel</button>
         <button class="btn" onclick="cdGenerateSynthesis()">Regenerate</button>
-        <span class="form-status" id="synthesis-status">${updated ? 'last generated ' + escapeHtml(updated) : ''}</span>
+        <span class="form-status" id="synthesis-status"></span>
       </div>` : `
       <button class="btn btn-primary" onclick="cdGenerateSynthesis()">Generate synthesis</button>
       <span class="form-status" id="synthesis-status" style="margin-left:0.6rem"></span>
-      <div class="matches-empty" style="margin-top:0.6rem">No synthesis yet. Generate one once the chart is computed.</div>`}
+      <div class="matches-empty" style="margin-top:0.6rem">No synthesis yet. Generate one once the chart is computed. The client chart text and session worksheets wait for it.</div>`}
   </div>`;
+}
+function synToggleEdit(on) {
+  const sec = document.getElementById('synthesis-section'); if (!sec) return;
+  sec.classList.toggle('syn-editing', on);
+  const b = document.getElementById('syn-edit-btn'); if (b) b.style.display = on ? 'none' : '';
+  sec.querySelectorAll('button.syn-edit').forEach(x => x.style.display = on ? 'inline-block' : 'none');
+  if (!on) { const ta = document.getElementById('synthesis-text'), rd = document.getElementById('synthesis-read'); if (ta && rd && ta.dataset.saved) ta.value = ta.dataset.saved; }
+  else { const ta = document.getElementById('synthesis-text'); if (ta) { ta.dataset.saved = ta.dataset.saved || ta.value; ta.focus(); } }
+  postHeight();
 }
 
 async function cdGenerateSynthesis() {
   const status = document.getElementById('synthesis-status');
+  if (document.getElementById('synthesis-text') && !confirm('Regenerate the synthesis? It replaces the current text, including your edits. The client chart text and worksheets will then show as written from an earlier version until you regenerate them.')) return;
   if (status) status.textContent = 'generating… (~15s)';
   try {
     const token = await getFreshAccessToken();
@@ -1214,7 +1285,8 @@ async function cdSaveSynthesis() {
   if (status) status.textContent = 'saving…';
   try {
     await sbPatch('client_chart_synthesis', 'client_id', CLIENT_ID, { synthesis_text: ta.value, updated_at: new Date().toISOString() });
-    if (status) status.textContent = 'saved · ' + new Date().toLocaleTimeString();
+    if (status) status.textContent = 'saved — refreshing…';
+    setTimeout(() => location.reload(), 400);
   } catch (e) { if (status) status.textContent = 'failed: ' + e.message; }
 }
 
@@ -1670,6 +1742,13 @@ function wireSaveAndRecompute(client) {
   });
 }
 
+// Inside the portal (embed=1): report height so the iframe never scrolls on its own.
+function postHeight() {
+  if (!EMBED || window.parent === window) return;
+  try { window.parent.postMessage({ type: 'chart-admin-height', height: document.documentElement.scrollHeight }, window.location.origin); } catch {}
+}
+if (EMBED && 'ResizeObserver' in window) new ResizeObserver(postHeight).observe(document.body);
+window.addEventListener('load', postHeight);
 init();
 </script>
 </body>

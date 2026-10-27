@@ -1045,6 +1045,11 @@ body { font-weight: 400; }
   background: var(--surface); color: var(--text-dim); cursor: pointer; }
 .cd-subnav button + button { border-left: 1px solid var(--border); }
 .cd-subnav button.active { background: var(--gold); color: #fbf7ec; }
+.cd-subbar { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.cd-subbar .cd-subnav { margin-bottom: 0; }
+.cd-subnav-link { font-size: 15px; color: var(--gold); text-decoration: none; border-bottom: 1px solid var(--border-hover); }
+.ws-stale { color: var(--amber); }
+.cd-note a { color: var(--gold); text-decoration: underline; text-decoration-color: var(--border-hover); }
 .chart-frame { width: 100%; border: 1px solid var(--border); border-radius: 8px; min-height: 70vh; background: var(--surface); display: block; }
 .cd-note { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dim); margin: 0 0 1rem; line-height: 1.5; }
 
@@ -2437,8 +2442,9 @@ async function loadClientDetail() {
       ]);
     }
 
-    const worksheets = await rest(`client_session_worksheets?client_id=eq.${id}&order=created_at.desc&select=id,requests,session_minutes,content,created_at`).catch(() => []);
-    currentDetailData = { worksheets: Array.isArray(worksheets) ? worksheets : [], client, birth, hd, gk, ancestors, convs, refByNum, fieldById, resonance: resonance || [], allTapestry: allTapestry || [], planets: planets || [], sig1: sig1 || [], sig2: sig2 || [], recentConv, convSections: convSections || [], threshold, sevenGates: Array.isArray(sevenGates) ? sevenGates : [] };
+    const worksheets = await rest(`client_session_worksheets?client_id=eq.${id}&order=created_at.desc&select=id,requests,session_minutes,content,created_at,synthesis_at`).catch(() => []);
+    const synRow = (await rest(`client_chart_synthesis?client_id=eq.${id}&select=updated_at`).catch(() => []))[0] || null;
+    currentDetailData = { worksheets: Array.isArray(worksheets) ? worksheets : [], synthesis: synRow, client, birth, hd, gk, ancestors, convs, refByNum, fieldById, resonance: resonance || [], allTapestry: allTapestry || [], planets: planets || [], sig1: sig1 || [], sig2: sig2 || [], recentConv, convSections: convSections || [], threshold, sevenGates: Array.isArray(sevenGates) ? sevenGates : [] };
 
     document.getElementById('cd-title').textContent = client.name || '—';
     document.getElementById('cd-subtitle').textContent =
@@ -2672,7 +2678,7 @@ function cdHeaderHtml(d) {
   const actions = `
     <button class="btn btn-gold btn-sm" onclick="startPreview('${c.id}')">Preview as client</button>
     <button class="btn btn-outline btn-sm" onclick="cdShowSection('messages')">Message</button>
-    <a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${cid}" target="_blank" rel="noopener">Working chart ↗</a>`;
+    <button class="btn btn-outline btn-sm" onclick="cdOpenWorkingChart()" title="Synthesis, birth data and the full working chart">Working chart</button>`;
   const login = c.auth_user_id
     ? '<span class="tag on">Portal login active</span>'
     : (c.email ? `<button class="btn btn-outline btn-sm" onclick="inviteClient('${c.id}', this)">Invite to portal</button>` : '<span class="tag">Add an email to invite</span>');
@@ -2718,14 +2724,21 @@ function cdSessionTab(d) {
   const ws = d.worksheets || [];
   const pre = ws[0] ? ws[0].requests : cdWsPrefill(d.client);
   const hasChart = !!(d.birth || d.gk || d.hd);
+  const syn = d.synthesis;
+  const ready = hasChart && !!syn;
+  const why = !hasChart ? 'No chart yet. Enter birth data in Working chart first.'
+    : !syn ? 'No chart synthesis yet. The worksheet is built from it.' : '';
+  const synNote = syn ? `<p class="cd-note">Built from the chart synthesis saved ${new Date(syn.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}. <a href="#" onclick="cdOpenWorkingChart();return false">Review it in Working chart</a>.</p>`
+    : hasChart ? `<p class="cd-note"><a href="#" onclick="cdOpenWorkingChart();return false">Generate the synthesis in Working chart</a>, then come back here.</p>` : '';
   return `
     <div class="cd-card full" style="margin-bottom:1.25rem">
       <h3 class="cd-card-title">What they asked for</h3>
+      ${synNote}
       <p class="cd-note">Prefilled from ${ws[0] ? 'the last worksheet' : 'their intake answers'}. Add what they asked for at booking, in their words where you can — one request per line works best.</p>
       <textarea class="form-textarea" id="cd-ws-req" rows="6" placeholder="e.g. Why do I keep leaving jobs at the two-year mark? · My mother's illness and what I'm carrying from her · Whether to start the program in January">${cdEsc(pre)}</textarea>
       <div class="cd-actions" style="margin-top:0.75rem">
-        <button class="btn btn-gold btn-sm" id="cd-ws-gen" onclick="cdWsGenerate(this)" ${hasChart ? '' : 'disabled title="Compute the chart first"'}>Generate 90-minute worksheet</button>
-        <span class="cd-status" id="cd-ws-status">${hasChart ? '' : 'No chart yet — enter birth data in the working chart first.'}</span>
+        <button class="btn btn-gold btn-sm" id="cd-ws-gen" onclick="cdWsGenerate(this)" ${ready ? '' : 'disabled title="' + why + '"'}>Generate 90-minute worksheet</button>
+        <span class="cd-status" id="cd-ws-status">${why}</span>
       </div>
     </div>
     <div id="cd-ws-view">${ws.length ? cdWsView(d, ws[0].id) : ''}</div>`;
@@ -2745,6 +2758,7 @@ function cdWsView(d, id) {
           <button class="btn btn-outline btn-sm" onclick="cdWsPdf('${w.id}', 'handout', this)">Client handout PDF</button>
         </div>
       </div>
+      ${d.synthesis && (!w.synthesis_at || Math.abs(new Date(d.synthesis.updated_at) - new Date(w.synthesis_at)) > 1000) ? `<p class="cd-note ws-stale">The chart synthesis has changed since this worksheet was written. Generate a new one to bring it in line.</p>` : ''}
       ${c.focus ? `<p class="ws-focus">${cdEsc(c.focus)}</p>` : ''}
       <h4 class="ws-h">Flow</h4>
       <table class="off-table ws-flow"><thead><tr><th>Minutes</th><th>Segment</th><th>What to do</th></tr></thead><tbody>
@@ -2771,7 +2785,7 @@ async function cdWsGenerate(btn) {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-session-worksheet`, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ client_id: currentDetailClient, requests, session_minutes: 90 }) });
     const out = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(out.details || out.error || ('HTTP ' + res.status));
-    const rows = await rest(`client_session_worksheets?client_id=eq.${currentDetailClient}&order=created_at.desc&select=id,requests,session_minutes,content,created_at`);
+    const rows = await rest(`client_session_worksheets?client_id=eq.${currentDetailClient}&order=created_at.desc&select=id,requests,session_minutes,content,created_at,synthesis_at`);
     currentDetailData.worksheets = Array.isArray(rows) ? rows : [];
     document.getElementById('cd-ws-view').innerHTML = cdWsView(currentDetailData, out.id);
     st.textContent = 'worksheet ready';
@@ -2785,10 +2799,10 @@ function wsShowPdf(win, url, fname, title) {
   win.document.open();
   win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${e(title)}</title><style>
     html, body { margin: 0; height: 100%; background: #fbf7ec; font-family: Jost, Helvetica, Arial, sans-serif; }
-    .bar { height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0 1.25rem; background: #1c1812; color: #f0e6cc; box-sizing: border-box; }
+    .bar { height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0 1.25rem; background: #efe7d2; color: #14110a; border-bottom: 1px solid rgba(122,86,24,0.3); box-sizing: border-box; }
     .bar .t { font-family: Georgia, serif; font-size: 18px; } .bar .b { display: flex; gap: 0.6rem; }
-    .bar a, .bar button { font: 500 15px Jost, Helvetica, Arial, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 16px; border-radius: 3px; border: 1px solid #c9a04a; background: transparent; color: #c9a04a; cursor: pointer; text-decoration: none; }
-    .bar .solid { background: #b08030; color: #1c1812; border-color: #b08030; }
+    .bar a, .bar button { font: 500 15px Jost, Helvetica, Arial, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 16px; border-radius: 3px; border: 1px solid #7a5618; background: transparent; color: #7a5618; cursor: pointer; text-decoration: none; }
+    .bar .solid { background: #7a5618; color: #fbf7ec; border-color: #7a5618; }
     iframe { display: block; width: 100%; height: calc(100% - 56px); border: 0; }
   </style></head><body><div class="bar"><span class="t">${e(title)}</span><span class="b"><button class="solid" id="p">Print</button><a href="${url}" download="${e(fname)}">Download</a></span></div>
   <iframe id="f" src="${url}#toolbar=0&view=FitH" title="${e(title)}"></iframe></body></html>`);
@@ -2861,24 +2875,25 @@ async function cdWsPdf(id, kind, btn) {
 function cdChartTab(d) {
   const c = d.client;
   const hasChart = !!(d.birth || d.gk || d.hd);
+  const cid = encodeURIComponent(c.id);
   const clientView = hasChart ? `
-      <p class="cd-note">Exactly what ${cdEsc(c.name || 'this client')} reads${c.access_chart ? '' : ' once you turn Chart on in the header'}. Turn on <b>Show edit controls</b> inside to change a passage for this client only or for every client.</p>
+      <p class="cd-note">Exactly what ${cdEsc(c.name || 'this client')} reads${c.access_chart ? '' : ' once you turn Chart on in the header'}. The teaching text is written from the saved synthesis in Working chart. Turn on <b>Show edit controls</b> inside to change a passage for this client only or for every client.</p>
       <iframe class="chart-frame" id="cd-chart-frame" title="Client chart" loading="lazy"></iframe>`
-    : `<div class="cd-card full"><div class="cd-value muted">No chart yet. Enter birth data in the working chart to compute it.</div>
-        <div class="cd-actions" style="margin-top:1rem"><a class="btn btn-gold btn-sm" href="chart-admin.html?client_id=${encodeURIComponent(c.id)}" target="_blank" rel="noopener">Enter birth data ↗</a></div></div>`;
+    : `<div class="cd-card full"><div class="cd-value muted">No chart yet. Enter birth data in Working chart to compute it; the client view appears once it is computed.</div>
+        <div class="cd-actions" style="margin-top:1rem"><button class="btn btn-gold btn-sm" onclick="cdChartView('working')">Enter birth data</button></div></div>`;
+  // One working chart: chart-admin.html embedded (synthesis first, then birth data, placements,
+  // aspects, Human Design, Gene Keys, lineage resonance, notes). No second summary here.
   return `
-    <div class="cd-subnav">
-      <button class="active" data-chart="client" onclick="cdChartView('client')">Client view</button>
-      <button data-chart="working" onclick="cdChartView('working')">Working view</button>
+    <div class="cd-subbar">
+      <div class="cd-subnav">
+        <button class="active" data-chart="client" onclick="cdChartView('client')">Client view</button>
+        <button data-chart="working" onclick="cdChartView('working')">Working chart · synthesis</button>
+      </div>
+      <a class="cd-subnav-link" href="chart-admin.html?client_id=${cid}" target="_blank" rel="noopener">Open working chart in a new tab ↗</a>
     </div>
     <div id="cd-chart-client">${clientView}</div>
     <div id="cd-chart-working" style="display:none">
-      <div class="cd-grid">${cdBirthDataCard(d)}${cdChartSummaryCard(d)}</div>
-      <div class="cd-card full" style="margin-bottom:1.25rem">
-        <h3 class="sp-card-title">Placements &amp; Gene Keys</h3>
-        ${cdChartPlacementsBlock(d)}
-        ${cdGeneKeysBlock(d)}
-      </div>
+      <iframe class="chart-frame" id="cd-working-frame" title="Working chart" loading="lazy"></iframe>
     </div>`;
 }
 function cdChartView(which) {
@@ -2886,7 +2901,18 @@ function cdChartView(which) {
   const cv = document.getElementById('cd-chart-client'), wv = document.getElementById('cd-chart-working');
   if (cv) cv.style.display = which === 'client' ? 'block' : 'none';
   if (wv) wv.style.display = which === 'working' ? 'block' : 'none';
-  if (which === 'client') cdLoadChartFrame();
+  if (which === 'client') cdLoadChartFrame(); else cdLoadWorkingFrame();
+}
+// Header "Working chart" button and every in-record link to the working chart land here.
+function cdOpenWorkingChart() {
+  cdChartView('working');
+  cdShowSection('chart');
+}
+function cdLoadWorkingFrame() {
+  const f = document.getElementById('cd-working-frame');
+  if (!f || f.dataset.loaded === currentDetailClient) return;
+  f.dataset.loaded = currentDetailClient;
+  f.src = `chart-admin.html?client_id=${encodeURIComponent(currentDetailClient)}&embed=1`;
 }
 function cdLoadChartFrame() {
   const f = document.getElementById('cd-chart-frame');
@@ -2896,8 +2922,10 @@ function cdLoadChartFrame() {
 }
 // my-chart.html (embed mode) reports its height so the frame never scrolls on its own.
 window.addEventListener('message', e => {
-  if (e.origin !== window.location.origin || !e.data || e.data.type !== 'my-chart-height') return;
-  const f = document.getElementById('cd-chart-frame');
+  if (e.origin !== window.location.origin || !e.data) return;
+  const f = e.data.type === 'my-chart-height' ? document.getElementById('cd-chart-frame')
+          : e.data.type === 'chart-admin-height' ? document.getElementById('cd-working-frame') : null;
+  if (!f) return;
   if (f) f.style.height = Math.max(600, Number(e.data.height) || 0) + 'px';
 });
 
@@ -2960,7 +2988,7 @@ function cdShowSection(key) {
     b.classList.toggle('active', b.dataset.sec === key);
   });
   if (key === 'messages') loadClientMessages();
-  if (key === 'chart') cdLoadChartFrame();
+  if (key === 'chart') { const w = document.querySelector('.cd-subnav button[data-chart="working"].active'); w ? cdLoadWorkingFrame() : cdLoadChartFrame(); }
   window.scrollTo(0, 0);
 }
 
@@ -3011,7 +3039,7 @@ function cdQuickActions(d) {
     <div class="cd-card full" style="margin-bottom:1.25rem">
       <div class="cd-actions">
         <button class="btn btn-gold btn-sm" onclick="startPreview('${d.client.id}')">Preview as Client</button>
-        <a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${cid}" target="_blank">Open Full Chart ↗</a>
+        <button class="btn btn-outline btn-sm" onclick="cdOpenWorkingChart()">Working chart</button>
         <a class="btn btn-outline btn-sm" href="my-chart.html?client_id=${cid}" target="_blank">Open Their Chart (client view) ↗</a>
         <a class="btn btn-outline btn-sm" href="ancestral-weaving.html?client_id=${cid}" target="_blank">Open Their Weaving ↗</a>
         <a class="btn btn-outline btn-sm" href="ancestral-catalog.html?client_id=${cid}" target="_blank">Open Their Catalog ↗</a>
@@ -3192,7 +3220,7 @@ function cdBirthDataCard(d) {
         <h3 class="cd-card-title">Birth Data</h3>
         <div class="cd-value muted">No birth data on file.</div>
         <div class="cd-actions" style="margin-top:1rem">
-          <a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${d.client.id}" target="_blank">Enter in Chart Admin ↗</a>
+          <button class="btn btn-outline btn-sm" onclick="cdOpenWorkingChart()">Enter in working chart</button>
         </div>
       </div>`;
   }
@@ -3211,7 +3239,7 @@ function cdBirthDataCard(d) {
       <div class="cd-row"><div class="cd-label">Timezone</div><div class="cd-value">${cdEsc(b.timezone) || '—'}</div></div>
       <div class="cd-row"><div class="cd-label">Last computed</div><div class="cd-value">${b.computed_at ? new Date(b.computed_at).toLocaleString() : '—'}</div></div>
       <div class="cd-actions" style="margin-top:1rem">
-        <a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${d.client.id}" target="_blank">Edit in Chart Admin ↗</a>
+        <button class="btn btn-outline btn-sm" onclick="cdOpenWorkingChart()">Edit in working chart</button>
       </div>
     </div>`;
 }
@@ -3251,7 +3279,7 @@ function cdChartSummaryCard(d) {
         ${sphereLine('Core Wound', gk.gk_core,       gk.gk_core_line)}
       ` : ''}
       <div class="cd-actions" style="margin-top:1rem">
-        <a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${d.client.id}" target="_blank">Full chart ↗</a>
+        <button class="btn btn-outline btn-sm" onclick="cdOpenWorkingChart()">Working chart</button>
       </div>
     </div>`;
 }
@@ -3479,7 +3507,7 @@ function cdChartPlacementsBlock(d) {
 
   const recomputeBtn = canRecompute
     ? `<button class="btn btn-outline btn-sm" onclick="cdRecomputeChart()">Recompute Chart</button>`
-    : `<a class="btn btn-outline btn-sm" href="chart-admin.html?client_id=${d.client.id}" target="_blank">Enter birth data ↗</a>`;
+    : `<button class="btn btn-outline btn-sm" onclick="cdOpenWorkingChart()">Enter birth data</button>`;
 
   return `
     <div class="sp-section">

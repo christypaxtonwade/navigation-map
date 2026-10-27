@@ -6,12 +6,12 @@
 <title>Your Chart · Navigation Map</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* readability-standard.md v3 — walnut frame, vellum reading surface. Floor: 15px, opacity 0.88. */
+/* readability-standard.md v4 vellum (2026-10-26) — light page, vellum reading sheet, ink type. Floor: 15px, opacity 0.88. */
 :root {
-  --bg: #1c1812; --surface: #251f18;
-  --text: #f0e6cc; --text-secondary: #d4c7a8; --text-dim: #b8a98a;
-  --gold: #b08030; --gold-bright: #c9a04a; --gold-dim: rgba(176,128,48,0.72);
-  --border: rgba(176,128,48,0.18);
+  --bg: #f4eedd; --surface: #efe7d2;
+  --text: #14110a; --text-secondary: #2b2414; --text-dim: #4e4228;
+  --gold: #7a5618; --gold-bright: #5e4110; --gold-dim: rgba(122,86,24,0.55);
+  --border: rgba(122,86,24,0.22);
   --vellum: #e8dcbb; --vellum-dark: #ddd0a8; --paper: #f4ecd6; --paper-2: #efe5ca;
   --ink: #14110a; --ink-secondary: #2b2414; --ink-dim: #4e4228; --ink-gold: #7a5618;
   --rule: rgba(122,86,24,0.35); --somatic: #7a3216;
@@ -23,8 +23,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Cormorant Garamo
 .topbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
 .eyebrow { font-family: 'Jost', sans-serif; font-size: var(--text-label); font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-bright); }
 .btn { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.55rem 1rem; border-radius: 3px; border: 1px solid var(--gold); background: transparent; color: var(--gold-bright); cursor: pointer; text-decoration: none; display: inline-block; }
-.btn:hover { background: rgba(176,128,48,0.12); }
-.btn-solid { background: var(--gold); color: #1c1812; }
+.btn:hover { background: rgba(122,86,24,0.08); }
+.btn-solid { background: var(--gold); color: #fbf7ec; }
+.btn-solid:hover { background: var(--gold-bright); }
 .btn[disabled] { opacity: 0.88; cursor: wait; }
 .msg { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; font-size: var(--text-body); color: var(--text-secondary); }
 
@@ -34,6 +35,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Cormorant Garamo
 .adminbar b { color: var(--text); font-weight: 500; }
 .adminbar label { display: inline-flex; gap: 0.45rem; align-items: center; cursor: pointer; }
 .adminbar .status { color: var(--gold-bright); }
+.ab-syn { margin-top: 0.5rem; color: var(--ink-dim); }
+.ab-syn.stale { color: var(--somatic); }
+.ab-syn.stale b { color: var(--somatic); }
 .ab-sections { margin-top: 0.8rem; border-top: 1px solid var(--border); padding-top: 0.7rem; }
 .ab-sections summary { cursor: pointer; font-weight: 500; color: var(--text); }
 .ab-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.8rem 1.2rem; margin: 0.8rem 0; }
@@ -44,7 +48,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Cormorant Garamo
 .draftnote { margin-top: 0.7rem; color: var(--text-dim); }
 
 /* the reading surface */
-.sheet { background: var(--vellum); color: var(--ink); border-radius: 6px; padding: 2.25rem 2.5rem 2.75rem; }
+.sheet { background: var(--vellum); color: var(--ink); border: 1px solid var(--rule); box-shadow: 0 1px 3px rgba(20,17,10,0.06); border-radius: 6px; padding: 2.25rem 2.5rem 2.75rem; }
 .sheet .eyebrow { color: var(--ink-gold); }
 .cover { padding: 1rem 0 0.5rem; }
 .title { font-size: 2.2rem; font-weight: 500; line-height: 1.12; color: var(--ink); margin: 0.35rem 0; }
@@ -288,7 +292,8 @@ async function load() {
     channels: get(`hd_channels_reference?select=gate_a,gate_b,name,quality`),
     ref: get(`chart_reference_text?select=kind,key,title,body`),
     over: get(`client_chart_text?client_id=eq.${id}&select=section_key,body`),
-    an: get(`client_chart_analysis?client_id=eq.${id}&select=content,status,updated_at,approved_at`),
+    an: get(`client_chart_analysis?client_id=eq.${id}&select=content,status,updated_at,approved_at,synthesis_at`),
+    syn: S.isAdmin ? get(`client_chart_synthesis?client_id=eq.${id}&select=updated_at`).catch(() => []) : Promise.resolve([]),
   };
   const D = { client };
   for (const [k, p] of Object.entries(q)) D[k] = await p;
@@ -301,6 +306,7 @@ async function load() {
   D.OVER = Object.fromEntries(D.over.map(o => [o.section_key, o.body]));
   D.weightOf = Object.fromEntries(D.weights.map(w => [w.body_name, Number(w.body_weight) || 0.5]));
   D.AN = (Array.isArray(D.an) && D.an[0]) || null;
+  D.SYN = (Array.isArray(D.syn) && D.syn[0]) || null;
   S.D = D;
 }
 
@@ -562,7 +568,14 @@ function adminBarHTML() {
   const sel = Array.isArray(D.client.chart_sections) ? D.client.chart_sections : SECTIONS.map(s => s.key);
   const groups = [...new Set(SECTIONS.map(s => s.group))];
   const when = t => t ? new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-  const anLine = !an ? `<span><b>Teaching text:</b> not generated yet — the page shows reference text.</span> <button class="btn btn-solid" id="ab-gen">Generate analysis</button>`
+  // The teaching text is written from the saved chart synthesis (Working chart). Say which.
+  const syn = D.SYN;
+  const synLine = !syn ? `<div class="ab-row ab-syn"><span><b>Source:</b> no chart synthesis yet. Generate and save it in the Working chart first; the teaching text is written from it.</span></div>`
+    : !an ? `<div class="ab-row ab-syn"><span><b>Source:</b> chart synthesis saved ${when(syn.updated_at)}.</span></div>`
+    : (!an.synthesis_at || new Date(syn.updated_at) - new Date(an.synthesis_at) > 1000)
+      ? `<div class="ab-row ab-syn stale"><span><b>Source:</b> the chart synthesis changed on ${when(syn.updated_at)}, after this text was written. Regenerate to bring it in line; your edits for this client stay.</span></div>`
+      : `<div class="ab-row ab-syn"><span><b>Source:</b> written from the chart synthesis saved ${when(an.synthesis_at)}.</span></div>`;
+  const anLine = !an ? `<span><b>Teaching text:</b> not generated yet — the page shows reference text.</span> <button class="btn btn-solid" id="ab-gen" ${syn ? '' : 'disabled title="Save a chart synthesis first"'}>Generate analysis</button>`
     : an.status === 'approved' ? `<span><b>Teaching text:</b> approved ${when(an.approved_at)} — the client sees it.</span> <button class="btn" id="ab-unapprove">Return to draft</button> <button class="btn" id="ab-gen">Regenerate</button>`
     : `<span><b>Teaching text:</b> draft from ${when(an.updated_at)} — only you see it.</span> <button class="btn btn-solid" id="ab-approve">Approve for client</button> <button class="btn" id="ab-gen">Regenerate</button>`;
   return `<div class="adminbar">
@@ -574,6 +587,7 @@ function adminBarHTML() {
         <span class="status" id="ab-status"></span>
       </div>
       <div class="ab-row ab-an">${anLine}</div>
+      ${synLine}
       <details class="ab-sections" ${S.sectionsOpen ? 'open' : ''}>
         <summary>Sections to include in ${esc((D.client.name || 'the client').split(' ')[0])}'s copy · ${sel.length} of ${SECTIONS.length}</summary>
         <div class="ab-groups">${groups.map(g => `<fieldset><legend>${g}</legend>${SECTIONS.filter(s => s.group === g).map(s => `<label><input type="checkbox" class="ab-sec" value="${s.key}" ${sel.includes(s.key) ? 'checked' : ''}> ${s.label}</label>`).join('')}</fieldset>`).join('')}</div>
@@ -600,7 +614,7 @@ async function generateAnalysis(btn) {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-client-chart-analysis`, { method: 'POST', headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ client_id: S.D.client.id }) });
     const out = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(out.details || out.error || ('HTTP ' + res.status));
-    const [row] = await get(`client_chart_analysis?client_id=eq.${S.D.client.id}&select=content,status,updated_at,approved_at`);
+    const [row] = await get(`client_chart_analysis?client_id=eq.${S.D.client.id}&select=content,status,updated_at,approved_at,synthesis_at`);
     S.D.AN = row || null; render();
     document.getElementById('ab-status').textContent = 'draft ready — review, then approve';
   } catch (e) { st.textContent = 'failed: ' + e.message; btn.disabled = false; btn.textContent = 'Try again'; }
@@ -675,11 +689,11 @@ function showPdfViewer(win, url, fname, title) {
   win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${e(title)}</title>
 <style>
   html, body { margin: 0; height: 100%; background: #fbf7ec; font-family: Jost, Helvetica, Arial, sans-serif; }
-  .bar { height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0 1.25rem; background: #1c1812; color: #f0e6cc; box-sizing: border-box; }
+  .bar { height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0 1.25rem; background: #efe7d2; color: #14110a; border-bottom: 1px solid rgba(122,86,24,0.3); box-sizing: border-box; }
   .bar .t { font-family: Georgia, serif; font-size: 18px; }
   .bar .b { display: flex; gap: 0.6rem; }
-  .bar a, .bar button { font: 500 15px Jost, Helvetica, Arial, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 16px; border-radius: 3px; border: 1px solid #c9a04a; background: transparent; color: #c9a04a; cursor: pointer; text-decoration: none; }
-  .bar .solid { background: #b08030; color: #1c1812; border-color: #b08030; }
+  .bar a, .bar button { font: 500 15px Jost, Helvetica, Arial, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 16px; border-radius: 3px; border: 1px solid #7a5618; background: transparent; color: #7a5618; cursor: pointer; text-decoration: none; }
+  .bar .solid { background: #7a5618; color: #fbf7ec; border-color: #7a5618; }
   iframe { display: block; width: 100%; height: calc(100% - 56px); border: 0; }
 </style></head><body>
   <div class="bar"><span class="t">${e(title)}</span><span class="b">

@@ -9,19 +9,19 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* v3 hybrid palette — warm walnut dark frame / hand-pressed vellum reading surface */
-  --bg: #1c1812;
-  --surface: #251f18;
-  --surface-2: #2e261e;
-  --border: rgba(176,128,48,0.18);
-  --border-hover: rgba(176,128,48,0.38);
-  --gold: #b08030;
-  --gold-bright: #c69240;
-  --gold-dim: rgba(176,128,48,0.72);
-  --text: #f0e6cc;
-  --text-secondary: #d4c7a8;
-  --text-dim: #b8a98a;
-  --text-faint: #8f826a;
+  /* v4 vellum (2026-10-26) — light page, vellum cards, ink type; arcs use the register palette */
+  --bg: #f4eedd;
+  --surface: #fbf7ec;
+  --surface-2: #efe7d2;
+  --border: rgba(122,86,24,0.22);
+  --border-hover: rgba(122,86,24,0.45);
+  --gold: #7a5618;
+  --gold-bright: #5e4110;
+  --gold-dim: rgba(122,86,24,0.55);
+  --text: #14110a;
+  --text-secondary: #2b2414;
+  --text-dim: #4e4228;
+  --text-faint: #665839;
 
   --vellum: #e8dcbb;
   --vellum-dark: #ddd0a8;
@@ -29,15 +29,15 @@
   --ink: #14110a;
   --ink-secondary: #2b2414;
   --ink-dim: #4e4228;
-  --ink-faint: #78694a;
+  --ink-faint: #665839;
   --ink-gold: #7a5618;
-  --ink-gold-bright: #a07428;
+  --ink-gold-bright: #7a5618;
   --border-ink: rgba(122,86,24,0.30);
   --border-ink-strong: rgba(122,86,24,0.50);
 
-  --arc-descent: #b8afe8;
-  --arc-underworld: #e09e80;
-  --arc-return: #6ccca8;
+  --arc-descent: #3d2f70;
+  --arc-underworld: #7a3216;
+  --arc-return: #165a42;
 }
 
 html { scroll-behavior: smooth; }
@@ -49,8 +49,8 @@ body {
 body::before {
   content: ''; position: fixed; inset: 0;
   background-image:
-    radial-gradient(ellipse at 20% 10%, rgba(176,128,48,0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 90%, rgba(176,128,48,0.03) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 10%, rgba(122,86,24,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 90%, rgba(122,86,24,0.03) 0%, transparent 50%);
   pointer-events: none; z-index: 0;
 }
 .page {
@@ -59,7 +59,7 @@ body::before {
   padding: 4rem 3rem 6rem;
 }
 
-/* ── Header (dark) ── */
+/* ── Header ── */
 .header { text-align: center; margin-bottom: 2rem; opacity: 0; animation: fadeUp 0.9s ease forwards; }
 .header-eyebrow { font-size: 15px; font-weight: 500; letter-spacing: 0.22em; color: var(--gold); text-transform: uppercase; margin-bottom: 1rem; }
 .header-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.6rem,6vw,3.8rem); font-weight: 400; font-style: italic; color: var(--text); line-height: 1.1; }
@@ -69,7 +69,7 @@ body::before {
 .header-link { font-size: 15px; font-weight: 500; color: var(--gold); letter-spacing: 0.08em; text-decoration: none; border-bottom: 1px solid var(--gold-dim); padding-bottom: 2px; transition: color 0.2s; }
 .header-link:hover { color: var(--gold-bright); }
 
-/* ── Intro (dark) ── */
+/* ── Intro ── */
 .intro {
   margin: 3rem auto 3rem; max-width: 720px; text-align: center;
   opacity: 0; animation: fadeUp 0.9s ease 0.1s forwards;
@@ -82,7 +82,7 @@ body::before {
 }
 .intro p:last-child { margin-bottom: 0; }
 
-/* ── Arc dividers (dark) ── */
+/* ── Arc dividers ── */
 .arc-label { text-align: center; margin: 3.5rem 0 2rem; opacity: 0; animation: fadeUp 0.9s ease forwards; }
 .arc-label-inner {
   display: inline-flex; flex-direction: column; align-items: center; gap: 0.5rem;
@@ -103,13 +103,13 @@ body::before {
 .arc-glyph { font-size: 1.1rem; letter-spacing: 0.15em; margin-bottom: 0.15rem; }
 .arc-label.arc-descent    .arc-label-title { color: var(--arc-descent); }
 .arc-label.arc-descent    .arc-glyph { color: var(--arc-descent); opacity: 0.88; }
-.arc-label.arc-descent    .arc-label-inner { border-color: rgba(184,175,232,0.22); background: rgba(184,175,232,0.04); }
+.arc-label.arc-descent    .arc-label-inner { border-color: rgba(61,47,112,0.30); background: rgba(61,47,112,0.05); }
 .arc-label.arc-underworld .arc-label-title { color: var(--arc-underworld); }
 .arc-label.arc-underworld .arc-glyph { color: var(--arc-underworld); opacity: 0.88; }
-.arc-label.arc-underworld .arc-label-inner { border-color: rgba(224,158,128,0.22); background: rgba(224,158,128,0.04); }
+.arc-label.arc-underworld .arc-label-inner { border-color: rgba(122,50,22,0.30); background: rgba(122,50,22,0.05); }
 .arc-label.arc-return     .arc-label-title { color: var(--arc-return); }
 .arc-label.arc-return     .arc-glyph { color: var(--arc-return); opacity: 0.88; }
-.arc-label.arc-return     .arc-label-inner { border-color: rgba(108,204,168,0.22); background: rgba(108,204,168,0.04); }
+.arc-label.arc-return     .arc-label-inner { border-color: rgba(22,90,66,0.30); background: rgba(22,90,66,0.05); }
 
 /* ── Correspondence cards (vellum) ── */
 .corr-card {
