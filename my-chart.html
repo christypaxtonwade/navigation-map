@@ -577,7 +577,7 @@ function adminBarHTML() {
       : `<div class="ab-row ab-syn"><span><b>Source:</b> written from the chart synthesis saved ${when(an.synthesis_at)}.</span></div>`;
   const anLine = !an ? `<span><b>Teaching text:</b> not generated yet — the page shows reference text.</span> <button class="btn btn-solid" id="ab-gen" ${syn ? '' : 'disabled title="Save a chart synthesis first"'}>Generate analysis</button>`
     : an.status === 'approved' ? `<span><b>Teaching text:</b> approved ${when(an.approved_at)} — the client sees it.</span> <button class="btn" id="ab-unapprove">Return to draft</button> <button class="btn" id="ab-gen">Regenerate</button>`
-    : `<span><b>Teaching text:</b> draft from ${when(an.updated_at)} — only you see it.</span> <button class="btn btn-solid" id="ab-approve">Approve for client</button> <button class="btn" id="ab-gen">Regenerate</button>`;
+    : `<span><b>Teaching text:</b> draft from ${when(an.updated_at)} — only you see it.</span> <button class="btn btn-solid" id="ab-approve">Approve for client</button> <button class="btn" id="ab-gen">Regenerate</button> <button class="btn" id="ab-tighten" title="Shorten the Gene Keys teachings to two or three sentences without regenerating the rest">Tighten Gene Keys text</button>`;
   return `<div class="adminbar">
       <div class="ab-row">
         <span><b>Admin view</b> · ${esc(D.client.name || '')}</span>
@@ -619,6 +619,21 @@ async function generateAnalysis(btn) {
     document.getElementById('ab-status').textContent = 'draft ready — review, then approve';
   } catch (e) { st.textContent = 'failed: ' + e.message; btn.disabled = false; btn.textContent = 'Try again'; }
 }
+// Shortens the Gene Keys teachings in the current draft (2–3 sentences, all three stages named);
+// the rest of the teaching text is left as it is.
+async function tightenGk(btn) {
+  const st = document.getElementById('ab-status');
+  btn.disabled = true; btn.textContent = 'Tightening… (about 30 seconds)'; st.textContent = '';
+  try {
+    const t = await token(); if (!t) throw new Error('SESSION_EXPIRED');
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-client-chart-analysis`, { method: 'POST', headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ client_id: S.D.client.id, mode: 'condense_gk' }) });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(out.details || out.error || ('HTTP ' + res.status));
+    const [row] = await get(`client_chart_analysis?client_id=eq.${S.D.client.id}&select=content,status,updated_at,approved_at,synthesis_at`);
+    S.D.AN = row || null; render();
+    document.getElementById('ab-status').textContent = out.still_needing_attention ? `${out.still_needing_attention} Gene Keys passage(s) still long or missing a stage name; edit them by hand or try again` : 'Gene Keys text tightened — review, then approve';
+  } catch (e) { st.textContent = 'failed: ' + e.message; btn.disabled = false; btn.textContent = 'Try again'; }
+}
 async function setAnalysisStatus(status) {
   const st = document.getElementById('ab-status'); st.textContent = 'saving…';
   try {
@@ -652,6 +667,7 @@ function render() {
     on('ab-sec-all', () => saveSections(true));
     on('ab-gen', e => generateAnalysis(e.target));
     on('ab-approve', () => setAnalysisStatus('approved'));
+    on('ab-tighten', e => tightenGk(e.target));
     on('ab-unapprove', () => setAnalysisStatus('draft'));
     const abAccess = document.getElementById('ab-access');
     if (abAccess) abAccess.onchange = async e => {
