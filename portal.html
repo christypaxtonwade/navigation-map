@@ -2227,8 +2227,8 @@ function buildNav() {
     { href: 'convergence.html',       label: 'Convergence ↗',      flag: 'access_convergence' },
   ];
 
-  // Admin (not previewing): reference pages only. Weaving / Convergence pages are
-  // per-client and are opened from each client's page instead.
+  // Admin (not previewing): every page, without a client_id. Weaving and Convergence open
+  // Christy's own (canonical) Weaving and Convergence; each client's open from their page.
   const adminReference = isAdmin && !isPreviewingAsClient;
   if (adminReference) {
     const h = document.createElement('div');
@@ -2237,7 +2237,6 @@ function buildNav() {
     externalGroup.appendChild(h);
   }
   externalLinks.forEach(l => {
-    if (adminReference && (l.flag === 'access_weaving' || l.flag === 'access_convergence')) return;
     if (l.flag && (!isAdmin || isPreviewingAsClient)) {
       // Client (or the client being previewed) must have the flag true on their row.
       if (!activeClient || !activeClient[l.flag]) return;
