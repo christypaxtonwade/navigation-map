@@ -3255,9 +3255,9 @@ function cdChartSummaryCard(d) {
   const sphereLine = (label, num, line) => {
     if (!num) return '';
     const r = refByNum[num];
-    const f = r ? fieldById[r.shadow_field_id || r.primary_field_id] : null;
-    const arc = r ? `${r.shadow} → ${r.gift} → ${r.siddhi}` : '';
-    const fStr = f ? `Field ${f.number} · ${f.name}` : '';
+    const f = r ? fieldById[r.primary_field_id || r.shadow_field_id] : null;
+    const arc = r ? `${r.shadow} · ${r.gift} · ${r.siddhi}` : '';
+    const fStr = f ? `Field ${['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII'][f.number] || f.number} · ${f.name}` : '';
     return `<div class="cd-row stack"><div class="cd-label">${label}</div>
       <div class="cd-value">GK ${num}.${line} · <i>${arc}</i></div>
       ${fStr ? `<div class="cd-value muted" style="font-size:15px">${fStr}</div>` : ''}</div>`;
@@ -3542,9 +3542,9 @@ function cdGeneKeysBlock(d) {
     const num = gk[numKey], line = gk[lineKey];
     if (!num) return '';
     const r = refByNum[num];
-    const f = r ? fieldById[r.shadow_field_id || r.primary_field_id] : null;
-    const arc = r ? `${r.shadow} → ${r.gift} → ${r.siddhi}` : '—';
-    const fStr = f ? `Field ${f.number} · ${f.name}` : '—';
+    const f = r ? fieldById[r.primary_field_id || r.shadow_field_id] : null;
+    const arc = r ? `${r.shadow} · ${r.gift} · ${r.siddhi}` : '—';
+    const fStr = f ? `Field ${['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII'][f.number] || f.number} · ${f.name}` : '—';
     return `<tr>
       <td><span class="sp-bodyname">${label}</span></td>
       <td class="num sp-gold">${num}.${line ?? '—'}</td>

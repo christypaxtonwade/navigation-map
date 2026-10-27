@@ -208,6 +208,7 @@ body {
 .seq-lbl { display: block; font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-gold); margin-bottom: 0.25rem; }
 .seq-note, .seq-client { font-size: 16px; color: var(--ink-secondary); line-height: 1.55; border-top: 1px solid var(--vellum-deeper); padding-top: 0.6rem; }
 .seq-client { border-top-style: dashed; }
+.seq-missing { display: block; font-family: 'Jost', sans-serif; font-size: 15px; color: var(--somatic); margin-top: 0.35rem; }
 .seq-pending { display: block; font-style: italic; color: var(--ink-dim); margin-top: 0.25rem; }
 .seq-meta { display: none; }
 
@@ -1408,6 +1409,9 @@ function renderSequence(title, intro, klass, gk, refByNum, fieldById, sphereKeys
     const hasOver = Object.prototype.hasOwnProperty.call(GK_TEXT.over, ok);
     const clientTxt = hasOver ? GK_TEXT.over[ok] : GK_TEXT.client[k];
     const clientTag = hasOver ? 'your edit' : GK_TEXT.status === 'approved' ? 'approved' : GK_TEXT.status ? 'draft' : '';
+    // The client text should name all three stages; flag any it leaves out.
+    const named = w => w && new RegExp('\\b' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(clientTxt || '');
+    const unnamed = ref && clientTxt ? [ref.shadow, ref.gift, ref.siddhi].filter(w => w && !named(w)) : [];
     return `
       <div class="seq-card${isCore ? ' core' : ''}">
         <div class="seq-top"><div><div class="seq-sphere">${label}</div><div class="seq-gk">${num}.${line}</div></div>
@@ -1416,7 +1420,7 @@ function renderSequence(title, intro, klass, gk, refByNum, fieldById, sphereKeys
           : `<span class="seq-lbl">In session</span>${SPHERE_GUIDE[k] || ''}<span class="seq-pending">Regenerate the synthesis to add this sphere's reading.</span>`}</div>
         <div class="seq-client"><span class="seq-lbl">Client reads${clientTag ? ' · ' + clientTag : ''}</span>${clientTxt === undefined || clientTxt === null
           ? '<span class="seq-pending">Not written yet. Generate the analysis in Client view.</span>'
-          : clientTxt === '' ? '<span class="seq-pending">Hidden from the client by your edit.</span>' : escapeHtml(clientTxt)}</div>
+          : clientTxt === '' ? '<span class="seq-pending">Hidden from the client by your edit.</span>' : escapeHtml(clientTxt)}${unnamed.length ? `<span class="seq-missing">Does not name ${escapeHtml(unnamed.join(' or '))}.</span>` : ''}</div>
       </div>`;
   }).join('');
   return `
