@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Courses · Navigation Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* readability-standard.md v4 vellum — light page, vellum reading sheet, ink type. Floor: 15px, opacity 0.88.
+   Same palette as my-chart.html. Covers use the walnut frame (#1c1812) with the walnut-palette text values. */
+:root {
+  --bg: #f4eedd; --surface: #fbf7ec; --surface-2: #efe7d2;
+  --text: #14110a; --text-secondary: #2b2414; --text-dim: #4e4228;
+  --gold: #7a5618; --gold-bright: #5e4110;
+  --border: rgba(122,86,24,0.22); --rule: rgba(122,86,24,0.35);
+  --vellum: #e8dcbb; --paper: #f4ecd6;
+  --ink: #14110a; --ink-secondary: #2b2414; --ink-dim: #4e4228; --ink-gold: #7a5618;
+  --somatic: #7a3216; --teal: #165a42;
+  --walnut: #1c1812; --walnut-text: #f0e6cc; --walnut-gold: #c9a04a;
+  --text-body: 1.15rem; --text-label: 0.94rem;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Cormorant Garamond', Georgia, serif; font-size: 16px; line-height: 1.6; min-height: 100vh; }
+.frame { max-width: 1120px; margin: 0 auto; padding: 2.5rem 1rem 5rem; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.eyebrow { font-family: 'Jost', sans-serif; font-size: var(--text-label); font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-bright); }
+.btn { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.6rem 1.1rem; border-radius: 3px; border: 1px solid var(--gold); background: transparent; color: var(--gold-bright); cursor: pointer; text-decoration: none; display: inline-block; line-height: 1.3; }
+.btn:hover { background: rgba(122,86,24,0.08); }
+.btn-solid { background: var(--gold); color: #fbf7ec; }
+.btn-solid:hover { background: var(--gold-bright); }
+.btn-sm { padding: 0.35rem 0.7rem; }
+.btn[disabled] { cursor: wait; }
+.btn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+.linkbtn { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; letter-spacing: 0.06em; color: var(--gold-bright); background: none; border: none; cursor: pointer; text-decoration: none; padding: 0.25rem 0; }
+.linkbtn:hover { text-decoration: underline; }
+.msg { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 2rem; font-size: var(--text-body); color: var(--text-secondary); }
+
+/* library head */
+.lib-head { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.75rem; }
+h1 { font-size: 2.5rem; font-weight: 500; line-height: 1.12; color: var(--text); }
+h2.sec { font-size: 1.7rem; font-weight: 500; color: var(--text); margin: 2.75rem 0 1rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
+.resume { display: flex; align-items: center; gap: 1rem; text-align: right; background: none; border: none; cursor: pointer; color: inherit; font: inherit; padding: 0.25rem; border-radius: 6px; }
+.resume:hover .resume-what { text-decoration: underline; }
+.resume-label { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+.resume-what { font-size: 1.25rem; color: var(--text); line-height: 1.3; max-width: 22rem; }
+.resume .thumb { width: 132px; flex: none; border-radius: 4px; overflow: hidden; border: 1px solid var(--rule); }
+
+/* cards */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.5rem; }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(20,17,10,0.06); }
+.cover { position: relative; aspect-ratio: 16 / 9; background: var(--walnut); overflow: hidden; }
+.cover svg, .cover img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; }
+.cover-title { position: absolute; left: 0; right: 0; bottom: 0; padding: 0.9rem 1.1rem; font-size: 1.5rem; font-style: italic; font-weight: 500; line-height: 1.15; color: var(--walnut-text); background: linear-gradient(180deg, rgba(28,24,18,0), rgba(28,24,18,0.92) 55%); }
+.cover-title small { display: block; font-family: 'Jost', sans-serif; font-style: normal; font-size: 15px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--walnut-gold); margin-bottom: 0.15rem; }
+.card-body { padding: 1.25rem 1.35rem 1.4rem; display: flex; flex-direction: column; gap: 0.7rem; flex: 1; }
+.card-title { font-size: 1.6rem; font-weight: 500; line-height: 1.2; color: var(--text); }
+.card-text { font-size: var(--text-body); line-height: 1.45; color: var(--text-secondary); flex: 1; }
+.card-status { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
+.card .btn { align-self: flex-start; margin-top: 0.3rem; }
+.bar { height: 10px; border: 1px solid var(--ink-dim); border-radius: 5px; overflow: hidden; background: #fffdf6; }
+.bar > span { display: block; height: 100%; background: var(--gold); }
+.bar-note { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dim); margin-top: 0.25rem; }
+.quiet { font-size: var(--text-body); font-style: italic; color: var(--text-dim); }
+
+/* course view */
+.back { display: inline-block; margin-bottom: 1.25rem; }
+.course-head { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 2rem; align-items: center; margin-bottom: 1.5rem; }
+.course-head .cover { border-radius: 8px; border: 1px solid var(--rule); }
+.course-tag { font-size: 1.35rem; font-style: italic; color: var(--text-secondary); margin: 0.4rem 0 1rem; line-height: 1.35; }
+.jump { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1.5rem; }
+.chip { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; color: var(--gold-bright); border: 1px solid var(--rule); border-radius: 999px; padding: 0.2rem 0.85rem; background: var(--surface); text-decoration: none; cursor: pointer; }
+.chip:hover { background: var(--surface-2); }
+.section { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; margin-bottom: 1.25rem; overflow: hidden; scroll-margin-top: 1rem; }
+.section-head { padding: 1.2rem 1.5rem 1rem; border-bottom: 1px solid var(--border); background: var(--paper); }
+.section-title { font-size: 1.75rem; font-weight: 500; line-height: 1.2; color: var(--text); margin-top: 0.1rem; }
+.section-q { font-size: 1.25rem; font-style: italic; color: var(--text-secondary); }
+.section-note { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dim); margin-top: 0.4rem; }
+.items { list-style: none; }
+.item { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) auto; gap: 0.5rem 1.25rem; align-items: center; padding: 0.95rem 1.5rem; border-top: 1px solid var(--border); }
+.item:first-child { border-top: none; }
+.item-kind { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+.item-title { font-size: 1.3rem; line-height: 1.3; color: var(--text); }
+.item-desc { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dim); }
+.item-act { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.seen { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--teal); white-space: nowrap; }
+.item.off { background: repeating-linear-gradient(135deg, transparent 0 10px, rgba(122,50,22,0.05) 10px 20px); }
+.tag { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; color: var(--somatic); border: 1px solid var(--somatic); border-radius: 3px; padding: 0 0.4rem; margin-left: 0.4rem; white-space: nowrap; }
+.tag.ok { color: var(--teal); border-color: var(--teal); }
+.empty { padding: 1rem 1.5rem; }
+
+/* letter */
+.sheet { background: var(--vellum); color: var(--ink); border: 1px solid var(--rule); box-shadow: 0 1px 3px rgba(20,17,10,0.06); border-radius: 6px; padding: 2.5rem clamp(1.25rem, 6vw, 4rem) 3rem; max-width: 800px; margin: 0 auto; }
+.sheet h1 { font-size: 2rem; margin: 0.3rem 0 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--rule); }
+.letter p, .letter li { font-size: 1.2rem; font-weight: 400; line-height: 1.65; color: var(--ink-secondary); margin: 0 0 1.05rem; overflow-wrap: anywhere; }
+.letter strong, .letter b { font-weight: 600; color: var(--ink); }
+.letter h1, .letter h2, .letter h3 { font-size: 1.45rem; font-weight: 600; color: var(--ink); margin: 1.6rem 0 0.6rem; border: none; padding: 0; }
+.letter hr { border: 0; border-top: 1px solid var(--rule); margin: 1.75rem 0; }
+.letter a { color: var(--gold-bright); }
+.letter ul, .letter ol { padding-left: 1.4rem; margin-bottom: 1rem; }
+.letter blockquote { border-left: 3px solid var(--ink-gold); padding-left: 1rem; margin: 0 0 1rem; }
+.letter-bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; max-width: 800px; margin: 0 auto 1rem; }
+
+/* admin */
+.adminbar { background: var(--surface-2); border: 1px solid var(--rule); border-radius: 6px; padding: 0.9rem 1.2rem; margin-bottom: 1.5rem; font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 0.6rem 1.25rem; align-items: center; justify-content: space-between; }
+.adminbar b { color: var(--text); font-weight: 600; }
+.mg { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-secondary); }
+.mg-panel { background: var(--surface-2); border: 1px solid var(--rule); border-radius: 8px; padding: 1rem 1.25rem 1.2rem; margin-bottom: 1.25rem; }
+.mg-panel > summary { cursor: pointer; font-weight: 600; color: var(--text); font-size: 16px; }
+.mg-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.7rem 1rem; margin-top: 0.9rem; }
+.mg-form label { display: flex; flex-direction: column; gap: 0.2rem; font-weight: 500; color: var(--text-dim); }
+.mg-form .wide { grid-column: 1 / -1; }
+.mg input[type=text], .mg input[type=url], .mg select, .mg textarea { font-family: 'Jost', sans-serif; font-size: 16px; color: var(--ink); background: #fffdf6; border: 1px solid var(--ink-dim); border-radius: 3px; padding: 0.45rem 0.6rem; width: 100%; }
+.mg-row { display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem; align-items: center; margin-top: 0.8rem; }
+.mg-status { color: var(--gold-bright); }
+.item-mg { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.4rem 0.6rem; align-items: center; padding-top: 0.35rem; border-top: 1px dashed var(--border); }
+.item-mg label { display: inline-flex; gap: 0.35rem; align-items: center; cursor: pointer; }
+.item-edit { grid-column: 1 / -1; }
+.drop { border: 2px dashed var(--rule); border-radius: 8px; padding: 1.1rem; text-align: center; margin-top: 0.9rem; background: #fffdf6; }
+.drop.over { background: var(--paper); border-color: var(--gold); }
+.enr-list { columns: 2; column-gap: 2rem; margin-top: 0.8rem; }
+.enr-list label { display: flex; gap: 0.5rem; align-items: center; margin: 0.25rem 0; break-inside: avoid; cursor: pointer; }
+.section-add { padding: 0.8rem 1.5rem 1rem; border-top: 1px dashed var(--border); }
+
+body.embed { background: transparent; min-height: 0; }
+body.embed .frame { max-width: none; padding: 0.25rem 0.25rem 2rem; }
+
+@media (max-width: 760px) {
+  h1 { font-size: 2rem; }
+  .course-head { grid-template-columns: 1fr; }
+  .course-head .cover { max-width: 420px; }
+  .item { grid-template-columns: 1fr; gap: 0.3rem; padding: 0.9rem 1.1rem; }
+  .item-act { justify-content: flex-start; }
+  .section-head { padding: 1rem 1.1rem 0.9rem; }
+  .resume { text-align: left; flex-direction: row-reverse; }
+  .resume .thumb { width: 96px; }
+  .enr-list { columns: 1; }
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="frame">
+  <div class="topbar">
+    <span class="eyebrow">Navigation Map · Courses</span>
+    <span id="actions"></span>
+  </div>
+  <div id="adminbar"></div>
+  <div id="root"><div class="msg">Opening your courses…</div></div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://egldaiqrwuxqgavjwwim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbGRhaXFyd3V4cWdhdmp3d2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzkxMTMsImV4cCI6MjA5MTQxNTExM30.jVZvPEPP4f78OfbaWBAryGPd4N_b16FKY92NXi-CeeA';
+const ADMIN_EMAIL = 'christypaxtonwade@gmail.com';
+const BUCKET = 'course-files';
+
+// ── Session (shared with the portal via storage — same shape as my-chart.html) ──
+function readPortalSession() {
+  for (const store of [sessionStorage, localStorage]) {
+    try { const raw = store.getItem('portal_session'); if (!raw) continue; const s = JSON.parse(raw); if (s?.access_token) return s; } catch {}
+  }
+  return null;
+}
+function writePortalSession(s) { const p = JSON.stringify(s); try { sessionStorage.setItem('portal_session', p); } catch {} try { localStorage.setItem('portal_session', p); } catch {} }
+let _refresh = null;
+async function token() {
+  // Inside the portal, borrow its session (one owner for the refresh token).
+  try { if (window.parent !== window && typeof window.parent.portalAccessToken === 'function') { const t = await window.parent.portalAccessToken(); if (t) return t; } } catch {}
+  const s = readPortalSession(); if (!s) return null;
+  const now = Date.now(), expired = s.expires_at && now > s.expires_at;
+  if (s.expires_at && now < s.expires_at - 60000) return s.access_token;
+  if (!s.refresh_token) return expired ? null : s.access_token;
+  if (!_refresh) _refresh = (async () => {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, { method: 'POST', headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: s.refresh_token }) });
+      const d = await r.json(); if (!r.ok || !d.access_token) return null;
+      const f = { access_token: d.access_token, refresh_token: d.refresh_token || s.refresh_token, expires_at: Date.now() + (d.expires_in || 3600) * 1000, user: d.user || s.user };
+      writePortalSession(f); return f.access_token;
+    } catch { return null; } finally { _refresh = null; }
+  })();
+  return _refresh;
+}
+async function api(path, opts = {}) {
+  const t = await token(); if (!t) throw new Error('SESSION_EXPIRED');
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...opts, headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${t}`, 'Content-Type': 'application/json', ...(opts.headers || {}) } });
+  if (res.status === 401) throw new Error('SESSION_EXPIRED');
+  if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : null;
+}
+const get = (p) => api(p).catch(e => { if (e.message === 'SESSION_EXPIRED') throw e; console.warn(p, e); return []; });
+const REP = { Prefer: 'return=representation' };
+
+// ── Utilities ──
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const KIND = { letter: ['Letter', 'Read'], video: ['Recording', 'Watch ↗'], file: ['Download', 'Download'], link: ['Link', 'Open ↗'] };
+const safeUrl = u => /^(https?:|mailto:)/i.test(String(u || '').trim()) ? String(u).trim() : '';
+const slugName = s => String(s || '').normalize('NFKD').replace(/[^\w.\- ]+/g, '').trim().replace(/\s+/g, '-');
+
+// ── Covers: gold line on the walnut frame ──
+const G = '#c9a04a';
+const COVERS = {
+  // seven doorways, one inside the next, going down
+  gates: `<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="320" height="180" fill="#1c1812"/>${
+    [0, 1, 2, 3, 4, 5, 6].map(i => { const w = 148 - i * 19, h = 150 - i * 17, x = 160 - w / 2, top = 14 + i * 9, r = w / 2;
+      return `<path d="M${x} ${top + h} V${top + r} a${r} ${r} 0 0 1 ${w} 0 V${top + h}" fill="none" stroke="${G}" stroke-width="${i === 6 ? 1.6 : 1.1}" opacity="${(1 - i * 0.07).toFixed(2)}"/>`; }).join('')
+  }<circle cx="160" cy="108" r="2.6" fill="${G}"/></svg>`,
+  // thirteen Fields on an even ring, the path turning inward
+  map: `<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="320" height="180" fill="#1c1812"/><circle cx="160" cy="84" r="62" fill="none" stroke="${G}" stroke-width="1" opacity="0.9"/>${
+    Array.from({ length: 13 }, (_, i) => { const a = (i / 13) * Math.PI * 2 - Math.PI / 2; return `<circle cx="${(160 + 62 * Math.cos(a)).toFixed(1)}" cy="${(84 + 62 * Math.sin(a)).toFixed(1)}" r="3.4" fill="#1c1812" stroke="${G}" stroke-width="1.3"/>`; }).join('')
+  }<path d="${Array.from({ length: 70 }, (_, i) => { const t = i / 69, a = t * Math.PI * 4 - Math.PI / 2, r = 50 * (1 - t); return `${i ? 'L' : 'M'}${(160 + r * Math.cos(a)).toFixed(1)} ${(84 + r * Math.sin(a)).toFixed(1)}`; }).join(' ')}" fill="none" stroke="${G}" stroke-width="1" opacity="0.9"/></svg>`,
+  // a signal, received
+  signals: `<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="320" height="180" fill="#1c1812"/>${
+    [18, 36, 54, 72, 90, 108].map((r, i) => `<path d="M${160 - r} 120 a${r} ${r} 0 0 1 ${2 * r} 0" fill="none" stroke="${G}" stroke-width="1.1" opacity="${(1 - i * 0.06).toFixed(2)}"/>`).join('')
+  }<circle cx="160" cy="120" r="3.2" fill="${G}"/></svg>`,
+  // the open book, four registers
+  fieldguide: `<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="320" height="180" fill="#1c1812"/><path d="M160 34 C132 22 96 22 70 32 V128 C96 118 132 118 160 130 C188 118 224 118 250 128 V32 C224 22 188 22 160 34 Z M160 34 V130" fill="none" stroke="${G}" stroke-width="1.2"/>${
+    [0, 1, 2, 3].map(i => `<path d="M84 ${50 + i * 17} C104 ${44 + i * 17} 128 ${44 + i * 17} 148 ${52 + i * 17} M172 ${52 + i * 17} C192 ${44 + i * 17} 216 ${44 + i * 17} 236 ${50 + i * 17}" fill="none" stroke="${G}" stroke-width="1" opacity="0.9"/>`).join('')
+  }</svg>`,
+};
+function coverHTML(c, withTitle) {
+  const art = c.cover_url && safeUrl(c.cover_url) ? `<img src="${esc(safeUrl(c.cover_url))}" alt="">` : (COVERS[c.cover] || COVERS.gates);
+  return `<div class="cover">${art}${withTitle ? `<div class="cover-title">${c.eyebrow ? `<small>${esc(c.eyebrow)}</small>` : ''}${esc(c.title)}</div>` : ''}</div>`;
+}
+
+// ── State ──
+const params = new URLSearchParams(location.search);
+const S = { isAdmin: false, manage: false, preview: params.get('preview') === '1', embed: params.get('embed') === '1', clientId: null, client: null, D: null };
+if (S.embed) {
+  document.body.classList.add('embed');
+  const post = () => { try { parent.postMessage({ type: 'my-courses-height', height: document.documentElement.scrollHeight }, location.origin); } catch {} };
+  new ResizeObserver(post).observe(document.body);
+  window.addEventListener('load', post);
+}
+const root = () => document.getElementById('root');
+
+async function init() {
+  const sess = readPortalSession();
+  if (!sess) { root().innerHTML = `<div class="msg">Please sign in to your portal first, then open your courses from there. <br><br><a class="btn" href="portal.html">Go to the portal</a></div>`; return; }
+  S.isAdmin = (sess.user?.email || '').toLowerCase() === ADMIN_EMAIL && !S.preview;
+  try {
+    if (params.get('client_id')) S.clientId = params.get('client_id');
+    else if (!S.isAdmin && sess.user?.id) { const [me] = await get(`clients?auth_user_id=eq.${sess.user.id}&select=id&limit=1`); S.clientId = me?.id; }
+    if (!S.clientId && !S.isAdmin) { root().innerHTML = `<div class="msg">We could not find your client record. Please return to the portal.</div>`; return; }
+    await load();
+    window.addEventListener('hashchange', render);
+    render();
+  } catch (e) { fail(e); }
+}
+function fail(e) {
+  root().innerHTML = `<div class="msg">${e.message === 'SESSION_EXPIRED' ? 'Your session has expired. Please sign in to the portal again, then reopen your courses.' : 'Something went wrong loading your courses: ' + esc(e.message)}</div>`;
+}
+
+async function load() {
+  const id = S.clientId;
+  const q = {
+    courses: get('courses?select=*&order=sort'),
+    sections: get('course_sections?select=*&order=sort'),
+    items: get('course_items?select=id,course_id,section_id,cohort,kind,title,description,url,storage_path,file_name,source_key,sort,published&order=sort,created_at'),
+    enr: get(`course_enrollments?select=id,course_id,client_id,cohort${id ? `&client_id=eq.${id}` : ''}`),
+    client: id ? get(`clients?id=eq.${id}&select=id,name&limit=1`) : Promise.resolve([]),
+    progress: id ? get(`course_progress?client_id=eq.${id}&select=item_id`) : Promise.resolve([]),
+    sig2: id ? get(`signals_tier2_readings?client_id=eq.${id}&select=id&limit=1`) : Promise.resolve([]),
+    clients: S.isAdmin ? get('clients?select=id,name,email,auth_user_id&order=name') : Promise.resolve([]),
+  };
+  const D = {}; for (const [k, p] of Object.entries(q)) D[k] = (await p) || [];
+  S.client = D.client[0] || null;
+  D.seen = new Set(D.progress.map(p => p.item_id));
+  S.D = D;
+}
+
+// ── What this viewer holds and can see ──
+// A client (or Christy previewing as one) holds a course through course_enrollments.
+// Christy, managing, sees every course and every item, published or not.
+const asClient = () => !!S.clientId;
+const enrollment = c => S.D.enr.find(e => e.course_id === c.id && (!S.clientId || e.client_id === S.clientId));
+function holds(c) { return c.kind === 'course' && (asClient() ? !!enrollment(c) : true); }
+function ready(it) { return it.kind === 'letter' ? true : it.kind === 'file' ? !!it.storage_path : !!safeUrl(it.url); }
+function visibleItems(c) {
+  const e = enrollment(c);
+  return S.D.items.filter(it => it.course_id === c.id && (
+    (!asClient() && S.manage) ? true
+    : it.published && ready(it) && (!asClient() || !it.cohort || it.cohort === e?.cohort)));
+}
+function hidden(c) { return c.hide_when === 'signals_tier2' && asClient() && S.D.sig2.length > 0; }
+const bySlug = slug => S.D.courses.find(c => c.slug === slug);
+const lastKey = () => `courses_last_${S.clientId || 'admin'}`;
+
+// ── Render ──
+function route() { const m = /^#(course|letter)\/(.+)$/.exec(location.hash); return m ? { view: m[1], key: decodeURIComponent(m[2]) } : { view: 'library' }; }
+function render() {
+  try {
+    document.getElementById('adminbar').innerHTML = S.isAdmin ? `<div class="adminbar"><span><b>You are managing the course library.</b> A client sees only what is published, in the courses she holds.</span><label style="display:inline-flex;gap:0.45rem;align-items:center;cursor:pointer"><input type="checkbox" id="mg-toggle" ${S.manage ? 'checked' : ''}> Show editing controls</label></div>` : '';
+    const t = document.getElementById('mg-toggle'); if (t) t.onchange = () => { S.manage = t.checked; render(); };
+    const r = route();
+    if (r.view === 'course' && bySlug(r.key) && holds(bySlug(r.key))) return renderCourse(bySlug(r.key));
+    if (r.view === 'letter') { const it = S.D.items.find(x => x.id === r.key); if (it) return renderLetter(it); }
+    renderLibrary();
+  } catch (e) { fail(e); }
+}
+function progressHTML(c) {
+  const items = visibleItems(c).filter(it => it.published && ready(it)); if (!items.length || !asClient()) return '';
+  const n = items.filter(it => S.D.seen.has(it.id)).length;
+  return `<div><div class="bar" role="img" aria-label="${n} of ${items.length} opened"><span style="width:${Math.round(100 * n / items.length)}%"></span></div><div class="bar-note">${n} of ${items.length} opened</div></div>`;
+}
+function renderLibrary() {
+  const D = S.D, pub = D.courses.filter(c => c.published || S.isAdmin);
+  const mine = pub.filter(holds), other = pub.filter(c => !holds(c) && !hidden(c));
+  let resume = '';
+  try {
+    const last = JSON.parse(localStorage.getItem(lastKey()) || 'null'), c = last && bySlug(last.c), it = c && holds(c) && visibleItems(c).find(x => x.id === last.i);
+    if (it) { const sec = D.sections.find(s => s.id === it.section_id);
+      resume = `<button class="resume" data-resume="${esc(c.slug)}" data-sec="${esc(it.section_id || '')}"><span><span class="resume-label">Resume</span><br><span class="resume-what">${esc(c.title)}${sec ? ' · ' + esc(sec.eyebrow || sec.title) : ''}<br>${esc(it.title)}</span></span><span class="thumb">${coverHTML(c)}</span></button>`; }
+  } catch {}
+  const first = String(S.client?.name || '').trim().split(/\s+/)[0];
+  root().innerHTML = `
+    <div class="lib-head"><h1>${S.isAdmin ? 'Courses' : 'My Courses'}</h1>${resume}</div>
+    ${S.preview && first ? `<p class="mg" style="margin:-1rem 0 1.25rem">You are seeing ${esc(first)}'s courses.</p>` : ''}
+    ${mine.length ? `<div class="grid">${mine.map(c => `
+      <article class="card">
+        ${coverHTML(c, true)}
+        <div class="card-body">
+          <h2 class="card-title">${esc(c.title)}${S.isAdmin && !c.published ? '<span class="tag">hidden</span>' : ''}</h2>
+          ${progressHTML(c)}
+          <p class="card-text">${esc(c.tagline || '')}</p>
+          <a class="btn btn-solid" href="#course/${encodeURIComponent(c.slug)}">Open course</a>
+        </div>
+      </article>`).join('')}</div>` : `<p class="quiet">Nothing here yet. What you enroll in opens on this page.</p>`}
+    ${other.length ? `<h2 class="sec">${mine.length ? 'Also available' : 'Available'}</h2><div class="grid">${other.map(c => `
+      <article class="card">
+        ${coverHTML(c, true)}
+        <div class="card-body">
+          <h2 class="card-title">${esc(c.title)}</h2>
+          ${c.status_label ? `<div class="card-status">${esc(c.status_label)}</div>` : ''}
+          <p class="card-text">${esc(c.tagline || '')}</p>
+          ${safeUrl(c.cta_url) ? `<a class="btn" href="${esc(safeUrl(c.cta_url))}" target="_blank" rel="noopener">${esc(c.cta_label || 'Learn more')} ↗</a>` : ''}
+          ${S.isAdmin && S.manage ? cardEditor(c) : ''}
+        </div>
+      </article>`).join('')}</div>` : ''}`;
+  if (!S.keepScroll) scrollTop(); S.keepScroll = false;
+  root().querySelectorAll('[data-resume]').forEach(b => b.onclick = () => { S.scrollTo = b.dataset.sec; location.hash = `#course/${encodeURIComponent(b.dataset.resume)}`; });
+  wireManage();
+}
+
+function itemRow(it, sibs) {
+  const [label, act] = KIND[it.kind] || ['Item', 'Open'];
+  const off = !it.published || !ready(it), mg = S.isAdmin && S.manage;
+  const action = !ready(it) ? '' : it.kind === 'letter' ? `<a class="btn btn-sm" href="#letter/${it.id}">${act}</a>`
+    : it.kind === 'file' ? `<button class="btn btn-sm" data-file="${it.id}">${act}</button>`
+    : `<a class="btn btn-sm" href="${esc(safeUrl(it.url))}" target="_blank" rel="noopener" data-open="${it.id}">${act}</a>`;
+  return `<li class="item${mg && off ? ' off' : ''}" id="item-${it.id}">
+    <span class="item-kind">${label}</span>
+    <span><span class="item-title">${esc(it.title)}</span>${mg ? `${it.published ? '' : '<span class="tag">not published</span>'}${ready(it) ? '' : `<span class="tag">${it.kind === 'file' ? 'no file yet' : 'no link yet'}</span>`}${it.cohort ? `<span class="tag ok">${esc(it.cohort)} only</span>` : ''}` : ''}
+      ${it.description ? `<br><span class="item-desc">${esc(it.description)}</span>` : ''}</span>
+    <span class="item-act">${asClient() && S.D.seen.has(it.id) ? '<span class="seen">✓ opened</span>' : ''}${action}</span>
+    ${mg ? `<div class="item-mg mg">
+      <label><input type="checkbox" data-pub="${it.id}" ${it.published ? 'checked' : ''}> Published</label>
+      <button class="btn btn-sm" data-edit="${it.id}">Edit</button>
+      ${it.kind === 'file' ? `<label class="btn btn-sm">${it.storage_path ? 'Replace file' : 'Attach file'}<input type="file" data-attach="${it.id}" hidden></label>` : ''}
+      <button class="btn btn-sm" data-move="${it.id}" data-dir="-1" ${sibs.indexOf(it) === 0 ? 'disabled' : ''} aria-label="Move up">↑</button>
+      <button class="btn btn-sm" data-move="${it.id}" data-dir="1" ${sibs.indexOf(it) === sibs.length - 1 ? 'disabled' : ''} aria-label="Move down">↓</button>
+      <button class="btn btn-sm" data-del="${it.id}">Delete</button>
+      <span class="mg-status" id="st-${it.id}"></span></div>` : ''}
+  </li>`;
+}
+function renderCourse(c) {
+  const D = S.D, items = visibleItems(c), mg = S.isAdmin && S.manage;
+  const secs = D.sections.filter(s => s.course_id === c.id);
+  const of = sid => items.filter(it => (it.section_id || null) === sid);
+  const shown = secs.filter(s => mg || s.question || of(s.id).length);   // a section with no question (the closing letter) appears once it holds something
+  const loose = of(null);
+  root().innerHTML = `
+    <a class="linkbtn back" href="#">← ${S.isAdmin ? 'All courses' : 'My Courses'}</a>
+    <div class="course-head">
+      <div><div class="eyebrow">${esc(c.eyebrow || '')}</div><h1>${esc(c.title)}</h1>
+        ${c.tagline ? `<p class="course-tag">${esc(c.tagline)}</p>` : ''}${progressHTML(c)}</div>
+      ${coverHTML(c)}
+    </div>
+    ${mg ? cardEditor(c) + enrollPanel(c) + bulkPanel(c) : ''}
+    ${shown.length > 3 ? `<nav class="jump" aria-label="Sections">${shown.map(s => `<button class="chip" data-jump="${s.id}">${esc(s.eyebrow || s.title)}</button>`).join('')}</nav>` : ''}
+    ${shown.map(s => { const list = of(s.id); return `
+      <section class="section" id="sec-${s.id}">
+        <div class="section-head">
+          ${s.eyebrow ? `<div class="eyebrow">${esc(s.eyebrow)}</div>` : ''}
+          <h2 class="section-title">${esc(s.title)}</h2>
+          ${s.question ? `<div class="section-q">${esc(s.question)}</div>` : ''}
+          ${s.note ? `<div class="section-note">${esc(s.note)}</div>` : ''}
+        </div>
+        ${list.length ? `<ul class="items">${list.map(it => itemRow(it, list)).join('')}</ul>` : `<p class="quiet empty">Not yet open.</p>`}
+        ${mg ? addForm(c, s) : ''}
+      </section>`; }).join('')}
+    ${loose.length || mg ? `<section class="section" id="sec-loose">
+        <div class="section-head"><h2 class="section-title">${shown.length ? 'Also in this course' : 'In this course'}</h2></div>
+        ${loose.length ? `<ul class="items">${loose.map(it => itemRow(it, loose)).join('')}</ul>` : `<p class="quiet empty">Nothing here yet.</p>`}
+        ${mg ? addForm(c, null) : ''}
+      </section>` : ''}
+    ${mg ? `<details class="mg mg-panel"><summary>Add a section</summary><div class="mg-form">
+        <label>Label above the title<input type="text" id="ns-eyebrow" placeholder="Module One"></label>
+        <label>Title<input type="text" id="ns-title"></label>
+        <label class="wide">Question or subtitle (optional)<input type="text" id="ns-q"></label></div>
+        <div class="mg-row"><button class="btn btn-sm btn-solid" id="ns-save" data-course="${c.id}">Add section</button><span class="mg-status" id="ns-st"></span></div></details>` : ''}`;
+  root().querySelectorAll('[data-jump]').forEach(a => a.onclick = () => document.getElementById('sec-' + a.dataset.jump)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  root().querySelectorAll('[data-file]').forEach(b => b.onclick = () => downloadFile(b.dataset.file, b));
+  root().querySelectorAll('[data-open]').forEach(a => a.addEventListener('click', () => markSeen(a.dataset.open)));
+  wireManage(c);
+  if (S.scrollTo !== undefined) { const el = document.getElementById('sec-' + (S.scrollTo || 'loose')); delete S.scrollTo; if (el) setTimeout(() => el.scrollIntoView({ block: 'start' }), 60); }
+  else if (!S.keepScroll) scrollTop();
+  S.keepScroll = false;
+}
+function scrollTop() { try { (S.embed ? parent : window).scrollTo({ top: 0 }); } catch { window.scrollTo(0, 0); } }
+
+// ── Seen ──
+async function markSeen(id) {
+  const it = S.D.items.find(x => x.id === id), c = it && S.D.courses.find(x => x.id === it.course_id);
+  if (c) try { localStorage.setItem(lastKey(), JSON.stringify({ c: c.slug, i: id })); } catch {}
+  if (!S.clientId || S.preview || S.isAdmin || S.D.seen.has(id)) return;
+  S.D.seen.add(id);
+  const row = document.querySelector(`#item-${CSS.escape(id)} .item-act`); if (row && !row.querySelector('.seen')) row.insertAdjacentHTML('afterbegin', '<span class="seen">✓ opened</span>');
+  try { await api('course_progress', { method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' }, body: JSON.stringify({ client_id: S.clientId, item_id: id }) }); } catch (e) { console.warn(e); }
+}
+
+// ── Files (private bucket; a short-lived signed link, sent straight to download) ──
+const objPath = p => p.split('/').map(encodeURIComponent).join('/');
+async function downloadFile(id, btn) {
+  const it = S.D.items.find(x => x.id === id); if (!it?.storage_path) return;
+  const label = btn.textContent; btn.disabled = true; btn.textContent = 'Preparing…';
+  try {
+    const t = await token(); if (!t) throw new Error('SESSION_EXPIRED');
+    const r = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/${BUCKET}/${objPath(it.storage_path)}`, { method: 'POST', headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ expiresIn: 300 }) });
+    const d = await r.json(); if (!r.ok || !d.signedURL) throw new Error(d.message || d.error || 'not available');
+    const url = `${SUPABASE_URL}/storage/v1${d.signedURL}&download=${encodeURIComponent(it.file_name || it.storage_path.split('/').pop())}`;
+    const f = document.createElement('iframe'); f.style.display = 'none'; f.src = url; document.body.appendChild(f); setTimeout(() => f.remove(), 60000);
+    markSeen(id);
+    btn.textContent = label;
+  } catch (e) { btn.textContent = e.message === 'SESSION_EXPIRED' ? 'Sign in again' : 'Could not open'; console.warn(e); setTimeout(() => { btn.textContent = label; }, 4000); }
+  btn.disabled = false;
+}
+
+// ── Letters ──
+const LETTER_TAGS = new Set(['P', 'BR', 'STRONG', 'B', 'EM', 'I', 'A', 'HR', 'H1', 'H2', 'H3', 'UL', 'OL', 'LI', 'BLOCKQUOTE']);
+function cleanLetter(html) {
+  const doc = new DOMParser().parseFromString(`<div id="x">${html || ''}</div>`, 'text/html'), box = doc.getElementById('x');
+  doc.querySelectorAll('script,style,iframe,object,embed,link,meta').forEach(n => n.remove());
+  [...box.querySelectorAll('*')].forEach(n => {
+    if (!LETTER_TAGS.has(n.tagName)) { n.replaceWith(...n.childNodes); return; }
+    const href = n.tagName === 'A' ? safeUrl(n.getAttribute('href')) : '';
+    [...n.attributes].forEach(a => n.removeAttribute(a.name));
+    if (n.tagName === 'A') { if (href) { n.setAttribute('href', href); n.setAttribute('target', '_blank'); n.setAttribute('rel', 'noopener'); } else n.replaceWith(...n.childNodes); }
+  });
+  const first = String(S.client?.name || '').trim().split(/\s+/)[0];
+  const w = doc.createTreeWalker(box, NodeFilter.SHOW_TEXT); let t;
+  while ((t = w.nextNode())) if (t.nodeValue.includes('{first}')) t.nodeValue = t.nodeValue.replace(/\{first\}/g, first || 'Dear one');
+  return box;
+}
+async function renderLetter(it) {
+  const c = S.D.courses.find(x => x.id === it.course_id), sec = S.D.sections.find(s => s.id === it.section_id);
+  root().innerHTML = `<div class="msg">Opening the letter…</div>`;
+  if (it.body_html === undefined) { const [row] = await get(`course_items?id=eq.${it.id}&select=body_html`); it.body_html = row?.body_html || ''; }
+  const box = cleanLetter(it.body_html);
+  root().innerHTML = `
+    <div class="letter-bar"><a class="linkbtn" href="#course/${encodeURIComponent(c.slug)}" id="lt-back">← ${esc(c.title)}</a>
+      <button class="btn btn-solid" id="lt-pdf">Download PDF</button></div>
+    <article class="sheet"><div class="eyebrow">${esc(c.title)}${sec?.eyebrow ? ' · ' + esc(sec.eyebrow) : ''}</div>
+      <h1>${esc(it.title)}</h1><div class="letter" id="lt-body"></div></article>`;
+  document.getElementById('lt-body').append(...box.childNodes);
+  document.getElementById('lt-back').onclick = () => { S.scrollTo = it.section_id || ''; };
+  document.getElementById('lt-pdf').onclick = e => letterPdf(it, c, e.currentTarget);
+  scrollTop(); markSeen(it.id);
+}
+// White page, black type: prints clean on a black-and-white printer.
+function pdfText(s) { return String(s ?? '').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/—/g, ' - ').replace(/–/g, '-').replace(/→/g, '>').replace(/…/g, '...').replace(/ /g, ' ').replace(/[^\x00-\xFF]/g, ''); }
+function letterPdf(it, c, btn) {
+  const JS = window.jspdf && window.jspdf.jsPDF; if (!JS) { btn.textContent = 'Still loading, try again'; return; }
+  const doc = new JS({ unit: 'pt', format: 'letter' });
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 72, maxW = W - 2 * M, BOTTOM = H - 64;
+  const SIZE = 12, LEAD = SIZE * 1.5; let y = M, page = 1;
+  const foot = () => { doc.setFont('times', 'italic'); doc.setFontSize(10); doc.setTextColor(60); doc.text(pdfText(`${c.title} · ${it.title} · ${page}`), W / 2, H - 36, { align: 'center' }); doc.setTextColor(0); };
+  const newPage = () => { foot(); doc.addPage(); page++; y = M; };
+  const font = (b, i) => doc.setFont('times', b && i ? 'bolditalic' : b ? 'bold' : i ? 'italic' : 'normal');
+  const runs = (node, st, out) => { node.childNodes.forEach(n => {
+    if (n.nodeType === 3) out.push({ t: pdfText(n.nodeValue), ...st });
+    else if (n.tagName === 'BR') out.push({ br: true });
+    else if (n.nodeType === 1) runs(n, { b: st.b || /^(STRONG|B|H1|H2|H3)$/.test(n.tagName), i: st.i || /^(EM|I)$/.test(n.tagName) }, out); }); return out; };
+  const para = (rs, size, indent = 0, after = 9) => {
+    const lh = size * 1.5; doc.setFontSize(size);
+    if (y + lh > BOTTOM) newPage();
+    let x = M + indent, gap = 0; y += size;
+    const nl = () => { y += lh; if (y > BOTTOM) { y -= lh; newPage(); y += size; } x = M + indent; gap = 0; };
+    rs.forEach(r => {
+      if (r.br) return nl();
+      font(r.b, r.i);
+      r.t.split(/(\s+)/).forEach(w => {
+        if (!w) return;
+        if (/^\s+$/.test(w)) { if (x > M + indent) gap = doc.getTextWidth(' '); return; }
+        const pieces = doc.getTextWidth(w) > maxW - indent ? doc.splitTextToSize(w, maxW - indent) : [w];
+        pieces.forEach(p => { const ww = doc.getTextWidth(p); if (x + gap + ww > M + maxW + 0.5) nl(); doc.text(p, x + gap, y); x += gap + ww; gap = 0; });
+      });
+    });
+    y += (lh - size) + after;
+  };
+  doc.setTextColor(0);
+  para([{ t: pdfText(c.title).toUpperCase() }], 10, 0, 2);
+  para([{ t: pdfText(it.title), b: true }], 18, 0, 14);
+  doc.setDrawColor(120); doc.setLineWidth(0.6); doc.line(M, y, W - M, y); y += 16;
+  const walk = box => [...box.children].forEach(el => {
+    if (el.tagName === 'HR') { if (y + 24 > BOTTOM) newPage(); y += 6; doc.line(M, y, W - M, y); y += 18; }
+    else if (el.tagName === 'UL' || el.tagName === 'OL') [...el.children].forEach((li, i) => para([{ t: el.tagName === 'OL' ? `${i + 1}. ` : '- ' }, ...runs(li, {}, [])], SIZE, 14, 4));
+    else if (el.tagName === 'BLOCKQUOTE') para(runs(el, { i: true }, []), SIZE, 18);
+    else if (/^H[1-3]$/.test(el.tagName)) { y += 6; para(runs(el, { b: true }, []), 14, 0, 6); }
+    else para(runs(el, {}, []), SIZE);
+  });
+  walk(cleanLetter(it.body_html));
+  foot();
+  doc.save(`${slugName(c.title)}-${slugName(it.title.replace(/·/g, '-'))}.pdf`.replace(/-+/g, '-'));
+}
+
+// ══ Managing (Christy only) ══════════════════════════════════════════════
+function cardEditor(c) {
+  const f = (k, label, wide, ph) => `<label${wide ? ' class="wide"' : ''}>${label}<input type="text" data-cf="${k}" value="${esc(c[k] || '')}" placeholder="${esc(ph || '')}"></label>`;
+  return `<details class="mg mg-panel" data-card="${c.id}"><summary>Card and labels${c.published ? '' : ' · hidden from clients'}</summary>
+    <div class="mg-form">${f('title', 'Title')}${f('eyebrow', 'Label above the title')}${f('tagline', 'Card text', true)}
+      ${f('status_label', 'Shown to those who do not hold it', false, 'Opens in January')}${f('cta_label', 'Button label')}${f('cta_url', 'Button link', true, 'https://')}
+      ${f('cover_url', 'Cover image link (optional; replaces the drawn cover)', true, 'https://')}</div>
+    <div class="mg-row"><label style="display:inline-flex;gap:0.4rem;align-items:center"><input type="checkbox" data-cf="published" ${c.published ? 'checked' : ''}> Visible in the portal</label>
+      <button class="btn btn-sm btn-solid" data-card-save="${c.id}">Save</button><span class="mg-status"></span></div></details>`;
+}
+function enrollPanel(c) {
+  const have = new Map(S.D.enr.filter(e => e.course_id === c.id).map(e => [e.client_id, e]));
+  const cohorts = [...new Set([...S.D.items.filter(i => i.course_id === c.id && i.cohort).map(i => i.cohort), ...[...have.values()].map(e => e.cohort).filter(Boolean)])];
+  return `<details class="mg mg-panel"><summary>Who holds this course · ${have.size}</summary>
+    <div class="mg-row">New enrollments join <select id="enr-cohort" style="width:auto"><option value="">no cohort</option>${cohorts.map(x => `<option selected>${esc(x)}</option>`).join('')}</select>
+      <span>Recordings and letters marked for one cohort are seen only by that cohort.</span></div>
+    <div class="enr-list">${S.D.clients.map(cl => { const e = have.get(cl.id); return `<label><input type="checkbox" data-enr="${cl.id}" data-course="${c.id}" ${e ? 'checked' : ''}> ${esc(cl.name || cl.email)}${e?.cohort ? ` <span class="tag ok">${esc(e.cohort)}</span>` : ''}${cl.auth_user_id ? '' : ' <span class="tag">no login</span>'}</label>`; }).join('')}</div>
+    <div class="mg-row"><span class="mg-status" id="enr-st"></span></div></details>`;
+}
+function bulkPanel(c) {
+  const waiting = S.D.items.filter(i => i.course_id === c.id && i.kind === 'file' && !i.storage_path);
+  return `<details class="mg mg-panel"><summary>Add files · ${waiting.length} waiting for a file</summary>
+    <div class="drop" id="drop" data-course="${c.id}">Drop PDFs here, or <label class="linkbtn" style="text-decoration:underline">choose files<input type="file" id="drop-in" multiple hidden></label>.<br>
+      A file whose name matches a waiting item fills it and publishes it. Any other file is added under <i>Also in this course</i>, unpublished, for you to place.</div>
+    ${waiting.length ? `<div class="mg-row">Waiting: ${waiting.map(i => `<span class="tag">${esc(i.file_name || i.title)}</span>`).join(' ')}</div>` : ''}
+    <div class="mg-row"><span class="mg-status" id="drop-st"></span></div></details>`;
+}
+function addForm(c, s) {
+  const sid = s ? s.id : '';
+  const cohorts = [...new Set(S.D.items.filter(i => i.course_id === c.id && i.cohort).map(i => i.cohort).concat(S.D.enr.filter(e => e.course_id === c.id && e.cohort).map(e => e.cohort)))];
+  return `<details class="mg section-add" data-add="${sid}" data-course="${c.id}"><summary style="cursor:pointer;font-weight:600;color:var(--text)">+ Add here</summary>
+    <div class="mg-form">
+      <label>Kind<select data-af="kind"><option value="video">Recording (link)</option><option value="file">Download (file)</option><option value="link">Link</option></select></label>
+      <label>Title<input type="text" data-af="title" placeholder="The circle · recording"></label>
+      <label>Line beneath (optional)<input type="text" data-af="description" placeholder="Friday, November 13"></label>
+      <label>Who sees it<select data-af="cohort"><option value="">Everyone who holds the course</option>${cohorts.map(x => `<option value="${esc(x)}">${esc(x)} only</option>`).join('')}</select></label>
+      <label class="wide" data-af-url>Link<input type="url" data-af="url" placeholder="https://"></label>
+      <label class="wide" data-af-file hidden>File<input type="file" data-af="file"></label></div>
+    <div class="mg-row"><button class="btn btn-sm btn-solid" data-add-save>Add and publish</button><span class="mg-status"></span></div></details>`;
+}
+async function uploadFile(c, file, name) {
+  const t = await token(); if (!t) throw new Error('SESSION_EXPIRED');
+  const path = `${c.slug}/${slugName(name || file.name)}`;
+  const r = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${objPath(path)}`, { method: 'POST', headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${t}`, 'x-upsert': 'true', 'Content-Type': file.type || 'application/octet-stream' }, body: file });
+  if (!r.ok) throw new Error(await r.text());
+  return path;
+}
+const patchItem = (id, body) => api(`course_items?id=eq.${id}`, { method: 'PATCH', headers: REP, body: JSON.stringify({ ...body, updated_at: new Date().toISOString() }) }).then(r => { Object.assign(S.D.items.find(x => x.id === id), r[0]); });
+function again() { S.keepScroll = true; render(); }
+
+function wireManage(c) {
+  if (!(S.isAdmin && S.manage)) return;
+  const R = root(), $$ = sel => R.querySelectorAll(sel);
+  // course card
+  $$('[data-card-save]').forEach(b => b.onclick = async () => {
+    const box = b.closest('[data-card]'), st = b.nextElementSibling, body = { updated_at: new Date().toISOString() };
+    box.querySelectorAll('[data-cf]').forEach(el => { body[el.dataset.cf] = el.type === 'checkbox' ? el.checked : (el.value.trim() || null); });
+    if (!body.title) { st.textContent = 'A title is needed.'; return; }
+    st.textContent = 'saving…';
+    try { const r = await api(`courses?id=eq.${b.dataset.cardSave}`, { method: 'PATCH', headers: REP, body: JSON.stringify(body) }); Object.assign(S.D.courses.find(x => x.id === b.dataset.cardSave), r[0]); again(); }
+    catch (e) { st.textContent = 'failed: ' + e.message; }
+  });
+  if (!c) return;
+  // publish / move / delete / edit / attach
+  $$('[data-pub]').forEach(el => el.onchange = async () => { const st = document.getElementById('st-' + el.dataset.pub); st.textContent = 'saving…'; try { await patchItem(el.dataset.pub, { published: el.checked }); again(); } catch (e) { st.textContent = 'failed: ' + e.message; } });
+  $$('[data-move]').forEach(b => b.onclick = async () => {
+    const it = S.D.items.find(x => x.id === b.dataset.move), sibs = S.D.items.filter(x => x.course_id === it.course_id && (x.section_id || null) === (it.section_id || null));
+    const i = sibs.indexOf(it), j = i + Number(b.dataset.dir); if (j < 0 || j >= sibs.length) return;
+    [sibs[i], sibs[j]] = [sibs[j], sibs[i]];
+    try { for (let k = 0; k < sibs.length; k++) if (sibs[k].sort !== (k + 1) * 10) await patchItem(sibs[k].id, { sort: (k + 1) * 10 }); S.D.items.sort((a, b2) => a.sort - b2.sort); again(); } catch (e) { document.getElementById('st-' + it.id).textContent = 'failed: ' + e.message; }
+  });
+  $$('[data-del]').forEach(b => b.onclick = async () => {
+    if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Delete for good?'; setTimeout(() => { b.dataset.sure = ''; b.textContent = 'Delete'; }, 4000); return; }
+    try { await api(`course_items?id=eq.${b.dataset.del}`, { method: 'DELETE' }); S.D.items = S.D.items.filter(x => x.id !== b.dataset.del); again(); } catch (e) { document.getElementById('st-' + b.dataset.del).textContent = 'failed: ' + e.message; }
+  });
+  $$('[data-edit]').forEach(b => b.onclick = () => {
+    const it = S.D.items.find(x => x.id === b.dataset.edit), li = document.getElementById('item-' + it.id); if (li.querySelector('.item-edit')) return;
+    li.insertAdjacentHTML('beforeend', `<div class="item-edit mg"><div class="mg-form">
+      <label>Title<input type="text" data-ef="title" value="${esc(it.title)}"></label>
+      <label>Line beneath<input type="text" data-ef="description" value="${esc(it.description || '')}"></label>
+      <label>Only for cohort (blank = everyone)<input type="text" data-ef="cohort" value="${esc(it.cohort || '')}"></label>
+      ${it.kind === 'video' || it.kind === 'link' ? `<label class="wide">Link<input type="url" data-ef="url" value="${esc(it.url || '')}" placeholder="https://"></label>` : ''}</div>
+      <div class="mg-row"><button class="btn btn-sm btn-solid" data-ef-save>Save</button><button class="btn btn-sm" data-ef-cancel>Cancel</button><span class="mg-status"></span></div></div>`);
+    const ed = li.querySelector('.item-edit');
+    ed.querySelector('[data-ef-cancel]').onclick = () => ed.remove();
+    ed.querySelector('[data-ef-save]').onclick = async () => { const body = {}; ed.querySelectorAll('[data-ef]').forEach(el => { body[el.dataset.ef] = el.value.trim() || null; });
+      if (!body.title) { ed.querySelector('.mg-status').textContent = 'A title is needed.'; return; }
+      if ('url' in body) { body.url = safeUrl(body.url) || null; if (body.url && !safeUrl(it.url)) body.published = true; }   // a first link opens the item
+      try { await patchItem(it.id, body); again(); } catch (e) { ed.querySelector('.mg-status').textContent = 'failed: ' + e.message; } };
+  });
+  $$('[data-attach]').forEach(el => el.onchange = async () => {
+    const it = S.D.items.find(x => x.id === el.dataset.attach), st = document.getElementById('st-' + it.id), file = el.files[0]; if (!file) return;
+    st.textContent = 'uploading…';
+    try { const path = await uploadFile(c, file, it.file_name || file.name); await patchItem(it.id, { storage_path: path, file_name: it.file_name || slugName(file.name) }); again(); } catch (e) { st.textContent = 'failed: ' + e.message; }
+  });
+  // add an item
+  $$('[data-add]').forEach(box => {
+    const kind = box.querySelector('[data-af=kind]'), u = box.querySelector('[data-af-url]'), f = box.querySelector('[data-af-file]');
+    kind.onchange = () => { u.hidden = kind.value === 'file'; f.hidden = kind.value !== 'file'; };
+    box.querySelector('[data-add-save]').onclick = async e => {
+      const st = e.currentTarget.nextElementSibling, v = k => box.querySelector(`[data-af=${k}]`).value.trim();
+      const file = box.querySelector('[data-af=file]').files[0];
+      if (!v('title')) { st.textContent = 'A title is needed.'; return; }
+      if (kind.value === 'file' ? !file : !safeUrl(v('url'))) { st.textContent = kind.value === 'file' ? 'Choose a file.' : 'A full link is needed (https://…).'; return; }
+      st.textContent = 'saving…';
+      try {
+        const sibs = S.D.items.filter(x => x.course_id === c.id && (x.section_id || '') === box.dataset.add);
+        const body = { course_id: c.id, section_id: box.dataset.add || null, kind: kind.value, title: v('title'), description: v('description') || null, cohort: v('cohort') || null, sort: (sibs.length ? Math.max(...sibs.map(x => x.sort)) : 0) + 10, published: true };
+        if (kind.value === 'file') { body.storage_path = await uploadFile(c, file); body.file_name = slugName(file.name); } else body.url = safeUrl(v('url'));
+        const r = await api('course_items', { method: 'POST', headers: REP, body: JSON.stringify(body) }); S.D.items.push(r[0]); again();
+      } catch (err) { st.textContent = 'failed: ' + err.message; }
+    };
+  });
+  // add a section
+  const ns = document.getElementById('ns-save');
+  if (ns) ns.onclick = async () => { const st = document.getElementById('ns-st'), title = document.getElementById('ns-title').value.trim(); if (!title) { st.textContent = 'A title is needed.'; return; }
+    const secs = S.D.sections.filter(s => s.course_id === c.id);
+    try { const r = await api('course_sections', { method: 'POST', headers: REP, body: JSON.stringify({ course_id: c.id, eyebrow: document.getElementById('ns-eyebrow').value.trim() || null, title, question: document.getElementById('ns-q').value.trim() || null, sort: (secs.length ? Math.max(...secs.map(s => s.sort)) : 0) + 10 }) }); S.D.sections.push(r[0]); S.D.sections.sort((a, b) => a.sort - b.sort); again(); }
+    catch (e) { st.textContent = 'failed: ' + e.message; } };
+  // who holds it
+  $$('[data-enr]').forEach(el => el.onchange = async () => { const st = document.getElementById('enr-st'); st.textContent = 'saving…';
+    try {
+      if (el.checked) { const r = await api('course_enrollments', { method: 'POST', headers: REP, body: JSON.stringify({ course_id: c.id, client_id: el.dataset.enr, cohort: document.getElementById('enr-cohort').value || null, source: 'manual' }) }); S.D.enr.push(r[0]); }
+      else { await api(`course_enrollments?course_id=eq.${c.id}&client_id=eq.${el.dataset.enr}`, { method: 'DELETE' }); S.D.enr = S.D.enr.filter(x => !(x.course_id === c.id && x.client_id === el.dataset.enr)); }
+      st.textContent = 'saved · ' + new Date().toLocaleTimeString();
+    } catch (e) { el.checked = !el.checked; st.textContent = 'failed: ' + e.message; } });
+  // many files at once
+  const drop = document.getElementById('drop');
+  if (drop) {
+    const take = async files => { const st = document.getElementById('drop-st'); let n = 0;
+      for (const file of files) { st.textContent = `uploading ${file.name}…`;
+        try {
+          const want = slugName(file.name).toLowerCase(), it = S.D.items.find(i => i.course_id === c.id && i.kind === 'file' && (i.file_name || '').toLowerCase() === want);
+          const path = await uploadFile(c, file, it?.file_name);
+          if (it) await patchItem(it.id, { storage_path: path, published: true });
+          else { const r = await api('course_items', { method: 'POST', headers: REP, body: JSON.stringify({ course_id: c.id, kind: 'file', title: file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '), file_name: slugName(file.name), storage_path: path, sort: 900, published: false }) }); S.D.items.push(r[0]); }
+          n++;
+        } catch (e) { st.textContent = `${file.name} failed: ${e.message}`; return; } }
+      again(); };
+    document.getElementById('drop-in').onchange = e => take([...e.target.files]);
+    drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+    drop.ondragleave = () => drop.classList.remove('over');
+    drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); take([...e.dataTransfer.files]); };
+  }
+}
+
+init();
+</script>
+</body>
+</html>
