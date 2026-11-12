@@ -1060,7 +1060,7 @@ body { font-weight: 400; }
 .welcome-how li { font-size: 16px; line-height: 1.65; color: var(--text-secondary); margin-bottom: 0.4rem; }
 .welcome-intro { max-width: 760px; font-size: 17px; }
 .welcome-edit { width: 100%; }
-#panel-my-chart .chart-frame { border: none; background: transparent; }
+#panel-my-chart .chart-frame, #panel-my-courses .chart-frame, #panel-courses-admin .chart-frame { border: none; background: transparent; }
 .chart-frame { width: 100%; border: 1px solid var(--border); border-radius: 8px; min-height: 70vh; background: var(--surface); display: block; }
 .cd-note { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dim); margin: 0 0 1rem; line-height: 1.5; }
 
@@ -1505,6 +1505,16 @@ body { font-weight: 400; }
       <!-- ══ CLIENT: My Chart (my-chart.html embedded; same session as the portal) ══ -->
       <div class="panel" id="panel-my-chart">
         <iframe class="chart-frame" id="client-chart-frame" title="My Chart"></iframe>
+      </div>
+
+      <!-- ══ CLIENT: My Courses (my-courses.html embedded; same session as the portal) ══ -->
+      <div class="panel" id="panel-my-courses">
+        <iframe class="chart-frame" id="client-courses-frame" title="My Courses"></iframe>
+      </div>
+
+      <!-- ══ ADMIN: Courses (my-courses.html embedded, with its editing controls) ══ -->
+      <div class="panel" id="panel-courses-admin">
+        <iframe class="chart-frame" id="admin-courses-frame" title="Courses"></iframe>
       </div>
 
       <!-- ══ CLIENT: My Tapestry ══ -->
@@ -2045,6 +2055,16 @@ async function enterApp() {
 
   showView('view-app');
 
+  // 2026-11-12: a visitor sent here by the living Map's gate goes back to it after signing in.
+  try {
+    const back = sessionStorage.getItem('nm_after_login');
+    if (back) {
+      sessionStorage.removeItem('nm_after_login');
+      const me = isAdmin ? null : getActiveClientObject();
+      if (/^\/map-living\.html(#field-[ivx]+)?$/i.test(back) && (isAdmin || (me && me.access_map))) { window.location.href = back; return; }
+    }
+  } catch (e) { }
+
   // Detect preview-mode return: if URL has ?client_id=X&preview=1 and we're admin,
   // automatically restart preview-as-X (sent here by the external pages' Portal links).
   // This preserves preview context across the external-page-and-back journey.
@@ -2119,6 +2139,7 @@ function buildNav() {
     { id: 'panel-followups',          label: 'Follow-ups' },
     { group: 'Offerings' },
     { id: 'panel-offerings',          label: 'Offering Tracker' },
+    { id: 'panel-courses-admin',      label: 'Courses' },
     { group: 'Build' },
     { id: 'panel-weaving',            label: 'Weaving Builder' },
     { id: 'panel-ancestor-research',  label: 'Ancestor Research' },
@@ -2137,6 +2158,8 @@ function buildNav() {
     // the portal (embedded), not in a separate tab.
     clientTabs.push({ id: 'panel-welcome', label: 'Welcome' });
     if (activeClient.access_chart) clientTabs.push({ id: 'panel-my-chart', label: 'My Chart' });
+    // My Courses is open to every client: what she holds, and what is available.
+    clientTabs.push({ id: 'panel-my-courses', label: 'My Courses' });
     // Signal Reading is independent of access flags. The readings live in the
     // signals_readings / signals_tier2_readings tables (loaded by loadSignalReading),
     // NOT in the legacy clients.signals_reading JSONB — so we always surface the
@@ -2221,8 +2244,9 @@ function buildNav() {
   // append the active client's id.) Distinct from the "My Tapestry" panel.
   const externalLinks = [
     { href: 'index.html',             label: 'Map ↗',              flag: null },
-    // Living Map added 2026-11-12: the public-site preview (map-living.html). Change href to /map when the living Map becomes /map.
-    { href: 'https://christypaxtonwade.com/map-living.html', label: 'The Living Map ↗', flag: null, absolute: true },
+    // Living Map (2026-11-12): portal page map-living.html, built by website/map-living-source/build_portal.py.
+    // Not public. Clients see it when access_map is on (paid offering); admin always.
+    { href: 'map-living.html', label: 'The Living Map ↗', flag: 'access_map', noClient: true },
     { href: 'ancestral-weaving.html', label: 'Weaving ↗',          flag: 'access_weaving' },
     { href: 'ancestral-catalog.html', label: 'Catalog ↗',          flag: 'access_catalog' },
     { href: 'tapestry.html',          label: 'Mythic Tapestry ↗',  flag: null, noClient: true },
@@ -2276,6 +2300,20 @@ function loadMyChartPanel() {
   if (f.dataset.src !== src) { f.dataset.src = src; f.src = src; }
 }
 
+// ── Courses (embedded): the client's My Courses, and the admin's Courses with editing ──
+function loadCoursesPanel(panelId) {
+  const admin = panelId === 'panel-courses-admin';
+  const f = document.getElementById(admin ? 'admin-courses-frame' : 'client-courses-frame');
+  if (!f) return;
+  let src = 'my-courses.html?embed=1';
+  if (!admin) {
+    const c = getActiveClientObject();
+    if (!c) return;
+    if (isPreviewingAsClient) src += `&client_id=${encodeURIComponent(c.id)}&preview=1`;
+  }
+  if (f.dataset.src !== src) { f.dataset.src = src; f.src = src; }
+}
+
 // ── Client: Welcome ───────────────────────────────────
 // What the portal is, how to use it, and what this client has, from their access flags.
 // The words live in chart_reference_text (kind 'portal_welcome') so Christy can edit them
@@ -2285,6 +2323,7 @@ const WELCOME_DEFAULT = {
   intro: 'This is the private space for the work you and Christy do together. What you find here is built from your chart, your lineage and your sessions, and only the two of you can see it. Sections open as the work reaches them, so this page grows with you.',
   how: 'Use the menu on the left to move between sections. Each one is described below.\nLinks marked ↗ open a full page in a new tab; your portal stays open in this one.\nTo keep or print your chart, open My Chart and choose Generate PDF.\nQuestions between sessions go in Messages. Christy is notified by email, and you will get an email when she replies.\nOn a shared computer, sign out at the top right when you are done.',
   sec_my_chart: 'Your astrology, Human Design and Gene Keys read together, and the Fields of the Navigation Map where they place you. Download it as a PDF to keep.',
+  sec_my_courses: 'The courses you hold, each with its letters, recordings and pages to download, and what else is available.',
   sec_signal_reading: 'Your reading from the Signals from the Field quiz: your arc, your Field, your register and the frequency pattern it surfaced. If you have not taken the quiz yet, the link is here.',
   sec_messages: 'A private thread with Christy, for questions and anything that surfaces between sessions.',
   sec_my_weaving: 'The ancestors assembled for your lineage research, each carrying a frequency, with the layers of their story.',
@@ -2296,6 +2335,7 @@ const WELCOME_DEFAULT = {
 let WELCOME_TEXT = null;
 const WELCOME_SECTIONS = [
   ['panel-my-chart',        'My Chart',       'sec_my_chart',        c => c.access_chart],
+  ['panel-my-courses',      'My Courses',     'sec_my_courses',      () => true],
   ['panel-signal-reading',  'Signal Reading', 'sec_signal_reading',  () => true],
   ['panel-client-messages', 'Messages',       'sec_messages',        () => true],
   ['panel-my-weaving',      'My Weaving',     'sec_my_weaving',      c => c.access_weaving],
@@ -2373,6 +2413,7 @@ const ADMIN_HASH_MAP = {
   '#clients':             'panel-overview',
   '#overview':            'panel-overview',  // legacy alias
   '#offerings':           'panel-offerings',
+  '#courses':             'panel-courses-admin',
   '#prospects':           'panel-prospects',
   '#followups':           'panel-followups',
   '#weaving':             'panel-weaving',
@@ -2383,6 +2424,7 @@ const ADMIN_HASH_MAP = {
 const CLIENT_HASH_MAP = {
   '#welcome':        'panel-welcome',
   '#my-chart':       'panel-my-chart',
+  '#my-courses':     'panel-my-courses',
   '#signal-reading': 'panel-signal-reading',
   '#messages':       'panel-client-messages',
   '#my-weaving':     'panel-my-weaving',
@@ -2442,6 +2484,7 @@ function activatePanel(panelId) {
   const panel = document.getElementById(panelId);
   if (panel) panel.classList.add('active');
   window.scrollTo(0, 0);
+  if (panelId === 'panel-my-courses' || panelId === 'panel-courses-admin') loadCoursesPanel(panelId);
 }
 
 // ── View toggle ───────────────────────────────────────
@@ -2813,6 +2856,7 @@ async function cdSendMessage() {
 // existing save/toggle wiring by element id keeps working.
 const CD_ACCESS = [
   ['access_chart',       'Chart'],
+  ['access_map',         'Living Map'],
   ['access_weaving',     'Weaving'],
   ['access_catalog',     'Catalog'],
   ['access_convergence', 'Convergence'],
@@ -3066,7 +3110,7 @@ function cdLoadChartFrame() {
 }
 // my-chart.html (embed mode) reports its height so the frame never scrolls on its own.
 window.addEventListener('message', e => {
-  if (e.origin !== window.location.origin || !e.data || !/^(my-chart|chart-admin)-height$/.test(e.data.type || '')) return;
+  if (e.origin !== window.location.origin || !e.data || !/^(my-chart|chart-admin|my-courses)-height$/.test(e.data.type || '')) return;
   const f = [...document.querySelectorAll('iframe.chart-frame')].find(x => x.contentWindow === e.source);
   if (!f) return;
   if (f) f.style.height = Math.max(600, Number(e.data.height) || 0) + 'px';
@@ -3287,6 +3331,7 @@ function cdAccessCard(d) {
     { key: 'access_convergence', label: 'My Convergence', hint: 'their full Convergence + PDF + history' },
     { key: 'access_catalog',     label: 'My Catalog',     hint: 'their ancestors as a sortable catalog (usually with the weaving)' },
     { key: 'access_chart',       label: 'My Chart',       hint: 'their chart analysis — astrology, Human Design, Gene Keys and the Map — with PDF' },
+    { key: 'access_map',         label: 'The Living Map', hint: 'the living Map of thirteen Fields, opened with a paid offering' },
   ];
   const autoRow = (on, name, note) =>
     `<div class="cd-row"><div class="cd-label" style="min-width:150px">${name}</div><div class="cd-value">${on ? '<span style="color:var(--gold)">On</span>' : '<span class="muted">Off</span>'} — ${note}</div></div>`;
@@ -4094,7 +4139,8 @@ async function cdSaveAccess() {
       access_weaving:     document.getElementById('cd-f-access_weaving').checked,
       access_catalog:     document.getElementById('cd-f-access_catalog').checked,
       access_convergence: document.getElementById('cd-f-access_convergence').checked,
-      access_chart:       document.getElementById('cd-f-access_chart').checked
+      access_chart:       document.getElementById('cd-f-access_chart').checked,
+      access_map:         document.getElementById('cd-f-access_map').checked
     });
     await loadClients();
     const fresh = allClients.find(x => x.id === currentDetailClient);
@@ -4260,7 +4306,7 @@ function renderClientList() {
     return true;
   });
   if (!list.length) { el.innerHTML = '<div class="empty">No one matches that search.</div>'; return; }
-  const ACCESS = [['access_chart', 'Chart'], ['access_weaving', 'Weaving'], ['access_catalog', 'Catalog'], ['access_convergence', 'Convergence']];
+  const ACCESS = [['access_chart', 'Chart'], ['access_map', 'Living Map'], ['access_weaving', 'Weaving'], ['access_catalog', 'Catalog'], ['access_convergence', 'Convergence']];
   el.innerHTML = list.map(c => {
     const unread = unreadByClient[c.id] || 0;
     const login = c.auth_user_id
