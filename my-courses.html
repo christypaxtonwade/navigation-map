@@ -283,6 +283,13 @@ function visibleItems(c) {
     : it.published && ready(it) && (!asClient() || !it.cohort || it.cohort === e?.cohort)));
 }
 function hidden(c) { return c.hide_when === 'signals_tier2' && asClient() && S.D.sig2.length > 0; }
+// A card can speak differently to someone who holds another course (holder_of): her own status line and button.
+function offer(c) {
+  const other = c.holder_of && asClient() && S.D.courses.find(x => x.slug === c.holder_of);
+  const hers = other && enrollment(other);
+  return hers ? { status: c.holder_status_label || c.status_label, label: c.holder_cta_label || c.cta_label, url: c.holder_cta_url || c.cta_url }
+              : { status: c.status_label, label: c.cta_label, url: c.cta_url };
+}
 const bySlug = slug => S.D.courses.find(c => c.slug === slug);
 const lastKey = () => `courses_last_${S.clientId || 'admin'}`;
 
@@ -326,17 +333,17 @@ function renderLibrary() {
           <a class="btn btn-solid" href="#course/${encodeURIComponent(c.slug)}">Open course</a>
         </div>
       </article>`).join('')}</div>` : `<p class="quiet">Nothing here yet. What you enroll in opens on this page.</p>`}
-    ${other.length ? `<h2 class="sec">${mine.length ? 'Also available' : 'Available'}</h2><div class="grid">${other.map(c => `
+    ${other.length ? `<h2 class="sec">${mine.length ? 'Also available' : 'Available'}</h2><div class="grid">${other.map(c => { const o = offer(c); return `
       <article class="card">
         ${coverHTML(c, true)}
         <div class="card-body">
           <h2 class="card-title">${esc(c.title)}</h2>
-          ${c.status_label ? `<div class="card-status">${esc(c.status_label)}</div>` : ''}
+          ${o.status ? `<div class="card-status">${esc(o.status)}</div>` : ''}
           <p class="card-text">${esc(c.tagline || '')}</p>
-          ${safeUrl(c.cta_url) ? `<a class="btn" href="${esc(safeUrl(c.cta_url))}" target="_blank" rel="noopener">${esc(c.cta_label || 'Learn more')} ↗</a>` : ''}
+          ${safeUrl(o.url) ? `<a class="btn" href="${esc(safeUrl(o.url))}" target="_blank" rel="noopener">${esc(o.label || 'Learn more')} ↗</a>` : ''}
           ${S.isAdmin && S.manage ? cardEditor(c) : ''}
         </div>
-      </article>`).join('')}</div>` : ''}`;
+      </article>`; }).join('')}</div>` : ''}`;
   if (!S.keepScroll) scrollTop(); S.keepScroll = false;
   root().querySelectorAll('[data-resume]').forEach(b => b.onclick = () => { S.scrollTo = b.dataset.sec; location.hash = `#course/${encodeURIComponent(b.dataset.resume)}`; });
   wireManage();
@@ -520,6 +527,7 @@ function cardEditor(c) {
   return `<details class="mg mg-panel" data-card="${c.id}"><summary>Card and labels${c.published ? '' : ' · hidden from clients'}</summary>
     <div class="mg-form">${f('title', 'Title')}${f('eyebrow', 'Label above the title')}${f('tagline', 'Card text', true)}
       ${f('status_label', 'Shown to those who do not hold it', false, 'Opens in January')}${f('cta_label', 'Button label')}${f('cta_url', 'Button link', true, 'https://')}
+      ${f('holder_of', 'Different card for holders of (course short name)', false, 'seven-gates')}${f('holder_status_label', 'What those holders see')}${f('holder_cta_label', 'Their button label')}${f('holder_cta_url', 'Their button link', true, 'https://')}
       ${f('cover_url', 'Cover image link (optional; replaces the drawn cover)', true, 'https://')}</div>
     <div class="mg-row"><label style="display:inline-flex;gap:0.4rem;align-items:center"><input type="checkbox" data-cf="published" ${c.published ? 'checked' : ''}> Visible in the portal</label>
       <button class="btn btn-sm btn-solid" data-card-save="${c.id}">Save</button><span class="mg-status"></span></div></details>`;

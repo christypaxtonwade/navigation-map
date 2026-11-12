@@ -2243,7 +2243,8 @@ function buildNav() {
   // full canonical tapestry, not the empty client-scoped view. (noClient = don't
   // append the active client's id.) Distinct from the "My Tapestry" panel.
   const externalLinks = [
-    { href: 'index.html',             label: 'Map ↗',              flag: null },
+    // For a client, the living Map takes the Map's place once access_map is on; admin keeps both.
+    { href: 'index.html',             label: 'Map ↗',              flag: null, hideWhen: 'access_map' },
     // Living Map (2026-11-12): portal page map-living.html, built by website/map-living-source/build_portal.py.
     // Not public. Clients see it when access_map is on (paid offering); admin always.
     { href: 'map-living.html', label: 'The Living Map ↗', flag: 'access_map', noClient: true },
@@ -2263,6 +2264,7 @@ function buildNav() {
     externalGroup.appendChild(h);
   }
   externalLinks.forEach(l => {
+    if (l.hideWhen && !adminReference && activeClient && activeClient[l.hideWhen]) return;
     if (l.flag && (!isAdmin || isPreviewingAsClient)) {
       // Client (or the client being previewed) must have the flag true on their row.
       if (!activeClient || !activeClient[l.flag]) return;
@@ -2330,6 +2332,7 @@ const WELCOME_DEFAULT = {
   sec_my_convergence: 'The pattern analysis generated from your ancestral weaving, with a PDF to download.',
   sec_my_catalog: 'Every ancestor in your archive as one list, for finding a particular name.',
   sec_my_tapestry: 'The archetypal figures recognized in your work, and the ones you choose to add from the full Mythic Tapestry.',
+  sec_living_map: 'The living Map of the thirteen Fields, and the paths that run between them. Opens in a new tab.',
   sec_map: 'The full Navigation Map of Consciousness: the thirteen Fields and the terrain within them. Opens in a new tab.',
 };
 let WELCOME_TEXT = null;
@@ -2377,11 +2380,15 @@ async function renderWelcome(editing) {
           <p>${txt(key, 5)}</p>
           ${editing ? '' : `<button class="btn btn-outline btn-sm" onclick="welcomeOpen('${pid}')">Open ${label}</button>`}
         </div>`).join('')}
-      <div class="welcome-card">
+      ${c && c.access_map ? `<div class="welcome-card">
+        <div class="welcome-card-title">The Living Map ↗</div>
+        <p>${txt('sec_living_map', 5)}</p>
+        ${editing ? '' : `<a class="btn btn-outline btn-sm" href="map-living.html" target="_blank" rel="noopener">Open the Living Map ↗</a>`}
+      </div>` : `<div class="welcome-card">
         <div class="welcome-card-title">The Map ↗</div>
         <p>${txt('sec_map', 5)}</p>
         ${editing ? '' : `<a class="btn btn-outline btn-sm" href="index.html${c ? '?client_id=' + encodeURIComponent(c.id) : ''}" target="_blank" rel="noopener">Open the Map ↗</a>`}
-      </div>
+      </div>`}
     </div>
     <h3 class="welcome-h">Finding your way</h3>
     ${how}`;
