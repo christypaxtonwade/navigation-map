@@ -193,7 +193,7 @@ const REP = { Prefer: 'return=representation' };
 
 // ── Utilities ──
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const KIND = { letter: ['Letter', 'Read'], video: ['Recording', 'Watch ↗'], file: ['Download', 'Download'], link: ['Link', 'Open ↗'] };
+const KIND = { letter: ['Letter', 'Read'], video: ['Recording', 'Watch ↗'], file: ['File', 'Open ↗'], link: ['Link', 'Open ↗'] };
 const safeUrl = u => /^(https?:|mailto:)/i.test(String(u || '').trim()) ? String(u).trim() : '';
 const slugName = s => String(s || '').normalize('NFKD').replace(/[^\w.\- ]+/g, '').trim().replace(/\s+/g, '-');
 
@@ -352,8 +352,8 @@ function renderLibrary() {
 function itemRow(it, sibs) {
   const [label, act] = KIND[it.kind] || ['Item', 'Open'];
   const off = !it.published || !ready(it), mg = S.isAdmin && S.manage;
-  const action = !ready(it) ? '' : it.kind === 'letter' ? `<a class="btn btn-sm" href="#letter/${it.id}">${act}</a>`
-    : it.kind === 'file' ? `<button class="btn btn-sm" data-file="${it.id}">${act}</button>`
+  const action = !ready(it) ? '' : it.kind === 'letter' ? `<a class="btn btn-sm" href="#letter/${it.id}">${act}</a><button class="btn btn-sm" data-letter-pdf="${it.id}">Download</button>`
+    : it.kind === 'file' ? `<button class="btn btn-sm" data-file="${it.id}" data-mode="open">${act}</button><button class="btn btn-sm" data-file="${it.id}" data-mode="download">Download</button>`
     : `<a class="btn btn-sm" href="${esc(safeUrl(it.url))}" target="_blank" rel="noopener" data-open="${it.id}">${act}</a>`;
   return `<li class="item${mg && off ? ' off' : ''}" id="item-${it.id}">
     <span class="item-kind">${label}</span>
@@ -407,7 +407,13 @@ function renderCourse(c) {
         <label class="wide">Question or subtitle (optional)<input type="text" id="ns-q"></label></div>
         <div class="mg-row"><button class="btn btn-sm btn-solid" id="ns-save" data-course="${c.id}">Add section</button><span class="mg-status" id="ns-st"></span></div></details>` : ''}`;
   root().querySelectorAll('[data-jump]').forEach(a => a.onclick = () => document.getElementById('sec-' + a.dataset.jump)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
-  root().querySelectorAll('[data-file]').forEach(b => b.onclick = () => downloadFile(b.dataset.file, b));
+  root().querySelectorAll('[data-file]').forEach(b => b.onclick = () => downloadFile(b.dataset.file, b, b.dataset.mode === 'open'));
+  root().querySelectorAll('[data-letter-pdf]').forEach(b => b.onclick = async () => {
+    const it = S.D.items.find(x => x.id === b.dataset.letterPdf), label = b.textContent; b.disabled = true; b.textContent = 'Preparing…';
+    try { if (it.body_html === undefined) { const [row] = await get(`course_items?id=eq.${it.id}&select=body_html`); it.body_html = row?.body_html || ''; }
+      letterPdf(it, c, b); markSeen(it.id); b.textContent = label; }
+    catch (e) { b.textContent = 'Could not prepare'; console.warn(e); setTimeout(() => { b.textContent = label; }, 4000); }
+    b.disabled = false; });
   root().querySelectorAll('[data-open]').forEach(a => a.addEventListener('click', () => markSeen(a.dataset.open)));
   wireManage(c);
   if (S.scrollTo !== undefined) { const el = document.getElementById('sec-' + (S.scrollTo || 'loose')); delete S.scrollTo; if (el) setTimeout(() => el.scrollIntoView({ block: 'start' }), 60); }
@@ -428,18 +434,22 @@ async function markSeen(id) {
 
 // ── Files (private bucket; a short-lived signed link, sent straight to download) ──
 const objPath = p => p.split('/').map(encodeURIComponent).join('/');
-async function downloadFile(id, btn) {
+async function downloadFile(id, btn, open) {
   const it = S.D.items.find(x => x.id === id); if (!it?.storage_path) return;
+  // Open: the tab is opened inside the click (so the browser allows it) and pointed at the file once the link is ready.
+  const win = open ? window.open('', '_blank') : null;
+  if (win) { try { win.document.title = it.title; win.document.body.style.cssText = 'font-family:Georgia,serif;font-size:18px;color:#2b2414;background:#fbf7ec;padding:3rem'; win.document.body.textContent = 'Opening…'; } catch {} }
   const label = btn.textContent; btn.disabled = true; btn.textContent = 'Preparing…';
   try {
     const t = await token(); if (!t) throw new Error('SESSION_EXPIRED');
     const r = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/${BUCKET}/${objPath(it.storage_path)}`, { method: 'POST', headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ expiresIn: 300 }) });
     const d = await r.json(); if (!r.ok || !d.signedURL) throw new Error(d.message || d.error || 'not available');
-    const url = `${SUPABASE_URL}/storage/v1${d.signedURL}&download=${encodeURIComponent(it.file_name || it.storage_path.split('/').pop())}`;
-    const f = document.createElement('iframe'); f.style.display = 'none'; f.src = url; document.body.appendChild(f); setTimeout(() => f.remove(), 60000);
+    const base = `${SUPABASE_URL}/storage/v1${d.signedURL}`;
+    if (win) win.location.replace(base);
+    else { const f = document.createElement('iframe'); f.style.display = 'none'; f.src = `${base}&download=${encodeURIComponent(it.file_name || it.storage_path.split('/').pop())}`; document.body.appendChild(f); setTimeout(() => f.remove(), 60000); }
     markSeen(id);
     btn.textContent = label;
-  } catch (e) { btn.textContent = e.message === 'SESSION_EXPIRED' ? 'Sign in again' : 'Could not open'; console.warn(e); setTimeout(() => { btn.textContent = label; }, 4000); }
+  } catch (e) { if (win) { try { win.close(); } catch {} } btn.textContent = e.message === 'SESSION_EXPIRED' ? 'Sign in again' : 'Could not open'; console.warn(e); setTimeout(() => { btn.textContent = label; }, 4000); }
   btn.disabled = false;
 }
 
