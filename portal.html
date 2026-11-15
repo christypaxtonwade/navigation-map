@@ -427,6 +427,38 @@ body::before {
 }
 .ancestor-row:hover { border-color: var(--border-hover); }
 
+/* ─── Client My Weaving: the threshold (2026-11-15) ───
+   Light, present-tense index of the lineage. Names, dates, places and frequency
+   tags; each row opens that ancestor in the dark Weaving, where the layers live. */
+.weave-door {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.25rem;
+  flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+  padding: 1.1rem 1.25rem; margin-bottom: 1.75rem;
+}
+.weave-door-count { font-size: 16px; color: var(--text-dim); }
+.weave-door .btn { text-decoration: none; }
+a.ancestor-row.weave-row {
+  text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.85rem 1rem;
+}
+a.ancestor-row.weave-row:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.weave-row .weave-go { color: var(--text-faint); font-size: 15px; flex-shrink: 0; transition: color 0.2s; }
+.weave-row:hover .weave-go { color: var(--gold); }
+.weave-tags { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; max-width: 55%; }
+.weave-tag {
+  font-size: 14px; padding: 2px 8px; border-radius: 8px; white-space: nowrap;
+  background: var(--accent); border: 1px solid var(--border); color: var(--gold);
+}
+.weave-tag-more { color: var(--text-faint); background: transparent; }
+.weave-research .ancestor-row { background: transparent; border-style: dashed; }
+.weave-research-note { font-size: 16px; color: var(--text-dim); margin: 0.25rem 0 0.9rem; }
+.weave-relation { font-size: 15px; color: var(--text-faint); font-style: italic; }
+@media (max-width: 640px) {
+  a.ancestor-row.weave-row { flex-wrap: wrap; }
+  .weave-tags { max-width: 100%; justify-content: flex-start; order: 3; width: 100%; padding-left: 1.25rem; }
+}
+
 /* ─── Client weaving expand-to-layers (Phase C) ─── */
 .ancestor-row.ca-expandable { display: block; padding: 0; overflow: hidden; }
 .ancestor-row.ca-expandable .ca-row-main {
@@ -2248,7 +2280,8 @@ function buildNav() {
     // Living Map (2026-11-12): portal page map-living.html, built by website/map-living-source/build_portal.py.
     // Not public. Clients see it when access_map is on (paid offering); admin always.
     { href: 'map-living.html', label: 'The Living Map ↗', flag: 'access_map', noClient: true },
-    { href: 'ancestral-weaving.html', label: 'Weaving ↗',          flag: 'access_weaving' },
+    // Clients reach the dark Weaving through My Weaving (one name, one doorway — 2026-11-15).
+    { href: 'ancestral-weaving.html', label: 'Weaving ↗',          flag: 'access_weaving', adminOnly: true },
     { href: 'ancestral-catalog.html', label: 'Catalog ↗',          flag: 'access_catalog' },
     { href: 'tapestry.html',          label: 'Mythic Tapestry ↗',  flag: null, noClient: true },
     { href: 'convergence.html',       label: 'Convergence ↗',      flag: 'access_convergence' },
@@ -2265,6 +2298,7 @@ function buildNav() {
   }
   externalLinks.forEach(l => {
     if (l.hideWhen && !adminReference && activeClient && activeClient[l.hideWhen]) return;
+    if (l.adminOnly && !adminReference) return;
     if (l.flag && (!isAdmin || isPreviewingAsClient)) {
       // Client (or the client being previewed) must have the flag true on their row.
       if (!activeClient || !activeClient[l.flag]) return;
@@ -2328,7 +2362,7 @@ const WELCOME_DEFAULT = {
   sec_my_courses: 'The courses you hold, each with its letters, recordings and pages to download, and what else is available.',
   sec_signal_reading: 'Your reading from the Signals from the Field quiz: your arc, your Field, your register and the frequency pattern it surfaced. If you have not taken the quiz yet, the link is here.',
   sec_messages: 'A private thread with Christy, for questions and anything that surfaces between sessions.',
-  sec_my_weaving: 'The ancestors assembled for your lineage research, each carrying a frequency, with the layers of their story.',
+  sec_my_weaving: 'The ancestors assembled for your lineage research, each carrying a frequency. Open any one to enter the Weaving and read their story.',
   sec_my_convergence: 'The pattern analysis generated from your ancestral weaving, with a PDF to download.',
   sec_my_catalog: 'Every ancestor in your archive as one list, for finding a particular name.',
   sec_my_tapestry: 'The archetypal figures recognized in your work, and the ones you choose to add from the full Mythic Tapestry.',
@@ -5793,81 +5827,95 @@ async function loadMyWeaving() {
     container.innerHTML = '<div class="empty">Your weaving is being assembled.</div>';
     return;
   }
-  const idList = rows.map(r=>r.id).join(',');
-  const freqRows = await rest(`client_ancestor_frequencies?select=client_ancestor_id,strength,frequency_tags(name)&client_ancestor_id=in.(${idList})`);
+
+  // Intake stubs are ancestors named at intake, not yet researched or written.
+  const woven = rows.filter(r => r.status !== 'intake_stub');
+  // In the order the client named them on the intake form.
+  const inResearch = rows.filter(r => r.status === 'intake_stub')
+    .sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || '')));
+
   const freqMap = {};
-  (Array.isArray(freqRows)?freqRows:[]).forEach(r => {
-    const name = r.frequency_tags?.name; if (!name) return;
-    if (!freqMap[r.client_ancestor_id]) freqMap[r.client_ancestor_id] = [];
-    freqMap[r.client_ancestor_id].push(name);
-  });
+  if (woven.length) {
+    const idList = woven.map(r => r.id).join(',');
+    const freqRows = await rest(`client_ancestor_frequencies?select=client_ancestor_id,strength,frequency_tags(name)&client_ancestor_id=in.(${idList})`);
+    (Array.isArray(freqRows) ? freqRows : []).forEach(r => {
+      const name = r.frequency_tags?.name; if (!name) return;
+      if (!freqMap[r.client_ancestor_id]) freqMap[r.client_ancestor_id] = [];
+      freqMap[r.client_ancestor_id].push({ name, strength: r.strength ?? 0 });
+    });
+    const RANK = { dominant: 3, strong: 3, present: 2, moderate: 2, trace: 1, faint: 1 };
+    const rank = (v) => typeof v === 'number' ? v : (RANK[String(v || '').toLowerCase()] || 0);
+    Object.values(freqMap).forEach(list => list.sort((a, b) => rank(b.strength) - rank(a.strength)));
+  }
 
-  const arcGroups = [
-    { label: 'Mythic · Ancient', eras: ['mythic','ancient','classical','post-roman'] },
-    { label: 'Medieval', eras: ['early-medieval','high-medieval','late-medieval'] },
-    { label: 'Early Modern · Colonial', eras: ['renaissance','reformation','colonial','enlightenment'] },
-    { label: '19th Century · Contemporary', eras: ['19th-century','contemporary'] },
-  ];
-  const grouped = {};
-  arcGroups.forEach(g => { grouped[g.label] = []; });
-  rows.forEach(a => {
-    const era = (a.era||'').toLowerCase();
-    const grp = arcGroups.find(g => g.eras.includes(era));
-    const lbl = grp ? grp.label : '19th Century · Contemporary';
-    if (!grouped[lbl]) grouped[lbl] = [];
-    grouped[lbl].push(a);
-  });
-
-  // Helper: escape HTML in user-provided text
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  // The dark Weaving: same client context the sidebar links carry.
+  const weaveBase = `ancestral-weaving.html?client_id=${encodeURIComponent(clientId)}${isPreviewingAsClient ? '&preview=1' : ''}`;
 
-  // Helper: render the five-layer expansion for a single ancestor (click-to-expand).
-  // Hidden by default; toggleAncestorLayers() flips a class to reveal.
-  const layerBlock = (a) => {
-    const layer = (label, body) => body
-      ? `<div class="ca-layer"><div class="ca-layer-label">${label}</div><div class="ca-layer-body">${esc(body).replace(/\n/g, '<br>')}</div></div>`
-      : '';
-    const sigil = (a.sigil_name || a.sigil_description || a.sigil_svg)
-      ? `<div class="ca-layer ca-layer-sigil">
-          <div class="ca-layer-label">The Sigil</div>
-          ${a.sigil_svg ? `<div class="ca-sigil-art">${a.sigil_svg}</div>` : ''}
-          ${a.sigil_name ? `<div class="ca-sigil-name">${esc(a.sigil_name)}</div>` : ''}
-          ${a.sigil_description ? `<div class="ca-sigil-text">${esc(a.sigil_description)}</div>` : ''}
-        </div>`
-      : '';
-    const anyLayer = a.layer_terroir || a.layer_unresolved || a.layer_thread || a.layer_lineage || sigil;
-    if (!anyLayer) return '<div class="ca-empty">No layers written yet.</div>';
-    return `
-      ${layer('Terroir', a.layer_terroir)}
-      ${layer('The Unresolved', a.layer_unresolved)}
-      ${layer('The Living Thread', a.layer_thread)}
-      ${layer('The Lineage', a.layer_lineage)}
-      ${sigil}`;
-  };
+  let html = '';
+  if (woven.length) {
+    html += `<div class="weave-door">
+      <div class="weave-door-count">${woven.length} ${woven.length === 1 ? 'ancestor' : 'ancestors'} woven into your lineage${inResearch.length ? ` · ${inResearch.length} in research` : ''}</div>
+      <a class="btn btn-gold" href="${weaveBase}" target="_blank" rel="noopener">Enter the Weaving ↗</a>
+    </div>`;
 
-  let html = `<div style="margin-bottom:1rem;font-size:15px;color:var(--text-dim)">${rows.length} ancestors assembled across the lineage</div>`;
-  arcGroups.forEach(g => {
-    const group = grouped[g.label]||[];
-    if (!group.length) return;
-    html += `<div class="section-header" style="margin-top:2rem"><div class="section-title">${g.label}</div></div><div class="ancestor-list">`;
-    group.forEach(a => {
-      const freqs = freqMap[a.id]||[];
-      const topFreqs = freqs.slice(0,3).map(f=>`<span style="font-size:15px;padding:2px 7px;border-radius:8px;background:var(--accent);border:1px solid var(--border);color:var(--gold);white-space:nowrap">${esc(f)}</span>`).join('');
-      html += `<div class="ancestor-row ca-expandable" data-ca-id="${a.id}" onclick="toggleClientAncestor(this)" style="cursor:pointer">
-        <div class="ca-row-main">
+    const arcGroups = [
+      { label: 'Mythic · Ancient', eras: ['mythic','ancient','classical','post-roman'] },
+      { label: 'Medieval', eras: ['early-medieval','high-medieval','late-medieval'] },
+      { label: 'Early Modern · Colonial', eras: ['renaissance','reformation','colonial','enlightenment'] },
+      { label: '19th Century · Contemporary', eras: ['19th-century','contemporary'] },
+    ];
+    const grouped = {};
+    arcGroups.forEach(g => { grouped[g.label] = []; });
+    woven.forEach(a => {
+      const era = (a.era || '').toLowerCase();
+      const grp = arcGroups.find(g => g.eras.includes(era));
+      grouped[grp ? grp.label : '19th Century · Contemporary'].push(a);
+    });
+
+    arcGroups.forEach(g => {
+      const group = grouped[g.label] || [];
+      if (!group.length) return;
+      html += `<div class="section-header" style="margin-top:2rem"><div class="section-title">${g.label}</div></div><div class="ancestor-list">`;
+      group.forEach(a => {
+        // Frequency tags are carried as data so a later build can route them onto the Map.
+        const all = freqMap[a.id] || [];
+        const TAG_LIMIT = 4;
+        const tags = all.slice(0, TAG_LIMIT).map(f =>
+          `<span class="weave-tag" data-frequency="${esc(f.name)}">${esc(f.name)}</span>`).join('')
+          + (all.length > TAG_LIMIT ? `<span class="weave-tag weave-tag-more" title="${esc(all.slice(TAG_LIMIT).map(f => f.name).join(' · '))}">+${all.length - TAG_LIMIT}</span>` : '');
+        html += `<a class="ancestor-row weave-row" href="${weaveBase}#ancestor/${encodeURIComponent(slug(a.name))}" target="_blank" rel="noopener"
+            aria-label="Open ${esc(a.name)} in the Weaving">
           <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
-          <div class="ancestor-name-block" style="flex:1">
+          <div class="ancestor-name-block" style="flex:1;min-width:0">
             <div class="ancestor-name-text">${esc(a.name)}</div>
-            <div class="ancestor-dates">${esc(a.dates||'')} ${a.location?'· '+esc(a.location):''}</div>
+            <div class="ancestor-dates">${esc(a.dates || '')}${a.location ? ' · ' + esc(a.location) : ''}</div>
           </div>
-          <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${topFreqs}</div>
-          <span class="ca-chevron">▸</span>
+          <div class="weave-tags">${tags}</div>
+          <span class="weave-go" aria-hidden="true">↗</span>
+        </a>`;
+      });
+      html += '</div>';
+    });
+  }
+
+  if (inResearch.length) {
+    html += `<div class="weave-research">
+      <div class="section-header" style="margin-top:${woven.length ? '2.5rem' : '0'}"><div class="section-title">In Research</div></div>
+      <p class="weave-research-note">The ancestors you named are being researched. Each one enters the Weaving when their story is written.</p>
+      <div class="ancestor-list">`;
+    inResearch.forEach(a => {
+      html += `<div class="ancestor-row">
+        <div class="ancestor-name-block" style="flex:1;min-width:0">
+          <div class="ancestor-name-text">${esc(a.name)}</div>
+          <div class="ancestor-dates">${esc(a.dates || '')}${a.relation_to_client ? (a.dates ? ' · ' : '') + `<span class="weave-relation">${esc(a.relation_to_client)}</span>` : ''}</div>
         </div>
-        <div class="ca-layers">${layerBlock(a)}</div>
       </div>`;
     });
-    html += '</div>';
-  });
+    html += '</div></div>';
+  }
+
   container.innerHTML = html;
 }
 
