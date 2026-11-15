@@ -1043,7 +1043,7 @@ async function init() {
       }
 
       // Intake stubs (named at intake, not yet written) live in the portal's My Weaving › In Research, not here.
-      const cas = await supabaseFetch(`client_ancestors?client_id=eq.${encodeURIComponent(CLIENT_ID)}&status=neq.intake_stub&select=*&order=sort_year.asc`);
+      const cas = await supabaseFetch(`client_ancestors?client_id=eq.${encodeURIComponent(CLIENT_ID)}&status=not.in.(intake_stub,held)&select=*&order=sort_year.asc`);
       const caIds = cas.map(a => a.id);
       const freqRows = caIds.length
         ? await supabaseFetch(`client_ancestor_frequencies?client_ancestor_id=in.(${caIds.join(',')})&select=client_ancestor_id,frequency_tags(name)`).catch(() => [])

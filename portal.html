@@ -670,6 +670,31 @@ a.ancestor-row.weave-row:focus-visible { outline: 2px solid var(--gold); outline
   font-size: 15px; color: var(--text-faint); letter-spacing: 0.08em;
 }
 
+/* Triage research cards (2026-11-15) */
+.triage-client { margin-bottom: 2rem; }
+.triage-client > .eyebrow { margin-bottom: 0.75rem; }
+.triage-card { border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; background: rgba(122,86,24,0.03); }
+.triage-card.is-held { background: transparent; border-style: dashed; }
+.triage-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; flex-wrap: wrap; }
+.triage-name { font-size: 17px; font-weight: 500; color: var(--text); margin-bottom: 0.15rem; }
+.triage-meta { font-size: 15px; color: var(--text-dim); margin-bottom: 0.4rem; line-height: 1.5; }
+.triage-status { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+.triage-pill { display: inline-flex; align-items: center; font-size: 15px; color: var(--text-dim); padding: 3px 10px; border-radius: 10px; border: 1px solid var(--border); }
+.triage-actions { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+.triage-actions .form-select { width: auto; min-width: 130px; margin: 0; padding-top: 0.35rem; padding-bottom: 0.35rem; }
+.triage-held-label { font-size: 15px; color: var(--text-dim); font-style: italic; margin: 1rem 0 0.5rem; }
+.triage-research { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); display: grid; gap: 1.25rem; }
+.triage-research h4 { font-size: 15px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin: 0 0 0.5rem; }
+.triage-intake { font-size: 15px; color: var(--text-dim); line-height: 1.6; padding: 0.6rem 0.8rem; border-left: 2px solid rgba(122,86,24,0.3); white-space: pre-wrap; }
+.triage-finding { padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.5rem; font-size: 15px; line-height: 1.55; color: var(--text); }
+.triage-finding-head { display: flex; justify-content: space-between; gap: 0.75rem; color: var(--text-dim); margin-bottom: 0.25rem; }
+.triage-finding a { color: var(--gold); text-decoration: underline; word-break: break-all; }
+.triage-finding-form { display: grid; grid-template-columns: 150px 190px 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }
+.triage-prompts { margin: 0.5rem 0 0; padding-left: 1.25rem; font-size: 15px; color: var(--text); line-height: 1.6; }
+.triage-row-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.5rem; }
+.triage-msg { font-size: 15px; color: var(--text-dim); }
+@media (max-width: 720px) { .triage-finding-form { grid-template-columns: 1fr; } .triage-actions { width: 100%; } }
+
 /* Verification badge */
 .verify-badge {
   display: inline-flex; align-items: center; gap: 0.4rem;
@@ -1646,10 +1671,10 @@ body { font-weight: 400; }
 
         <!-- ═══ TRIAGE INTAKE MODE ═══ -->
         <div id="ar-triage-mode" style="display:none">
-          <p class="panel-sub" style="margin-bottom:1.5rem">Ancestors clients submitted via the intake form sit here as <em>intake stubs</em> — names + relation + dates + intake notes, but no research yet. Promoting a stub runs the AI Generate flow with the client's intake notes as primary context, then updates the stub in place: it gains all four layers and a sigil, links to the canonical ancestor record, and preserves the client's relation and intake notes. No duplicates created.</p>
+          <p class="panel-sub" style="margin-bottom:1.5rem">The ancestors a client names at intake arrive here. <strong style="font-weight:500">Research</strong> holds the work underneath the Weaving: source findings (FamilySearch, parish registers, archives), private notes on relationships and identity, and an assessment of how much record exists. When the research shows who belongs in the Weaving, <strong style="font-weight:500">Weave</strong> writes the ancestor from the findings into that client's Weaving only, never the shared archive. <strong style="font-weight:500">Hold</strong> keeps the research and hides the ancestor from the client. Set maternal or paternal before weaving.</p>
           <div class="card" style="margin-bottom:1.5rem">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-              <div class="eyebrow">Unlinked intake stubs</div>
+              <div class="eyebrow">In research · Held</div>
               <button class="btn btn-outline btn-sm" onclick="populateTriageList()">Refresh</button>
             </div>
             <div id="ar-triage-list"><div class="loading"><span class="loading-glyph">✦</span>Loading…</div></div>
@@ -5829,7 +5854,7 @@ async function loadMyWeaving() {
   }
 
   // Intake stubs are ancestors named at intake, not yet researched or written.
-  const woven = rows.filter(r => r.status !== 'intake_stub');
+  const woven = rows.filter(r => r.status !== 'intake_stub' && r.status !== 'held');
   // In the order the client named them on the intake form.
   const inResearch = rows.filter(r => r.status === 'intake_stub')
     .sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || '')));
@@ -5909,7 +5934,7 @@ async function loadMyWeaving() {
       html += `<div class="ancestor-row">
         <div class="ancestor-name-block" style="flex:1;min-width:0">
           <div class="ancestor-name-text">${esc(a.name)}</div>
-          <div class="ancestor-dates">${esc(a.dates || '')}${a.relation_to_client ? (a.dates ? ' · ' : '') + `<span class="weave-relation">${esc(a.relation_to_client)}</span>` : ''}</div>
+          <div class="ancestor-dates">${esc(a.dates || '')}</div>
         </div>
       </div>`;
     });
@@ -5990,7 +6015,7 @@ async function loadMyCatalog() {
   }
   if (!clientId) { container.innerHTML = '<div class="empty">No catalog available yet.</div>'; return; }
 
-  const rows = await rest(`client_ancestors?client_id=eq.${clientId}&select=*&order=name.asc`);
+  const rows = await rest(`client_ancestors?client_id=eq.${clientId}&status=not.in.(intake_stub,held)&select=*&order=name.asc`);
   if (!Array.isArray(rows) || !rows.length) {
     container.innerHTML = '<div class="empty">Your catalog is being assembled.</div>';
     return;
@@ -6252,8 +6277,9 @@ let arReviewData = null;      // raw AI result
 let arChips = [];             // [{ tagId, tagName, tagType, strength }]
 let arAugmentExistingId = null;     // when set, Confirm PATCHes this id instead of inserting
 let arAugmentExistingRecord = null; // full pre-augment snapshot, used for diff highlights
-let arPromoteStubId = null;         // when set, Confirm inserts canonical + updates this client_ancestors stub in place
+let arPromoteStubId = null;         // when set, Confirm writes the layers onto this client_ancestors row (personal, unlinked; no canonical row)
 let arPromoteStubData = null;       // full client_ancestors row + client name (for banner + payload composition)
+let arAugmentClientAncestorId = null; // when set with arAugmentExistingId, Augment targets a client's personal record (client_ancestors)
 
 // PDF attachments per mode. Each entry: { id, file, filename, size, base64, media_type, log, date, type, label, url }
 const arPdfState = { ar: [], aug: [], tap: [] };
@@ -6660,7 +6686,40 @@ async function confirmAncestorToDatabase() {
     const isAugment = !!arAugmentExistingId;
     const isPromote = !!arPromoteStubId;
 
-    if (isAugment) {
+    const isClientAugment = isAugment && !!arAugmentClientAncestorId;
+
+    if (isClientAugment) {
+      // Augment a client's personal record in place (client_ancestors; no canonical row).
+      const caPatch = {
+        name: payload.name, epithet: payload.epithet, dates: payload.dates, location: payload.location,
+        era: payload.era, sort_year: payload.sort_year || 0, status: payload.status || 'weaving',
+        catalog_preview: payload.catalog_preview,
+        layer_terroir: payload.layer_terroir, layer_unresolved: payload.layer_unresolved,
+        layer_thread: payload.layer_thread, layer_lineage: payload.layer_lineage,
+        sigil_name: payload.sigil_name, sigil_description: payload.sigil_description, sigil_svg: payload.sigil_svg,
+      };
+      const ok = await restPatch('client_ancestors', arAugmentClientAncestorId, caPatch);
+      if (!ok) throw new Error('Failed to update the client ancestor');
+      await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${arAugmentClientAncestorId}`);
+      for (const chip of arChips) {
+        await restPost('client_ancestor_frequencies', {
+          client_ancestor_id: arAugmentClientAncestorId,
+          frequency_tag_id:   chip.tagId,
+          strength:           chip.strength,
+        });
+      }
+      try {
+        await upsertClientAncestorResearch(arAugmentClientAncestorId, {
+          research_prompts: payload.research_prompts,
+          ...(arReviewData?.verification_status && ['verified','ambiguous','not_found'].includes(arReviewData.verification_status) ? { verification_status: arReviewData.verification_status, verification_note: arReviewData.verification_note || null } : {}),
+          ...(['thin','moderate','rich'].includes(arReviewData?.documentation_depth) ? { documentation_depth: arReviewData.documentation_depth } : {}),
+        });
+      } catch (_) { /* research record is secondary to the save */ }
+      ancestorId = null;
+    } else if (isPromote) {
+      // Weave from research: personal record only. No canonical ancestors row is created.
+      ancestorId = null;
+    } else if (isAugment) {
       // PATCH the existing ancestor in place. Don't overwrite slug (can change canonical URLs).
       const patchPayload = { ...payload };
       delete patchPayload.slug;
@@ -6678,7 +6737,7 @@ async function confirmAncestorToDatabase() {
         });
       }
     } else {
-      // INSERT a new ancestor (Generate New flow — also used by Promote since promote creates a new canonical row)
+      // INSERT a new canonical ancestor (Generate New flow)
       const result = await restPost('ancestors', payload);
       if (!Array.isArray(result) || !result[0]?.id) {
         throw new Error(result?.message || result?.details || result?.code || 'Failed to save ancestor');
@@ -6701,7 +6760,7 @@ async function confirmAncestorToDatabase() {
     //    (c) Generate + clientId selected: INSERT a new client_ancestors row (existing assign-to-client behavior)
     if (isPromote) {
       const stubPatchPayload = {
-        ancestor_id:       ancestorId,
+        ancestor_id:       null,
         slug:              payload.slug,
         name:              payload.name,
         epithet:           payload.epithet || null,
@@ -6718,10 +6777,17 @@ async function confirmAncestorToDatabase() {
         sigil_name:        payload.sigil_name || null,
         sigil_description: payload.sigil_description || null,
         sigil_svg:         payload.sigil_svg || null,
-        // NOTE: client_id, relation_to_client, occupation, intake_notes intentionally NOT in payload — preserved
+        // NOTE: client_id, lineage_side, relation_to_client, occupation, intake_notes intentionally NOT in payload — preserved
       };
       const ok = await restPatch('client_ancestors', arPromoteStubId, stubPatchPayload);
-      if (!ok) throw new Error('Failed to update intake stub in place');
+      if (!ok) throw new Error('Failed to write the ancestor into the Weaving');
+      try {
+        await upsertClientAncestorResearch(arPromoteStubId, {
+          research_prompts: payload.research_prompts,
+          ...(arReviewData?.verification_status && ['verified','ambiguous','not_found'].includes(arReviewData.verification_status) ? { verification_status: arReviewData.verification_status, verification_note: arReviewData.verification_note || null } : {}),
+          ...(['thin','moderate','rich'].includes(arReviewData?.documentation_depth) ? { documentation_depth: arReviewData.documentation_depth } : {}),
+        });
+      } catch (_) { /* research record is secondary to the save */ }
 
       // Resync client_ancestor_frequencies for the stub
       await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${arPromoteStubId}`);
@@ -6769,7 +6835,9 @@ async function confirmAncestorToDatabase() {
     // 4. Auto-log any uploaded PDFs to the research findings table (per-PDF "Log" toggle)
     const pdfMode = isAugment ? 'aug' : 'ar';
     const pdfsToLog = arPdfState[pdfMode].filter(p => p.log).length;
-    await logPdfFindingsAfterSave(ancestorId, pdfMode);
+    if (isPromote) await logPdfFindingsToClientAncestor(arPromoteStubId, pdfMode);
+    else if (isClientAugment) await logPdfFindingsToClientAncestor(arAugmentClientAncestorId, pdfMode);
+    else await logPdfFindingsAfterSave(ancestorId, pdfMode);
     clearPdfState(pdfMode);
 
     // Reload ancestors cache
@@ -6778,17 +6846,17 @@ async function confirmAncestorToDatabase() {
     if (isAugment) {
       verb = 'updated';
     } else if (isPromote) {
-      verb = 'researched and linked';
-      tail = ` to ${esc(arPromoteStubData?.clients?.name || 'client')}'s weaving`;
+      verb = 'woven';
+      tail = ` into ${esc(arPromoteStubData?.clients?.name || 'client')}'s Weaving (personal record)`;
     } else {
       verb = 'saved';
       tail = clientId ? ' and assigned to client' : '';
     }
     const pdfTail = pdfsToLog ? ` · ${pdfsToLog} PDF${pdfsToLog===1?'':'s'} logged to findings` : '';
-    const note = isAugment ? ' <span style="color:var(--text-faint);font-size:15px">(client weaving copies remain unchanged — re-assign or edit individually if you want them refreshed)</span>' : '';
+    const note = (isAugment && !isClientAugment) ? ' <span style="color:var(--text-faint);font-size:15px">(client weaving copies remain unchanged — re-assign or edit individually if you want them refreshed)</span>' : '';
     msgEl.innerHTML = `<span style="color:var(--teal)">✓ ${esc(payload.name)} ${verb}${tail}${pdfTail}.</span>${note}`;
     // Clear contextual state so next Confirm starts clean
-    if (isAugment) { arAugmentExistingId = null; arAugmentExistingRecord = null; }
+    if (isAugment) { arAugmentExistingId = null; arAugmentExistingRecord = null; arAugmentClientAncestorId = null; }
     if (isPromote) {
       arPromoteStubId = null; arPromoteStubData = null;
       const banner = document.getElementById('ar-promote-banner');
@@ -6939,7 +7007,70 @@ function showEditMode() {
 // TRIAGE INTAKE STUBS
 // ════════════════════════════════════════════════════
 
-let triageStubs = []; // cache so handlers can look up by id without escaping names through onclick
+// Research layer (2026-11-15): intake_stub = named at intake, in research (the client sees the name only).
+// held = researched, not chosen for the Weaving (hidden from the client, kept for later).
+// Findings and private research notes live in client_ancestor_findings / client_ancestor_research (admin-only).
+let triageStubs = [];             // cached rows (intake_stub + held) with _research and _findings
+const TRIAGE_OPEN = new Set();    // ids whose research panel is open
+
+const TRIAGE_VERIFY_LABEL = { verified: '✓ Verified', ambiguous: '⚠ Ambiguous', not_found: '✗ Not found' };
+const TRIAGE_SOURCE_TYPES = [
+  ['', '— Source type —'], ['baptism', 'Baptism / Birth'], ['marriage', 'Marriage'], ['burial', 'Burial / Death'],
+  ['census', 'Census'], ['will', 'Will / Probate'], ['land', 'Land / Property'], ['ship-manifest', 'Ship Manifest / Passport'],
+  ['military', 'Military'], ['newspaper', 'Newspaper'], ['family-tree', 'Family tree (FamilySearch etc.)'],
+  ['life-story', 'Life story / Memory'], ['oral-history', 'Oral History'], ['photo', 'Photograph'],
+  ['history', 'Local history / Context'], ['dna', 'DNA Match'], ['other', 'Other']
+];
+
+function _triageSideOptions(v) {
+  return [['', '— Side —'], ['maternal', 'Maternal'], ['paternal', 'Paternal'], ['both', 'Both'], ['unknown', 'Unknown']]
+    .map(([val, label]) => `<option value="${val}"${(v || '') === val ? ' selected' : ''}>${label}</option>`).join('');
+}
+
+async function upsertClientAncestorResearch(caId, fields) {
+  if (accessToken) {
+    const ok = await ensureFreshToken();
+    if (!ok) { forceReauth('Your session expired — please sign in again.'); throw new Error('SESSION_EXPIRED'); }
+  }
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/client_ancestor_research?on_conflict=client_ancestor_id`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${accessToken || SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates,return=representation'
+    },
+    body: JSON.stringify({ client_ancestor_id: caId, ...fields })
+  });
+  const body = await res.json().catch(() => null);
+  if (!res.ok) throw new Error((body && (body.message || body.details)) || `Save failed (${res.status})`);
+  return Array.isArray(body) ? body[0] : body;
+}
+
+// The context the AI receives when assessing or weaving a client ancestor.
+// Findings are the ground. Relationships are identity context only. The client's own
+// reading of the ancestor stays out of the layers; it belongs to the Convergence.
+function composeClientAncestorContext(row, research, findings) {
+  const parts = [];
+  if (row.lineage_side) parts.push(`Lineage side: ${row.lineage_side}`);
+  if (row.occupation) parts.push(`Occupation: ${row.occupation}`);
+  if (findings && findings.length) {
+    parts.push('Research findings (primary sources; these are the ground of the record):\n' + findings.map(f => {
+      const head = [f.finding_date, f.source_type, f.source_label].filter(Boolean).join(' · ');
+      return `- ${head ? head + ': ' : ''}${f.summary || ''}${f.url ? ` (${f.url})` : ''}`;
+    }).join('\n'));
+  }
+  const idParts = [];
+  if (row.relation_to_client) idParts.push(`Relation to client: ${row.relation_to_client}`);
+  if (research && research.research_notes) idParts.push(research.research_notes);
+  if (idParts.length) {
+    parts.push('Identity and disambiguation notes (use only to confirm who this person is; do not state their relationship or generation to the client in any layer):\n' + idParts.join('\n'));
+  }
+  if (row.intake_notes) {
+    parts.push('Client\'s intake account. Use only facts about this ancestor\'s life: events, places, circumstances, what happened to them. Do not carry the client\'s reading of this ancestor\'s character or psychology, or the client\'s own experience, into any layer. That material belongs to the Convergence.\n' + row.intake_notes);
+  }
+  return parts.join('\n\n');
+}
 
 async function populateTriageList() {
   const el = document.getElementById('ar-triage-list');
@@ -6947,97 +7078,289 @@ async function populateTriageList() {
   el.innerHTML = `<div class="loading"><span class="loading-glyph">✦</span>Loading…</div>`;
 
   try {
-    // intake_stub rows joined with their client name, newest first
     const rows = await rest(
-      `client_ancestors?status=eq.intake_stub&select=id,client_id,name,dates,location,occupation,relation_to_client,intake_notes,created_at,clients(name,email,entry_offering)&order=created_at.desc`
+      `client_ancestors?status=in.(intake_stub,held)&select=id,client_id,name,dates,location,occupation,relation_to_client,intake_notes,lineage_side,status,created_at,clients(name,email,entry_offering)&order=created_at.asc`
     );
     const list = Array.isArray(rows) ? rows : [];
+    let research = [], findings = [];
+    if (list.length) {
+      const ids = list.map(r => r.id).join(',');
+      [research, findings] = await Promise.all([
+        rest(`client_ancestor_research?client_ancestor_id=in.(${ids})&select=*`).catch(() => []),
+        rest(`client_ancestor_findings?client_ancestor_id=in.(${ids})&select=*&order=finding_date.asc.nullslast,created_at.asc`).catch(() => [])
+      ]);
+    }
+    const rMap = {}; (Array.isArray(research) ? research : []).forEach(r => { rMap[r.client_ancestor_id] = r; });
+    const fMap = {}; (Array.isArray(findings) ? findings : []).forEach(f => { (fMap[f.client_ancestor_id] = fMap[f.client_ancestor_id] || []).push(f); });
+    list.forEach(r => { r._research = rMap[r.id] || null; r._findings = fMap[r.id] || []; });
     triageStubs = list;
+
     if (!list.length) {
-      el.innerHTML = `<div class="empty" style="padding:2rem;text-align:center;font-style:italic;color:var(--text-faint)">No intake stubs awaiting triage.</div>`;
+      el.innerHTML = `<div class="empty" style="padding:2rem;text-align:center;font-style:italic;color:var(--text-faint)">No ancestors in research.</div>`;
       return;
     }
 
-    el.innerHTML = list.map(r => {
-      const clientName = esc(r.clients?.name || '—');
-      const clientMeta = [r.clients?.entry_offering, r.clients?.email].filter(Boolean).map(esc).join(' · ');
-      const ancestorMeta = [r.dates, r.relation_to_client, r.location, r.occupation].filter(Boolean).map(esc).join(' · ');
-      const notesPreview = r.intake_notes ? esc(r.intake_notes.slice(0, 200) + (r.intake_notes.length > 200 ? '…' : '')) : '';
-      return `<div style="border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:0.75rem;background:rgba(122,86,24,0.03)">
-        <div style="display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;margin-bottom:0.5rem">
-          <div style="flex:1">
-            <div style="font-size:16px;font-weight:500;color:var(--text);margin-bottom:0.15rem">${esc(r.name)}</div>
-            <div style="font-size:15px;color:var(--text-faint)">From <strong style="font-weight:500;color:var(--gold)">${clientName}</strong>${clientMeta ? ' · ' + clientMeta : ''}</div>
-          </div>
-          <div style="display:flex;gap:0.4rem;align-items:center">
-            <button class="btn btn-gold btn-sm" onclick="promoteStub('${r.id}')">Promote →</button>
-            <button class="btn btn-outline btn-sm" onclick="deleteIntakeStub('${r.id}')" title="Dismiss this intake stub" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Delete</button>
-          </div>
-        </div>
-        ${ancestorMeta ? `<div style="font-size:15px;color:var(--text-dim);margin-bottom:0.4rem">${ancestorMeta}</div>` : ''}
-        ${notesPreview ? `<div style="font-size:15px;color:var(--text-dim);font-style:italic;line-height:1.5;padding:0.5rem 0.75rem;border-left:2px solid rgba(122,86,24,0.25);background:rgba(122,86,24,0.03)">${notesPreview}</div>` : ''}
+    const groups = {};
+    list.forEach(r => {
+      if (!groups[r.client_id]) groups[r.client_id] = { name: r.clients?.name || '—', offering: r.clients?.entry_offering || '', rows: [] };
+      groups[r.client_id].rows.push(r);
+    });
+    el.innerHTML = Object.values(groups).map(g => {
+      const inR = g.rows.filter(r => r.status === 'intake_stub');
+      const held = g.rows.filter(r => r.status === 'held');
+      return `<div class="triage-client">
+        <div class="eyebrow">${esc(g.name)}${g.offering ? ' · ' + esc(g.offering) : ''} · ${inR.length} in research${held.length ? ` · ${held.length} held` : ''}</div>
+        ${inR.map(renderTriageCard).join('')}
+        ${held.length ? `<div class="triage-held-label">Held · researched, not in the Weaving, hidden from the client</div>${held.map(renderTriageCard).join('')}` : ''}
       </div>`;
     }).join('');
   } catch (err) {
-    el.innerHTML = `<div class="msg msg-error">Failed to load intake stubs: ${esc(err.message)}</div>`;
+    el.innerHTML = `<div class="msg msg-error">Failed to load: ${esc(err.message)}</div>`;
+  }
+}
+
+function renderTriageCard(r) {
+  const res = r._research || {};
+  const isHeld = r.status === 'held';
+  const meta = [r.dates, r.location, r.occupation].filter(Boolean).map(esc).join(' · ');
+  const badge = res.verification_status
+    ? `<span class="verify-badge verify-${esc(res.verification_status)}">${TRIAGE_VERIFY_LABEL[res.verification_status] || esc(res.verification_status)}</span>`
+    : `<span class="triage-pill">Not assessed</span>`;
+  const depth = res.documentation_depth ? `<span class="triage-pill">Record: ${esc(res.documentation_depth)}</span>` : '';
+  const fCount = (r._findings || []).length;
+  const open = TRIAGE_OPEN.has(r.id);
+  return `<div class="triage-card${isHeld ? ' is-held' : ''}" id="tc-${r.id}">
+    <div class="triage-head">
+      <div style="flex:1;min-width:220px">
+        <div class="triage-name">${esc(r.name)}</div>
+        ${meta ? `<div class="triage-meta">${meta}</div>` : ''}
+        <div class="triage-status">${badge}${depth}<span class="triage-pill">${fCount} finding${fCount === 1 ? '' : 's'}</span></div>
+      </div>
+      <div class="triage-actions">
+        <select class="form-select" onchange="setTriageSide('${r.id}', this.value)" aria-label="Lineage side for ${esc(r.name)}">${_triageSideOptions(r.lineage_side)}</select>
+        <button class="btn btn-outline btn-sm" onclick="toggleTriageResearch('${r.id}')" aria-expanded="${open}">${open ? 'Close research' : 'Research'}</button>
+        ${isHeld
+          ? `<button class="btn btn-outline btn-sm" onclick="setTriageStatus('${r.id}','intake_stub')" title="The client sees the name under In Research again">Return to research</button>`
+          : `<button class="btn btn-outline btn-sm" onclick="setTriageStatus('${r.id}','held')" title="Keep the research; hide this ancestor from the client">Hold</button>`}
+        <button class="btn btn-gold btn-sm" onclick="promoteStub('${r.id}')">Weave →</button>
+      </div>
+    </div>
+    ${open ? renderTriageResearch(r) : ''}
+  </div>`;
+}
+
+function renderTriageResearch(r) {
+  const res = r._research || {};
+  const prompts = Array.isArray(res.research_prompts) ? res.research_prompts : [];
+  const typeOpts = TRIAGE_SOURCE_TYPES.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+  const findings = (r._findings || []).map(f => {
+    const head = [f.finding_date, f.source_type, f.source_label].filter(Boolean).map(esc).join(' · ');
+    return `<div class="triage-finding">
+      <div class="triage-finding-head"><span>${head || 'Finding'}</span>
+        <button class="btn btn-outline btn-sm" onclick="deleteTriageFinding('${r.id}','${f.id}')" aria-label="Delete this finding">Remove</button></div>
+      ${f.summary ? `<div style="white-space:pre-wrap">${esc(f.summary)}</div>` : ''}
+      ${f.url ? `<div style="margin-top:0.25rem"><a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.url)}</a></div>` : ''}
+    </div>`;
+  }).join('');
+  return `<div class="triage-research">
+    ${(r.relation_to_client || r.intake_notes) ? `<div>
+      <h4>The client's words · kept for the Convergence</h4>
+      <div class="triage-intake">${r.relation_to_client ? esc(r.relation_to_client) + '\n' : ''}${esc(r.intake_notes || '')}</div>
+    </div>` : ''}
+    <div>
+      <h4>Findings</h4>
+      ${findings || '<div class="triage-msg" style="margin-bottom:0.5rem">No findings yet.</div>'}
+      <div class="triage-finding-form">
+        <input class="form-input" type="date" id="tf-date-${r.id}" aria-label="Record date">
+        <select class="form-select" id="tf-type-${r.id}" aria-label="Source type">${typeOpts}</select>
+        <input class="form-input" id="tf-label-${r.id}" placeholder="Source, e.g. Sobral de São Miguel baptisms 1794, folio 12" aria-label="Source label">
+      </div>
+      <input class="form-input" id="tf-url-${r.id}" placeholder="Link (FamilySearch record, archive image)" style="margin-bottom:0.5rem" aria-label="Link">
+      <textarea class="form-textarea" id="tf-summary-${r.id}" rows="3" placeholder="What the record says: names, dates, parents, godparents, places, occupation, life story text…" aria-label="Finding summary"></textarea>
+      <div class="triage-row-btns"><button class="btn btn-outline btn-sm" onclick="addTriageFinding('${r.id}')">Add finding</button><span class="triage-msg" id="tf-msg-${r.id}"></span></div>
+    </div>
+    <div>
+      <h4>Research notes · private</h4>
+      <textarea class="form-textarea" id="tr-notes-${r.id}" rows="4" placeholder="Relationships, generation, which record is the right person and why, open questions for the client…">${esc(res.research_notes || '')}</textarea>
+      <div class="triage-row-btns"><button class="btn btn-outline btn-sm" onclick="saveTriageNotes('${r.id}')">Save notes</button><span class="triage-msg" id="tr-msg-${r.id}"></span></div>
+    </div>
+    <div>
+      <h4>Assessment</h4>
+      ${res.assessed_at ? `<div class="triage-msg">Assessed ${esc(new Date(res.assessed_at).toLocaleDateString())}${res.verification_note ? ': ' + esc(res.verification_note) : ''}</div>` : '<div class="triage-msg">Not assessed yet. Assess after adding findings: it checks identity, rates how much record exists, and lists what to look for next.</div>'}
+      ${prompts.length ? `<div class="triage-msg" style="margin-top:0.6rem">Still to find:</div><ol class="triage-prompts">${prompts.map(p => `<li>${esc(p)}</li>`).join('')}</ol>` : ''}
+      <div class="triage-row-btns"><button class="btn btn-outline btn-sm" id="ta-btn-${r.id}" onclick="assessTriage('${r.id}')">✦ Assess record</button><span class="triage-msg" id="ta-msg-${r.id}"></span></div>
+    </div>
+    <div class="triage-row-btns"><button class="btn btn-outline btn-sm" onclick="deleteIntakeStub('${r.id}')" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Delete this ancestor</button></div>
+  </div>`;
+}
+
+function _rerenderTriageCard(id) {
+  const row = triageStubs.find(s => s.id === id);
+  const el = document.getElementById(`tc-${id}`);
+  if (row && el) el.outerHTML = renderTriageCard(row);
+}
+
+function toggleTriageResearch(id) {
+  if (TRIAGE_OPEN.has(id)) TRIAGE_OPEN.delete(id); else TRIAGE_OPEN.add(id);
+  _rerenderTriageCard(id);
+}
+
+async function setTriageSide(id, value) {
+  const ok = await restPatch('client_ancestors', id, { lineage_side: value || null });
+  const row = triageStubs.find(s => s.id === id);
+  if (ok && row) row.lineage_side = value || null;
+  if (!ok) { alert('Could not save the lineage side.'); _rerenderTriageCard(id); }
+}
+
+async function setTriageStatus(id, status) {
+  const ok = await restPatch('client_ancestors', id, { status });
+  if (!ok) { alert('Could not update this ancestor.'); return; }
+  populateTriageList();
+}
+
+async function saveTriageNotes(id) {
+  const msg = document.getElementById(`tr-msg-${id}`);
+  const notes = document.getElementById(`tr-notes-${id}`).value.trim();
+  try {
+    const saved = await upsertClientAncestorResearch(id, { research_notes: notes || null });
+    const row = triageStubs.find(s => s.id === id);
+    if (row) row._research = saved || { ...(row._research || {}), research_notes: notes };
+    if (msg) msg.textContent = 'Saved.';
+  } catch (err) {
+    if (msg) msg.textContent = 'Save failed: ' + err.message;
+  }
+}
+
+async function _refreshTriageFindings(id) {
+  const rows = await rest(`client_ancestor_findings?client_ancestor_id=eq.${id}&select=*&order=finding_date.asc.nullslast,created_at.asc`).catch(() => []);
+  const row = triageStubs.find(s => s.id === id);
+  if (row) row._findings = Array.isArray(rows) ? rows : [];
+}
+
+async function addTriageFinding(id) {
+  const v = (k) => (document.getElementById(`tf-${k}-${id}`)?.value || '').trim();
+  const msg = document.getElementById(`tf-msg-${id}`);
+  if (!v('summary') && !v('label') && !v('url')) { if (msg) msg.textContent = 'Add what the record says, a source or a link.'; return; }
+  const result = await restPost('client_ancestor_findings', {
+    client_ancestor_id: id,
+    finding_date: v('date') || null,
+    source_type:  v('type') || null,
+    source_label: v('label') || null,
+    summary:      v('summary') || null,
+    url:          v('url') || null
+  });
+  if (!Array.isArray(result) || !result[0]?.id) { if (msg) msg.textContent = 'Save failed: ' + (result?.message || 'unknown error'); return; }
+  await _refreshTriageFindings(id);
+  _rerenderTriageCard(id);
+}
+
+async function deleteTriageFinding(id, findingId) {
+  if (!confirm('Remove this finding?')) return;
+  await restDelete(`client_ancestor_findings?id=eq.${findingId}`);
+  await _refreshTriageFindings(id);
+  _rerenderTriageCard(id);
+}
+
+// Assessment: identity check, documentation depth, what to look for next. Catalog level, no layers kept.
+async function assessTriage(id) {
+  const row = triageStubs.find(s => s.id === id);
+  if (!row) return;
+  const btn = document.getElementById(`ta-btn-${id}`);
+  const msg = document.getElementById(`ta-msg-${id}`);
+  // Keep unsaved notes in the assessment
+  const notesEl = document.getElementById(`tr-notes-${id}`);
+  const research = { ...(row._research || {}), research_notes: notesEl ? notesEl.value.trim() : (row._research?.research_notes || '') };
+  if (btn) { btn.disabled = true; btn.textContent = 'Assessing…'; }
+  if (msg) msg.textContent = 'Checking identity and the record. This takes up to a minute.';
+  try {
+    const fresh = await ensureFreshToken();
+    if (!fresh) { forceReauth('Your session has expired — please sign in again.'); return; }
+    const call = () => fetch(`${SUPABASE_URL}/functions/v1/generate-ancestor`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}`, 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify({
+        name: row.name, dates: row.dates || '', location: row.location || '', level: 'catalog',
+        notes: composeClientAncestorContext(row, research, row._findings),
+        editorial_guidance: 'This call is an assessment for research triage. Judge identity strictly from the findings provided: verified only when the sources place this person by name, dates and place; ambiguous when more than one person could fit or links are inferred; not_found when there is nothing to confirm. Research prompts must be specific record searches (which register, which parish, which years, which names) that would confirm identity or add life story.'
+      })
+    });
+    let res = await call();
+    if (res.status === 401) { if (await ensureFreshToken()) res = await call(); }
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || data.message || `Request failed (${res.status})`);
+    const vs = ['verified', 'ambiguous', 'not_found'].includes(data.verification_status) ? data.verification_status : 'ambiguous';
+    const dd = ['thin', 'moderate', 'rich'].includes(data.documentation_depth) ? data.documentation_depth : null;
+    const saved = await upsertClientAncestorResearch(id, {
+      research_notes: research.research_notes || null,
+      verification_status: vs,
+      verification_note: data.verification_note || null,
+      documentation_depth: dd,
+      research_prompts: Array.isArray(data.research_prompts) ? data.research_prompts : [],
+      assessed_at: new Date().toISOString()
+    });
+    row._research = saved;
+    _rerenderTriageCard(id);
+  } catch (err) {
+    if (msg) msg.textContent = 'Assessment failed: ' + err.message;
+    if (btn) { btn.disabled = false; btn.textContent = '✦ Assess record'; }
   }
 }
 
 async function deleteIntakeStub(stubId) {
   const row = triageStubs.find(s => s.id === stubId);
-  const ancestorName = row?.name || 'this stub';
+  const ancestorName = row?.name || 'this ancestor';
   const clientName   = row?.clients?.name || 'this client';
-  if (!confirm(`Delete the intake stub "${ancestorName}" from ${clientName}'s weaving?\n\nThis will not touch any canonical ancestor record. The intake notes and relation will be lost.`)) return;
+  if (!confirm(`Delete "${ancestorName}" from ${clientName}'s research?\n\nThe intake notes, findings and research notes for this ancestor will be lost. Hold keeps them instead.`)) return;
   try {
-    // Cascades client_ancestor_frequencies; intake_stub typically has none anyway
     await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${stubId}`);
-    await restDelete(`client_ancestors?id=eq.${stubId}`);
+    await restDelete(`client_ancestors?id=eq.${stubId}`); // cascades research + findings
+    TRIAGE_OPEN.delete(stubId);
     populateTriageList();
   } catch (err) {
     alert('Delete failed: ' + err.message);
   }
 }
 
+// Weave: write this ancestor from the research into the client's Weaving (personal record, never the shared archive).
 async function promoteStub(stubId) {
-  // Load the stub (fresh, in case it changed)
   const rows = await rest(`client_ancestors?id=eq.${encodeURIComponent(stubId)}&select=*,clients(name)`);
   const stub = Array.isArray(rows) && rows.length ? rows[0] : null;
-  if (!stub) { alert('Could not load that intake stub. Refresh and try again.'); return; }
-  if (stub.status !== 'intake_stub') { alert('That row is no longer an intake stub.'); return; }
+  if (!stub) { alert('Could not load that ancestor. Refresh and try again.'); return; }
+  if (stub.status !== 'intake_stub' && stub.status !== 'held') { alert('That ancestor is already in the Weaving.'); return; }
+  if (!stub.lineage_side) { alert(`Set maternal or paternal for ${stub.name} before weaving.`); return; }
+
+  const [resRows, findRows] = await Promise.all([
+    rest(`client_ancestor_research?client_ancestor_id=eq.${stubId}&select=*`).catch(() => []),
+    rest(`client_ancestor_findings?client_ancestor_id=eq.${stubId}&select=*&order=finding_date.asc.nullslast,created_at.asc`).catch(() => [])
+  ]);
+  const research = Array.isArray(resRows) && resRows.length ? resRows[0] : null;
+  const findings = Array.isArray(findRows) ? findRows : [];
 
   arPromoteStubId   = stubId;
   arPromoteStubData = stub;
 
-  // Switch to Generate New mode and pre-fill the form, preserving promote state
   showGenerateMode({ preservePromote: true });
 
   document.getElementById('ar-name').value     = stub.name || '';
   document.getElementById('ar-dates').value    = stub.dates || '';
   document.getElementById('ar-location').value = stub.location || '';
+  document.getElementById('ar-notes').value    = composeClientAncestorContext(stub, research, findings);
+  document.getElementById('ar-level').value    = 'weaving';
 
-  // Compose Context Notes from the client's intake info
-  const noteParts = [];
-  if (stub.relation_to_client) noteParts.push(`Relation to client: ${stub.relation_to_client}`);
-  if (stub.occupation)         noteParts.push(`Occupation: ${stub.occupation}`);
-  if (stub.intake_notes)       noteParts.push(`Client's intake notes: ${stub.intake_notes}`);
-  document.getElementById('ar-notes').value = noteParts.join('\n\n');
-
-  document.getElementById('ar-level').value = 'auto';
-
-  // Banner
   const banner = document.getElementById('ar-promote-banner');
   if (banner) {
+    const depth = research?.documentation_depth ? ` · record ${esc(research.documentation_depth)}` : '';
+    const thin = !findings.length
+      ? `<div style="margin-top:0.4rem;color:var(--amber)">No findings logged for this ancestor. The draft will rest on the intake alone.</div>` : '';
     banner.style.display = 'block';
-    banner.innerHTML = `Promoting intake stub: <strong style="font-weight:500">${esc(stub.name)}</strong> (from <strong style="font-weight:500">${esc(stub.clients?.name || 'client')}</strong>) · <a href="#" onclick="event.preventDefault();showTriageMode()" style="color:var(--gold);text-decoration:underline">cancel and return to triage</a>`;
+    banner.innerHTML = `Weaving <strong style="font-weight:500">${esc(stub.name)}</strong> into <strong style="font-weight:500">${esc(stub.clients?.name || 'client')}</strong>'s Weaving · ${esc(stub.lineage_side)} · ${findings.length} finding${findings.length === 1 ? '' : 's'}${depth}. Personal record, not added to the shared archive. Context Notes can be edited before generating. · <a href="#" onclick="event.preventDefault();showTriageMode()" style="color:var(--gold);text-decoration:underline">cancel and return to research</a>${thin}`;
   }
 
-  // Reset any previous review/PDFs/loading
   document.getElementById('ar-review').style.display = 'none';
   document.getElementById('ar-review').innerHTML = '';
   document.getElementById('ar-form-msg').innerHTML = '';
   clearPdfState('ar');
 
-  // Scroll the form into view
   document.getElementById('ancestor-research-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -7059,6 +7382,22 @@ function populateAugmentSelector() {
       if (a.id === current) opt.selected = true;
       sel.appendChild(opt);
     });
+
+  // Client Weavings: personal records (not linked to the shared archive)
+  rest(`client_ancestors?ancestor_id=is.null&status=not.in.(intake_stub,held)&select=id,name,dates,clients(name)&order=name.asc`)
+    .then(rows => {
+      if (!Array.isArray(rows) || !rows.length) return;
+      const grp = document.createElement('optgroup');
+      grp.label = 'Client Weavings · personal records';
+      rows.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = 'ca:' + r.id;
+        opt.textContent = `${r.name}${r.dates ? ' · ' + r.dates : ''} (${r.clients?.name || 'client'})`;
+        if (opt.value === current) opt.selected = true;
+        grp.appendChild(opt);
+      });
+      sel.appendChild(grp);
+    }).catch(() => {});
 
   // Wire the also-log checkbox once
   const cb = document.getElementById('aug-also-log-check');
@@ -7094,10 +7433,23 @@ async function loadAncestorForAugment() {
     allFrequencyTags = Array.isArray(tags) ? tags : [];
   }
 
-  const [ancestor, freqRows] = await Promise.all([
-    rest(`ancestors?id=eq.${id}&select=*`).then(r => r[0]),
-    rest(`ancestor_frequencies?ancestor_id=eq.${id}&select=strength,frequency_tags(name,type)`).catch(() => [])
-  ]);
+  const caId = id.startsWith('ca:') ? id.slice(3) : null;
+  arAugmentClientAncestorId = caId;
+  let ancestor, freqRows;
+  if (caId) {
+    let researchRow;
+    [ancestor, freqRows, researchRow] = await Promise.all([
+      rest(`client_ancestors?id=eq.${caId}&select=*`).then(r => r[0]),
+      rest(`client_ancestor_frequencies?client_ancestor_id=eq.${caId}&select=strength,frequency_tags(name,type)`).catch(() => []),
+      rest(`client_ancestor_research?client_ancestor_id=eq.${caId}&select=research_prompts`).then(r => r[0]).catch(() => null)
+    ]);
+    if (ancestor) ancestor = { ...ancestor, research_prompts: researchRow?.research_prompts || [] };
+  } else {
+    [ancestor, freqRows] = await Promise.all([
+      rest(`ancestors?id=eq.${id}&select=*`).then(r => r[0]),
+      rest(`ancestor_frequencies?ancestor_id=eq.${id}&select=strength,frequency_tags(name,type)`).catch(() => [])
+    ]);
+  }
 
   if (!ancestor) {
     summary.style.display = 'block';
@@ -7212,8 +7564,8 @@ async function runAugment() {
       const labelVal = document.getElementById('aug-log-label').value.trim() || null;
       const urlVal   = document.getElementById('aug-log-url').value.trim() || null;
       try {
-        await restPost('ancestor_research_findings', {
-          ancestor_id:  id,
+        await restPost(id.startsWith('ca:') ? 'client_ancestor_findings' : 'ancestor_research_findings', {
+          ...(id.startsWith('ca:') ? { client_ancestor_id: id.slice(3) } : { ancestor_id: id }),
           finding_date: dateVal,
           source_type:  typeVal,
           source_label: labelVal || 'Augment integration',
@@ -7224,7 +7576,7 @@ async function runAugment() {
     }
 
     // Wire into the existing Review screen, but mark as augment so Confirm PATCHes
-    arAugmentExistingId = id;
+    arAugmentExistingId = id.startsWith('ca:') ? id.slice(3) : id;
     arReviewData = data;
     arChips = matchFrequencyTags(data.frequency_tags || []);
     renderAncestorReview(data);
@@ -7839,6 +8191,23 @@ async function logPdfFindingsAfterSave(ancestorId, mode) {
         source_type:  p.type || null,
         source_label: (p.label || p.filename).slice(0, 500),
         summary:      `Source PDF attached during ${mode === 'ar' ? 'Generate New' : 'Augment Existing'} flow.`,
+        url:          p.url || null
+      });
+    } catch (_) { /* don't fail the main save on log errors */ }
+  }
+}
+
+async function logPdfFindingsToClientAncestor(clientAncestorId, mode) {
+  if (!clientAncestorId) return;
+  for (const p of arPdfState[mode]) {
+    if (!p.log) continue;
+    try {
+      await restPost('client_ancestor_findings', {
+        client_ancestor_id: clientAncestorId,
+        finding_date: p.date || null,
+        source_type:  p.type || null,
+        source_label: (p.label || p.filename).slice(0, 500),
+        summary:      `Source PDF attached during ${mode === 'ar' ? 'Weave' : 'Augment'}.`,
         url:          p.url || null
       });
     } catch (_) { /* don't fail the main save on log errors */ }

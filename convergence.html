@@ -820,7 +820,7 @@ async function loadClientData() {
   }
 
   const ancestors = await sb(
-    `client_ancestors?client_id=eq.${client.id}&select=*&order=sort_year.asc`
+    `client_ancestors?client_id=eq.${client.id}&status=not.in.(intake_stub,held)&select=*&order=sort_year.asc`
   );
 
   const freqRows = await sb(
