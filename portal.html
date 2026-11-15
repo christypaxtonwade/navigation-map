@@ -670,6 +670,11 @@ a.ancestor-row.weave-row:focus-visible { outline: 2px solid var(--gold); outline
   font-size: 15px; color: var(--text-faint); letter-spacing: 0.08em;
 }
 
+/* Client vs research designation (2026-11-15) */
+.added-via { display: inline-flex; align-items: center; font-size: 15px; padding: 3px 10px; border-radius: 10px; white-space: nowrap; vertical-align: middle; }
+.added-via-client { border: 1px solid rgba(122,86,24,0.45); color: var(--gold); }
+.added-via-research { border: 1px dashed var(--border); color: var(--text-dim); }
+
 /* Triage research cards (2026-11-15) */
 .triage-client { margin-bottom: 2rem; }
 .triage-client > .eyebrow { margin-bottom: 0.75rem; }
@@ -765,6 +770,15 @@ a.ancestor-row.weave-row:focus-visible { outline: 2px solid var(--gold); outline
   cursor: pointer;
 }
 .chip-strength-label:hover { color: var(--gold); }
+.chip-row { display: flex; flex-direction: column; gap: 4px; width: 100%; margin-bottom: 0.6rem; }
+.chip-row .chip { align-self: flex-start; }
+.chip-note {
+  width: 100%; box-sizing: border-box; resize: vertical;
+  font-family: inherit; font-size: 15px; line-height: 1.5;
+  padding: 6px 10px; border-radius: 6px;
+  background: transparent; border: 1px solid var(--border); color: var(--text);
+}
+.chip-note:focus { outline: none; border-color: var(--border-hover); }
 .chip-add-row {
   display: flex; gap: 0.5rem; margin-top: 0.75rem; align-items: center;
 }
@@ -4527,15 +4541,15 @@ async function loadClientWeaving() {
   const rowHtml = (a) => `<div class="ancestor-row">
         <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
         <div class="ancestor-name-block">
-          <div class="ancestor-name-text">${a.name}${a.ancestor_id ? '' : ' <span style="font-size:15px;color:var(--gold)">· personal</span>'}</div>
+          <div class="ancestor-name-text">${a.name}${a.ancestor_id ? '' : ' <span style="font-size:15px;color:var(--gold)">· personal</span>'} ${addedViaPill(a)}</div>
           <div class="ancestor-dates">${a.dates||''} ${a.location ? '· '+a.location : ''}${a.relation_to_client ? ' · '+a.relation_to_client : ''}</div>
         </div>
         <span class="ancestor-freq-count">${(freqMap[a.id]||[]).length} freq${(freqMap[a.id]||[]).length!==1?'s':''}</span>
         ${sideSelect(a)}
         <button class="btn btn-outline btn-sm" onclick="removeClientAncestor('${a.id}','${clientId}')" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Remove</button>
       </div>`;
-  // Group by lineage side. Ordering within each group stays chronological (rows
-  // arrive ordered by sort_year). 'unknown' and unset fold into one group.
+  // Group by lineage side. Within each group: client-named ancestors first (intake order),
+  // then ancestors added through research, chronologically. 'unknown' and unset fold into one group.
   const groups = [
     { key: 'maternal', label: 'Maternal line',        items: [] },
     { key: 'paternal', label: 'Paternal line',        items: [] },
@@ -4551,7 +4565,7 @@ async function loadClientWeaving() {
   });
   const sections = groups.filter(g => g.items.length).map(g =>
     `<div class="section-header" style="margin-top:1.25rem"><div class="section-title">${g.label} — ${g.items.length}</div></div>
-     <div class="ancestor-list">${g.items.map(rowHtml).join('')}</div>`
+     <div class="ancestor-list">${sortClientAncestors(g.items).map(rowHtml).join('')}</div>`
   ).join('');
   container.innerHTML = `
     <div class="section-header"><div class="section-title">Weaving — ${rows.length} ancestor${rows.length!==1?'s':''}</div></div>
@@ -4572,10 +4586,10 @@ async function addAncestorToClient() {
   if (result && !result.code) {
     const caId = Array.isArray(result) ? result[0]?.id : result?.id;
     if (caId) {
-      const freqRows = await rest(`ancestor_frequencies?ancestor_id=eq.${ancestorId}&select=frequency_tag_id`);
+      const freqRows = await rest(`ancestor_frequencies?ancestor_id=eq.${ancestorId}&select=frequency_tag_id,note`);
       if (Array.isArray(freqRows) && freqRows.length) {
         for (const fp of freqRows) {
-          await restPost('client_ancestor_frequencies', { client_ancestor_id: caId, frequency_tag_id: fp.frequency_tag_id, strength });
+          await restPost('client_ancestor_frequencies', { client_ancestor_id: caId, frequency_tag_id: fp.frequency_tag_id, strength, note: fp.note || null });
         }
       }
     }
@@ -5856,8 +5870,7 @@ async function loadMyWeaving() {
   // Intake stubs are ancestors named at intake, not yet researched or written.
   const woven = rows.filter(r => r.status !== 'intake_stub' && r.status !== 'held');
   // In the order the client named them on the intake form.
-  const inResearch = rows.filter(r => r.status === 'intake_stub')
-    .sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || '')));
+  const inResearch = sortClientAncestors(rows.filter(r => r.status === 'intake_stub'));
 
   const freqMap = {};
   if (woven.length) {
@@ -5936,6 +5949,7 @@ async function loadMyWeaving() {
           <div class="ancestor-name-text">${esc(a.name)}</div>
           <div class="ancestor-dates">${esc(a.dates || '')}</div>
         </div>
+        ${addedViaPill(a)}
       </div>`;
     });
     html += '</div></div>';
@@ -6274,7 +6288,8 @@ async function myMessagesSend() {
 
 // State for current review session
 let arReviewData = null;      // raw AI result
-let arChips = [];             // [{ tagId, tagName, tagType, strength }]
+let arChips = [];             // [{ tagId, tagName, tagType, strength, note }]
+let arExistingFreqNotes = {}; // lowercased tag name -> saved note, for Augment fallback
 let arAugmentExistingId = null;     // when set, Confirm PATCHes this id instead of inserting
 let arAugmentExistingRecord = null; // full pre-augment snapshot, used for diff highlights
 let arPromoteStubId = null;         // when set, Confirm writes the layers onto this client_ancestors row (personal, unlinked; no canonical row)
@@ -6358,7 +6373,7 @@ async function generateAncestorAI() {
     }
 
     arReviewData = data;
-    arChips = matchFrequencyTags(data.frequency_tags || []);
+    arChips = matchFrequencyTags(data.frequency_tags || [], data.frequency_notes || []);
     renderAncestorReview(data);
 
   } catch (err) {
@@ -6375,9 +6390,14 @@ function stripRomanPrefix(s) {
   return String(s || '').replace(/^[IVX]+\s*[:.\-]\s*/i, '').trim();
 }
 
-function matchFrequencyTags(suggestedNames) {
+function matchFrequencyTags(suggestedNames, frequencyNotes) {
   const chips = [];
   const usedIds = new Set();
+  const noteMap = {};
+  (Array.isArray(frequencyNotes) ? frequencyNotes : []).forEach(n => {
+    const key = stripRomanPrefix(String(n?.tag || '')).toLowerCase().trim();
+    if (key && n?.why) noteMap[key] = String(n.why).trim();
+  });
   (suggestedNames || []).forEach(suggested => {
     const cleaned = stripRomanPrefix(suggested);
     const norm = cleaned.toLowerCase().trim();
@@ -6390,7 +6410,8 @@ function matchFrequencyTags(suggestedNames) {
       allFrequencyTags.find(t => t.name.toLowerCase().includes(norm) || norm.includes(t.name.toLowerCase()));
     if (match && !usedIds.has(match.id)) {
       usedIds.add(match.id);
-      chips.push({ tagId: match.id, tagName: match.name, tagType: match.type, strength: 'noted' });
+      const note = noteMap[norm] || noteMap[match.name.toLowerCase()] || arExistingFreqNotes[match.name.toLowerCase()] || '';
+      chips.push({ tagId: match.id, tagName: match.name, tagType: match.type, strength: 'noted', note });
     }
   });
   return chips;
@@ -6578,11 +6599,14 @@ function renderChips() {
     return;
   }
   display.innerHTML = arChips.map((c, i) => `
-    <span class="chip">
-      ${esc(c.tagName)}
-      <span class="chip-strength-label" onclick="cycleChipStrength(${i})" title="Click to change strength">${c.strength}</span>
-      <button class="chip-remove" onclick="removeChip(${i})" title="Remove tag">×</button>
-    </span>`).join('');
+    <div class="chip-row">
+      <span class="chip">
+        ${esc(c.tagName)}
+        <span class="chip-strength-label" onclick="cycleChipStrength(${i})" title="Click to change strength">${c.strength}</span>
+        <button class="chip-remove" onclick="removeChip(${i})" title="Remove tag">×</button>
+      </span>
+      <textarea class="chip-note" rows="2" placeholder="Why this frequency is present for this ancestor (1–2 lines)" oninput="arChips[${i}].note=this.value">${esc(c.note || '')}</textarea>
+    </div>`).join('');
 }
 
 function addChip() {
@@ -6594,7 +6618,7 @@ function addChip() {
   const opt     = sel.options[sel.selectedIndex];
   const tagName = opt.dataset.name || opt.text;
   const tagType = opt.dataset.type || '';
-  arChips.push({ tagId, tagName, tagType, strength: strSel.value });
+  arChips.push({ tagId, tagName, tagType, strength: strSel.value, note: arExistingFreqNotes[String(tagName).toLowerCase()] || '' });
   sel.value = '';
   renderChips();
 }
@@ -6706,6 +6730,7 @@ async function confirmAncestorToDatabase() {
           client_ancestor_id: arAugmentClientAncestorId,
           frequency_tag_id:   chip.tagId,
           strength:           chip.strength,
+          note:               chip.note || null,
         });
       }
       try {
@@ -6734,6 +6759,7 @@ async function confirmAncestorToDatabase() {
           ancestor_id:      ancestorId,
           frequency_tag_id: chip.tagId,
           strength:         chip.strength,
+          note:               chip.note || null,
         });
       }
     } else {
@@ -6750,6 +6776,7 @@ async function confirmAncestorToDatabase() {
           ancestor_id:       ancestorId,
           frequency_tag_id:  chip.tagId,
           strength:          chip.strength,
+          note:               chip.note || null,
         });
       }
     }
@@ -6796,6 +6823,7 @@ async function confirmAncestorToDatabase() {
           client_ancestor_id: arPromoteStubId,
           frequency_tag_id:   chip.tagId,
           strength:           chip.strength,
+          note:               chip.note || null,
         });
       }
     } else if (clientId && !isAugment) {
@@ -6827,6 +6855,7 @@ async function confirmAncestorToDatabase() {
             client_ancestor_id: caId,
             frequency_tag_id:   chip.tagId,
             strength:           assignStrength,
+            note:               chip.note || null,
           });
         }
       }
@@ -7010,6 +7039,25 @@ function showEditMode() {
 // Research layer (2026-11-15): intake_stub = named at intake, in research (the client sees the name only).
 // held = researched, not chosen for the Weaving (hidden from the client, kept for later).
 // Findings and private research notes live in client_ancestor_findings / client_ancestor_research (admin-only).
+// Client ancestor ordering (2026-11-15): ancestors the client named come first, in the order
+// she named them; ancestors added through research follow, chronologically by birth.
+const ADDED_VIA_LABEL = { client: 'Submitted by client', research: 'Added through research' };
+function sortClientAncestors(rows) {
+  const year = (r) => (typeof r.sort_year === 'number' && r.sort_year > 0) ? r.sort_year : 99999;
+  const created = (r) => String(r.created_at || '');
+  const entry = (r) => (typeof r.entry_order === 'number') ? r.entry_order : Number(r.entry_order) || 0;
+  return [...rows].sort((a, b) => {
+    const ac = a.added_via === 'client' ? 0 : 1, bc = b.added_via === 'client' ? 0 : 1;
+    if (ac !== bc) return ac - bc;
+    if (ac === 0) return (entry(a) - entry(b)) || created(a).localeCompare(created(b));
+    return (year(a) - year(b)) || String(a.name || '').localeCompare(String(b.name || ''));
+  });
+}
+function addedViaPill(r) {
+  const v = r.added_via === 'client' ? 'client' : 'research';
+  return `<span class="added-via added-via-${v}">${ADDED_VIA_LABEL[v]}</span>`;
+}
+
 let triageStubs = [];             // cached rows (intake_stub + held) with _research and _findings
 const TRIAGE_OPEN = new Set();    // ids whose research panel is open
 
@@ -7079,7 +7127,7 @@ async function populateTriageList() {
 
   try {
     const rows = await rest(
-      `client_ancestors?status=in.(intake_stub,held)&select=id,client_id,name,dates,location,occupation,relation_to_client,intake_notes,lineage_side,status,created_at,clients(name,email,entry_offering)&order=created_at.asc`
+      `client_ancestors?status=in.(intake_stub,held)&select=id,client_id,name,dates,location,occupation,relation_to_client,intake_notes,lineage_side,status,added_via,sort_year,entry_order,created_at,clients(name,email,entry_offering)&order=created_at.asc`
     );
     const list = Array.isArray(rows) ? rows : [];
     let research = [], findings = [];
@@ -7106,8 +7154,8 @@ async function populateTriageList() {
       groups[r.client_id].rows.push(r);
     });
     el.innerHTML = Object.values(groups).map(g => {
-      const inR = g.rows.filter(r => r.status === 'intake_stub');
-      const held = g.rows.filter(r => r.status === 'held');
+      const inR = sortClientAncestors(g.rows.filter(r => r.status === 'intake_stub'));
+      const held = sortClientAncestors(g.rows.filter(r => r.status === 'held'));
       return `<div class="triage-client">
         <div class="eyebrow">${esc(g.name)}${g.offering ? ' · ' + esc(g.offering) : ''} · ${inR.length} in research${held.length ? ` · ${held.length} held` : ''}</div>
         ${inR.map(renderTriageCard).join('')}
@@ -7134,7 +7182,7 @@ function renderTriageCard(r) {
       <div style="flex:1;min-width:220px">
         <div class="triage-name">${esc(r.name)}</div>
         ${meta ? `<div class="triage-meta">${meta}</div>` : ''}
-        <div class="triage-status">${badge}${depth}<span class="triage-pill">${fCount} finding${fCount === 1 ? '' : 's'}</span></div>
+        <div class="triage-status">${addedViaPill(r)}${badge}${depth}<span class="triage-pill">${fCount} finding${fCount === 1 ? '' : 's'}</span></div>
       </div>
       <div class="triage-actions">
         <select class="form-select" onchange="setTriageSide('${r.id}', this.value)" aria-label="Lineage side for ${esc(r.name)}">${_triageSideOptions(r.lineage_side)}</select>
@@ -7440,14 +7488,14 @@ async function loadAncestorForAugment() {
     let researchRow;
     [ancestor, freqRows, researchRow] = await Promise.all([
       rest(`client_ancestors?id=eq.${caId}&select=*`).then(r => r[0]),
-      rest(`client_ancestor_frequencies?client_ancestor_id=eq.${caId}&select=strength,frequency_tags(name,type)`).catch(() => []),
+      rest(`client_ancestor_frequencies?client_ancestor_id=eq.${caId}&select=strength,note,frequency_tags(name,type)`).catch(() => []),
       rest(`client_ancestor_research?client_ancestor_id=eq.${caId}&select=research_prompts`).then(r => r[0]).catch(() => null)
     ]);
     if (ancestor) ancestor = { ...ancestor, research_prompts: researchRow?.research_prompts || [] };
   } else {
     [ancestor, freqRows] = await Promise.all([
       rest(`ancestors?id=eq.${id}&select=*`).then(r => r[0]),
-      rest(`ancestor_frequencies?ancestor_id=eq.${id}&select=strength,frequency_tags(name,type)`).catch(() => [])
+      rest(`ancestor_frequencies?ancestor_id=eq.${id}&select=strength,note,frequency_tags(name,type)`).catch(() => [])
     ]);
   }
 
@@ -7459,6 +7507,10 @@ async function loadAncestorForAugment() {
 
   const tagList = (Array.isArray(freqRows) ? freqRows : [])
     .map(r => r.frequency_tags?.name).filter(Boolean);
+  arExistingFreqNotes = {};
+  (Array.isArray(freqRows) ? freqRows : []).forEach(r => {
+    const n = r.frequency_tags?.name; if (n && r.note) arExistingFreqNotes[n.toLowerCase()] = r.note;
+  });
   const promptCount = Array.isArray(ancestor.research_prompts) ? ancestor.research_prompts.length : 0;
   const lockedList  = Array.isArray(ancestor.locked_fields) ? ancestor.locked_fields : [];
   const guidance    = (ancestor.editorial_guidance || '').trim();
@@ -7579,7 +7631,7 @@ async function runAugment() {
     // Wire into the existing Review screen, but mark as augment so Confirm PATCHes
     arAugmentExistingId = id.startsWith('ca:') ? id.slice(3) : id;
     arReviewData = data;
-    arChips = matchFrequencyTags(data.frequency_tags || []);
+    arChips = matchFrequencyTags(data.frequency_tags || [], data.frequency_notes || []);
     renderAncestorReview(data);
 
     // Scroll the review into view
@@ -7623,7 +7675,7 @@ async function loadAncestorForEdit() {
 
   const [ancestor, freqRows, clientRows, findingRows] = await Promise.all([
     rest(`ancestors?id=eq.${id}&select=*`).then(r => r[0]),
-    rest(`ancestor_frequencies?ancestor_id=eq.${id}&select=id,strength,frequency_tag_id,frequency_tags(id,name,type)`).catch(() => []),
+    rest(`ancestor_frequencies?ancestor_id=eq.${id}&select=id,strength,note,frequency_tag_id,frequency_tags(id,name,type)`).catch(() => []),
     rest(`client_ancestors?ancestor_id=eq.${id}&select=id,client_id,clients(name)`).catch(() => []),
     rest(`ancestor_research_findings?ancestor_id=eq.${id}&select=*&order=finding_date.desc.nullslast,created_at.desc`).catch(() => [])
   ]);
@@ -7634,7 +7686,8 @@ async function loadAncestorForEdit() {
     tagId: r.frequency_tag_id,
     tagName: r.frequency_tags?.name || '',
     tagType: r.frequency_tags?.type || '',
-    strength: r.strength || 'noted'
+    strength: r.strength || 'noted',
+    note: r.note || ''
   }));
   editorClientAssignments = (Array.isArray(clientRows) ? clientRows : []).map(r => ({
     clientAncestorId: r.id,
@@ -8229,11 +8282,14 @@ function renderEditorChips() {
     return;
   }
   el.innerHTML = editorChips.map((c, i) => `
-    <span class="chip">
-      ${esc(c.tagName)}
-      <span class="chip-strength-label" onclick="cycleEditorChipStrength(${i})" title="Click to change">${c.strength}</span>
-      <button class="chip-remove" onclick="removeEditorChip(${i})">×</button>
-    </span>`).join('');
+    <div class="chip-row">
+      <span class="chip">
+        ${esc(c.tagName)}
+        <span class="chip-strength-label" onclick="cycleEditorChipStrength(${i})" title="Click to change">${c.strength}</span>
+        <button class="chip-remove" onclick="removeEditorChip(${i})">×</button>
+      </span>
+      <textarea class="chip-note" rows="2" placeholder="Why this frequency is present for this ancestor (1–2 lines)" oninput="editorChips[${i}].note=this.value">${esc(c.note || '')}</textarea>
+    </div>`).join('');
 }
 
 function addEditorChip() {
@@ -8242,7 +8298,7 @@ function addEditorChip() {
   const tagId = sel.value;
   if (!tagId || editorChips.find(c => c.tagId === tagId)) return;
   const opt = sel.options[sel.selectedIndex];
-  editorChips.push({ recordId: null, tagId, tagName: opt.dataset.name || opt.text, tagType: opt.dataset.type || '', strength: str.value });
+  editorChips.push({ recordId: null, tagId, tagName: opt.dataset.name || opt.text, tagType: opt.dataset.type || '', strength: str.value, note: '' });
   sel.value = '';
   renderEditorChips();
 }
@@ -8291,7 +8347,7 @@ async function assignAncestorToClientEditor() {
   if (Array.isArray(result) && result[0]?.id) {
     const caId = result[0].id;
     for (const chip of editorChips) {
-      await restPost('client_ancestor_frequencies', { client_ancestor_id: caId, frequency_tag_id: chip.tagId, strength });
+      await restPost('client_ancestor_frequencies', { client_ancestor_id: caId, frequency_tag_id: chip.tagId, strength, note: chip.note || null });
     }
     const client = allClients.find(c => c.id === clientId);
     editorClientAssignments.push({ clientAncestorId: caId, clientId, clientName: client?.name || clientId });
@@ -8437,7 +8493,8 @@ async function saveAncestorEdits() {
       await restPost('ancestor_frequencies', {
         ancestor_id: editorAncestorId,
         frequency_tag_id: chip.tagId,
-        strength: chip.strength
+        strength: chip.strength,
+        note: chip.note || null
       });
     }
 
@@ -8502,7 +8559,8 @@ async function syncClientFrequenciesFromCanonical(ancestorId, canonicalChips) {
         await restPost('client_ancestor_frequencies', {
           client_ancestor_id: copy.id,
           frequency_tag_id: chip.tagId,
-          strength: chip.strength
+          strength: chip.strength,
+          note: chip.note || null
         });
         changed = true;
       }

@@ -571,6 +571,14 @@ body::before {
   font-size: 15px; line-height: 1.6;
 }
 .aprof-tags-inline { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+.aprof-freq-item { display: flex; flex-direction: column; gap: 4px; flex: 1 1 100%; margin-bottom: 4px; }
+.aprof-freq-item .aprof-tag-chip { align-self: flex-start; }
+.aprof-freq-note { font-size: 15px; line-height: 1.55; color: var(--text-dim); font-style: italic; padding-left: 2px; }
+.freq-list { display: flex; flex-direction: column; gap: 8px; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); }
+.freq-item { display: flex; flex-direction: column; gap: 3px; }
+.freq-tag { align-self: flex-start; font-size: 15px; padding: 2px 8px; border-radius: 10px; background: rgba(201,168,124,0.08); border: 1px solid rgba(201,168,124,0.2); color: var(--gold); }
+.freq-note { font-size: 15px; line-height: 1.55; color: var(--text-dim); font-style: italic; padding-left: 2px; }
+body.aprof-printing .aprof-freq-note { color: #333 !important; font-size: 9pt !important; }
 .aprof-tag-chip {
   font-size: 15px; padding: 3px 10px; border-radius: 12px;
   background: rgba(201,168,124,0.10); border: 1px solid rgba(201,168,124,0.28);
@@ -971,8 +979,11 @@ function renderLayer(layer, a) {
 function renderAncestor(a, freqTags, i) {
   const layersHtml = LAYERS.map(l => renderLayer(l, a)).join('');
   const freqHtml = freqTags.length
-    ? `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.05)">
-        ${freqTags.map(t => `<span style="font-size: 15px;padding:2px 8px;border-radius:10px;background:rgba(201,168,124,0.08);border:1px solid rgba(201,168,124,0.2);color:var(--gold)">${t}</span>`).join('')}
+    ? `<div class="freq-list">
+        ${freqTags.map(t => {
+          const note = (pageFreqNotes[a.id] || {})[t];
+          return `<div class="freq-item"><span class="freq-tag">${esc(t)}</span>${note ? `<span class="freq-note">${esc(note)}</span>` : ''}</div>`;
+        }).join('')}
       </div>` : '';
 
   const datesLoc = [a.dates, a.location].filter(Boolean).join(' · ');
@@ -1022,6 +1033,7 @@ if (CLIENT_ID) {
 // Module-scope state: needed by openAncestorProfile after init() finishes
 let pageAncestors = [];
 let pageFreqMap = {};
+let pageFreqNotes = {}; // ancestorId -> { tagName: note }
 
 async function init() {
   const timeline = document.getElementById('weaving-timeline');
@@ -1046,7 +1058,7 @@ async function init() {
       const cas = await supabaseFetch(`client_ancestors?client_id=eq.${encodeURIComponent(CLIENT_ID)}&status=not.in.(intake_stub,held)&select=*&order=sort_year.asc`);
       const caIds = cas.map(a => a.id);
       const freqRows = caIds.length
-        ? await supabaseFetch(`client_ancestor_frequencies?client_ancestor_id=in.(${caIds.join(',')})&select=client_ancestor_id,frequency_tags(name)`).catch(() => [])
+        ? await supabaseFetch(`client_ancestor_frequencies?client_ancestor_id=in.(${caIds.join(',')})&select=client_ancestor_id,note,frequency_tags(name)`).catch(() => [])
         : [];
 
       ancestors = cas;
@@ -1056,12 +1068,13 @@ async function init() {
         if (!name) return;
         if (!freqMap[r.client_ancestor_id]) freqMap[r.client_ancestor_id] = [];
         freqMap[r.client_ancestor_id].push(name);
+        if (r.note) (pageFreqNotes[r.client_ancestor_id] ||= {})[name] = r.note;
       });
     } else {
       // Canonical archive (Christy's curated weaving)
       const [as, freqRows] = await Promise.all([
         supabaseFetch('ancestors?select=*&status=eq.weaving&order=sort_year.asc'),
-        supabaseFetch('ancestor_frequencies?select=ancestor_id,frequency_tags(name)').catch(() => [])
+        supabaseFetch('ancestor_frequencies?select=ancestor_id,note,frequency_tags(name)').catch(() => [])
       ]);
       ancestors = as;
       freqMap = {};
@@ -1070,6 +1083,7 @@ async function init() {
         if (!name) return;
         if (!freqMap[r.ancestor_id]) freqMap[r.ancestor_id] = [];
         freqMap[r.ancestor_id].push(name);
+        if (r.note) (pageFreqNotes[r.ancestor_id] ||= {})[name] = r.note;
       });
     }
 
@@ -1162,7 +1176,12 @@ function openAncestorProfile(id) {
     ? `<img class="aprof-image-img" src="${esc(a.photo_url)}" alt="${esc(a.name || 'Ancestor')}">`
     : `<div class="aprof-image-empty">◈</div>`;
   const inlineTags = tags.length
-    ? `<div class="aprof-tags-inline">${tags.map(t => `<span class="aprof-tag-chip">${esc(t)}</span>`).join('')}</div>` : '';
+    ? `<div class="aprof-tags-inline">${tags.map(t => {
+        const note = (pageFreqNotes[a.id] || {})[t];
+        return note
+          ? `<div class="aprof-freq-item"><span class="aprof-tag-chip">${esc(t)}</span><span class="aprof-freq-note">${esc(note)}</span></div>`
+          : `<span class="aprof-tag-chip">${esc(t)}</span>`;
+      }).join('')}</div>` : '';
 
   const datesLoc = [a.dates, a.location].filter(Boolean).join(' · ');
   const eraStr = a.era ? esc(a.era) : '';
