@@ -6332,7 +6332,7 @@ async function generateAncestorAI() {
           'Authorization': `Bearer ${accessToken}`,
           'apikey': SUPABASE_ANON_KEY,
         },
-        body: JSON.stringify({ name, dates, location, notes, level, pdfs })
+        body: JSON.stringify({ name, dates, location, notes, level, pdfs, ...(arPromoteStubData ? { client_id: arPromoteStubData.client_id, client_ancestor_id: arPromoteStubData.id } : {}) })
       }
     );
 
@@ -7279,7 +7279,7 @@ async function assessTriage(id) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}`, 'apikey': SUPABASE_ANON_KEY },
       body: JSON.stringify({
-        name: row.name, dates: row.dates || '', location: row.location || '', level: 'catalog',
+        name: row.name, dates: row.dates || '', location: row.location || '', level: 'catalog', client_id: row.client_id, client_ancestor_id: row.id,
         notes: composeClientAncestorContext(row, research, row._findings),
         editorial_guidance: 'This call is an assessment for research triage. Judge identity strictly from the findings provided: verified only when the sources place this person by name, dates and place; ambiguous when more than one person could fit or links are inferred; not_found when there is nothing to confirm. Research prompts must be specific record searches (which register, which parish, which years, which names) that would confirm identity or add life story.'
       })
@@ -7539,6 +7539,7 @@ async function runAugment() {
         body: JSON.stringify({
           mode: 'augment',
           existing_record: arAugmentExistingRecord,
+          ...(arAugmentClientAncestorId && arAugmentExistingRecord?.client_id ? { client_id: arAugmentExistingRecord.client_id } : {}),
           new_findings: findings,
           pdfs
         })
