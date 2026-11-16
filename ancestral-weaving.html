@@ -700,7 +700,9 @@ body::before {
 // Client weavings (client_id in the URL, or the portal's active client) hide the archive-only text.
 (function () {
   try {
-    var c = new URLSearchParams(location.search).get('client_id') || sessionStorage.getItem('active_client_id');
+    var q = new URLSearchParams(location.search);
+    if (q.get('view') === 'archive') return;
+    var c = q.get('client_id') || sessionStorage.getItem('active_client_id');
     if (c) document.documentElement.classList.add('client-weaving');
   } catch (e) {}
 })();
@@ -818,7 +820,12 @@ const ERA_GROUPS = [
   console.log('[chrome] role:', isAdmin ? 'admin' : 'client', '· email:', session.user.email);
 
   const params = new URLSearchParams(window.location.search);
-  let cidParam = params.get('client_id') || sessionStorage.getItem('active_client_id');
+  // ?view=archive: Christy's own archive. Admin only; it drops any remembered client context.
+  if (params.get('view') === 'archive') {
+    if (!isAdmin) { window.location.replace('ancestral-weaving.html'); return; }
+    sessionStorage.removeItem('active_client_id');
+  }
+  let cidParam = params.get('view') === 'archive' ? null : (params.get('client_id') || sessionStorage.getItem('active_client_id'));
   // preview=1 means we got here via admin previewing-as-client. Forward this
   // flag on every link (including the Portal return link) so the journey back
   // restores preview mode rather than landing in the admin canonical view.
@@ -889,6 +896,7 @@ const ERA_GROUPS = [
   function gateLink(a) {
     const href = a.getAttribute('href') || '';
     const baseHref = href.split('?')[0].split('#')[0];
+    if (href.includes('view=archive')) return;
     // Decorate Portal return links with client_id + preview flag so the journey
     // back to portal.html restores preview mode when applicable.
     if (baseHref === 'portal.html' || baseHref === '/portal.html' || baseHref.endsWith('/portal.html')) {
@@ -1018,9 +1026,18 @@ function esc(s) {
 }
 
 // ── Client context (URL ?client_id=... falling back to portal session active_client_id) ──
-const CLIENT_ID = new URLSearchParams(window.location.search).get('client_id')
+const ARCHIVE_VIEW = new URLSearchParams(window.location.search).get('view') === 'archive';
+const CLIENT_ID = ARCHIVE_VIEW ? null : (new URLSearchParams(window.location.search).get('client_id')
   || sessionStorage.getItem('active_client_id')
-  || null;
+  || null);
+// The "Viewing X's Weaving" banner and its archive link are for Christy only (not clients, not preview).
+function isAdminViewer() {
+  try {
+    if (new URLSearchParams(window.location.search).get('preview') === '1') return false;
+    const s = JSON.parse(sessionStorage.getItem('portal_session') || localStorage.getItem('portal_session') || 'null');
+    return !!(s && s.user && s.user.email === 'christypaxtonwade@gmail.com');
+  } catch (e) { return false; }
+}
 
 // Preserve client_id across cross-page links when present
 if (CLIENT_ID) {
@@ -1050,9 +1067,9 @@ async function init() {
       const eyebrow = document.querySelector('.header-eyebrow');
       if (eyebrow) eyebrow.textContent = clientName;
       const banner = document.getElementById('client-banner');
-      if (banner) {
+      if (banner && isAdminViewer()) {
         banner.style.display = 'block';
-        banner.innerHTML = `Viewing <strong style="font-weight:500">${esc(clientName)}</strong>'s Weaving · <a href="ancestral-weaving.html" style="color:var(--gold);text-decoration:underline">view canonical archive</a>`;
+        banner.innerHTML = `Viewing <strong style="font-weight:500">${esc(clientName)}</strong>'s Weaving · <a href="ancestral-weaving.html?view=archive" style="color:var(--gold);text-decoration:underline">view canonical archive</a>`;
       }
 
       // Intake stubs (named at intake, not yet written) live in the portal's My Weaving › In Research, not here.
