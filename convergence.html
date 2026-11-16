@@ -5,8 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Convergence — Christy Paxton Wade</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<script>
+// Client convergences (client_id in the URL, or the portal's active client) hide the archive-only parts.
+(function () {
+  try {
+    var q = new URLSearchParams(location.search);
+    if (q.get('view') === 'archive') return;
+    var c = q.get('client_id') || sessionStorage.getItem('active_client_id');
+    if (c) document.documentElement.classList.add('client-convergence');
+  } catch (e) {}
+})();
+</script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* Client views hide the archive-only text and links (2026-11-16, matching the Weaving and Catalog). */
+html:not(.client-convergence) .client-only { display: none !important; }
+html.client-convergence .archive-only { display: none !important; }
+/* Generation is Christy's work; clients and preview never see the controls. */
+html:not(.admin-viewer) .admin-only { display: none !important; }
 :root {
   --bg: #09090f;
   --surface: #0f1018;
@@ -475,7 +491,8 @@ body::before {
     <div class="header-rule"></div>
     <p class="header-sub">A structural analysis of the dominant frequency patterns across the ancestral weaving — drawn from lineage research, layer content, and the Navigation Map.</p>
     <div class="nav-links">
-      <a class="nav-link" href="index.html" data-link>Navigation Map</a>
+      <a class="nav-link archive-only" href="index.html" data-link>Navigation Map</a>
+      <a class="nav-link client-only" href="map-living.html" data-link>The Living Map</a>
       <a class="nav-link" href="ancestral-weaving.html" data-link>Ancestral Weaving</a>
       <a class="nav-link" href="ancestral-catalog.html" data-link>Ancestral Catalog</a>
       <a class="nav-link" href="tapestry.html" data-link>Mythic Tapestry</a>
@@ -507,9 +524,20 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // time we read CLIENT_ID_PARAM here, the active_client_id sessionStorage value
 // already matches the signed-in client's own row.
 const CONV_PARAMS = new URLSearchParams(window.location.search);
-const CLIENT_ID_PARAM   = CONV_PARAMS.get('client_id')
+const ARCHIVE_VIEW = CONV_PARAMS.get('view') === 'archive';
+const CLIENT_ID_PARAM   = ARCHIVE_VIEW ? null : (CONV_PARAMS.get('client_id')
   || sessionStorage.getItem('active_client_id')
-  || null;
+  || null);
+// Christy signed in and not previewing: the only viewer who sees the banner and the
+// generation controls. Clients and Preview as Client see the finished Convergence only.
+function isAdminViewer() {
+  try {
+    if (CONV_PARAMS.get('preview') === '1') return false;
+    const s = JSON.parse(sessionStorage.getItem('portal_session') || localStorage.getItem('portal_session') || 'null');
+    return !!(s && s.user && s.user.email === 'christypaxtonwade@gmail.com');
+  } catch (e) { return false; }
+}
+if (isAdminViewer()) document.documentElement.classList.add('admin-viewer');
 const CLIENT_NAME_PARAM = CONV_PARAMS.get('client_name') || null;
 let CLIENT_NAME = CLIENT_NAME_PARAM || 'Christy Paxton Wade';
 
@@ -548,7 +576,12 @@ if (CLIENT_ID_PARAM) {
   const KEY = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : SUPABASE_KEY;
   console.log('[chrome] role:', isAdmin ? 'admin' : 'client', '· email:', session.user.email);
   const params = new URLSearchParams(window.location.search);
-  let cidParam = params.get('client_id') || sessionStorage.getItem('active_client_id');
+  // ?view=archive: Christy's own Convergence. Admin only; it drops any remembered client context.
+  if (params.get('view') === 'archive') {
+    if (!isAdmin) { window.location.replace('convergence.html'); return; }
+    sessionStorage.removeItem('active_client_id');
+  }
+  let cidParam = params.get('view') === 'archive' ? null : (params.get('client_id') || sessionStorage.getItem('active_client_id'));
   const isPreview = params.get('preview') === '1';
   const previewSuffix = isPreview ? '&preview=1' : '';
   let activeClient = null;
@@ -588,6 +621,12 @@ if (CLIENT_ID_PARAM) {
     return;
   }
   if (activeClient) sessionStorage.setItem('active_client_id', activeClient.id);
+  // A signed-in client who arrives without client_id in the address (bookmark, new tab) is
+  // reloaded on her own Convergence, so the page never opens on anyone else's record.
+  if (!isAdmin && activeClient && !params.get('client_id')) {
+    window.location.replace(`convergence.html?client_id=${encodeURIComponent(activeClient.id)}${location.hash || ''}`);
+    return;
+  }
   // Fieldguide removed 2026-05-15: PDF-only.
   const LINK_FLAG_MAP = {
     'ancestral-weaving.html': 'access_weaving',
@@ -599,6 +638,7 @@ if (CLIENT_ID_PARAM) {
   function gateLink(a) {
     const href = a.getAttribute('href') || '';
     const baseHref = href.split('?')[0].split('#')[0];
+    if (href.includes('view=archive')) return;
     if (baseHref === 'portal.html' || baseHref === '/portal.html' || baseHref.endsWith('/portal.html')) {
       if (cid && !href.includes('client_id=')) {
         const sep = href.includes('?') ? '&' : '?';
@@ -810,12 +850,12 @@ async function loadClientData() {
   if (eyebrow) eyebrow.textContent = CLIENT_NAME;
   document.title = `The Convergence — ${CLIENT_NAME}`;
   // Show the client banner with a link back to the canonical view, but only when navigated in via client_id
-  if (CLIENT_ID_PARAM) {
+  if (CLIENT_ID_PARAM && isAdminViewer()) {
     const banner = document.getElementById('client-banner');
     if (banner) {
       const safeName = String(CLIENT_NAME).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
       banner.style.display = 'block';
-      banner.innerHTML = `Viewing <strong style="font-weight:500">${safeName}</strong>'s Convergence · <a href="convergence.html" style="color:var(--gold);text-decoration:underline">view canonical</a>`;
+      banner.innerHTML = `Viewing <strong style="font-weight:500">${safeName}</strong>'s Convergence · <a href="convergence.html?view=archive" style="color:var(--gold);text-decoration:underline">view canonical</a>`;
     }
   }
 
@@ -892,12 +932,18 @@ async function loadConvergenceHistory(clientId) {
   // All FINISHED convergences for this client, newest first.
   // Excludes 'generating' status so partial/orphaned rows from failed runs
   // don't show up in the history strip or get auto-loaded by init().
+  // Clients (and Preview as Client) see finished Convergences only: CLIENT_STATUSES.
+  const statuses = isAdminViewer() ? 'complete,published,in_review,draft' : CLIENT_STATUSES.join(',');
   return await sb(
     `convergences?client_id=eq.${clientId}` +
-    `&status=in.(complete,published,in_review,draft)` +
+    `&status=in.(${statuses})` +
     `&order=created_at.desc&select=id,title,status,created_at,version`
   );
 }
+
+// Which Convergences a client may read: only those Christy has released ('published').
+// Generation writes 'complete', which is held. RLS enforces the same rule (2026-11-16).
+const CLIENT_STATUSES = ['published'];
 
 async function loadConvergenceById(convId) {
   console.log('[loadConvergenceById] requested convId =', convId);
@@ -1283,6 +1329,9 @@ function renderSnapshot(conv) {
     </div>`;
 }
 
+// Each section is addressable by its title (the portal's My Convergence links here).
+function sectionAnchor(sec) { return 'section-' + String(sec.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+
 function renderSection(sec, freqAncestors) {
   const glyphs = {
     snapshot: '✦', frequency: '◈', unresolved: '◌', living_thread: '↑'
@@ -1309,11 +1358,16 @@ function renderSection(sec, freqAncestors) {
       </div>`;
   }
 
+  // Labels above each section. The last four were missing (the raw type showed); drafts for Christy's voice pass.
   const typeLabels = {
     snapshot: 'The Lineage',
     frequency: 'Frequency Pattern',
     unresolved: 'Unresolved Thread',
-    living_thread: 'The Living Thread'
+    living_thread: 'The Living Thread',
+    purpose: 'The Assignment',
+    chart_resonance: 'The Chart',
+    cross_source: 'Lineage and Chart',
+    what_this_asks: 'What It Asks'
   };
 
   const bodyText = (sec.final_text || sec.ai_draft || '')
@@ -1321,11 +1375,11 @@ function renderSection(sec, freqAncestors) {
     .map(p => `<p>${p.trim()}</p>`).join('');
 
   return `
-    <div class="convergence-section">
+    <div class="convergence-section" id="${sectionAnchor(sec)}">
       <div class="section-title-bar">
         <div class="section-glyph">${glyph}</div>
         <div class="section-title-block">
-          <div class="section-type-label">${typeLabels[sec.section_type] || sec.section_type}</div>
+          <div class="section-type-label">${typeLabels[sec.section_type] || ''}</div>
           <div class="section-title">${sec.title}</div>
           ${fieldNote}
         </div>
@@ -1356,7 +1410,7 @@ function renderHistoryNav(history, currentConvId) {
     <div class="history-nav">
       <span class="history-label">Past Convergences</span>
       <div class="history-list">${items}</div>
-      <button class="history-new" onclick="startGeneration()">+ New</button>
+      <button class="history-new admin-only" onclick="startGeneration()">+ New</button>
     </div>`;
 }
 
@@ -1395,6 +1449,7 @@ function renderConvergence(conv, clientData, history) {
 
   return `
     <div class="convergence-output">
+      ${renderReleaseBar(conv)}
       ${renderHistoryNav(history, conv.id)}
       ${renderSnapshot(convWithMeta)}
       <div class="section-header">
@@ -1405,13 +1460,43 @@ function renderConvergence(conv, clientData, history) {
       ${sectionsHtml}
       <div class="regen-bar">
         <button class="btn-pdf" onclick="window.print()">Download as PDF</button>
-        <button class="btn-regen" onclick="startGeneration()">Generate New Convergence</button>
+        <button class="btn-regen admin-only" onclick="startGeneration()">Generate New Convergence</button>
       </div>
     </div>`;
 }
 
+// Christy's view of a client Convergence: held or released, with the switch.
+function renderReleaseBar(conv) {
+  if (!isAdminViewer() || !CLIENT_ID_PARAM || !conv || !conv.id) return '';
+  const released = conv.status === 'published';
+  return `
+    <div class="release-bar admin-only" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin:0 0 1.5rem;padding:0.85rem 1.1rem;border:1px solid ${released ? 'rgba(109,216,178,0.35)' : 'rgba(201,168,124,0.35)'};border-radius:6px;font-size:15px;color:var(--text-secondary,#c8c0b0)">
+      <span>${released ? '<strong style="color:#6dd8b2;font-weight:500">Released</strong> · the client can read this Convergence.' : '<strong style="color:var(--gold);font-weight:500">Held</strong> · not visible to the client until you release it.'}</span>
+      <button class="btn-regen" style="margin:0" onclick="setConvergenceRelease('${conv.id}', ${released ? 'false' : 'true'})">${released ? 'Withdraw' : 'Release to client'}</button>
+    </div>`;
+}
+
+async function setConvergenceRelease(convId, release) {
+  if (!isAdminViewer()) return;
+  try {
+    await sbPatch('convergences', convId, { status: release ? 'published' : 'complete' });
+    await refreshHistory();
+    await viewConvergence(convId);
+  } catch (e) {
+    alert(`Could not ${release ? 'release' : 'withdraw'}: ${e.message}`);
+  }
+}
+
 function renderGeneratePanel(clientData) {
   const { ancestors, sortedFreqs } = clientData;
+  if (!isAdminViewer()) {
+    // Client view before a Convergence is ready (draft line for Christy's voice pass).
+    return `
+    <div class="generate-panel">
+      <div class="generate-title">Your Convergence is being prepared</div>
+      <div class="generate-sub">It will appear here once it is ready.</div>
+    </div>`;
+  }
   return `
     <div class="generate-panel">
       <div class="generate-title">Ready to generate</div>
@@ -1447,6 +1532,7 @@ function renderProgressPanel() {
 let globalClientData = null;
 
 async function startGeneration() {
+  if (!isAdminViewer()) return;
   const main = document.getElementById('main-content');
   main.innerHTML = renderProgressPanel();
   progressEl = main.querySelector('#progress-wrap');
@@ -1524,6 +1610,11 @@ async function init() {
       // jump to any past one. "+ New" inside the nav generates a fresh one.
       const latest = await loadConvergenceById(globalHistory[0].id);
       main.innerHTML = renderConvergence(latest, globalClientData, globalHistory);
+      // #section-N (from the portal's My Convergence) opens at that section.
+      if (/^#section-[a-z0-9-]+$/.test(location.hash)) {
+        const el = document.getElementById(location.hash.slice(1));
+        if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+      }
     } else {
       main.innerHTML = renderGeneratePanel(globalClientData);
     }
