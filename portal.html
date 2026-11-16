@@ -4780,6 +4780,14 @@ async function loadClientWeaving() {
     <option value="both"${a.lineage_side==='both'?' selected':''}>Both / chosen</option>
     <option value="unknown"${a.lineage_side==='unknown'?' selected':''}>Unknown</option>
   </select>`;
+  // Placement of a written ancestor: which client page shows them. The record (layers, sigil,
+  // tags) is the same whichever is chosen; In research and Held are set from Triage (2026-11-16).
+  const placeSelect = (a) => ['weaving','catalog','keynote'].includes(a.status)
+    ? `<select class="form-select" style="width:auto;min-width:112px;font-size:15px" title="Which of the client's pages shows this ancestor. The full record is kept either way." onchange="updateClientAncestorPlacement('${a.id}', this.value)">
+        <option value="weaving"${a.status==='weaving'?' selected':''}>Weaving</option>
+        <option value="catalog"${a.status==='catalog'?' selected':''}>Catalog</option>
+        <option value="keynote"${a.status==='keynote'?' selected':''}>Keynote</option>
+      </select>` : '';
   ARC_ROWS = rows;
   const rowHtml = (a) => `<div class="arc-item"><div class="ancestor-row">
         <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
@@ -4788,6 +4796,7 @@ async function loadClientWeaving() {
           <div class="ancestor-dates">${a.dates||''} ${a.location ? '· '+a.location : ''}${a.relation_to_client ? ' · '+a.relation_to_client : ''}</div>
         </div>
         <span class="ancestor-freq-count">${(freqMap[a.id]||[]).length} freq${(freqMap[a.id]||[]).length!==1?'s':''}</span>
+        ${placeSelect(a)}
         ${sideSelect(a)}
         <button class="btn btn-outline btn-sm" id="arc-btn-${a.id}" onclick="arcToggle('${a.id}')" aria-expanded="${ARC_OPEN.has(a.id)}">${ARC_OPEN.has(a.id) ? 'Close record' : 'Record'}</button>
         <button class="btn btn-outline btn-sm" onclick="removeClientAncestor('${a.id}','${clientId}')" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Remove</button>
@@ -5126,6 +5135,15 @@ async function removeClientAncestor(clientAncestorId, clientId) {
   await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${clientAncestorId}`);
   await restDelete(`client_ancestors?id=eq.${clientAncestorId}`);
   loadClientWeaving();
+}
+
+async function updateClientAncestorPlacement(caId, value) {
+  if (!['weaving','catalog','keynote'].includes(value)) return;
+  try {
+    const ok = await restPatch('client_ancestors', caId, { status: value });
+    if (!ok) throw new Error('save failed');
+    loadClientWeaving();
+  } catch (e) { alert('Could not change placement: ' + (e.message || e)); }
 }
 
 async function updateClientAncestorSide(caId, value) {
@@ -6389,7 +6407,9 @@ async function loadMyWeaving() {
   }
 
   // Intake stubs are ancestors named at intake, not yet researched or written.
-  const woven = rows.filter(r => r.status !== 'intake_stub' && r.status !== 'held');
+  // The Weaving holds ancestors placed in the Weaving only, as in Christy's own archive.
+  // Catalog and Keynote ancestors are read in My Catalog (2026-11-16).
+  const woven = rows.filter(r => r.status === 'weaving');
   // In the order the client named them on the intake form.
   const inResearch = sortClientAncestors(rows.filter(r => r.status === 'intake_stub'));
 
@@ -6995,6 +7015,12 @@ function renderAncestorReview(d) {
   const statusOptions = ['catalog','weaving','margin','keynote']
     .map(s => `<option value="${s}" ${s === d.status ? 'selected' : ''}>${s}</option>`).join('');
   const clientOptions = allClients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  // Weave from research and Augment of a client's record write onto that client's own record:
+  // placement comes from Status ("Place in") and strength from each tag, so the archive's
+  // "Assign to client" controls do not apply there (2026-11-16).
+  const personalRecord = !!(arPromoteStubId || arAugmentClientAncestorId);
+  const personalClientName = (arPromoteStubData && arPromoteStubData.clients && arPromoteStubData.clients.name)
+    || (allClients.find(c => c.id === (arPromoteStubData && arPromoteStubData.client_id)) || {}).name || 'the client';
 
   const reviewEl = document.getElementById('ar-review');
   reviewEl.innerHTML = `
@@ -7040,7 +7066,7 @@ function renderAncestorReview(d) {
           </div>
           <div class="form-group" style="margin-bottom:0">
             <label class="form-label">Status</label>
-            <select class="form-select" id="rv-status">${statusOptions}</select>
+            <select class="form-select" id="rv-status" onchange="const p=document.getElementById('ar-place'); if (p && [...p.options].some(o=>o.value===this.value)) p.value=this.value">${statusOptions}</select>
           </div>
         </div>
       </div>
@@ -7122,18 +7148,34 @@ function renderAncestorReview(d) {
 
       <!-- Confirm bar -->
       <div class="confirm-bar">
+        ${personalRecord ? `
+        <div class="confirm-bar-left" style="flex-wrap:wrap">
+          <label class="form-label" style="margin:0;white-space:nowrap" for="ar-place">Place in ${esc(personalClientName)}'s</label>
+          <select class="form-select" id="ar-place" style="width:150px;margin:0" onchange="document.getElementById('rv-status').value=this.value">
+            ${['weaving','catalog','keynote'].map(v => `<option value="${v}" ${v === (d.status || 'weaving') ? 'selected' : ''}>${v === 'weaving' ? 'Weaving' : v === 'catalog' ? 'Catalog' : 'Keynote'}</option>`).join('')}
+          </select>
+          <label class="form-label" style="margin:0 0 0 0.5rem;white-space:nowrap" for="ar-tag-strength-all">Tag strength</label>
+          <select class="form-select" id="ar-tag-strength-all" style="width:170px;margin:0" onchange="setAllChipStrength(this.value)">
+            <option value="">As set on each tag</option>
+            <option value="dominant">All Dominant</option>
+            <option value="emerging">All Emerging</option>
+            <option value="noted">All Noted</option>
+          </select>
+          <input type="hidden" id="ar-assign-client" value="">
+          <input type="hidden" id="ar-assign-strength" value="noted">
+        </div>` : `
         <div class="confirm-bar-left">
           <label class="form-label" style="margin:0;white-space:nowrap">Assign to client:</label>
           <select class="form-select" id="ar-assign-client" style="min-width:200px;margin:0">
-            <option value="">— Save to catalog only —</option>
+            <option value="">— My archive only (no client) —</option>
             ${clientOptions}
           </select>
-          <select class="form-select" id="ar-assign-strength" style="width:140px;margin:0">
+          <select class="form-select" id="ar-assign-strength" style="width:140px;margin:0" title="Strength given to every tag on the client's copy">
             <option value="dominant">Dominant</option>
             <option value="emerging">Emerging</option>
             <option value="noted">Noted</option>
           </select>
-        </div>
+        </div>`}
         <div style="display:flex;gap:0.75rem;align-items:center">
           <div id="ar-confirm-msg" style="font-size:15px"></div>
           <button class="btn btn-outline" onclick="resetAncestorResearch()">Start Over</button>
@@ -7234,6 +7276,13 @@ function renderResearchPrompts(prompts) {
         <span>${esc(p)}</span>
       </div>`).join('')}
     </div>`;
+}
+
+// Set every frequency tag in the review to one strength (Weave / client-record modes).
+function setAllChipStrength(v) {
+  if (!v) return;
+  (arChips || []).forEach(c => { c.strength = v; });
+  renderChips();
 }
 
 async function confirmAncestorToDatabase() {
