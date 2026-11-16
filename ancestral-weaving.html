@@ -883,6 +883,12 @@ const ERA_GROUPS = [
     return;
   }
   if (activeClient) sessionStorage.setItem('active_client_id', activeClient.id);
+  // A signed-in client who arrives without client_id in the address (bookmark, new tab) is
+  // reloaded on her own Weaving, so the page never opens in the archive's shape for her.
+  if (!isAdmin && activeClient && !params.get('client_id')) {
+    window.location.replace(`ancestral-weaving.html?client_id=${encodeURIComponent(activeClient.id)}${location.hash || ''}`);
+    return;
+  }
   console.log('[chrome] activeClient:', activeClient ? activeClient.name : '(none / canonical)');
 
   // Fieldguide removed 2026-05-15: PDF-only.

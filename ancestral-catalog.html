@@ -5,9 +5,23 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>The Ancestral Catalog — Christy Paxton Wade</title>
+<script>
+// Client catalogs (client_id in the URL, or the portal's active client) hide the archive-only text.
+(function () {
+  try {
+    var q = new URLSearchParams(location.search);
+    if (q.get('view') === 'archive') return;
+    var c = q.get('client_id') || sessionStorage.getItem('active_client_id');
+    if (c) document.documentElement.classList.add('client-catalog');
+  } catch (e) {}
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&amp;family=Jost:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* Client catalogs hide the archive-only text and links (2026-11-16, matching the Weaving). */
+html:not(.client-catalog) .client-only { display: none !important; }
+html.client-catalog .archive-only { display: none !important; }
 :root {
   --bg: #09090f;
   --surface: #11111c;
@@ -370,11 +384,13 @@ body::before {
 <div class="header-eyebrow">Christy Paxton Wade</div>
 <h1 class="header-title">The Ancestral Catalog</h1>
 <div class="header-rule"></div>
-<p class="header-sub">A seed catalog of the lineage. Every researched ancestor held here — those in full flower in the Weaving and those still germinating in the margins. Sortable by era and place. Searchable by name. Each card holds what is known, what connects, and what remains open.</p>
+<p class="header-sub archive-only">A seed catalog of the lineage. Every researched ancestor held here — those in full flower in the Weaving and those still germinating in the margins. Sortable by era and place. Searchable by name. Each card holds what is known, what connects, and what remains open.</p>
+<p class="header-sub client-only">A seed catalog of your lineage. Every ancestor in your archive is held here, searchable by name and sortable by era, place and Field. Each card holds what is known, what connects, and what remains open.</p>
 <div class="header-links">
 <a class="header-link" href="ancestral-weaving.html" data-link>The Ancestral Weaving ↗</a>
 <a class="header-link" href="tapestry.html" data-link>Mythic Tapestry ↗</a>
-<a class="header-link" href="index.html" data-link>Navigation Map ↗</a>
+<a class="header-link archive-only" href="index.html" data-link>Navigation Map ↗</a>
+<a class="header-link client-only" href="map-living.html" data-link>The Living Map ↗</a>
 <a class="header-link" href="convergence.html" data-link>The Convergence ↗</a>
 <a class="header-link" href="portal.html">Portal ↗</a>
 </div>
@@ -509,7 +525,12 @@ const ERA_BAR_CLASS = {
   console.log('[chrome] role:', isAdmin ? 'admin' : 'client', '· email:', session.user.email);
 
   const params = new URLSearchParams(window.location.search);
-  let cidParam = params.get('client_id') || sessionStorage.getItem('active_client_id');
+  // ?view=archive: Christy's own archive. Admin only; it drops any remembered client context.
+  if (params.get('view') === 'archive') {
+    if (!isAdmin) { window.location.replace('ancestral-catalog.html'); return; }
+    sessionStorage.removeItem('active_client_id');
+  }
+  let cidParam = params.get('view') === 'archive' ? null : (params.get('client_id') || sessionStorage.getItem('active_client_id'));
   const isPreview = params.get('preview') === '1';
   const previewSuffix = isPreview ? '&preview=1' : '';
   let activeClient = null;
@@ -551,6 +572,12 @@ const ERA_BAR_CLASS = {
     return;
   }
   if (activeClient) sessionStorage.setItem('active_client_id', activeClient.id);
+  // A signed-in client who arrives without client_id in the address (bookmark, new tab) is
+  // reloaded on her own catalog, so the page never opens in the archive's shape for her.
+  if (!isAdmin && activeClient && !params.get('client_id')) {
+    window.location.replace(`ancestral-catalog.html?client_id=${encodeURIComponent(activeClient.id)}${location.hash || ''}`);
+    return;
+  }
 
   // Fieldguide removed 2026-05-15: PDF-only.
   const LINK_FLAG_MAP = {
@@ -563,6 +590,7 @@ const ERA_BAR_CLASS = {
   function gateLink(a) {
     const href = a.getAttribute('href') || '';
     const baseHref = href.split('?')[0].split('#')[0];
+    if (href.includes('view=archive')) return;
     // Decorate Portal return links with client_id + preview flag.
     if (baseHref === 'portal.html' || baseHref === '/portal.html' || baseHref.endsWith('/portal.html')) {
       if (cid && !href.includes('client_id=')) {
@@ -728,9 +756,18 @@ function escCat(s) {
 
 // ── Client context (URL ?client_id=...) ──────────────────────
 // CLIENT_ID resolution: URL > portal session active_client_id > null (canonical view)
-const CLIENT_ID = new URLSearchParams(window.location.search).get('client_id')
+const ARCHIVE_VIEW = new URLSearchParams(window.location.search).get('view') === 'archive';
+const CLIENT_ID = ARCHIVE_VIEW ? null : (new URLSearchParams(window.location.search).get('client_id')
   || sessionStorage.getItem('active_client_id')
-  || null;
+  || null);
+// The "Viewing X's Catalog" banner and its archive link are for Christy only (not clients, not preview).
+function isAdminViewer() {
+  try {
+    if (new URLSearchParams(window.location.search).get('preview') === '1') return false;
+    const s = JSON.parse(sessionStorage.getItem('portal_session') || localStorage.getItem('portal_session') || 'null');
+    return !!(s && s.user && s.user.email === 'christypaxtonwade@gmail.com');
+  } catch (e) { return false; }
+}
 
 // Preserve client_id across cross-page links when present
 if (CLIENT_ID) {
@@ -756,10 +793,12 @@ async function init() {
       const client = await supabaseFetch(`clients?id=eq.${encodeURIComponent(CLIENT_ID)}&select=id,name`).then(r => r[0]).catch(() => null);
       const clientName = client?.name || 'Client';
 
+      const eyebrow = document.querySelector('.header-eyebrow');
+      if (eyebrow) eyebrow.textContent = clientName;
       const banner = document.getElementById('client-banner');
-      if (banner) {
+      if (banner && isAdminViewer()) {
         banner.style.display = 'block';
-        banner.innerHTML = `Viewing <strong style="font-weight:500">${escCat(clientName)}</strong>'s exclusive set · <a href="ancestral-catalog.html" style="color:var(--gold);text-decoration:underline">view canonical archive</a>`;
+        banner.innerHTML = `Viewing <strong style="font-weight:500">${escCat(clientName)}</strong>'s Catalog · <a href="ancestral-catalog.html?view=archive" style="color:var(--gold);text-decoration:underline">view canonical archive</a>`;
       }
 
       const cas = await supabaseFetch(`client_ancestors?client_id=eq.${encodeURIComponent(CLIENT_ID)}&status=not.in.(intake_stub,held)&select=*&order=sort_year.asc`);
@@ -856,8 +895,7 @@ function openAncestorProfile(id) {
     ? `<div class="aprof-tags-inline">${tags.map(t => `<span class="aprof-tag-chip">${aprofEsc(t)}</span>`).join('')}</div>` : '';
   const datesLoc = [a.dates, a.location].filter(Boolean).join(' · ');
   const eyebrow  = [a.era, datesLoc].filter(Boolean).map(aprofEsc).join(' · ');
-  const relationNote = a.relation_to_client ? `<div class="aprof-relation-note">Relation: ${aprofEsc(a.relation_to_client)}</div>` : '';
-  const intakeNote   = a.intake_notes ? `<div class="aprof-relation-note">Intake notes: ${aprofEsc(a.intake_notes)}</div>` : '';
+  // Relation and intake notes stay in the admin Ancestral Record (kept for the Convergence), not on the profile.
 
   const identity = `
     <div class="aprof-identity">
@@ -867,7 +905,7 @@ function openAncestorProfile(id) {
         <h2 class="aprof-name" id="aprof-name-id">${aprofEsc(a.name || '—')}</h2>
         ${a.epithet ? `<div class="aprof-epithet">${aprofEsc(a.epithet)}</div>` : ''}
         ${a.catalog_preview ? `<div class="aprof-archetype-text">${aprofFormatPara(a.catalog_preview)}</div>` : ''}
-        ${relationNote}${intakeNote}${inlineTags}
+        ${inlineTags}
       </div>
     </div>`;
 
