@@ -801,7 +801,8 @@ async function init() {
         banner.innerHTML = `Viewing <strong style="font-weight:500">${escCat(clientName)}</strong>'s Catalog · <a href="ancestral-catalog.html?view=archive" style="color:var(--gold);text-decoration:underline">view canonical archive</a>`;
       }
 
-      const cas = await supabaseFetch(`client_ancestors?client_id=eq.${encodeURIComponent(CLIENT_ID)}&status=not.in.(intake_stub,held)&select=*&order=sort_year.asc`);
+      // Placed ancestors and Historical Keynotes only; drafts (keynote_draft), research and held stay hidden (2026-11-16).
+      const cas = await supabaseFetch(`client_ancestors?client_id=eq.${encodeURIComponent(CLIENT_ID)}&status=in.(weaving,catalog,keynote)&select=*&order=sort_year.asc`);
       const caIds = cas.map(a => a.id);
       const freqRows = caIds.length
         ? await supabaseFetch(`client_ancestor_frequencies?client_ancestor_id=in.(${caIds.join(',')})&select=client_ancestor_id,frequency_tags(name)`).catch(() => [])

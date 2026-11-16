@@ -4743,7 +4743,7 @@ async function loadClientWeaving() {
   document.getElementById('weaving-add-ancestor').style.display = 'block';
   container.innerHTML = '<div class="loading"><span class="loading-glyph">✦</span>Loading weaving…</div>';
 
-  const rows = await rest(`client_ancestors?client_id=eq.${clientId}&select=*&order=sort_year.asc`);
+  let rows = await rest(`client_ancestors?client_id=eq.${clientId}&select=*&order=sort_year.asc`);
   if (!Array.isArray(rows) || !rows.length) {
     container.innerHTML = `<div class="section-header"><div class="section-title">Weaving — 0 ancestors</div></div><div class="empty">No ancestors assigned yet.</div>`;
     // All ancestors available — reset dropdown
@@ -4803,6 +4803,10 @@ async function loadClientWeaving() {
       </div><div class="arc-panel" id="arc-${a.id}"></div></div>`;
   // Group by lineage side. Within each group: client-named ancestors first (intake order),
   // then ancestors added through research, chronologically. 'unknown' and unset fold into one group.
+  // Historical Keynotes (context cards: keynote_ancestor_ids set) are listed on their own, below.
+  const keynoteRows = rows.filter(isContextKeynote);
+  const allRows = rows;
+  rows = rows.filter(r => !isContextKeynote(r));
   const groups = [
     { key: 'maternal', label: 'Maternal line',        items: [] },
     { key: 'paternal', label: 'Paternal line',        items: [] },
@@ -4829,8 +4833,239 @@ async function loadClientWeaving() {
       <button class="btn btn-outline btn-sm" onclick="arcSetAllVisible(true)">Show all research</button>
       <button class="btn btn-outline btn-sm" onclick="arcSetAllVisible(false)">Hide all research</button>
     </div>
-    ${sections}`;
+    ${sections}
+    ${knSectionHtml(clientId, keynoteRows)}`;
+  KN.people = rows;
   rows.filter(r => ARC_OPEN.has(r.id)).forEach(r => { delete ARC_CACHE[r.id]; arcRender(r.id); arcLoad(r.id).then(() => arcRender(r.id)); });
+  if (KN.open && KN.clientId === clientId) knRender();
+}
+
+// ════════════════════════════════════════════════════
+// HISTORICAL KEYNOTES (admin) — 2026-11-16
+// Context cards for a client's Catalog: the shared world several of her ancestors lived in
+// (a village, a trade, a law, a migration), ending "In this lineage" with a paragraph per
+// ancestor from their own records. generate-keynote drafts from the ticked ancestors'
+// findings; the draft is edited here and saved as keynote_draft (hidden from the client).
+// "In Catalog" (status keynote) shows it on the client's Catalog.
+// ════════════════════════════════════════════════════
+const KN = { open: false, clientId: null, id: null, people: [], draft: null, tags: [], sources: [], busy: false };
+
+function isContextKeynote(r) {
+  return (r.status === 'keynote' || r.status === 'keynote_draft') && Array.isArray(r.keynote_ancestor_ids) && r.keynote_ancestor_ids.length > 0;
+}
+
+function knSectionHtml(clientId, keynotes) {
+  const list = keynotes.map(k => `
+    <div class="ancestor-row">
+      <div class="ancestor-name-block" style="flex:1;min-width:0">
+        <div class="ancestor-name-text">${esc(k.name)} <span class="added-via">${k.status === 'keynote' ? 'In Catalog' : 'Draft · hidden from client'}</span></div>
+        <div class="ancestor-dates">${esc(k.dates || '')} · ${(k.keynote_ancestor_ids || []).length} ancestor${(k.keynote_ancestor_ids || []).length === 1 ? '' : 's'}</div>
+      </div>
+      <select class="form-select" style="width:auto;min-width:150px;font-size:15px" onchange="knSetPlacement('${k.id}', this.value)" title="Draft keeps it hidden from the client; In Catalog shows it on her Catalog">
+        <option value="keynote_draft"${k.status === 'keynote_draft' ? ' selected' : ''}>Draft (hidden)</option>
+        <option value="keynote"${k.status === 'keynote' ? ' selected' : ''}>In Catalog</option>
+      </select>
+      <button class="btn btn-outline btn-sm" onclick="knOpenEdit('${k.id}')">Edit</button>
+      <button class="btn btn-outline btn-sm" onclick="knRemove('${k.id}')" style="color:var(--red);border-color:rgba(192,112,96,0.3)">Remove</button>
+    </div>`).join('');
+  return `
+    <div class="section-header" style="margin-top:2rem"><div class="section-title">Historical Keynotes — ${keynotes.length}</div></div>
+    <p class="panel-sub" style="margin:0.25rem 0 0.9rem">The shared world several of these ancestors lived in, told once, with a paragraph for each ancestor from their own records. Drafts stay hidden from the client until you place them in her Catalog.</p>
+    ${list ? `<div class="ancestor-list">${list}</div>` : ''}
+    <div style="margin-top:0.9rem"><button class="btn btn-gold btn-sm" onclick="knOpenNew()">+ New Historical Keynote</button></div>
+    <div id="kn-editor" style="margin-top:1rem"></div>`;
+}
+
+async function knEnsureTags() {
+  if (!Array.isArray(allFrequencyTags) || !allFrequencyTags.length) {
+    const t = await rest('frequency_tags?select=id,name,type&order=name').catch(() => []);
+    allFrequencyTags = Array.isArray(t) ? t : [];
+  }
+}
+
+function knOpenNew() {
+  KN.open = true; KN.clientId = document.getElementById('weaving-client-select').value; KN.id = null;
+  KN.draft = { topic: '', place: '', period: '', notes: '', ancestor_ids: [] };
+  KN.tags = []; KN.sources = [];
+  knRender();
+}
+
+async function knOpenEdit(id) {
+  const rows = await rest(`client_ancestors?id=eq.${id}&select=*`);
+  const k = Array.isArray(rows) && rows[0]; if (!k) return;
+  const fr = await rest(`client_ancestor_frequencies?client_ancestor_id=eq.${id}&select=frequency_tag_id,note,frequency_tags(name)`).catch(() => []);
+  KN.open = true; KN.clientId = k.client_id; KN.id = id;
+  KN.draft = { ...k, ancestor_ids: k.keynote_ancestor_ids || [] , generated: true };
+  KN.tags = (Array.isArray(fr) ? fr : []).map(f => ({ tagId: f.frequency_tag_id, tagName: f.frequency_tags?.name || '', note: f.note || '' }));
+  KN.sources = [];
+  knRender();
+  document.getElementById('kn-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function knClose() { KN.open = false; KN.draft = null; const el = document.getElementById('kn-editor'); if (el) el.innerHTML = ''; }
+
+function knRender() {
+  const el = document.getElementById('kn-editor'); if (!el || !KN.open) return;
+  const d = KN.draft || {};
+  const people = (KN.people || []).slice().sort((a, b) => (a.sort_year || 0) - (b.sort_year || 0));
+  const checked = new Set(d.ancestor_ids || []);
+  const v = (x) => esc(x == null ? '' : x);
+  const eraOpts = ['mythic','ancient','classical','post-roman','early-medieval','high-medieval','late-medieval','renaissance','reformation','colonial','enlightenment','19th-century','contemporary']
+    .map(e => `<option value="${e}"${d.era === e ? ' selected' : ''}>${e}</option>`).join('');
+  const tagOpts = (allFrequencyTags || []).map(t => `<option value="${t.id}" data-name="${esc(t.name)}">${esc(t.name)}</option>`).join('');
+  el.innerHTML = `
+    <div class="card">
+      <div class="review-section-title">${KN.id ? 'Edit Historical Keynote' : 'New Historical Keynote'}</div>
+      ${KN.id ? '' : `
+      <div class="form-group"><label class="form-label">Topic</label>
+        <input class="form-input" id="kn-topic" value="${v(d.topic)}" placeholder="e.g. The wool trade of Covilhã and the women who spun and wove for it"></div>
+      <div class="review-grid-2">
+        <div class="form-group"><label class="form-label">Place</label><input class="form-input" id="kn-place" value="${v(d.place)}" placeholder="village, region"></div>
+        <div class="form-group"><label class="form-label">Period</label><input class="form-input" id="kn-period" value="${v(d.period)}" placeholder="e.g. 1764 – 1907"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Notes for the draft</label>
+        <textarea class="form-textarea" id="kn-notes" rows="2" placeholder="What this card should hold; what to leave to another card">${v(d.notes)}</textarea></div>`}
+      <div class="form-group"><label class="form-label">Ancestors this keynote speaks to</label>
+        <div style="display:flex;flex-wrap:wrap;gap:0.35rem 1.2rem;font-size:15px">
+          ${people.map(p => `<label style="display:flex;gap:0.4rem;align-items:center;cursor:pointer"><input type="checkbox" class="kn-anc" value="${p.id}"${checked.has(p.id) ? ' checked' : ''}> ${esc(p.name)}${p.dates ? ` <span style="color:var(--text-faint)">${esc(String(p.dates).slice(0, 24))}</span>` : ''}</label>`).join('')}
+        </div>
+        <div class="sp-sub" style="margin-top:0.4rem">The draft reads each ticked ancestor's logged findings. Their intake words and your private notes are not sent.</div>
+      </div>
+      ${KN.id ? '' : `<div class="cd-actions"><button class="btn btn-gold" id="kn-gen-btn" onclick="knGenerate()" ${KN.busy ? 'disabled' : ''}>${KN.busy ? 'Drafting… (about a minute)' : (d.generated ? '✦ Draft again' : '✦ Draft the keynote')}</button>
+        <button class="btn btn-outline" onclick="knClose()">Cancel</button> <span class="sp-status" id="kn-msg"></span></div>`}
+    </div>
+    ${d.generated ? `
+    <div class="card" style="margin-top:1rem">
+      <div class="review-grid-2">
+        <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="kn-name" value="${v(d.name)}"></div>
+        <div class="form-group"><label class="form-label">Dates</label><input class="form-input" id="kn-dates" value="${v(d.dates)}"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Epithet</label><input class="form-input" id="kn-epithet" value="${v(d.epithet)}"></div>
+      <div class="review-grid-2">
+        <div class="form-group"><label class="form-label">Location</label><input class="form-input" id="kn-location" value="${v(d.location)}"></div>
+        <div class="review-grid-2" style="gap:0.75rem">
+          <div class="form-group"><label class="form-label">Era</label><select class="form-select" id="kn-era">${eraOpts}</select></div>
+          <div class="form-group"><label class="form-label">Sort year</label><input class="form-input" id="kn-sort-year" type="number" value="${v(d.sort_year)}"></div>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Preview (shown on the card)</label><textarea class="form-textarea" id="kn-preview" rows="5">${v(d.catalog_preview)}</textarea></div>
+      <div class="form-group"><label class="form-label">The Record (history, then “In this lineage”)</label><textarea class="form-textarea" id="kn-full" rows="18">${v(d.catalog_full)}</textarea></div>
+      <div class="review-section-title" style="margin-top:0.5rem">Frequency Tags</div>
+      <div id="kn-tags">${KN.tags.map((t, i) => `
+        <div class="chip-row"><span class="chip">${esc(t.tagName)} <button class="chip-remove" onclick="KN.tags.splice(${i},1);knKeep();knRender()" title="Remove tag">×</button></span>
+        <textarea class="chip-note" rows="2" placeholder="Why this frequency is present in this history" oninput="KN.tags[${i}].note=this.value">${esc(t.note || '')}</textarea></div>`).join('')}</div>
+      <div class="chip-add-row"><select class="chip-add-select" id="kn-tag-select"><option value="">— Add a frequency tag —</option>${tagOpts}</select>
+        <button class="btn-chip-add" onclick="knAddTag()">+ Add</button></div>
+      ${KN.sources.length ? `<div class="review-section-title" style="margin-top:1rem">Sources (saved to this keynote's record)</div>
+        <div style="font-size:15px;line-height:1.6">${KN.sources.map(sr => `<div>· ${esc(sr.label || '')}${sr.url ? ` — <a href="${esc(sr.url)}" target="_blank" rel="noopener">link</a>` : ''}${sr.why ? ` <span style="color:var(--text-faint)">(${esc(sr.why)})</span>` : ''}</div>`).join('')}</div>` : ''}
+      ${d.verification_note ? `<div class="sp-sub" style="margin-top:0.75rem;color:var(--amber)">Check before placing: ${esc(d.verification_note)}</div>` : ''}
+      ${Array.isArray(d.research_prompts) && d.research_prompts.length ? `<div class="sp-sub" style="margin-top:0.5rem">Research prompts: ${d.research_prompts.map(esc).join(' · ')}</div>` : ''}
+      <div class="cd-actions" style="margin-top:1rem">
+        <button class="btn btn-gold" onclick="knSave()">${KN.id ? 'Save changes' : 'Save as draft (hidden from client)'}</button>
+        <button class="btn btn-outline" onclick="knClose()">Close</button>
+        <span class="sp-status" id="kn-save-msg"></span>
+      </div>
+    </div>` : ''}`;
+}
+
+// Keep typed values when the editor re-renders.
+function knKeep() {
+  const g = (id) => document.getElementById(id);
+  const d = KN.draft || (KN.draft = {});
+  [['topic','kn-topic'],['place','kn-place'],['period','kn-period'],['notes','kn-notes'],['name','kn-name'],['dates','kn-dates'],['epithet','kn-epithet'],
+   ['location','kn-location'],['era','kn-era'],['sort_year','kn-sort-year'],['catalog_preview','kn-preview'],['catalog_full','kn-full']]
+    .forEach(([k, id]) => { if (g(id)) d[k] = g(id).value; });
+  d.ancestor_ids = [...document.querySelectorAll('.kn-anc:checked')].map(x => x.value);
+}
+
+function knAddTag() {
+  const sel = document.getElementById('kn-tag-select'); if (!sel || !sel.value) return;
+  if (KN.tags.find(t => t.tagId === sel.value)) return;
+  knKeep();
+  KN.tags.push({ tagId: sel.value, tagName: sel.options[sel.selectedIndex].dataset.name || sel.options[sel.selectedIndex].text, note: '' });
+  knRender();
+}
+
+async function knGenerate() {
+  knKeep();
+  const d = KN.draft;
+  const msg = (t) => { const m = document.getElementById('kn-msg'); if (m) m.textContent = t; };
+  if (!d.topic || !d.topic.trim()) return msg('Name the topic first.');
+  if (!d.ancestor_ids.length) return msg('Tick at least one ancestor.');
+  await knEnsureTags();
+  KN.busy = true; knRender();
+  try {
+    if (accessToken) await ensureFreshToken();
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-keynote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}`, 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify({ client_id: KN.clientId, topic: d.topic, place: d.place, period: d.period, notes: d.notes, ancestor_ids: d.ancestor_ids }),
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(out.error || `status ${res.status}`);
+    KN.draft = { ...d, ...out, generated: true, ancestor_ids: out.keynote_ancestor_ids || d.ancestor_ids };
+    const byName = Object.fromEntries((allFrequencyTags || []).map(t => [String(t.name).toLowerCase(), t]));
+    const notes = Object.fromEntries((out.frequency_notes || []).map(n => [String(n.tag).toLowerCase(), n.why]));
+    KN.tags = (out.frequency_tags || []).map(n => byName[String(n).toLowerCase()]).filter(Boolean)
+      .map(t => ({ tagId: t.id, tagName: t.name, note: notes[String(t.name).toLowerCase()] || '' }));
+    KN.sources = Array.isArray(out.sources) ? out.sources : [];
+  } catch (e) {
+    KN.busy = false; knRender(); msg('Could not draft: ' + e.message); return;
+  }
+  KN.busy = false; knRender();
+}
+
+async function knSave() {
+  knKeep();
+  const d = KN.draft;
+  const msg = (t) => { const m = document.getElementById('kn-save-msg'); if (m) m.textContent = t; };
+  if (!d.name || !d.name.trim()) return msg('Name is required.');
+  if (!d.ancestor_ids || !d.ancestor_ids.length) return msg('Tick at least one ancestor.');
+  const body = {
+    name: d.name.trim(), epithet: d.epithet || null, dates: d.dates || null, location: d.location || null,
+    era: d.era || null, sort_year: parseInt(d.sort_year) || null,
+    catalog_preview: d.catalog_preview || null, catalog_full: d.catalog_full || null,
+    keynote_ancestor_ids: d.ancestor_ids,
+  };
+  msg('saving…');
+  try {
+    let id = KN.id;
+    if (id) {
+      const ok = await restPatch('client_ancestors', id, body);
+      if (!ok) throw new Error('update failed');
+    } else {
+      const r = await restPost('client_ancestors', { ...body, client_id: KN.clientId, status: 'keynote_draft', added_via: 'research', ancestor_id: null, lineage_side: null });
+      id = Array.isArray(r) && r[0]?.id;
+      if (!id) throw new Error((r && (r.message || r.details)) || 'insert failed');
+      for (const sr of KN.sources) {
+        await restPost('client_ancestor_findings', { client_ancestor_id: id, source_type: 'history', source_label: sr.label || null, summary: sr.why || null, url: sr.url || null });
+      }
+      KN.id = id;
+    }
+    await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${id}`);
+    for (const t of KN.tags) {
+      await restPost('client_ancestor_frequencies', { client_ancestor_id: id, frequency_tag_id: t.tagId, strength: 'noted', note: t.note || null });
+    }
+    msg('saved · ' + new Date().toLocaleTimeString());
+    KN.sources = [];
+    loadClientWeaving();
+  } catch (e) { msg('failed: ' + e.message); }
+}
+
+async function knSetPlacement(id, value) {
+  if (!['keynote', 'keynote_draft'].includes(value)) return;
+  const ok = await restPatch('client_ancestors', id, { status: value });
+  if (!ok) alert('Could not change placement.');
+  loadClientWeaving();
+}
+
+async function knRemove(id) {
+  if (!confirm('Remove this Historical Keynote? Its text, tags and sources are deleted.')) return;
+  await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${id}`);
+  await restDelete(`client_ancestor_findings?client_ancestor_id=eq.${id}`);
+  await restDelete(`client_ancestors?id=eq.${id}`);
+  if (KN.id === id) knClose();
+  loadClientWeaving();
 }
 
 // ════════════════════════════════════════════════════
@@ -6607,7 +6842,8 @@ async function loadMyCatalog() {
   }
   if (!clientId) { container.innerHTML = '<div class="empty">No catalog available yet.</div>'; return; }
 
-  const rows = await rest(`client_ancestors?client_id=eq.${clientId}&status=not.in.(intake_stub,held)&select=*&order=name.asc`);
+  // Placed ancestors and Historical Keynotes; drafts, research and held stay hidden (2026-11-16).
+  const rows = await rest(`client_ancestors?client_id=eq.${clientId}&status=in.(weaving,catalog,keynote)&select=*&order=name.asc`);
   if (!Array.isArray(rows) || !rows.length) {
     container.innerHTML = '<div class="empty">Your catalog is being assembled.</div>';
     return;
@@ -8078,7 +8314,7 @@ function populateAugmentSelector() {
     });
 
   // Client Weavings: personal records (not linked to the shared archive)
-  rest(`client_ancestors?ancestor_id=is.null&status=not.in.(intake_stub,held)&select=id,name,dates,clients(name)&order=name.asc`)
+  rest(`client_ancestors?ancestor_id=is.null&status=in.(weaving,catalog)&keynote_ancestor_ids=is.null&select=id,name,dates,clients(name)&order=name.asc`)
     .then(rows => {
       if (!Array.isArray(rows) || !rows.length) return;
       const grp = document.createElement('optgroup');

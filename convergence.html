@@ -860,7 +860,9 @@ async function loadClientData() {
   }
 
   const ancestors = await sb(
-    `client_ancestors?client_id=eq.${client.id}&status=not.in.(intake_stub,held)&select=*&order=sort_year.asc`
+    // Placed ancestors only. Historical Keynotes (context cards, keynote_ancestor_ids set) are not ancestors and
+    // do not enter the Convergence; drafts, research and held never do (2026-11-16).
+    `client_ancestors?client_id=eq.${client.id}&status=in.(weaving,catalog,keynote)&keynote_ancestor_ids=is.null&select=*&order=sort_year.asc`
   );
 
   const freqRows = await sb(
