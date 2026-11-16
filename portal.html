@@ -1166,6 +1166,23 @@ body { font-weight: 400; }
 .cd-subbar .cd-subnav { margin-bottom: 0; }
 .cd-subnav-link { font-size: 15px; color: var(--gold); text-decoration: none; border-bottom: 1px solid var(--border-hover); }
 .ws-stale { color: var(--amber); }
+.sess-list { display: grid; gap: 0.4rem; margin-top: 0.9rem; }
+.sess-row { display: grid; grid-template-columns: 110px 1fr auto; gap: 0.75rem; align-items: center; text-align: left; width: 100%; padding: 0.6rem 0.85rem; border: 1px solid var(--border); border-radius: 6px; background: transparent; color: var(--text); font: inherit; font-size: 15px; cursor: pointer; }
+.sess-row:hover { border-color: var(--border-hover); }
+.sess-row.active { border-color: var(--gold); background: var(--accent); }
+.sess-row:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.sess-num { font-weight: 500; color: var(--gold); }
+.sess-meta { color: var(--text); }
+.sess-status { color: var(--text-dim); white-space: nowrap; }
+.sess-held { color: var(--teal); }
+.sess-cancelled { color: var(--text-dim); text-decoration: line-through; }
+.sess-grid { display: grid; grid-template-columns: 170px 110px 150px 1fr; gap: 0.75rem; }
+.sess-field { display: flex; flex-direction: column; gap: 0.3rem; font-size: 15px; color: var(--text-dim); margin-bottom: 0.5rem; }
+.sess-field > span { letter-spacing: 0.04em; }
+.sess-checks { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; color: var(--text); }
+.sess-check { display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; }
+.sess-check input { width: 18px; height: 18px; accent-color: var(--gold); }
+@media (max-width: 760px) { .sess-grid { grid-template-columns: 1fr 1fr; } .sess-wide { grid-column: 1 / -1; } .sess-row { grid-template-columns: 1fr; gap: 0.15rem; } }
 .cd-note a { color: var(--gold); text-decoration: underline; text-decoration-color: var(--border-hover); }
 .welcome-h { font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin: 2rem 0 0.9rem; }
 .welcome-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
@@ -2756,7 +2773,8 @@ async function loadClientDetail() {
       ]);
     }
 
-    const worksheets = await rest(`client_session_worksheets?client_id=eq.${id}&order=created_at.desc&select=id,requests,session_minutes,content,created_at,synthesis_at`).catch(() => []);
+    const worksheets = await rest(`client_session_worksheets?client_id=eq.${id}&order=created_at.desc&select=${WS_SELECT}`).catch(() => []);
+    cdSessSel = null;
     const synRow = (await rest(`client_chart_synthesis?client_id=eq.${id}&select=updated_at`).catch(() => []))[0] || null;
     currentDetailData = { worksheets: Array.isArray(worksheets) ? worksheets : [], synthesis: synRow, client, birth, hd, gk, ancestors, convs, refByNum, fieldById, resonance: resonance || [], allTapestry: allTapestry || [], planets: planets || [], sig1: sig1 || [], sig2: sig2 || [], recentConv, convSections: convSections || [], threshold, sevenGates: Array.isArray(sevenGates) ? sevenGates : [] };
 
@@ -3027,7 +3045,25 @@ async function cdToggleAccess(key, btn) {
 // generate-session-worksheet returns a 90-minute flow, 2-3 chart elements per request,
 // what to watch for, and 3-5 journal prompts. Two PDFs: her worksheet, and a one-page
 // client handout of the prompts.
-const WS_SYSTEM = { astrology: 'Astrology', human_design: 'Human Design', gene_keys: 'Gene Keys', map: 'The Map' };
+// ── Sessions (2026-11-15) ─────────────────────────────
+// One record per 1:1 session in the client's sequence (client_session_worksheets).
+// Each session has a number, date, length, status and one or more focuses:
+// chart (Natal Chart / Sovereign Signal), lineage (Lineage Session), convergence (Convergence
+// reading), mirror_work (Mirror Work session). generate-session-worksheet v3 builds the worksheet
+// from the focuses and from what earlier sessions recorded. After the session, Christy records
+// what was worked, what opened, what carries forward and the next focus.
+const WS_SYSTEM = { astrology: 'Astrology', human_design: 'Human Design', gene_keys: 'Gene Keys', map: 'The Map', ancestor: 'Lineage', convergence: 'Convergence' };
+const SESSION_FOCUS = [
+  ['chart', 'Natal Chart / Sovereign Signal'],
+  ['lineage', 'Lineage Session'],
+  ['convergence', 'Convergence reading'],
+  ['mirror_work', 'Mirror Work session'],
+];
+const SESSION_FOCUS_SHORT = { chart: 'Chart', lineage: 'Lineage', convergence: 'Convergence', mirror_work: 'Mirror Work' };
+const SESSION_STATUS = { planned: 'Planned', held: 'Held', cancelled: 'Cancelled' };
+const WS_SELECT = 'id,session_number,session_date,focuses,status,title,requests,session_minutes,content,created_at,updated_at,synthesis_at,after_worked,after_opened,after_carry,next_focus,notes_updated_at';
+let cdSessSel = null;
+
 function cdWsPrefill(c) {
   const parts = [
     ['Repeating pattern', c.pattern_repeating], ['In the body', c.pattern_somatic], ['Inherited', c.pattern_inherited],
@@ -3035,77 +3071,212 @@ function cdWsPrefill(c) {
   ].filter(([, v]) => v && String(v).trim());
   return parts.map(([k, v]) => `${k}: ${String(v).trim()}`).join('\n');
 }
-function cdSessionTab(d) {
-  const ws = d.worksheets || [];
-  const pre = ws[0] ? ws[0].requests : cdWsPrefill(d.client);
+function cdSessOrdered(d) {
+  return [...(d.worksheets || [])].sort((a, b) => (a.session_number || 0) - (b.session_number || 0) || String(a.created_at).localeCompare(String(b.created_at)));
+}
+function cdSessDate(s) {
+  const v = s.session_date || null;
+  if (!v) return 'no date';
+  return new Date(v + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function cdSessReadiness(d, focuses) {
   const hasChart = !!(d.birth || d.gk || d.hd);
-  const syn = d.synthesis;
-  const ready = hasChart && !!syn;
-  const why = !hasChart ? 'No chart yet. Enter birth data in Working chart first.'
-    : !syn ? 'No chart synthesis yet. The worksheet is built from it.' : '';
-  const synNote = syn ? `<p class="cd-note">Built from the chart synthesis saved ${new Date(syn.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}. <a href="#" onclick="cdOpenWorkingChart();return false">Review it in Working chart</a>.</p>`
-    : hasChart ? `<p class="cd-note"><a href="#" onclick="cdOpenWorkingChart();return false">Generate the synthesis in Working chart</a>, then come back here.</p>` : '';
+  const woven = (d.ancestors || []).length;
+  const conv = (d.convs || []).some(c => ['complete', 'published'].includes(c.status));
+  const need = [];
+  if (focuses.includes('chart') && !hasChart) need.push('a chart (enter birth data in Working chart)');
+  if (focuses.includes('chart') && hasChart && !d.synthesis) need.push('a saved chart synthesis (Working chart)');
+  if (focuses.includes('lineage') && !woven) need.push('ancestors on the record');
+  if (focuses.includes('convergence') && !conv) need.push('a complete Convergence');
+  return need;
+}
+function cdSessionTab(d) {
+  const list = cdSessOrdered(d);
+  if (!cdSessSel || !list.find(s => s.id === cdSessSel)) cdSessSel = list.length ? list[list.length - 1].id : null;
+  const rows = list.map(s => `<button class="sess-row${s.id === cdSessSel ? ' active' : ''}" onclick="cdSessSelect('${s.id}')">
+      <span class="sess-num">${s.session_number ? 'Session ' + s.session_number : 'Session'}</span>
+      <span class="sess-meta">${cdEsc(cdSessDate(s))} · ${(s.focuses || []).map(f => cdEsc(SESSION_FOCUS_SHORT[f] || f)).join(' + ')}${s.title ? ' · ' + cdEsc(s.title) : ''}</span>
+      <span class="sess-status sess-${cdEsc(s.status || 'planned')}">${cdEsc(SESSION_STATUS[s.status] || s.status || 'Planned')}${s.content ? ' · worksheet' : ''}${(s.after_worked || s.after_opened || s.after_carry) ? ' · notes' : ''}</span>
+    </button>`).join('');
   return `
     <div class="cd-card full" style="margin-bottom:1.25rem">
-      <h3 class="cd-card-title">What they asked for</h3>
-      ${synNote}
-      <p class="cd-note">Prefilled from ${ws[0] ? 'the last worksheet' : 'their intake answers'}. Add what they asked for at booking, in their words where you can — one request per line works best.</p>
-      <textarea class="form-textarea" id="cd-ws-req" rows="6" placeholder="e.g. Why do I keep leaving jobs at the two-year mark? · My mother's illness and what I'm carrying from her · Whether to start the program in January">${cdEsc(pre)}</textarea>
-      <div class="cd-actions" style="margin-top:0.75rem">
-        <button class="btn btn-gold btn-sm" id="cd-ws-gen" onclick="cdWsGenerate(this)" ${ready ? '' : 'disabled title="' + why + '"'}>Generate 90-minute worksheet</button>
-        <span class="cd-status" id="cd-ws-status">${why}</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:0.75rem;flex-wrap:wrap">
+        <h3 class="cd-card-title" style="margin:0;border:none;padding:0">Sessions · ${list.length}</h3>
+        <button class="btn btn-gold btn-sm" onclick="cdSessNew(this)">+ Plan the next session</button>
       </div>
+      ${list.length ? `<div class="sess-list">${rows}</div>` : '<p class="cd-note" style="margin-top:0.75rem">No sessions yet. Plan the first one; its requests start from the intake answers.</p>'}
     </div>
-    <div id="cd-ws-view">${ws.length ? cdWsView(d, ws[0].id) : ''}</div>`;
+    <div id="cd-sess-detail">${cdSessDetail(d)}</div>`;
+}
+function cdSessSelect(id) {
+  cdSessSel = id;
+  cdSessRerender();
+}
+function cdSessRerender() {
+  const wrapper = document.getElementById('cd-sec-session');
+  if (wrapper) wrapper.innerHTML = cdSessionTab(currentDetailData);
+}
+function cdSessDetail(d) {
+  const s = (d.worksheets || []).find(x => x.id === cdSessSel);
+  if (!s) return '';
+  const focuses = s.focuses && s.focuses.length ? s.focuses : ['chart'];
+  const need = cdSessReadiness(d, focuses);
+  const checks = SESSION_FOCUS.map(([k, l]) => `<label class="sess-check"><input type="checkbox" name="sess-focus" value="${k}"${focuses.includes(k) ? ' checked' : ''}> ${cdEsc(l)}</label>`).join('');
+  const statusOpts = Object.entries(SESSION_STATUS).map(([k, l]) => `<option value="${k}"${(s.status || 'planned') === k ? ' selected' : ''}>${l}</option>`).join('');
+  const stale = s.content && focuses.includes('chart') && d.synthesis && (!s.synthesis_at || Math.abs(new Date(d.synthesis.updated_at) - new Date(s.synthesis_at)) > 1000);
+  return `
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title">Session ${s.session_number || ''} · before</h3>
+      <div class="sess-grid">
+        <label class="sess-field"><span>Date</span><input class="form-input" type="date" id="sess-date" value="${cdEsc(s.session_date || '')}"></label>
+        <label class="sess-field"><span>Minutes</span><input class="form-input" type="number" min="15" max="240" step="15" id="sess-min" value="${cdEsc(s.session_minutes || 90)}"></label>
+        <label class="sess-field"><span>Status</span><select class="form-select" id="sess-status">${statusOpts}</select></label>
+        <label class="sess-field sess-wide"><span>Title (optional)</span><input class="form-input" id="sess-title" value="${cdEsc(s.title || '')}" placeholder="e.g. The Sobral line · first reading"></label>
+      </div>
+      <div class="sess-field" style="margin-top:0.75rem"><span>This session centers on</span><div class="sess-checks">${checks}</div></div>
+      <p class="cd-note" style="margin-top:0.75rem">What they asked for, in their words where you can, one request per line.</p>
+      <textarea class="form-textarea" id="cd-ws-req" rows="6">${cdEsc(s.requests || '')}</textarea>
+      <div class="cd-actions" style="margin-top:0.75rem">
+        <button class="btn btn-outline btn-sm" onclick="cdSessSave(this)">Save details</button>
+        <button class="btn btn-gold btn-sm" id="cd-ws-gen" onclick="cdWsGenerate(this)">${s.content ? 'Rewrite the worksheet' : 'Write the worksheet'}</button>
+        <span class="cd-status" id="cd-ws-status">${need.length ? 'Needs ' + cdEsc(need.join(', ')) + '.' : ''}</span>
+      </div>
+      ${stale ? `<p class="cd-note ws-stale" style="margin-top:0.5rem">The chart synthesis has changed since this worksheet was written.</p>` : ''}
+    </div>
+    <div id="cd-ws-view">${s.content ? cdWsView(d, s.id) : ''}</div>
+    <div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title">Session ${s.session_number || ''} · after</h3>
+      <p class="cd-note">What happened in the room. The next worksheet reads this, so the sequence builds.</p>
+      <label class="sess-field"><span>What was worked</span><textarea class="form-textarea" id="sess-worked" rows="3">${cdEsc(s.after_worked || '')}</textarea></label>
+      <label class="sess-field"><span>What opened</span><textarea class="form-textarea" id="sess-opened" rows="3">${cdEsc(s.after_opened || '')}</textarea></label>
+      <label class="sess-field"><span>What carries forward</span><textarea class="form-textarea" id="sess-carry" rows="3">${cdEsc(s.after_carry || '')}</textarea></label>
+      <label class="sess-field"><span>Focus for the next session</span><textarea class="form-textarea" id="sess-next" rows="2">${cdEsc(s.next_focus || '')}</textarea></label>
+      <div class="cd-actions" style="margin-top:0.75rem">
+        <button class="btn btn-gold btn-sm" onclick="cdSessSaveNotes(this)">Save the session record</button>
+        <span class="cd-status" id="sess-notes-status">${s.notes_updated_at ? 'Saved ' + new Date(s.notes_updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}</span>
+      </div>
+      <div class="cd-actions" style="margin-top:1rem"><button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(192,112,96,0.3)" onclick="cdSessDelete()">Delete this session</button></div>
+    </div>`;
+}
+function cdSessFormFocuses() {
+  return [...document.querySelectorAll('input[name="sess-focus"]:checked')].map(x => x.value);
+}
+async function cdSessReload(selectId) {
+  const rows = await rest(`client_session_worksheets?client_id=eq.${currentDetailClient}&order=created_at.desc&select=${WS_SELECT}`);
+  currentDetailData.worksheets = Array.isArray(rows) ? rows : [];
+  if (selectId) cdSessSel = selectId;
+  cdSessRerender();
+}
+async function cdSessNew(btn) {
+  const d = currentDetailData, list = cdSessOrdered(d), last = list[list.length - 1];
+  const next = (list.reduce((m, s) => Math.max(m, s.session_number || 0), 0)) + 1;
+  const requests = last
+    ? [last.next_focus, last.after_carry ? 'Carried forward: ' + last.after_carry : ''].filter(Boolean).join('\n')
+    : cdWsPrefill(d.client);
+  btn.disabled = true;
+  const out = await restPost('client_session_worksheets', {
+    client_id: currentDetailClient, session_number: next, status: 'planned',
+    focuses: last?.focuses?.length ? last.focuses : ['chart'], session_minutes: last?.session_minutes || 90, requests: requests || ''
+  });
+  btn.disabled = false;
+  if (!Array.isArray(out) || !out[0]?.id) { alert('Could not create the session: ' + (out?.message || 'unknown error')); return; }
+  await cdSessReload(out[0].id);
+}
+async function cdSessSave(btn) {
+  const st = document.getElementById('cd-ws-status');
+  const focuses = cdSessFormFocuses();
+  if (!focuses.length) { st.textContent = 'Choose at least one focus.'; return; }
+  btn.disabled = true;
+  const ok = await restPatch('client_session_worksheets', cdSessSel, {
+    session_date: document.getElementById('sess-date').value || null,
+    session_minutes: Number(document.getElementById('sess-min').value) || 90,
+    status: document.getElementById('sess-status').value,
+    title: document.getElementById('sess-title').value.trim() || null,
+    focuses, requests: document.getElementById('cd-ws-req').value.trim(),
+    updated_at: new Date().toISOString()
+  });
+  btn.disabled = false;
+  if (!ok) { st.textContent = 'Save failed.'; return; }
+  await cdSessReload(cdSessSel);
+  const st2 = document.getElementById('cd-ws-status'); if (st2) st2.textContent = 'Saved.';
+}
+async function cdSessSaveNotes(btn) {
+  const st = document.getElementById('sess-notes-status');
+  btn.disabled = true;
+  const v = id => document.getElementById(id).value.trim() || null;
+  const body = { after_worked: v('sess-worked'), after_opened: v('sess-opened'), after_carry: v('sess-carry'), next_focus: v('sess-next'), notes_updated_at: new Date().toISOString() };
+  const cur = (currentDetailData.worksheets || []).find(x => x.id === cdSessSel);
+  if (cur && cur.status === 'planned' && (body.after_worked || body.after_opened)) body.status = 'held';
+  const ok = await restPatch('client_session_worksheets', cdSessSel, body);
+  btn.disabled = false;
+  if (!ok) { st.textContent = 'Save failed.'; return; }
+  await cdSessReload(cdSessSel);
+  const st2 = document.getElementById('sess-notes-status'); if (st2) st2.textContent = 'Saved.';
+}
+async function cdSessDelete() {
+  const s = (currentDetailData.worksheets || []).find(x => x.id === cdSessSel); if (!s) return;
+  if (!confirm(`Delete Session ${s.session_number || ''}${s.title ? ' (' + s.title + ')' : ''}, with its worksheet and notes? This can't be undone.`)) return;
+  await restDelete(`client_session_worksheets?id=eq.${s.id}`);
+  cdSessSel = null;
+  await cdSessReload(null);
 }
 function cdWsView(d, id) {
-  const ws = d.worksheets || []; const w = ws.find(x => x.id === id) || ws[0]; if (!w) return '';
+  const ws = d.worksheets || []; const w = ws.find(x => x.id === id); if (!w || !w.content) return '';
   const c = w.content || {};
   let t = 0;
   const clock = m => { const a = t; t += Number(m) || 0; return `${a}–${t}`; };
-  const history = ws.length > 1 ? `<select class="form-select" style="width:auto" onchange="document.getElementById('cd-ws-view').innerHTML = cdWsView(currentDetailData, this.value)">${ws.map(x => `<option value="${x.id}"${x.id === w.id ? ' selected' : ''}>${new Date(x.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</option>`).join('')}</select>` : '';
   return `
     <div class="cd-card full" style="margin-bottom:1.25rem">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.75rem">
-        <h3 class="cd-card-title" style="margin:0;border:none;padding:0">Session worksheet · ${w.session_minutes} minutes</h3>
-        <div class="cd-actions">${history}
+        <h3 class="cd-card-title" style="margin:0;border:none;padding:0">Worksheet · ${w.session_minutes} minutes · ${(w.focuses || []).map(f => cdEsc(SESSION_FOCUS_SHORT[f] || f)).join(' + ')}</h3>
+        <div class="cd-actions">
           <button class="btn btn-gold btn-sm" onclick="cdWsPdf('${w.id}', 'worksheet', this)">Worksheet PDF</button>
           <button class="btn btn-outline btn-sm" onclick="cdWsPdf('${w.id}', 'handout', this)">Client handout PDF</button>
         </div>
       </div>
-      ${d.synthesis && (!w.synthesis_at || Math.abs(new Date(d.synthesis.updated_at) - new Date(w.synthesis_at)) > 1000) ? `<p class="cd-note ws-stale">The chart synthesis has changed since this worksheet was written. Generate a new one to bring it in line.</p>` : ''}
       ${c.focus ? `<p class="ws-focus">${cdEsc(c.focus)}</p>` : ''}
+      ${c.carry_in ? `<h4 class="ws-h">Carried in</h4><p class="ws-p">${cdEsc(c.carry_in)}</p>` : ''}
       <h4 class="ws-h">Flow</h4>
       <table class="off-table ws-flow"><thead><tr><th>Minutes</th><th>Segment</th><th>What to do</th></tr></thead><tbody>
         ${(c.flow || []).map(f => `<tr><td class="sub">${clock(f.minutes)}</td><td class="who">${cdEsc(f.segment)}</td><td>${cdEsc(f.what)}</td></tr>`).join('')}
       </tbody></table>
       ${(c.areas || []).map((a, i) => `
         <h4 class="ws-h">Request ${i + 1} · ${cdEsc(a.request)}</h4>
-        <table class="off-table"><thead><tr><th>Chart element</th><th>Why it speaks to this</th><th>Open with</th></tr></thead><tbody>
+        <table class="off-table"><thead><tr><th>Element</th><th>Why it speaks to this</th><th>Open with</th></tr></thead><tbody>
           ${(a.elements || []).map(e => `<tr><td><div class="who">${cdEsc(e.element)}</div><div class="sub">${cdEsc(WS_SYSTEM[e.system] || e.system || '')}</div></td><td>${cdEsc(e.why)}</td><td><i>${cdEsc(e.open_with)}</i></td></tr>`).join('')}
         </tbody></table>`).join('')}
       ${c.watch_for ? `<h4 class="ws-h">Watch for</h4><p class="ws-p">${cdEsc(c.watch_for)}</p>` : ''}
       <h4 class="ws-h">Journal prompts · client handout</h4>
       <ol class="ws-prompts">${(c.prompts || []).map(p => `<li>${cdEsc(p.prompt)}${p.anchor ? `<span class="sub"> — ${cdEsc(p.anchor)}</span>` : ''}</li>`).join('')}</ol>
-      <details style="margin-top:1rem"><summary class="cd-note" style="cursor:pointer;display:inline">Requests this was built from</summary><pre class="cd-pre" style="margin-top:0.5rem">${cdEsc(w.requests)}</pre></details>
     </div>`;
 }
 async function cdWsGenerate(btn) {
   const st = document.getElementById('cd-ws-status');
   const requests = document.getElementById('cd-ws-req').value.trim();
+  const focuses = cdSessFormFocuses();
+  if (!focuses.length) { st.textContent = 'Choose at least one focus.'; return; }
   if (requests.length < 5) { st.textContent = 'Add what they asked for first.'; return; }
+  const need = cdSessReadiness(currentDetailData, focuses);
+  if (need.length) { st.textContent = 'Needs ' + need.join(', ') + '.'; return; }
+  const minutes = Number(document.getElementById('sess-min').value) || 90;
+  // Save the details first so date, title and status are kept with the worksheet.
+  await restPatch('client_session_worksheets', cdSessSel, {
+    session_date: document.getElementById('sess-date').value || null, session_minutes: minutes,
+    status: document.getElementById('sess-status').value, title: document.getElementById('sess-title').value.trim() || null,
+    focuses, requests
+  });
   btn.disabled = true; btn.textContent = 'Writing… (about a minute)'; st.textContent = '';
   try {
     const ok = await ensureFreshToken(); if (!ok) { forceReauth('Your session expired — please sign in again.'); return; }
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-session-worksheet`, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ client_id: currentDetailClient, requests, session_minutes: 90 }) });
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-session-worksheet`, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ client_id: currentDetailClient, session_id: cdSessSel, requests, session_minutes: minutes, focuses }) });
     const out = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(out.details || out.error || ('HTTP ' + res.status));
-    const rows = await rest(`client_session_worksheets?client_id=eq.${currentDetailClient}&order=created_at.desc&select=id,requests,session_minutes,content,created_at,synthesis_at`);
-    currentDetailData.worksheets = Array.isArray(rows) ? rows : [];
-    document.getElementById('cd-ws-view').innerHTML = cdWsView(currentDetailData, out.id);
-    st.textContent = 'worksheet ready';
-  } catch (e) { st.textContent = 'failed: ' + e.message; }
-  btn.disabled = false; btn.textContent = 'Generate 90-minute worksheet';
+    await cdSessReload(cdSessSel);
+    const st2 = document.getElementById('cd-ws-status'); if (st2) st2.textContent = 'Worksheet ready.';
+  } catch (e) {
+    st.textContent = 'Failed: ' + e.message;
+    btn.disabled = false; btn.textContent = 'Write the worksheet';
+  }
 }
 
 // PDFs open in a small viewer with Print and Download (file keeps the client's name).
@@ -3126,10 +3297,10 @@ function wsShowPdf(win, url, fname, title) {
 }
 async function cdWsPdf(id, kind, btn) {
   const JS = window.jspdf && window.jspdf.jsPDF; if (!JS) { alert('The PDF tool is still loading. Try again in a moment.'); return; }
-  const d = currentDetailData, w = (d.worksheets || []).find(x => x.id === id); if (!w) return;
+  const d = currentDetailData, w = (d.worksheets || []).find(x => x.id === id); if (!w || !w.content) return;
   const win = window.open('', '_blank');
   const c = w.content || {}, name = d.client.name || 'Client';
-  const date = new Date(w.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const date = new Date(w.session_date ? w.session_date + 'T12:00:00' : w.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   try {
     const doc = new JS({ unit: 'pt', format: 'letter' });
     const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 54, maxW = W - 2 * M, BOTTOM = H - 50;
@@ -3163,13 +3334,14 @@ async function cdWsPdf(id, kind, btn) {
         doc.setDrawColor(...RULE); doc.setLineWidth(0.4); for (let k = 0; k < 3; k++) { ensure(22); y += 20; doc.line(M, y, W - M, y); } y += 16;
       });
     } else {
-      flow('SESSION WORKSHEET · ' + w.session_minutes + ' MINUTES', 'h2'); flow(name, 'h1'); flow(date, 'meta'); rule();
+      flow(`SESSION ${w.session_number || ''} · ${(w.focuses || []).map(f => (SESSION_FOCUS_SHORT[f] || f).toUpperCase()).join(' + ')} · ${w.session_minutes} MINUTES`, 'h2'); flow(name, 'h1'); flow(w.title ? `${w.title} · ${date}` : date, 'meta'); rule();
       if (c.focus) flow(c.focus, 'lead');
+      if (c.carry_in) { flow('CARRIED IN', 'h2'); flow(c.carry_in, 'body'); y += 4; }
       flow('FLOW', 'h2'); let t = 0;
       table(['Minutes', 'Segment', 'What to do'], (c.flow || []).map(f => { const a = t; t += Number(f.minutes) || 0; return [`${a}-${t}`, f.segment, f.what]; }), [0.12, 0.22, 0.66], ['small', 'bold', 'small']);
       (c.areas || []).forEach((a, i) => {
         ensure(80); flow(`REQUEST ${i + 1}`, 'h2'); flow(a.request, 'bold'); y += 2;
-        table(['Chart element', 'Why it speaks to this', 'Open with'], (a.elements || []).map(e => [`${e.element}\n${WS_SYSTEM[e.system] || ''}`, e.why, e.open_with]), [0.26, 0.42, 0.32], ['bold', 'small', 'small']);
+        table(['Element', 'Why it speaks to this', 'Open with'], (a.elements || []).map(e => [`${e.element}\n${WS_SYSTEM[e.system] || ''}`, e.why, e.open_with]), [0.26, 0.42, 0.32], ['bold', 'small', 'small']);
       });
       if (c.watch_for) { ensure(60); flow('WATCH FOR', 'h2'); flow(c.watch_for, 'body'); y += 4; }
       ensure(80); flow('JOURNAL PROMPTS · FOR THE CLIENT HANDOUT', 'h2');
