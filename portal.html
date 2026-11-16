@@ -1516,11 +1516,7 @@ body { font-weight: 400; }
               <select class="form-select" id="ancestor-select" style="margin-bottom:0.75rem">
                 <option value="">— Choose ancestor —</option>
               </select>
-              <select class="form-select" id="ancestor-strength" style="margin-bottom:0.75rem">
-                <option value="dominant">Dominant</option>
-                <option value="emerging">Emerging</option>
-                <option value="noted">Noted</option>
-              </select>
+              <input type="hidden" id="ancestor-strength" value="noted">
               <select class="form-select" id="ancestor-side" style="margin-bottom:0.75rem">
                 <option value="">Lineage side — unspecified</option>
                 <option value="maternal">Maternal</option>
@@ -5195,7 +5191,7 @@ function arcRender(id) {
     <div>
       <h4>Frequencies · and why</h4>
       ${d.freqs.length ? `<div class="arc-freqs">${d.freqs.map(f => `<div class="arc-freq">
-        <span class="chip">${esc(f.frequency_tags?.name || '')}<span class="chip-strength-label" style="cursor:default">${esc(f.strength || '')}</span></span>
+        <span class="chip">${esc(f.frequency_tags?.name || '')}</span>
         ${f.note ? `<div class="arc-freq-note">${esc(f.note)}</div>` : '<div class="arc-freq-note arc-muted">No note yet. Augment or edit the record to add one.</div>'}
       </div>`).join('')}</div>` : '<div class="triage-msg">No frequencies assigned.</div>'}
     </div>
@@ -5661,11 +5657,7 @@ function renderTapestryEditor(t, isNew) {
           <option value="">— Add a frequency tag —</option>
           ${allFrequencyTags.map(tag => `<option value="${tag.id}" data-name="${esc(tag.name)}" data-type="${tag.type}">${tag.name} (${tag.type})</option>`).join('')}
         </select>
-        <select class="chip-strength-select" id="tap-chip-strength">
-          <option value="noted">Noted</option>
-          <option value="emerging">Emerging</option>
-          <option value="dominant">Dominant</option>
-        </select>
+        <input type="hidden" id="tap-chip-strength" value="noted">
         <button class="btn-chip-add" onclick="addTapestryChip()">+ Add</button>
       </div>
     </div>
@@ -5720,7 +5712,6 @@ function renderTapestryChips() {
   el.innerHTML = tapestryEditorChips.map((c, i) => `
     <span class="chip">
       ${esc(c.tagName)}
-      <span class="chip-strength-label" onclick="cycleTapestryChipStrength(${i})" title="Click to change strength">${c.strength}</span>
       <button class="chip-remove" onclick="removeTapestryChip(${i})" title="Remove">×</button>
     </span>`).join('');
 }
@@ -6680,9 +6671,7 @@ async function loadMyWeaving() {
       if (!freqMap[r.client_ancestor_id]) freqMap[r.client_ancestor_id] = [];
       freqMap[r.client_ancestor_id].push({ name, strength: r.strength ?? 0 });
     });
-    const RANK = { dominant: 3, strong: 3, present: 2, moderate: 2, trace: 1, faint: 1 };
-    const rank = (v) => typeof v === 'number' ? v : (RANK[String(v || '').toLowerCase()] || 0);
-    Object.values(freqMap).forEach(list => list.sort((a, b) => rank(b.strength) - rank(a.strength)));
+    Object.values(freqMap).forEach(list => list.sort((a, b) => a.name.localeCompare(b.name)));
   }
 
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -6857,9 +6846,7 @@ async function loadMyCatalog() {
     if (!freqMap[r.client_ancestor_id]) freqMap[r.client_ancestor_id] = [];
     freqMap[r.client_ancestor_id].push({ name, strength: r.strength });
   });
-  // Strongest first: dominant, then noted, then emerging.
-  const RANK = { dominant: 3, noted: 2, emerging: 1 };
-  Object.values(freqMap).forEach(list => list.sort((a, b) => (RANK[b.strength] || 0) - (RANK[a.strength] || 0)));
+  Object.values(freqMap).forEach(list => list.sort((a, b) => a.name.localeCompare(b.name)));
 
   // The dark Catalog: same client context the portal's other pages carry.
   window._myCatalogBase = `ancestral-catalog.html?client_id=${encodeURIComponent(clientId)}${isPreviewingAsClient ? '&preview=1' : ''}`;
@@ -7372,11 +7359,7 @@ function renderAncestorReview(d) {
             <option value="">— Add a frequency tag —</option>
             ${allFrequencyTags.map(t => `<option value="${t.id}" data-name="${esc(t.name)}" data-type="${t.type}">${t.name} <span style="color:var(--text-faint)">(${t.type})</span></option>`).join('')}
           </select>
-          <select class="chip-strength-select" id="ar-chip-strength">
-            <option value="noted">Noted</option>
-            <option value="emerging">Emerging</option>
-            <option value="dominant">Dominant</option>
-          </select>
+          <input type="hidden" id="ar-chip-strength" value="noted">
           <button class="btn-chip-add" onclick="addChip()">+ Add</button>
         </div>
         <div id="ar-chip-unmatched" style="margin-top:0.75rem;font-size:15px;color:var(--text-faint)"></div>
@@ -7390,13 +7373,6 @@ function renderAncestorReview(d) {
           <select class="form-select" id="ar-place" style="width:150px;margin:0" onchange="document.getElementById('rv-status').value=this.value">
             ${['weaving','catalog','keynote'].map(v => `<option value="${v}" ${v === (d.status || 'weaving') ? 'selected' : ''}>${v === 'weaving' ? 'Weaving' : v === 'catalog' ? 'Catalog' : 'Keynote'}</option>`).join('')}
           </select>
-          <label class="form-label" style="margin:0 0 0 0.5rem;white-space:nowrap" for="ar-tag-strength-all">Tag strength</label>
-          <select class="form-select" id="ar-tag-strength-all" style="width:170px;margin:0" onchange="setAllChipStrength(this.value)">
-            <option value="">As set on each tag</option>
-            <option value="dominant">All Dominant</option>
-            <option value="emerging">All Emerging</option>
-            <option value="noted">All Noted</option>
-          </select>
           <input type="hidden" id="ar-assign-client" value="">
           <input type="hidden" id="ar-assign-strength" value="noted">
         </div>` : `
@@ -7406,11 +7382,7 @@ function renderAncestorReview(d) {
             <option value="">— My archive only (no client) —</option>
             ${clientOptions}
           </select>
-          <select class="form-select" id="ar-assign-strength" style="width:140px;margin:0" title="Strength given to every tag on the client's copy">
-            <option value="dominant">Dominant</option>
-            <option value="emerging">Emerging</option>
-            <option value="noted">Noted</option>
-          </select>
+          <input type="hidden" id="ar-assign-strength" value="noted">
         </div>`}
         <div style="display:flex;gap:0.75rem;align-items:center">
           <div id="ar-confirm-msg" style="font-size:15px"></div>
@@ -7449,7 +7421,6 @@ function renderChips() {
     <div class="chip-row">
       <span class="chip">
         ${esc(c.tagName)}
-        <span class="chip-strength-label" onclick="cycleChipStrength(${i})" title="Click to change strength">${c.strength}</span>
         <button class="chip-remove" onclick="removeChip(${i})" title="Remove tag">×</button>
       </span>
       <textarea class="chip-note" rows="2" placeholder="Why this frequency is present for this ancestor (1–2 lines)" oninput="arChips[${i}].note=this.value">${esc(c.note || '')}</textarea>
@@ -9167,7 +9138,6 @@ function renderEditorChips() {
     <div class="chip-row">
       <span class="chip">
         ${esc(c.tagName)}
-        <span class="chip-strength-label" onclick="cycleEditorChipStrength(${i})" title="Click to change">${c.strength}</span>
         <button class="chip-remove" onclick="removeEditorChip(${i})">×</button>
       </span>
       <textarea class="chip-note" rows="2" placeholder="Why this frequency is present for this ancestor (1–2 lines)" oninput="editorChips[${i}].note=this.value">${esc(c.note || '')}</textarea>

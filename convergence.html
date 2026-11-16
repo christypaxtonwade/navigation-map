@@ -866,7 +866,7 @@ async function loadClientData() {
   );
 
   const freqRows = await sb(
-    `client_ancestor_frequencies?client_ancestor_id=in.(${ancestors.map(a=>a.id).join(',')})&select=client_ancestor_id,frequency_tag_id,strength`
+    `client_ancestor_frequencies?client_ancestor_id=in.(${ancestors.map(a=>a.id).join(',')})&select=client_ancestor_id,frequency_tag_id,note`
   ).catch(() => []);
 
   const tagIds = [...new Set(freqRows.map(r => r.frequency_tag_id))];
@@ -880,12 +880,15 @@ async function loadClientData() {
   // Build frequency counts
   const freqCounts = {};
   const freqAncestors = {};
+  const freqNotes = {}; // freqNotes[tagName][clientAncestorId] = why this frequency is present
+
   freqRows.forEach(r => {
     const tag = tagMap[r.frequency_tag_id];
     if (!tag) return;
     if (!freqCounts[tag.name]) { freqCounts[tag.name] = 0; freqAncestors[tag.name] = []; }
     freqCounts[tag.name]++;
     freqAncestors[tag.name].push(ancestorMap[r.client_ancestor_id]);
+    if (r.note) { (freqNotes[tag.name] = freqNotes[tag.name] || {})[r.client_ancestor_id] = r.note; }
   });
 
   const sortedFreqs = Object.entries(freqCounts)
@@ -913,7 +916,7 @@ async function loadClientData() {
     });
   }
 
-  return { client, ancestors, freqCounts, freqAncestors, sortedFreqs, tapestry, tapestryFreqMap };
+  return { client, ancestors, freqCounts, freqAncestors, freqNotes, sortedFreqs, tapestry, tapestryFreqMap };
 }
 
 async function loadExistingConvergence(clientId) {
@@ -1021,7 +1024,7 @@ function tapestryBlock(tapestry, tapestryFreqMap) {
 }
 
 async function generateConvergence(clientData) {
-  const { client, ancestors, freqCounts, freqAncestors, sortedFreqs, tapestry, tapestryFreqMap } = clientData;
+  const { client, ancestors, freqCounts, freqAncestors, freqNotes = {}, sortedFreqs, tapestry, tapestryFreqMap } = clientData;
   const topFreqs = sortedFreqs.slice(0, 6);
   const maxCount = topFreqs[0]?.[1] || 1;
   const patternsBlock = clientPatternsBlock(client);
@@ -1158,35 +1161,40 @@ Write TWO paragraphs (total 250-320 words):
     const freqAncs = (freqAncestors[freqName] || []).filter(Boolean);
     const fieldCtx = await getFieldContext(freqName);
 
-    // Build ancestor evidence summary
-    const ancestorSummary = freqAncs.slice(0, 8).map(a => {
-      const layerSnippet = a.layer_thread
-        ? a.layer_thread.slice(0, 200)
-        : a.layer_terroir
-        ? a.layer_terroir.slice(0, 200)
-        : a.catalog_preview
-        ? a.catalog_preview.slice(0, 200)
-        : '';
-      return `${a.name} (${a.era || ''}, ${a.dates || ''}): ${layerSnippet}`;
+    // Evidence for this frequency: each carrier's whole record (all four layers) and the
+    // researcher's note on why the frequency is present. A frequency is read as an effect of
+    // the layers working together in the record and its transmission, never assigned to one layer.
+    const clip = (t, n) => { t = String(t || '').trim(); return t.length > n ? t.slice(0, n).replace(/\s+\S*$/, '') + '…' : t; };
+    const notesFor = freqNotes[freqName] || {};
+    const ordered = freqAncs.slice().sort((a, b) => (notesFor[b.id] ? 1 : 0) - (notesFor[a.id] ? 1 : 0)).slice(0, 8)
+      .sort((a, b) => (a.sort_year || 0) - (b.sort_year || 0));
+    const ancestorSummary = ordered.map(a => {
+      const layers = [
+        a.layer_terroir    && `Terroir: ${clip(a.layer_terroir, 700)}`,
+        a.layer_unresolved && `The Unresolved: ${clip(a.layer_unresolved, 700)}`,
+        a.layer_thread     && `The Thread: ${clip(a.layer_thread, 700)}`,
+        a.layer_lineage    && `Lineage: ${clip(a.layer_lineage, 700)}`,
+      ].filter(Boolean);
+      const body = layers.length ? layers.join('\n') : clip(a.catalog_preview, 500);
+      const why = notesFor[a.id] ? `\nWhy this frequency is present (researcher's note): ${notesFor[a.id]}` : '';
+      return `${a.name} (${a.era || ''}, ${a.dates || ''})\n${body}${why}`;
     }).join('\n\n');
-
-    const unresolved = freqAncs.slice(0, 5).map(a =>
-      a.layer_unresolved ? `${a.name}: ${a.layer_unresolved.slice(0,150)}` : null
-    ).filter(Boolean).join('\n');
+    const others = freqAncs.length > ordered.length
+      ? `\n\nAlso carrying this frequency: ${freqAncs.filter(a => !ordered.includes(a)).map(a => a.name).join(', ')}.` : '';
 
     const freqPrompt = `Write the convergence section for the frequency: ${freqName}
 
 FIELDGUIDE CONTEXT:
 ${fieldCtx ? `Field: ${fieldCtx.name}\nTagline: ${fieldCtx.tagline || ''}\nRulers: ${fieldCtx.field_rulers || ''}` : `This frequency appears across ${freqCount} ancestors.`}
 
-ANCESTORS CARRYING THIS FREQUENCY (${freqCount} total):
-${ancestorSummary}
+ANCESTORS CARRYING THIS FREQUENCY (${freqCount} total). Each record gives the ancestor's four layers and, where written, the researcher's note on why this frequency is present:
+${ancestorSummary}${others}
 
-UNRESOLVED LAYERS:
-${unresolved || 'Not yet documented.'}
+HOW TO READ THIS EVIDENCE:
+A frequency does not live in one layer. It is an effect of the layers working together: the ground an ancestor stood on, what stayed unresolved, the thread they carried, and what passed into the lineage. Read how the frequency arises from that interplay in each record. Where the researcher's note says why the frequency is present, treat it as the primary reading and build from it; do not contradict it. Do not assign the frequency to a single layer, and do not quote layer names as labels.
 
 Write THREE paragraphs:
-1. The pattern: what this frequency looks like across this specific lineage, naming 2-3 ancestors and what they carry. (150-180 words)
+1. The pattern: what this frequency looks like across this specific lineage, naming 2-3 ancestors and how it arises in each of their records. (150-180 words)
 2. The unresolved thread: what has not yet been completed or metabolized across the lineage's carriers of this frequency. (120-150 words)  
 3. The living thread: how this frequency is active in the present descendant, what it calls for, what it makes possible. Speak directly to ${CLIENT_NAME}. (120-150 words)`;
 
