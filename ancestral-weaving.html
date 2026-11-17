@@ -1075,7 +1075,7 @@ async function init() {
       const banner = document.getElementById('client-banner');
       if (banner && isAdminViewer()) {
         banner.style.display = 'block';
-        banner.innerHTML = `Viewing <strong style="font-weight:500">${esc(clientName)}</strong>'s Weaving · <a href="ancestral-weaving.html?view=archive" style="color:var(--gold);text-decoration:underline">view canonical archive</a>`;
+        banner.innerHTML = `Viewing <strong style="font-weight:500">${esc(clientName)}</strong>'s Weaving <span style="opacity:0.7">· only you see this line</span>`;
       }
 
       // Intake stubs (named at intake, not yet written) live in the portal's My Weaving › In Research, not here.

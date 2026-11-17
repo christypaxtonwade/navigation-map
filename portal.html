@@ -2379,16 +2379,16 @@ function buildNav() {
     // Not public. Clients see it when access_map is on (paid offering); admin always.
     { href: 'map-living.html', label: 'The Living Map ↗', flag: 'access_map', noClient: true },
     // Clients reach the dark Weaving through My Weaving (one name, one doorway — 2026-11-15).
-    { href: 'ancestral-weaving.html', label: 'Weaving ↗',          flag: 'access_weaving', adminOnly: true },
+    { href: 'ancestral-weaving.html?view=archive', label: 'Weaving ↗', flag: 'access_weaving', adminOnly: true, absolute: true },
     // Clients reach the dark Catalog through My Catalog, as with the Weaving (2026-11-16).
-    { href: 'ancestral-catalog.html', label: 'Catalog ↗',          flag: 'access_catalog', adminOnly: true },
+    { href: 'ancestral-catalog.html?view=archive', label: 'Catalog ↗', flag: 'access_catalog', adminOnly: true, absolute: true },
     { href: 'tapestry.html',          label: 'Mythic Tapestry ↗',  flag: null, noClient: true },
     // Clients reach the dark Convergence through My Convergence, as with the Weaving and Catalog (2026-11-16).
-    { href: 'convergence.html',       label: 'Convergence ↗',      flag: 'access_convergence', adminOnly: true },
+    { href: 'convergence.html?view=archive', label: 'Convergence ↗', flag: 'access_convergence', adminOnly: true, absolute: true },
   ];
 
-  // Admin (not previewing): every page, without a client_id. Weaving and Convergence open
-  // Christy's own (canonical) Weaving and Convergence; each client's open from their page.
+  // Admin (not previewing): every page, without a client_id. Weaving, Catalog and Convergence open
+  // Christy's own (canonical) pages with ?view=archive; each client's open from their page.
   const adminReference = isAdmin && !isPreviewingAsClient;
   if (adminReference) {
     const h = document.createElement('div');

@@ -809,7 +809,7 @@ async function init() {
       const banner = document.getElementById('client-banner');
       if (banner && isAdminViewer()) {
         banner.style.display = 'block';
-        banner.innerHTML = `Viewing <strong style="font-weight:500">${escCat(clientName)}</strong>'s Catalog · <a href="ancestral-catalog.html?view=archive" style="color:var(--gold);text-decoration:underline">view canonical archive</a>`;
+        banner.innerHTML = `Viewing <strong style="font-weight:500">${escCat(clientName)}</strong>'s Catalog <span style="opacity:0.7">· only you see this line</span>`;
       }
 
       // Placed ancestors and Historical Keynotes only; drafts (keynote_draft), research and held stay hidden (2026-11-16).

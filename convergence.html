@@ -855,7 +855,7 @@ async function loadClientData() {
     if (banner) {
       const safeName = String(CLIENT_NAME).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
       banner.style.display = 'block';
-      banner.innerHTML = `Viewing <strong style="font-weight:500">${safeName}</strong>'s Convergence · <a href="convergence.html?view=archive" style="color:var(--gold);text-decoration:underline">view canonical</a>`;
+      banner.innerHTML = `Viewing <strong style="font-weight:500">${safeName}</strong>'s Convergence <span style="opacity:0.7">· only you see this line</span>`;
     }
   }
 
