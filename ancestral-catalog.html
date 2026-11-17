@@ -405,13 +405,9 @@ body::before {
 <div class="filter-group">
 <span style="font-size: 15px;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;padding-top:8px;flex-shrink:0">Filter</span>
 <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-<button class="filter-btn" onclick="setFilter('mythic', this)">Mythic</button>
-<button class="filter-btn" onclick="setFilter('ancient', this)">Ancient</button>
-<button class="filter-btn" onclick="setFilter('medieval', this)">Medieval</button>
-<button class="filter-btn" onclick="setFilter('early-modern', this)">Early Modern</button>
-<button class="filter-btn" onclick="setFilter('modern', this)">Modern</button>
+<span id="era-filters" style="display:contents"></span>
 <button class="filter-btn" onclick="setFilter('weaving', this)">In Weaving</button>
-    <button class="filter-btn" onclick="setFilter('keynote', this)">Keynotes</button>
+<button class="filter-btn" id="keynote-filter" onclick="setFilter('keynote', this)" style="display:none">Historical Keynotes</button>
 </div>
 <div class="filter-group sort-group">
 <span style="font-size: 15px;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;padding-top:8px;flex-shrink:0">Sort</span>
@@ -475,8 +471,30 @@ let activeFilter = 'all';
 let activeSort = 'chronological';
 
 // Map Supabase era values to filter categories and era bar CSS classes
+// One filter per era, in historical order, built from the eras present in this Catalog (2026-11-16).
+// Labels match the Weaving's era sections.
+const ERA_SECTIONS = [
+  ['mythic', 'Mythic'], ['ancient', 'Ancient'], ['classical', 'Classical'], ['post-roman', 'Post-Roman'],
+  ['early-medieval', 'Early Medieval'], ['high-medieval', 'High Medieval'], ['late-medieval', 'Late Medieval'],
+  ['renaissance', 'Renaissance'], ['reformation', 'Reformation'], ['early-modern', 'Early Modern'],
+  ['colonial', 'Colonial'], ['enlightenment', 'Enlightenment'], ['19th-century', '19th Century'],
+  ['modern', 'Modern'], ['contemporary', '20th Century'],
+];
+function buildEraFilters(cards) {
+  const holder = document.getElementById('era-filters');
+  if (!holder) return;
+  const present = new Set(cards.map(c => c.dataset.era).filter(Boolean));
+  const order = ERA_SECTIONS.map(([k]) => k);
+  const extra = [...present].filter(k => !order.includes(k));
+  const label = (k) => (ERA_SECTIONS.find(([e]) => e === k) || [k, k.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())])[1];
+  holder.innerHTML = [...order, ...extra].filter(k => present.has(k))
+    .map(k => `<button class="filter-btn" onclick="setFilter('era:${k}', this)">${label(k)}</button>`).join('');
+  const kn = document.getElementById('keynote-filter');
+  if (kn) kn.style.display = cards.some(c => c.classList.contains('keynote-card')) ? '' : 'none';
+}
 const ERA_FILTER = {
   'mythic':        'mythic',
+  'ancient':       'ancient',
   'classical':     'ancient',
   'post-roman':    'ancient',
   'early-medieval':'medieval',
@@ -484,10 +502,15 @@ const ERA_FILTER = {
   'late-medieval': 'medieval',
   'early-modern':  'early-modern',
   'colonial':      'early-modern',
+  'renaissance':   'early-modern',
+  'reformation':   'early-modern',
+  'enlightenment': 'early-modern',
   '19th-century':  'modern',
+  'contemporary':  'modern',
 };
 const ERA_BAR_CLASS = {
   'mythic':        'era-mythic',
+  'ancient':       'era-ancient',
   'classical':     'era-ancient',
   'post-roman':    'era-ancient',
   'early-medieval':'era-medieval',
@@ -495,7 +518,11 @@ const ERA_BAR_CLASS = {
   'late-medieval': 'era-medieval',
   'early-modern':  'era-early-modern',
   'colonial':      'era-early-modern',
+  'renaissance':   'era-early-modern',
+  'reformation':   'era-early-modern',
+  'enlightenment': 'era-early-modern',
   '19th-century':  'era-modern',
+  'contemporary':  'era-modern',
 };
 
 // ════════════════════════════════════════════════════
@@ -669,13 +696,13 @@ function applyAll() {
 
   cards.forEach(card => {
     const searchText = (card.dataset.search || '').toLowerCase();
-    const filterCat  = card.dataset.filterCat || '';
     const inWeaving  = card.dataset.weaving === 'true';
     const matchesSearch = !query || searchText.includes(query);
     const matchesFilter =
       activeFilter === 'all' ||
       (activeFilter === 'weaving' && inWeaving) ||
-      activeFilter === filterCat;
+      (activeFilter === 'keynote' && card.classList.contains('keynote-card')) ||
+      (activeFilter.startsWith('era:') && card.dataset.era === activeFilter.slice(4));
     if (matchesSearch && matchesFilter) { card.classList.remove('hidden'); visible++; }
     else card.classList.add('hidden');
   });
@@ -729,6 +756,7 @@ function buildCard(ancestor, freqTags, index) {
     + (ancestor.status === 'margin' ? ' margin-ancestor' : '')
     + (isKeynote ? ' keynote-card' : '');
   card.dataset.filterCat    = filterCat;
+  card.dataset.era          = String(era || '').toLowerCase();
   card.dataset.weaving      = inWeaving ? 'true' : 'false';
   // A Historical Keynote (context card) lists the ancestors it speaks to; a person never does.
   card.dataset.context      = (Array.isArray(ancestor.keynote_ancestor_ids) && ancestor.keynote_ancestor_ids.length) ? 'true' : 'false';
@@ -853,6 +881,7 @@ async function init() {
 
     const allCards = Array.from(document.querySelectorAll('.catalog-card'));
     setCountNote(allCards);
+    buildEraFilters(allCards);
     const knNote = document.getElementById('keynote-note');
     if (knNote) knNote.style.display = allCards.some(c => c.dataset.context === 'true') ? '' : 'none';
 

@@ -783,13 +783,16 @@ const LAYERS = [
   { key: 'sigil',            cls: 'layer-sigil layer-sigil-full', label: 'The Sigil', isSigil: true },
 ];
 
-const ERA_GROUPS = [
-  { label: 'Mythic · Ancient',         eras: ['mythic', 'classical'] },
-  { label: 'Post-Roman · Early Medieval', eras: ['post-roman', 'early-medieval'] },
-  { label: 'High Medieval',            eras: ['high-medieval'] },
-  { label: 'Late Medieval',            eras: ['late-medieval'] },
-  { label: 'Early Modern · Colonial',  eras: ['early-modern', 'colonial'] },
-  { label: 'Modern',                   eras: ['19th-century', 'modern'] },
+// One section per era, in historical order, named by the era each ancestor's record carries.
+// The era is set per ancestor to fit their own region (Colonial for the American and Acadian
+// lines, Enlightenment for 18th-century Portugal and Switzerland), so the Weaving shows only
+// the eras its own people lived in (2026-11-16; replaces fixed combined groups).
+const ERA_SECTIONS = [
+  ['mythic', 'Mythic'], ['ancient', 'Ancient'], ['classical', 'Classical'], ['post-roman', 'Post-Roman'],
+  ['early-medieval', 'Early Medieval'], ['high-medieval', 'High Medieval'], ['late-medieval', 'Late Medieval'],
+  ['renaissance', 'Renaissance'], ['reformation', 'Reformation'], ['early-modern', 'Early Modern'],
+  ['colonial', 'Colonial'], ['enlightenment', 'Enlightenment'], ['19th-century', '19th Century'],
+  ['modern', 'Modern'], ['contemporary', '20th Century'],
 ];
 
 // ════════════════════════════════════════════════════
@@ -1131,24 +1134,22 @@ async function init() {
       });
     }
 
-    // Group ancestors by era
+    // Group ancestors by era, sections in historical order; an unrecognised era keeps its own name at the end.
     const grouped = {};
-    ERA_GROUPS.forEach(g => { grouped[g.label] = []; });
-
+    const order = ERA_SECTIONS.map(([k]) => k);
     ancestors.forEach(a => {
-      const era = (a.era || '').toLowerCase();
-      const group = ERA_GROUPS.find(g => g.eras.includes(era));
-      const label = group ? group.label : 'Modern';
-      if (!grouped[label]) grouped[label] = [];
-      grouped[label].push(a);
+      const era = (a.era || '').toLowerCase() || 'undated';
+      (grouped[era] = grouped[era] || []).push(a);
     });
+    const extra = Object.keys(grouped).filter(k => !order.includes(k));
+    const labelOf = (k) => (ERA_SECTIONS.find(([e]) => e === k) || [k, k === 'undated' ? 'Undated' : k.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())])[1];
 
     let html = '';
     let globalIndex = 0;
-    ERA_GROUPS.forEach(g => {
-      const group = grouped[g.label] || [];
+    [...order, ...extra].forEach(k => {
+      const group = (grouped[k] || []).slice().sort((x, y) => (x.sort_year ?? 99999) - (y.sort_year ?? 99999));
       if (group.length === 0) return;
-      html += `<div class="era-divider"><span class="era-label">${g.label}</span></div>`;
+      html += `<div class="era-divider"><span class="era-label">${labelOf(k)}</span></div>`;
       group.forEach(a => {
         html += renderAncestor(a, freqMap[a.id] || [], globalIndex++);
       });
