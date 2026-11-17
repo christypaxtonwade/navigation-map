@@ -386,6 +386,7 @@ body::before {
 <div class="header-rule"></div>
 <p class="header-sub archive-only">A seed catalog of the lineage. Every researched ancestor held here — those in full flower in the Weaving and those still germinating in the margins. Sortable by era and place. Searchable by name. Each card holds what is known, what connects, and what remains open.</p>
 <p class="header-sub client-only">A seed catalog of your lineage. Every ancestor in your archive is held here, searchable by name and sortable by era, place and Field. Each card holds what is known, what connects, and what remains open.</p>
+<p class="header-sub keynote-note" id="keynote-note" style="display:none;margin-top:0.9rem;font-style:italic">Historical Keynotes hold the wider history this lineage lived inside: a place, a trade, a law, a crossing. Each is told once, then followed into the lives of the ancestors it touched.</p>
 <div class="header-links">
 <a class="header-link" href="ancestral-weaving.html" data-link>The Ancestral Weaving ↗</a>
 <a class="header-link" href="tapestry.html" data-link>Mythic Tapestry ↗</a>
@@ -687,8 +688,16 @@ function applyAll() {
   });
   visibleCards.forEach(card => grid.appendChild(card));
 
-  document.getElementById('count-note').textContent =
-    visible === 1 ? '1 ancestor' : visible + ' ancestors';
+  setCountNote(visibleCards);
+}
+
+// Ancestors and Historical Keynotes are counted separately (2026-11-16).
+function setCountNote(cards) {
+  const kn = cards.filter(c => c.dataset.context === 'true').length;
+  const an = cards.length - kn;
+  const parts = [an === 1 ? '1 ancestor' : an + ' ancestors'];
+  if (kn) parts.push(kn === 1 ? '1 historical keynote' : kn + ' historical keynotes');
+  document.getElementById('count-note').textContent = parts.join(' · ');
 }
 
 function buildCard(ancestor, freqTags, index) {
@@ -721,6 +730,8 @@ function buildCard(ancestor, freqTags, index) {
     + (isKeynote ? ' keynote-card' : '');
   card.dataset.filterCat    = filterCat;
   card.dataset.weaving      = inWeaving ? 'true' : 'false';
+  // A Historical Keynote (context card) lists the ancestors it speaks to; a person never does.
+  card.dataset.context      = (Array.isArray(ancestor.keynote_ancestor_ids) && ancestor.keynote_ancestor_ids.length) ? 'true' : 'false';
   card.dataset.search       = searchParts;
   card.dataset.sortName     = (ancestor.name || '').toLowerCase();
   card.dataset.sortLocation = (ancestor.location || '').toLowerCase();
@@ -840,8 +851,10 @@ async function init() {
       ancestors.forEach((a, i) => grid.appendChild(buildCard(a, freqMap[a.id] || [], i)));
     }
 
-    const total = ancestors.length;
-    document.getElementById('count-note').textContent = total + ' ancestor' + (total !== 1 ? 's' : '');
+    const allCards = Array.from(document.querySelectorAll('.catalog-card'));
+    setCountNote(allCards);
+    const knNote = document.getElementById('keynote-note');
+    if (knNote) knNote.style.display = allCards.some(c => c.dataset.context === 'true') ? '' : 'none';
 
     // Cache for the profile modal
     pageAncestors = ancestors;

@@ -3050,7 +3050,7 @@ async function cdToggleAccess(key, btn) {
 // reading), mirror_work (Mirror Work session). generate-session-worksheet v3 builds the worksheet
 // from the focuses and from what earlier sessions recorded. After the session, Christy records
 // what was worked, what opened, what carries forward and the next focus.
-const WS_SYSTEM = { astrology: 'Astrology', human_design: 'Human Design', gene_keys: 'Gene Keys', map: 'The Map', ancestor: 'Lineage', convergence: 'Convergence' };
+const WS_SYSTEM = { astrology: 'Astrology', human_design: 'Human Design', gene_keys: 'Gene Keys', map: 'The Map', ancestor: 'Lineage', history: 'Historical Keynote', convergence: 'Convergence' };
 const SESSION_FOCUS = [
   ['chart', 'Natal Chart / Sovereign Signal'],
   ['lineage', 'Lineage Session'],
@@ -4778,11 +4778,10 @@ async function loadClientWeaving() {
   </select>`;
   // Placement of a written ancestor: which client page shows them. The record (layers, sigil,
   // tags) is the same whichever is chosen; In research and Held are set from Triage (2026-11-16).
-  const placeSelect = (a) => ['weaving','catalog','keynote'].includes(a.status)
+  const placeSelect = (a) => ['weaving','catalog'].includes(a.status)
     ? `<select class="form-select" style="width:auto;min-width:112px;font-size:15px" title="Which of the client's pages shows this ancestor. The full record is kept either way." onchange="updateClientAncestorPlacement('${a.id}', this.value)">
         <option value="weaving"${a.status==='weaving'?' selected':''}>Weaving</option>
         <option value="catalog"${a.status==='catalog'?' selected':''}>Catalog</option>
-        <option value="keynote"${a.status==='keynote'?' selected':''}>Keynote</option>
       </select>` : '';
   ARC_ROWS = rows;
   const rowHtml = (a) => `<div class="arc-item"><div class="ancestor-row">
@@ -4892,7 +4891,7 @@ async function knOpenEdit(id) {
   const fr = await rest(`client_ancestor_frequencies?client_ancestor_id=eq.${id}&select=frequency_tag_id,note,frequency_tags(name)`).catch(() => []);
   KN.open = true; KN.clientId = k.client_id; KN.id = id;
   KN.draft = { ...k, ancestor_ids: k.keynote_ancestor_ids || [] , generated: true };
-  KN.tags = (Array.isArray(fr) ? fr : []).map(f => ({ tagId: f.frequency_tag_id, tagName: f.frequency_tags?.name || '', note: f.note || '' }));
+  KN.tags = [];
   KN.sources = [];
   knRender();
   document.getElementById('kn-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -4946,12 +4945,6 @@ function knRender() {
       </div>
       <div class="form-group"><label class="form-label">Preview (shown on the card)</label><textarea class="form-textarea" id="kn-preview" rows="5">${v(d.catalog_preview)}</textarea></div>
       <div class="form-group"><label class="form-label">The Record (history, then “In this lineage”)</label><textarea class="form-textarea" id="kn-full" rows="18">${v(d.catalog_full)}</textarea></div>
-      <div class="review-section-title" style="margin-top:0.5rem">Frequency Tags</div>
-      <div id="kn-tags">${KN.tags.map((t, i) => `
-        <div class="chip-row"><span class="chip">${esc(t.tagName)} <button class="chip-remove" onclick="KN.tags.splice(${i},1);knKeep();knRender()" title="Remove tag">×</button></span>
-        <textarea class="chip-note" rows="2" placeholder="Why this frequency is present in this history" oninput="KN.tags[${i}].note=this.value">${esc(t.note || '')}</textarea></div>`).join('')}</div>
-      <div class="chip-add-row"><select class="chip-add-select" id="kn-tag-select"><option value="">— Add a frequency tag —</option>${tagOpts}</select>
-        <button class="btn-chip-add" onclick="knAddTag()">+ Add</button></div>
       ${KN.sources.length ? `<div class="review-section-title" style="margin-top:1rem">Sources (saved to this keynote's record)</div>
         <div style="font-size:15px;line-height:1.6">${KN.sources.map(sr => `<div>· ${esc(sr.label || '')}${sr.url ? ` — <a href="${esc(sr.url)}" target="_blank" rel="noopener">link</a>` : ''}${sr.why ? ` <span style="color:var(--text-faint)">(${esc(sr.why)})</span>` : ''}</div>`).join('')}</div>` : ''}
       ${d.verification_note ? `<div class="sp-sub" style="margin-top:0.75rem;color:var(--amber)">Check before placing: ${esc(d.verification_note)}</div>` : ''}
@@ -5000,10 +4993,7 @@ async function knGenerate() {
     const out = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(out.error || `status ${res.status}`);
     KN.draft = { ...d, ...out, generated: true, ancestor_ids: out.keynote_ancestor_ids || d.ancestor_ids };
-    const byName = Object.fromEntries((allFrequencyTags || []).map(t => [String(t.name).toLowerCase(), t]));
-    const notes = Object.fromEntries((out.frequency_notes || []).map(n => [String(n.tag).toLowerCase(), n.why]));
-    KN.tags = (out.frequency_tags || []).map(n => byName[String(n).toLowerCase()]).filter(Boolean)
-      .map(t => ({ tagId: t.id, tagName: t.name, note: notes[String(t.name).toLowerCase()] || '' }));
+    KN.tags = []; // Historical Keynotes carry no frequency tags (2026-11-16).
     KN.sources = Array.isArray(out.sources) ? out.sources : [];
   } catch (e) {
     KN.busy = false; knRender(); msg('Could not draft: ' + e.message); return;
@@ -5038,10 +5028,8 @@ async function knSave() {
       }
       KN.id = id;
     }
+    // Historical Keynotes carry no frequency tags: clear any left from earlier versions.
     await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${id}`);
-    for (const t of KN.tags) {
-      await restPost('client_ancestor_frequencies', { client_ancestor_id: id, frequency_tag_id: t.tagId, strength: 'noted', note: t.note || null });
-    }
     msg('saved · ' + new Date().toLocaleTimeString());
     KN.sources = [];
     loadClientWeaving();
@@ -5369,7 +5357,7 @@ async function removeClientAncestor(clientAncestorId, clientId) {
 }
 
 async function updateClientAncestorPlacement(caId, value) {
-  if (!['weaving','catalog','keynote'].includes(value)) return;
+  if (!['weaving','catalog'].includes(value)) return;
   try {
     const ok = await restPatch('client_ancestors', caId, { status: value });
     if (!ok) throw new Error('save failed');
@@ -6854,7 +6842,11 @@ async function loadMyCatalog() {
   // The threshold: count, the door into the Catalog, and sort controls — alphabetical by default.
   let html = `
     <div class="weave-door">
-      <div class="weave-door-count">${rows.length} ${rows.length === 1 ? 'ancestor' : 'ancestors'} in your catalog</div>
+      <div class="weave-door-count">${(() => {
+        const kn = rows.filter(r => r.status === 'keynote' && Array.isArray(r.keynote_ancestor_ids) && r.keynote_ancestor_ids.length).length;
+        const an = rows.length - kn;
+        return `${an} ${an === 1 ? 'ancestor' : 'ancestors'}${kn ? ` · ${kn} historical ${kn === 1 ? 'keynote' : 'keynotes'}` : ''} in your catalog`;
+      })()}</div>
       <a class="btn btn-gold" href="${window._myCatalogBase}" target="_blank" rel="noopener">Enter the Catalog ↗</a>
     </div>
     <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:1.25rem;flex-wrap:wrap;gap:1rem">
@@ -6908,7 +6900,7 @@ function renderMyCatalog(mode) {
       <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
       <div class="ancestor-name-block" style="flex:1;min-width:0">
         <div class="ancestor-name-text">${esc(a.name)}</div>
-        <div class="ancestor-dates">${esc(a.dates || '')}${a.location ? ' · ' + esc(a.location) : ''}</div>
+        <div class="ancestor-dates">${a.status === 'keynote' && Array.isArray(a.keynote_ancestor_ids) && a.keynote_ancestor_ids.length ? 'Historical Keynote · ' : ''}${esc(a.dates || '')}${a.location ? ' · ' + esc(a.location) : ''}</div>
       </div>
       <div class="weave-tags">${tags}</div>
       <span class="weave-go" aria-hidden="true">↗</span>
@@ -7235,8 +7227,12 @@ function renderAncestorReview(d) {
 
   const eraOptions = ['mythic','ancient','classical','post-roman','early-medieval','high-medieval','late-medieval','renaissance','reformation','colonial','enlightenment','19th-century','contemporary']
     .map(e => `<option value="${e}" ${e === d.era ? 'selected' : ''}>${e}</option>`).join('');
-  const statusOptions = ['catalog','weaving','margin','keynote']
-    .map(s => `<option value="${s}" ${s === d.status ? 'selected' : ''}>${s}</option>`).join('');
+  // A client's own record places a person in Weaving or Catalog only; Keynote is reserved for
+  // Historical Keynotes (context cards), made in the Weaving Builder (2026-11-16).
+  const isPersonal = !!(arPromoteStubId || arAugmentClientAncestorId);
+  const placeDefault = ['weaving','catalog'].includes(d.status) ? d.status : (isPersonal ? 'catalog' : d.status);
+  const statusOptions = (isPersonal ? ['catalog','weaving'] : ['catalog','weaving','margin','keynote'])
+    .map(s => `<option value="${s}" ${s === placeDefault ? 'selected' : ''}>${s}</option>`).join('');
   const clientOptions = allClients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
   // Weave from research and Augment of a client's record write onto that client's own record:
   // placement comes from Status ("Place in") and strength from each tag, so the archive's
@@ -7371,7 +7367,7 @@ function renderAncestorReview(d) {
         <div class="confirm-bar-left" style="flex-wrap:wrap">
           <label class="form-label" style="margin:0;white-space:nowrap" for="ar-place">Place in ${esc(personalClientName)}'s</label>
           <select class="form-select" id="ar-place" style="width:150px;margin:0" onchange="document.getElementById('rv-status').value=this.value">
-            ${['weaving','catalog','keynote'].map(v => `<option value="${v}" ${v === (d.status || 'weaving') ? 'selected' : ''}>${v === 'weaving' ? 'Weaving' : v === 'catalog' ? 'Catalog' : 'Keynote'}</option>`).join('')}
+            ${['weaving','catalog'].map(v => `<option value="${v}" ${v === placeDefault ? 'selected' : ''}>${v === 'weaving' ? 'Weaving' : 'Catalog'}</option>`).join('')}
           </select>
           <input type="hidden" id="ar-assign-client" value="">
           <input type="hidden" id="ar-assign-strength" value="noted">
