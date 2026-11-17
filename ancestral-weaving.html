@@ -142,12 +142,19 @@ body::before {
   transform: translateX(-4px);
 }
 .ancestor-date {
+  /* Timeline gutter: years only, stacked, right-aligned to the dot (2026-11-16).
+     The full dates stay in the card's meta line and in print. */
   position: absolute; left: -3rem; top: 0;
-  transform: translateX(-100%) translateX(-16px);
-  font-size: 15px; font-weight: 300; color: var(--text-faint);
-  letter-spacing: 0.05em; white-space: nowrap;
-  text-align: right; width: 130px; padding-top: 1.4rem;
+  transform: translateX(-100%) translateX(-20px);
+  width: 96px; padding-top: 1.2rem; text-align: right;
+  color: var(--text-faint); line-height: 1.15;
 }
+.ancestor-date .ad-years { display: flex; flex-direction: column; align-items: flex-end; gap: 0.15rem; }
+.ancestor-date .ad-y1 { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-style: italic; color: var(--text-dim); letter-spacing: 0.02em; }
+.ancestor-date .ad-y2 { font-size: 15px; font-weight: 300; letter-spacing: 0.06em; }
+.ancestor-date .ad-y2::before { content: '— '; opacity: 0.6; }
+.ancestor-date .ad-wrap { font-size: 15px; font-weight: 300; letter-spacing: 0.04em; white-space: normal; }
+.ancestor-date .ad-full { display: none; }
 .ancestor-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -394,6 +401,8 @@ body::before {
     page-break-inside: avoid !important; break-inside: avoid-page !important;
   }
   .ancestor:first-of-type { page-break-before: auto !important; break-before: auto !important; }
+  .ancestor-date .ad-years, .ancestor-date .ad-wrap { display: none !important; }
+  .ancestor-date .ad-full { display: inline !important; }
   .ancestor-date {
     color: #7a5618 !important; font-size: 10pt !important;
     background: transparent !important; padding: 0 !important; margin-bottom: 0.3rem !important;
@@ -1007,7 +1016,7 @@ function renderAncestor(a, freqTags, i) {
   // Click anywhere on the row opens the profile modal. Inline layers stay in DOM
   // (hidden on screen, shown for print) so the page-level Print button still produces a full document.
   return `<div class="ancestor" tabindex="0" onclick="openAncestorProfile('${a.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openAncestorProfile('${a.id}');}" style="animation-delay:${0.05*i}s">
-    ${a.dates ? `<div class="ancestor-date">${a.dates}</div>` : ''}
+    ${a.dates ? `<div class="ancestor-date">${gutterYears(a.dates)}<span class="ad-full">${a.dates}</span></div>` : ''}
     <div class="ancestor-card">
       <div class="ancestor-header">
         <div class="ancestor-name-block">
@@ -1027,6 +1036,18 @@ function renderAncestor(a, freqTags, i) {
 }
 
 // ── Helpers ──────────────────────────────────────────────────
+// The timeline gutter shows years only: "1794 / — 1875", "c. 1787", "50 BC / — 500 AD".
+// Dates with no year in them ("1st–4th century") wrap in the gutter as written.
+function gutterYears(dates) {
+  const t = String(dates || '');
+  const found = t.match(/\b\d{1,4}\s*(?:BCE|BC|AD|CE)\b|\b\d{3,4}\b/g) || [];
+  if (!found.length) return `<span class="ad-wrap">${t}</span>`;
+  const approx = /^\s*(c\.|ca\.|circa|about|abt\.?|born about)/i.test(t) ? 'c. ' : '';
+  const y1 = approx + found[0].replace(/\s+/g, ' ');
+  const y2 = found.length > 1 && found[found.length - 1] !== found[0] ? found[found.length - 1].replace(/\s+/g, ' ') : '';
+  return `<span class="ad-years"><span class="ad-y1">${y1}</span>${y2 ? `<span class="ad-y2">${y2}</span>` : ''}</span>`;
+}
+
 function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
