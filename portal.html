@@ -3293,63 +3293,153 @@ function wsShowPdf(win, url, fname, title) {
   win.document.close();
   win.document.getElementById('p').onclick = () => { try { const f = win.document.getElementById('f').contentWindow; f.focus(); f.print(); } catch { win.location.href = url; } };
 }
+// Worksheet and handout PDFs (redesigned 2026-11-17): compact type, defined text blocks,
+// an "At a glance" opening with the session's key elements, and open white space for notes
+// and journaling in place of ruled lines.
 async function cdWsPdf(id, kind, btn) {
   const JS = window.jspdf && window.jspdf.jsPDF; if (!JS) { alert('The PDF tool is still loading. Try again in a moment.'); return; }
   const d = currentDetailData, w = (d.worksheets || []).find(x => x.id === id); if (!w || !w.content) return;
   const win = window.open('', '_blank');
   const c = w.content || {}, name = d.client.name || 'Client';
   const date = new Date(w.session_date ? w.session_date + 'T12:00:00' : w.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const focusLabel = (w.focuses || []).map(f => SESSION_FOCUS_SHORT[f] || f).join(' + ');
   try {
     const doc = new JS({ unit: 'pt', format: 'letter' });
-    const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 54, maxW = W - 2 * M, BOTTOM = H - 50;
-    const INK = [20, 17, 10], DIM = [62, 52, 32], GOLD = [90, 63, 16], RULE = [140, 122, 85];
+    const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+    const M = 56, maxW = W - 2 * M, TOP = 56, BOTTOM = H - 56, PAD = 8;
+    const INK = [28, 24, 16], DIM = [100, 88, 66], GOLD = [122, 86, 24], LINE = [210, 197, 168], FILL = [249, 246, 238];
     const T = s => String(s ?? '').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/—/g, ' - ').replace(/–/g, '-').replace(/→/g, '>').replace(/…/g, '...').replace(/[^\x00-\xFF]/g, '');
-    let y = M, page = 1;
-    const footer = () => { doc.setFont('times', 'normal'); doc.setFontSize(9); doc.setTextColor(...DIM); doc.text(T(`${name} · ${kind === 'handout' ? 'Journal prompts' : 'Session worksheet'} · ${page}`), W / 2, H - 28, { align: 'center' }); };
-    const ensure = h => { if (y + h > BOTTOM) { footer(); doc.addPage(); page++; y = M; } };
-    const ST = { body: ['times', 'normal', 10.5, INK, 1.35, 5], lead: ['times', 'italic', 12, INK, 1.35, 8], h1: ['times', 'normal', 22, INK, 1.2, 4], h2: ['helvetica', 'bold', 9, GOLD, 1.3, 4], meta: ['helvetica', 'normal', 9, DIM, 1.3, 4], small: ['times', 'normal', 10, INK, 1.3, 2], bold: ['times', 'bold', 10, INK, 1.3, 2], prompt: ['times', 'normal', 12.5, INK, 1.45, 0] };
-    const lay = (t, st, w) => { const [f, s2, z] = ST[st]; doc.setFont(f, s2); doc.setFontSize(z); return t ? doc.splitTextToSize(T(t), w) : []; };
-    const put = (lines, st, x) => { const [f, s2, z, col, lead, after] = ST[st]; doc.setFont(f, s2); doc.setFontSize(z); doc.setTextColor(...col); lines.forEach(l => { ensure(z * lead); doc.setFont(f, s2); doc.setFontSize(z); doc.setTextColor(...col); doc.text(l, x, y + z); y += z * lead; }); if (lines.length) y += after; };
-    const flow = (t, st) => put(lay(t, st, maxW), st, M);
-    const rule = () => { doc.setDrawColor(...GOLD); doc.setLineWidth(0.5); doc.line(M, y, W - M, y); y += 10; };
-    const table = (head, rows, widths, styles) => {
-      const cw = widths.map(f => f * maxW), pad = 4;
-      const row = (cells, header) => {
-        const laid = cells.map((cl, i) => lay(header ? String(cl).toUpperCase() : cl, header ? 'h2' : styles[i], cw[i] - 2 * pad));
-        const hgt = Math.max(...laid.map((ls, i) => ls.length * ST[header ? 'h2' : styles[i]][2] * 1.3)) + 2 * pad;
-        ensure(hgt); const y0 = y; let x = M;
-        laid.forEach((ls, i) => { y = y0 + pad; const st = header ? 'h2' : styles[i]; const [f, s2, z, col] = ST[st]; doc.setFont(f, s2); doc.setFontSize(z); doc.setTextColor(...col); ls.forEach(l => { doc.text(l, x + pad, y + z); y += z * 1.3; }); x += cw[i]; });
-        y = y0 + hgt; doc.setDrawColor(...RULE); doc.setLineWidth(header ? 0.8 : 0.4); doc.line(M, y, M + maxW, y);
-      };
-      row(head, true); rows.forEach(r => row(r, false)); y += 10;
+    // [font, style, size, colour, line-height factor]
+    const F = {
+      eyebrow: ['helvetica', 'bold', 7.5, GOLD, 1.3], title: ['times', 'normal', 17, INK, 1.2], meta: ['helvetica', 'normal', 8.5, DIM, 1.35],
+      label: ['helvetica', 'bold', 7, GOLD, 1.35], body: ['times', 'normal', 9.5, INK, 1.42], italic: ['times', 'italic', 9.5, INK, 1.42],
+      lead: ['times', 'italic', 10.5, INK, 1.42], strong: ['times', 'bold', 9.5, INK, 1.38], small: ['helvetica', 'normal', 7.5, DIM, 1.35],
+      prompt: ['times', 'normal', 10.5, INK, 1.45],
     };
+    let y = TOP, page = 1;
+    const setF = k => { const [f, s, z, col] = F[k]; doc.setFont(f, s); doc.setFontSize(z); doc.setTextColor(...col); };
+    const lh = k => F[k][2] * F[k][4];
+    const split = (t, k, wd) => { if (t == null || t === '') return []; setF(k); return doc.splitTextToSize(k === 'label' ? T(t).toUpperCase() : T(t), wd); };
+    const draw = (lines, k, x, y0) => { setF(k); let yy = y0; lines.forEach(l => { doc.text(l, x, yy + F[k][2], k === 'label' || k === 'eyebrow' ? { charSpace: 0.7 } : undefined); yy += lh(k); }); return yy; };
+    const footer = () => { setF('small'); doc.text(T(`${name} · ${kind === 'handout' ? 'Journal prompts' : 'Session worksheet'} · ${page}`), W / 2, H - 30, { align: 'center' }); };
+    const newPage = () => { footer(); doc.addPage(); page++; y = TOP; };
+    const ensure = h => { if (y + h > BOTTOM) newPage(); };
+    const label = (t, gap = 6) => { ensure(lh('label') + gap + 40); y = draw(split(t, 'label', maxW), 'label', M, y) + gap; };
+    const text = (t, k, gap = 4) => { split(t, k, maxW).forEach(l => { ensure(lh(k)); y = draw([l], k, M, y); }); y += gap; };
+    // parts: [{ t, k, gap }]
+    const measure = (parts, wd) => {
+      const laid = parts.filter(p => p.t).map(p => ({ ...p, lines: split(p.t, p.k, wd - 2 * PAD) }));
+      const h = laid.reduce((s, p, i) => s + p.lines.length * lh(p.k) + (i < laid.length - 1 ? (p.gap ?? 3) : 0), 0) + 2 * PAD;
+      return { laid, h };
+    };
+    const boxAt = (m, x, y0, wd, h, fill = true) => {
+      doc.setDrawColor(...LINE); doc.setLineWidth(0.5);
+      if (fill) { doc.setFillColor(...FILL); doc.rect(x, y0, wd, h, 'FD'); } else doc.rect(x, y0, wd, h, 'S');
+      let yy = y0 + PAD;
+      m.laid.forEach(p => { yy = draw(p.lines, p.k, x + PAD, yy) + (p.gap ?? 3); });
+    };
+    const box = (parts, after = 8) => { const m = measure(parts, maxW); ensure(Math.min(m.h, BOTTOM - TOP)); boxAt(m, M, y, maxW, m.h); y += m.h + after; };
+    const space = (h, lbl, after = 10) => {
+      ensure(h);
+      doc.setDrawColor(...LINE); doc.setLineWidth(0.5); doc.rect(M, y, maxW, h, 'S');
+      if (lbl) draw([T(lbl).toUpperCase()], 'label', M + PAD, y + PAD);
+      y += h + after;
+    };
+    const header = eyebrow => {
+      y = draw([T(eyebrow).toUpperCase()], 'eyebrow', M, y) + 4;
+      y = draw([T(name)], 'title', M, y) + 2;
+      y = draw([T(w.title ? `${w.title} · ${date}` : date)], 'meta', M, y) + 8;
+      doc.setDrawColor(...GOLD); doc.setLineWidth(0.6); doc.line(M, y, W - M, y); y += 14;
+    };
+
     if (kind === 'handout') {
-      flow('NAVIGATION MAP · JOURNAL PROMPTS', 'h2'); flow(name, 'h1'); flow(date, 'meta'); rule(); y += 6;
-      flow('Take these one at a time, over the coming weeks. Write by hand if you can, and let each one run longer than feels necessary. The key or Field named beside each prompt is the frequency it works with; your chart analysis describes it.', 'body'); y += 10;
+      header('Journal prompts');
+      text('Take these one at a time over the coming weeks. Write by hand if you can, and let each one run longer than feels necessary. The name beside each prompt is the frequency it works with.', 'body', 12);
       (c.prompts || []).forEach((p, i) => {
-        ensure(110);
-        flow(`${i + 1}`, 'h2'); put(lay(p.prompt, 'prompt', maxW), 'prompt', M); y += 3; if (p.anchor) flow(p.anchor, 'meta');
-        doc.setDrawColor(...RULE); doc.setLineWidth(0.4); for (let k = 0; k < 3; k++) { ensure(22); y += 20; doc.line(M, y, W - M, y); } y += 16;
+        const m = measure([{ t: `${i + 1}`, k: 'label', gap: 3 }, { t: p.prompt, k: 'prompt', gap: 3 }, { t: p.anchor, k: 'small' }], maxW);
+        const room = 170;
+        ensure(m.h + room);
+        boxAt(m, M, y, maxW, m.h); y += m.h;
+        doc.setDrawColor(...LINE); doc.setLineWidth(0.5); doc.rect(M, y, maxW, room, 'S'); y += room + 14;
       });
     } else {
-      flow(`SESSION ${w.session_number || ''} · ${(w.focuses || []).map(f => (SESSION_FOCUS_SHORT[f] || f).toUpperCase()).join(' + ')} · ${w.session_minutes} MINUTES`, 'h2'); flow(name, 'h1'); flow(w.title ? `${w.title} · ${date}` : date, 'meta'); rule();
-      if (c.focus) flow(c.focus, 'lead');
-      if (c.carry_in) { flow('CARRIED IN', 'h2'); flow(c.carry_in, 'body'); y += 4; }
-      flow('FLOW', 'h2'); let t = 0;
-      table(['Minutes', 'Segment', 'What to do'], (c.flow || []).map(f => { const a = t; t += Number(f.minutes) || 0; return [`${a}-${t}`, f.segment, f.what]; }), [0.12, 0.22, 0.66], ['small', 'bold', 'small']);
-      (c.areas || []).forEach((a, i) => {
-        ensure(80); flow(`REQUEST ${i + 1}`, 'h2'); flow(a.request, 'bold'); y += 2;
-        table(['Element', 'Why it speaks to this', 'Open with'], (a.elements || []).map(e => [`${e.element}\n${WS_SYSTEM[e.system] || ''}`, e.why, e.open_with]), [0.26, 0.42, 0.32], ['bold', 'small', 'small']);
+      header(`Session ${w.session_number || ''} · ${focusLabel} · ${w.session_minutes} minutes`);
+
+      // ── At a glance ──
+      label('At a glance');
+      const colGap = 10, colW = (maxW - colGap) / 2;
+      const left = measure([
+        { t: 'Focus', k: 'label', gap: 3 }, { t: c.focus, k: 'italic', gap: 8 },
+        ...(c.carry_in ? [{ t: 'Carried in', k: 'label', gap: 3 }, { t: c.carry_in, k: 'body' }] : []),
+      ], colW);
+      const right = measure([{ t: 'Requests', k: 'label', gap: 3 }, ...(c.areas || []).map((a, i) => ({ t: `${i + 1}.  ${a.request}`, k: 'body', gap: 3 }))], colW);
+      const hh = Math.max(left.h, right.h);
+      ensure(hh);
+      boxAt(left, M, y, colW, hh); boxAt(right, M + colW + colGap, y, colW, hh); y += hh + colGap;
+
+      // Key elements, grouped by system, each listed once
+      const groups = {};
+      (c.areas || []).forEach(a => (a.elements || []).forEach(e => {
+        const g = WS_SYSTEM[e.system] || e.system || 'Other';
+        (groups[g] = groups[g] || []);
+        if (!groups[g].includes(e.element)) groups[g].push(e.element);
+      }));
+      const keyParts = [{ t: 'Key elements', k: 'label', gap: 5 }];
+      Object.entries(groups).forEach(([g, list], i, arr) => {
+        keyParts.push({ t: g, k: 'small', gap: 1 });
+        keyParts.push({ t: list.join('   ·   '), k: 'strong', gap: i < arr.length - 1 ? 6 : 0 });
       });
-      if (c.watch_for) { ensure(60); flow('WATCH FOR', 'h2'); flow(c.watch_for, 'body'); y += 4; }
-      ensure(80); flow('JOURNAL PROMPTS · FOR THE CLIENT HANDOUT', 'h2');
-      (c.prompts || []).forEach((p, i) => flow(`${i + 1}.  ${p.prompt}${p.anchor ? '  (' + p.anchor + ')' : ''}`, 'body'));
-      y += 8; ensure(90); flow('NOTES', 'h2'); doc.setDrawColor(...RULE); doc.setLineWidth(0.4); for (let k = 0; k < 6; k++) { ensure(22); y += 20; doc.line(M, y, W - M, y); }
+      box(keyParts, 16);
+
+      // ── Flow ──
+      label('Flow');
+      const cw = [0.11, 0.24, 0.65].map(f => f * maxW), tp = 5;
+      const row = (cells, styles, head) => {
+        const laid = cells.map((cl, i) => split(cl, styles[i], cw[i] - 2 * tp));
+        const hgt = Math.max(...laid.map((ls, i) => ls.length * lh(styles[i]))) + 2 * tp;
+        ensure(hgt);
+        if (head) { doc.setFillColor(...FILL); doc.rect(M, y, maxW, hgt, 'F'); }
+        let x = M; laid.forEach((ls, i) => { draw(ls, styles[i], x + tp, y + tp); x += cw[i]; });
+        y += hgt; doc.setDrawColor(...LINE); doc.setLineWidth(0.4); doc.line(M, y, M + maxW, y);
+      };
+      doc.setDrawColor(...LINE); doc.setLineWidth(0.4); doc.line(M, y, M + maxW, y);
+      row(['Minutes', 'Segment', 'What to do'], ['label', 'label', 'label'], true);
+      let t = 0;
+      (c.flow || []).forEach(f => { const a = t; t += Number(f.minutes) || 0; row([`${a}-${t}`, f.segment, f.what], ['small', 'strong', 'body'], false); });
+      y += 18;
+
+      // ── Requests ──
+      const elParts = e => [
+        { t: e.element, k: 'strong', gap: 1 }, { t: WS_SYSTEM[e.system] || e.system || '', k: 'small', gap: 5 },
+        { t: e.why, k: 'body', gap: 4 }, { t: e.open_with ? 'Open with: ' + e.open_with : '', k: 'italic' },
+      ];
+      (c.areas || []).forEach((a, i) => {
+        // Keep the request heading with its first element.
+        const first = (a.elements || [])[0];
+        ensure(lh('label') + 3 + split(a.request, 'lead', maxW).length * lh('lead') + 6 + (first ? measure(elParts(first), maxW).h : 0));
+        label(`Request ${i + 1}`, 3);
+        text(a.request, 'lead', 6);
+        (a.elements || []).forEach(e => box([
+          { t: e.element, k: 'strong', gap: 1 }, { t: WS_SYSTEM[e.system] || e.system || '', k: 'small', gap: 5 },
+          { t: e.why, k: 'body', gap: 4 }, { t: e.open_with ? 'Open with: ' + e.open_with : '', k: 'italic' },
+        ], 6));
+        space(64, 'Notes', 18);
+      });
+
+      if (c.watch_for) { label('Watch for'); box([{ t: c.watch_for, k: 'body' }], 16); }
+
+      label('Journal prompts · for the client handout');
+      (c.prompts || []).forEach((p, i) => { text(`${i + 1}.  ${p.prompt}`, 'body', 1); if (p.anchor) text(p.anchor, 'small', 6); else y += 5; });
+      y += 10;
+
+      ensure(170);
+      space(Math.max(150, BOTTOM - y), 'Notes', 0);
     }
     footer();
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const fname = `${kind === 'handout' ? 'journal-prompts' : 'session-worksheet'}-${slug}-${new Date(w.created_at).toISOString().slice(0, 10)}.pdf`;
-    const title = `${name} · ${kind === 'handout' ? 'Journal Prompts' : 'Session Worksheet'}`;
+    const day = (w.session_date || new Date(w.created_at).toISOString().slice(0, 10));
+    const fname = `${kind === 'handout' ? 'journal-prompts' : 'session-worksheet'}-${slug}-session-${w.session_number || ''}-${day}.pdf`;
+    const title = `${name} · ${kind === 'handout' ? 'Journal Prompts' : 'Session ' + (w.session_number || '') + ' Worksheet'}`;
     doc.setProperties({ title });
     const url = URL.createObjectURL(new File([doc.output('blob')], fname, { type: 'application/pdf' }));
     if (win && !win.closed) wsShowPdf(win, url, fname, title); else doc.save(fname);
