@@ -739,6 +739,23 @@ a.ancestor-row.weave-row:focus-visible { outline: 2px solid var(--gold); outline
 .triage-intake { font-size: 15px; color: var(--text-dim); line-height: 1.6; padding: 0.6rem 0.8rem; border-left: 2px solid rgba(122,86,24,0.3); white-space: pre-wrap; }
 .triage-finding { padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.5rem; font-size: 15px; line-height: 1.55; color: var(--text); }
 .triage-finding-head { display: flex; justify-content: space-between; gap: 0.75rem; color: var(--text-dim); margin-bottom: 0.25rem; }
+.triage-finding.is-highlight { border-color: var(--gold); border-left-width: 3px; }
+.finding-highlight { margin: 0.2rem 0 0.4rem; color: var(--gold); font-size: 15px; line-height: 1.5; }
+.finding-highlight-input { width: 100%; margin: 0.25rem 0 0.4rem; }
+.finding-btns { display: flex; gap: 0.4rem; flex-shrink: 0; }
+.arc-kin-parents { display: grid; grid-template-columns: max-content 1fr; gap: 0.35rem 0.9rem; font-size: 15px; line-height: 1.5; margin-bottom: 0.75rem; }
+.arc-kin-label { color: var(--text-dim); letter-spacing: 0.04em; }
+.arc-kin-list { list-style: none; padding: 0; margin: 0 0 0.6rem; display: grid; gap: 0.35rem; }
+.arc-kin-list li { display: flex; justify-content: space-between; gap: 0.75rem; font-size: 15px; line-height: 1.5; padding: 0.3rem 0; border-bottom: 1px solid var(--border); }
+.arc-kin-role { color: var(--text-dim); }
+.arc-kin-note { color: var(--text-dim); }
+.arc-kin-form { display: grid; grid-template-columns: 1fr 1.6fr; gap: 0.4rem; margin-bottom: 0.4rem; }
+.arc-highlights { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.35rem; font-size: 15px; line-height: 1.5; color: var(--text); }
+.arc-highlights li::marker { color: var(--gold); }
+.weave-kin { font-size: 15px; line-height: 1.6; margin: 0.5rem 0 0.25rem; display: grid; gap: 0.2rem; }
+.weave-kin-label { color: var(--text-dim); }
+.weave-record-item.is-highlight { border-left-color: var(--gold); }
+.weave-record-mark { color: var(--gold); }
 .triage-finding a { color: var(--gold); text-decoration: underline; word-break: break-all; }
 .triage-finding-form { display: grid; grid-template-columns: 150px 190px 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }
 .triage-prompts { margin: 0.5rem 0 0; padding-left: 1.25rem; font-size: 15px; color: var(--text); line-height: 1.6; }
@@ -1771,7 +1788,13 @@ body { font-weight: 400; }
 
           <div class="card" style="max-width:720px;margin-bottom:2rem">
             <div class="form-group" style="margin-bottom:1rem">
-              <label class="form-label">Select Ancestor</label>
+              <label class="form-label" for="aug-owner-select">Whose ancestors</label>
+              <select class="form-select" id="aug-owner-select" onchange="augOwnerChanged()">
+                <option value="">My archive</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:1rem">
+              <label class="form-label" for="aug-ancestor-select">Select Ancestor</label>
               <select class="form-select" id="aug-ancestor-select" onchange="loadAncestorForAugment()">
                 <option value="">— Choose an ancestor —</option>
               </select>
@@ -5242,9 +5265,13 @@ function arcEventsHtml(events) {
 
 function arcFindingHtml(f, removable, caId) {
   const head = [f.finding_date, arcSourceLabel(f.source_type), f.source_label].filter(Boolean).map(esc).join(' · ');
-  return `<div class="triage-finding">
-    <div class="triage-finding-head"><span>${head || 'Finding'}</span>
-      ${removable ? `<button class="btn btn-outline btn-sm" onclick="arcDeleteFinding('${caId}','${f.id}')" aria-label="Delete this finding">Remove</button>` : ''}</div>
+  const hl = removable && f.highlight;
+  return `<div class="triage-finding${hl ? ' is-highlight' : ''}">
+    <div class="triage-finding-head"><span>${hl ? '<span class="weave-record-mark" aria-label="Highlighted">✦</span> ' : ''}${head || 'Finding'}</span>
+      ${removable ? `<span class="finding-btns">
+        <button class="btn btn-outline btn-sm" onclick="arcToggleHighlight('${caId}','${f.id}', ${hl ? 'false' : 'true'})" aria-pressed="${hl ? 'true' : 'false'}">${hl ? 'Unhighlight' : 'Highlight'}</button>
+        <button class="btn btn-outline btn-sm" onclick="arcDeleteFinding('${caId}','${f.id}')" aria-label="Delete this finding">Remove</button></span>` : ''}</div>
+    ${hl ? `<input class="form-input finding-highlight-input" value="${esc(f.highlight_note || '')}" placeholder="Why this matters" aria-label="Why this finding is highlighted" onchange="arcSaveHighlightNote('${caId}','${f.id}', this.value)">` : ''}
     ${f.summary ? `<div style="white-space:pre-wrap">${esc(f.summary)}</div>` : ''}
     ${f.url ? `<div style="margin-top:0.25rem"><a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.url)}</a></div>` : ''}
   </div>`;
@@ -5315,6 +5342,10 @@ function arcRender(id) {
       <div class="triage-intake">${r.relation_to_client ? esc(r.relation_to_client) + '\n' : ''}${esc(r.intake_notes || '')}</div>
     </div>` : ''}
 
+    ${arcHighlightsHtml(d.findings)}
+
+    ${arcKinHtml(id, res)}
+
     <div>
       <h4>Findings · sources and links</h4>
       ${d.findings.map(f => arcFindingHtml(f, true, id)).join('') || '<div class="triage-msg" style="margin-bottom:0.5rem">No findings yet.</div>'}
@@ -5344,7 +5375,7 @@ function arcRender(id) {
     <div>
       <h4>Writing</h4>
       <div class="triage-msg">${layers.length ? 'Written: ' + layers.map(esc).join(' · ') : 'Not written yet.'}</div>
-      ${layers.length && !['intake_stub','held'].includes(r.status) ? `<div class="triage-row-btns"><a class="btn btn-outline btn-sm" href="${weaveHref}" target="_blank" rel="noopener">Open in the Weaving ↗</a></div>` : ''}
+      ${layers.length && !['intake_stub','held'].includes(r.status) ? `<div class="triage-row-btns"><a class="btn btn-outline btn-sm" href="${weaveHref}" target="_blank" rel="noopener">Open in the Weaving ↗</a>${['weaving','catalog'].includes(r.status) && !r.keynote_ancestor_ids ? `<button class="btn btn-outline btn-sm" onclick="augmentFromRecord('${id}','${r.client_id}')">Augment with new findings</button>` : ''}</div>` : ''}
     </div>
 
     <div>
@@ -5369,6 +5400,84 @@ function arcRender(id) {
       ${arcEventsHtml(d.events)}
     </div>
   </div>`;
+}
+
+function arcHighlightsHtml(findings) {
+  const hl = (findings || []).filter(f => f.highlight);
+  if (!hl.length) return '';
+  return `<div>
+    <h4>Highlights · unusual or significant</h4>
+    <ul class="arc-highlights">${hl.map(f => `<li>${f.finding_date ? `<span class="arc-kin-role">${esc(f.finding_date)}</span> · ` : ''}${esc(f.highlight_note || f.source_label || arcSourceLabel(f.source_type) || 'Finding')}</li>`).join('')}</ul>
+  </div>`;
+}
+
+function arcKinHtml(id, res) {
+  const rels = Array.isArray(res.relationships) ? res.relationships : [];
+  return `<div>
+    <h4>Family · parents and relationships</h4>
+    <div class="arc-kin-parents">
+      <label class="arc-kin-label" for="ak-father-${id}">Father</label>
+      <input class="form-input" id="ak-father-${id}" value="${esc(res.father || '')}" placeholder="Not yet known">
+      <label class="arc-kin-label" for="ak-mother-${id}">Mother</label>
+      <input class="form-input" id="ak-mother-${id}" value="${esc(res.mother || '')}" placeholder="Not yet known">
+    </div>
+    <div class="triage-row-btns" style="margin-bottom:0.75rem"><button class="btn btn-outline btn-sm" onclick="arcSaveParents('${id}')">Save parents</button><span class="triage-msg" id="ak-msg-${id}"></span></div>
+    ${rels.length ? `<ul class="arc-kin-list">${rels.map((x, i) => `<li><span><span class="arc-kin-role">${esc(x.role || '')}</span> · ${esc(x.name || '')}${x.note ? ` <span class="arc-kin-note">— ${esc(x.note)}</span>` : ''}${x.source ? ` <span class="arc-kin-note">(${esc(x.source)})</span>` : ''}</span>
+      <button class="btn btn-outline btn-sm" onclick="arcRemoveRelation('${id}', ${i})" aria-label="Remove this relationship">Remove</button></li>`).join('')}</ul>` : '<div class="triage-msg" style="margin-bottom:0.5rem">No relationships recorded yet.</div>'}
+    <div class="arc-kin-form">
+      <input class="form-input" id="ak-role-${id}" placeholder="Role, e.g. Godmother, Sister, Witness" aria-label="Relationship role">
+      <input class="form-input" id="ak-name-${id}" placeholder="Name" aria-label="Name">
+      <input class="form-input" id="ak-note-${id}" placeholder="Note (optional)" aria-label="Note">
+      <input class="form-input" id="ak-source-${id}" placeholder="Source, e.g. baptism 1865" aria-label="Source">
+    </div>
+    <div class="triage-row-btns"><button class="btn btn-outline btn-sm" onclick="arcAddRelation('${id}')">Add relationship</button></div>
+  </div>`;
+}
+
+async function arcSaveResearch(id, fields, msgId) {
+  const msg = msgId ? document.getElementById(msgId) : null;
+  try {
+    await upsertClientAncestorResearch(id, fields);
+    if (ARC_CACHE[id]) ARC_CACHE[id].research = { ...(ARC_CACHE[id].research || {}), ...fields };
+    if (msg) msg.textContent = 'Saved.';
+    return true;
+  } catch (err) {
+    if (msg) msg.textContent = 'Save failed: ' + err.message;
+    return false;
+  }
+}
+
+async function arcSaveParents(id) {
+  const v = (k) => (document.getElementById(`ak-${k}-${id}`)?.value || '').trim() || null;
+  await arcSaveResearch(id, { father: v('father'), mother: v('mother') }, `ak-msg-${id}`);
+}
+
+async function arcAddRelation(id) {
+  const v = (k) => (document.getElementById(`ak-${k}-${id}`)?.value || '').trim();
+  if (!v('role') && !v('name')) return;
+  const rels = [...(ARC_CACHE[id]?.research?.relationships || [])];
+  const item = { role: v('role'), name: v('name') };
+  if (v('note')) item.note = v('note');
+  if (v('source')) item.source = v('source');
+  rels.push(item);
+  if (await arcSaveResearch(id, { relationships: rels })) arcRender(id);
+}
+
+async function arcRemoveRelation(id, idx) {
+  const rels = [...(ARC_CACHE[id]?.research?.relationships || [])];
+  rels.splice(idx, 1);
+  if (await arcSaveResearch(id, { relationships: rels })) arcRender(id);
+}
+
+async function arcToggleHighlight(id, findingId, on) {
+  const ok = await restPatch('client_ancestor_findings', findingId, { highlight: on });
+  if (ok) await arcRefresh(id);
+}
+
+async function arcSaveHighlightNote(id, findingId, note) {
+  await restPatch('client_ancestor_findings', findingId, { highlight_note: (note || '').trim() || null });
+  const f = ARC_CACHE[id]?.findings.find(x => x.id === findingId);
+  if (f) f.highlight_note = (note || '').trim() || null;
 }
 
 async function arcToggle(id) {
@@ -6788,18 +6897,43 @@ async function loadMyWeaving() {
   const visibleIds = rows.filter(r => r.research_visible && r.status !== 'held').map(r => r.id);
   const myFindings = {};
   if (visibleIds.length) {
-    const fr = await rest(`client_ancestor_findings?client_ancestor_id=in.(${visibleIds.join(',')})&select=client_ancestor_id,finding_date,source_type,source_label,summary,url&order=finding_date.asc.nullslast,created_at.asc`).catch(() => []);
+    const fr = await rest(`client_ancestor_findings?client_ancestor_id=in.(${visibleIds.join(',')})&select=client_ancestor_id,finding_date,source_type,source_label,summary,url,highlight,highlight_note&order=finding_date.asc.nullslast,created_at.asc`).catch(() => []);
     (Array.isArray(fr) ? fr : []).forEach(f => { (myFindings[f.client_ancestor_id] = myFindings[f.client_ancestor_id] || []).push(f); });
   }
+  // Parents and relationships for opened research (private notes stay admin-only).
+  const myKin = {};
+  if (visibleIds.length) {
+    try {
+      await ensureFreshToken();
+      const kr = await fetch(`${SUPABASE_URL}/rest/v1/rpc/client_ancestor_kin`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: visibleIds })
+      }).then(r => r.ok ? r.json() : []);
+      (Array.isArray(kr) ? kr : []).forEach(k => { myKin[k.client_ancestor_id] = k; });
+    } catch (_) { /* non-fatal */ }
+  }
+  const kinHtml = (a) => {
+    const k = myKin[a.id]; if (!k) return '';
+    const rels = Array.isArray(k.relationships) ? k.relationships : [];
+    const lines = [];
+    if (k.father) lines.push(`<div><span class="weave-kin-label">Father · </span>${esc(k.father)}</div>`);
+    if (k.mother) lines.push(`<div><span class="weave-kin-label">Mother · </span>${esc(k.mother)}</div>`);
+    rels.forEach(x => lines.push(`<div><span class="weave-kin-label">${esc(x.role || '')} · </span>${esc(x.name || '')}${x.note ? ` <span class="weave-kin-label">— ${esc(x.note)}</span>` : ''}</div>`));
+    return lines.length ? `<div class="weave-kin">${lines.join('')}</div>` : '';
+  };
   const researchRecordHtml = (a) => {
     const list = a.research_visible ? (myFindings[a.id] || []) : [];
-    if (!list.length) return '';
+    const kin = a.research_visible ? kinHtml(a) : '';
+    if (!list.length && !kin) return '';
     return `<details class="weave-record">
       <summary>The research record · ${list.length} source${list.length === 1 ? '' : 's'}</summary>
+      ${kin}
       <div class="weave-record-list">${list.map(f => {
         const head = [f.finding_date, arcSourceLabel(f.source_type), f.source_label].filter(Boolean).map(x => esc(x)).join(' · ');
-        return `<div class="weave-record-item">
-          ${head ? `<div class="weave-record-head">${head}</div>` : ''}
+        return `<div class="weave-record-item${f.highlight ? ' is-highlight' : ''}">
+          ${head ? `<div class="weave-record-head">${f.highlight ? '<span class="weave-record-mark" aria-label="Highlighted">✦</span> ' : ''}${head}</div>` : ''}
+          ${f.highlight && f.highlight_note ? `<div class="finding-highlight">${esc(f.highlight_note)}</div>` : ''}
           ${f.summary ? `<div class="weave-record-text">${esc(f.summary)}</div>` : ''}
           ${f.url ? `<a class="weave-record-link" href="${esc(f.url)}" target="_blank" rel="noopener">Open the record ↗</a>` : ''}
         </div>`;
@@ -8422,36 +8556,68 @@ async function promoteStub(stubId) {
 // AUGMENT EXISTING ANCESTOR
 // ════════════════════════════════════════════════════
 
-function populateAugmentSelector() {
+// Augment lists one owner's ancestors at a time: Christy's archive, or one client's
+// own records (2026-11-17). A client's list holds only her woven and catalog ancestors;
+// intake ancestors are written through Triage → Weave, not Augment.
+let AUG_PRESELECT = null; // { owner, value } set by augmentFromRecord()
+
+async function populateAugmentOwners() {
+  const own = document.getElementById('aug-owner-select');
+  if (!own) return;
+  const keep = AUG_PRESELECT ? AUG_PRESELECT.owner : own.value;
+  const rows = await rest(`client_ancestors?status=in.(weaving,catalog)&keynote_ancestor_ids=is.null&select=client_id,clients(name)`).catch(() => []);
+  const seen = new Map();
+  (Array.isArray(rows) ? rows : []).forEach(r => { if (r.client_id && !seen.has(r.client_id)) seen.set(r.client_id, r.clients?.name || 'Client'); });
+  own.innerHTML = '<option value="">My archive</option>' + [...seen.entries()]
+    .sort((a, b) => a[1].localeCompare(b[1]))
+    .map(([id, name]) => `<option value="${esc(id)}">${esc(name)}</option>`).join('');
+  own.value = seen.has(keep) ? keep : '';
+}
+
+function augOwnerChanged() {
+  const sel = document.getElementById('aug-ancestor-select');
+  if (sel) sel.value = '';
+  populateAugmentSelector();
+  loadAncestorForAugment();
+}
+
+async function augmentFromRecord(caId, clientId) {
+  AUG_PRESELECT = { owner: clientId, value: 'ca:' + caId };
+  showPanel('panel-ancestor-research');
+  await initAncestorResearch();
+  showAugmentMode();
+}
+
+async function populateAugmentSelector() {
   const sel = document.getElementById('aug-ancestor-select');
   if (!sel) return;
-  const current = sel.value;
+  await populateAugmentOwners();
+  const owner = document.getElementById('aug-owner-select')?.value || '';
+  const current = AUG_PRESELECT ? AUG_PRESELECT.value : sel.value;
+  AUG_PRESELECT = null;
   sel.innerHTML = '<option value="">— Choose an ancestor —</option>';
-  [...allAncestors]
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .forEach(a => {
+
+  if (!owner) {
+    [...allAncestors]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = `${a.name}${a.dates ? ' · ' + a.dates : ''} (${a.status || 'catalog'})`;
+        if (a.id === current) opt.selected = true;
+        sel.appendChild(opt);
+      });
+  } else {
+    const rows = await rest(`client_ancestors?client_id=eq.${owner}&status=in.(weaving,catalog)&keynote_ancestor_ids=is.null&select=id,name,dates,status,lineage_side&order=sort_year.asc.nullslast,name.asc`).catch(() => []);
+    (Array.isArray(rows) ? rows : []).forEach(r => {
       const opt = document.createElement('option');
-      opt.value = a.id;
-      opt.textContent = `${a.name}${a.dates ? ' · ' + a.dates : ''} (${a.status || 'catalog'})`;
-      if (a.id === current) opt.selected = true;
+      opt.value = 'ca:' + r.id;
+      opt.textContent = `${r.name}${r.dates ? ' · ' + r.dates : ''} (${[r.status, r.lineage_side].filter(Boolean).join(', ')})`;
+      if (opt.value === current) opt.selected = true;
       sel.appendChild(opt);
     });
-
-  // Client Weavings: personal records (not linked to the shared archive)
-  rest(`client_ancestors?ancestor_id=is.null&status=in.(weaving,catalog)&keynote_ancestor_ids=is.null&select=id,name,dates,clients(name)&order=name.asc`)
-    .then(rows => {
-      if (!Array.isArray(rows) || !rows.length) return;
-      const grp = document.createElement('optgroup');
-      grp.label = 'Client Weavings · personal records';
-      rows.forEach(r => {
-        const opt = document.createElement('option');
-        opt.value = 'ca:' + r.id;
-        opt.textContent = `${r.name}${r.dates ? ' · ' + r.dates : ''} (${r.clients?.name || 'client'})`;
-        if (opt.value === current) opt.selected = true;
-        grp.appendChild(opt);
-      });
-      sel.appendChild(grp);
-    }).catch(() => {});
+  }
+  if (sel.value && sel.value === current) loadAncestorForAugment();
 
   // Wire the also-log checkbox once
   const cb = document.getElementById('aug-also-log-check');
