@@ -5454,19 +5454,20 @@ function arcActionsHtml(id, d, layers, weaveHref) {
   } else if (prev) {
     advice.push([`Reassessed: record stays ${esc(res.documentation_depth || '—')}.`, '']);
   }
-  if (findings.length && sinceAssess) advice.push([`${sinceAssess} finding${sinceAssess === 1 ? '' : 's'} added since the last assessment${res.assessed_at ? ' (' + esc(arcDate(res.assessed_at)) + ')' : ''}.`, `<button class="btn btn-outline btn-sm" onclick="arcReassess('${id}', this)">Reassess</button>`]);
+  if (!r.ancestor_id && res.assessed_at && findings.length && sinceAssess) advice.push([`${sinceAssess} finding${sinceAssess === 1 ? '' : 's'} added since the last Disambiguation (${esc(arcDate(res.assessed_at))}).`, `<button class="btn btn-outline btn-sm" onclick="arcDisambiguate('${id}', '', true)">Re-check identity</button>`]);
   if (writable && sinceWriting) advice.push([`${sinceWriting} finding${sinceWriting === 1 ? '' : 's'} logged since the profile was written (${esc(arcDate(lastWritten))}).`, `<button class="btn btn-outline btn-sm" onclick="augmentFromRecord('${id}','${r.client_id}')">Augment</button>`]);
   if (r.status === 'catalog' && DEPTH[res.documentation_depth] >= 2) advice.push([`The record is now ${esc(res.documentation_depth)}: it may carry a full Weaving profile. Move it, then Augment to write the layers.`, `<button class="btn btn-outline btn-sm" onclick="arcMoveToWeaving('${id}')">Move to Weaving</button>`]);
   if (r.status === 'weaving' && res.documentation_depth === 'thin' && prev) advice.push(['The record is thin for a full Weaving profile. Keep it, or place it in the Catalog.', `<button class="btn btn-outline btn-sm" onclick="arcMoveToCatalog('${id}')">Move to Catalog</button>`]);
   const inResearch = ['intake_stub', 'held'].includes(r.status);
   const linked = !!r.ancestor_id;
   const dis = res.disambiguation || null;
-  if (!linked && inResearch && !res.disambiguated_at && dis?.state !== 'running' && dis?.state !== 'done') advice.unshift(['Not yet disambiguated: identity has not been checked against the records.', `<button class="btn btn-outline btn-sm" onclick="arcDisambiguate('${id}')">Disambiguate</button>`]);
+  if (!linked && inResearch && !res.disambiguated_at && dis?.state !== 'running' && dis?.state !== 'done') advice.unshift(['Not yet disambiguated: identity has not been checked against the records.', `<button class="btn btn-outline btn-sm" onclick="arcDisambiguate('${id}')">Disambiguation</button>`]);
+  if (!linked && inResearch && res.disambiguated_at && !res.researched_at && res.research_run?.state !== 'running' && !(res.research_run?.state === 'done' && !res.research_run.saved_at && !res.research_run.discarded_at)) advice.unshift(['Identity saved. Next: Research gathers the vital records, life history and historical context before weaving.', `<button class="btn btn-outline btn-sm" onclick="arcResearch('${id}')">Research</button>`]);
   return `<div class="arc-actions">
-      ${!linked ? `<button class="btn ${inResearch && !res.disambiguated_at ? 'btn-gold' : 'btn-outline'} btn-sm" id="arc-dis-btn-${id}" onclick="arcDisambiguate('${id}')" ${dis?.state === 'running' ? 'disabled' : ''} title="Search the records to establish who this is and who they could be confused with">${dis?.state === 'running' ? 'Disambiguating…' : res.disambiguated_at ? 'Disambiguate again' : 'Disambiguate'}</button>` : ''}
+      ${!linked ? `<button class="btn ${inResearch && !res.disambiguated_at ? 'btn-gold' : 'btn-outline'} btn-sm" id="arc-dis-btn-${id}" onclick="arcDisambiguate('${id}')" ${dis?.state === 'running' ? 'disabled' : ''} title="Establish who this is and who they could be confused with">${dis?.state === 'running' ? 'Disambiguating…' : res.disambiguated_at ? 'Disambiguation again' : 'Disambiguation'}</button>` : ''}
+      ${!linked && (res.disambiguated_at || res.research_run) ? `<button class="btn ${inResearch && res.disambiguated_at && !res.researched_at ? 'btn-gold' : 'btn-outline'} btn-sm" id="arc-res-btn-${id}" onclick="arcResearch('${id}')" ${res.research_run?.state === 'running' ? 'disabled' : ''} title="Vital records, life history, records held offline and historical context">${res.research_run?.state === 'running' ? 'Researching…' : res.researched_at ? 'Research again' : 'Research'}</button>` : ''}
       ${inResearch ? `<button class="btn btn-gold btn-sm" onclick="lwWeave('${id}')" title="Write this ancestor from the research into the client's Weaving or Catalog">Weave</button>` : ''}
       ${writable ? `<button class="btn btn-gold btn-sm" onclick="augmentFromRecord('${id}','${r.client_id}')">Augment with new findings</button>` : ''}
-      <button class="btn btn-outline btn-sm" id="arc-reassess-${id}" onclick="arcReassess('${id}', this)">${res.assessed_at ? 'Reassess record' : 'Assess record'}</button>
       ${writable && !linked ? `<button class="btn btn-outline btn-sm" onclick="arcEditText('${id}')">Edit text</button>` : ''}
       ${layers.length && !inResearch ? `<a class="btn btn-outline btn-sm" href="${weaveHref}" target="_blank" rel="noopener">Open in the Weaving ↗</a>` : ''}
       ${r.status === 'intake_stub' ? `<button class="btn btn-outline btn-sm" onclick="lwSetStatus('${id}','held')" title="Keep the research; hide this ancestor from the client">Hold</button>` : ''}
@@ -5672,25 +5673,28 @@ async function arcSaveReading(id, btn) {
   }
 }
 
-// ── Disambiguation (2026-11-17): the first step of research. Searches the records and published
-// trees, names who this most likely is and who they could be confused with, checks what is already
-// recorded for conflicts, and offers findings. Runs in the background (edge function
-// disambiguate-ancestor); the result waits in the research record until it is reviewed. ──
+// ── Disambiguation and Research (2026-11-18) ──
+// Disambiguation: who this is. Searches vital records and trees, compares the people who could be
+// confused with the ancestor, checks for conflicts, and proposes the record's fields and relatives.
+// Re-check reads only what is saved. Research (after Disambiguation is saved): vital records of the
+// person and family, life history and records held offline, and the historical context (terroir).
+// Both run in the background (edge function ancestor-research) and wait in the record for review;
+// nothing is saved until Christy saves it.
 const ARC_DIS_POLL = {};
 const DIS_EVIDENCE_LABEL = { 'original record': 'Original record', index: 'Index', 'family tree': 'Family tree · lead only', published: 'Published', inferred: 'Inferred' };
 const DIS_STRONG = ['original record', 'index', 'published'];
+const RUN_COL = { disambiguation: 'disambiguation', research: 'research_run' };
 
-async function arcDisambiguate(id, focus) {
-  const btn = document.getElementById(`arc-dis-btn-${id}`);
+async function arcStartRun(id, kind, opts = {}) {
+  const btn = document.getElementById(kind === 'research' ? `arc-res-btn-${id}` : `arc-dis-btn-${id}`);
   if (btn) { btn.disabled = true; btn.textContent = 'Starting…'; }
   try {
     const fresh = await ensureFreshToken();
     if (!fresh) { forceReauth('Your session has expired — please sign in again.'); return; }
-    const f = focus != null ? focus : (document.getElementById(`dis-focus-${id}`)?.value || '').trim();
-    const call = () => fetch(`${SUPABASE_URL}/functions/v1/disambiguate-ancestor`, {
+    const call = () => fetch(`${SUPABASE_URL}/functions/v1/ancestor-research`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}`, 'apikey': SUPABASE_ANON_KEY },
-      body: JSON.stringify({ client_ancestor_id: id, focus: f })
+      body: JSON.stringify({ client_ancestor_id: id, kind, recheck: !!opts.recheck, focus: opts.focus || '' })
     });
     let res = await call();
     if (res.status === 401) { if (await ensureFreshToken()) res = await call(); }
@@ -5698,37 +5702,62 @@ async function arcDisambiguate(id, focus) {
     if (!res.ok || data.error) throw new Error(data.error || `Request failed (${res.status})`);
     await arcLoad(id);
     if (ARC_OPEN.has(id)) arcRender(id);
-    arcDisEnsurePoll(id);
+    arcEnsurePoll(id, kind);
   } catch (err) {
     const msg = document.getElementById(`arc-act-msg-${id}`);
-    if (msg) msg.textContent = 'Disambiguation could not start: ' + err.message;
-    if (btn) { btn.disabled = false; btn.textContent = 'Disambiguate'; }
+    if (msg) msg.textContent = (kind === 'research' ? 'Research' : 'Disambiguation') + ' could not start: ' + err.message;
+    if (btn) { btn.disabled = false; btn.textContent = kind === 'research' ? 'Research' : 'Disambiguation'; }
   }
 }
+function arcDisambiguate(id, focus, recheck) {
+  const f = focus != null ? focus : (document.getElementById(`dis-focus-${id}`)?.value || '').trim();
+  const rc = recheck != null ? recheck : !!document.getElementById(`dis-recheck-${id}`)?.checked;
+  return arcStartRun(id, 'disambiguation', { focus: f, recheck: rc });
+}
+function arcResearch(id) {
+  return arcStartRun(id, 'research', { focus: (document.getElementById(`res-focus-${id}`)?.value || '').trim() });
+}
+function arcDisEnsurePoll(id) { arcEnsurePoll(id, 'disambiguation'); }
 
-function arcDisEnsurePoll(id) {
-  if (ARC_DIS_POLL[id]) return;
+function arcEnsurePoll(id, kind) {
+  const key = id + ':' + kind;
+  if (ARC_DIS_POLL[key]) return;
+  const col = RUN_COL[kind];
   const started = Date.now();
-  ARC_DIS_POLL[id] = setInterval(async () => {
+  let lastStage = null;
+  ARC_DIS_POLL[key] = setInterval(async () => {
     try {
-      const r = await rest(`client_ancestor_research?client_ancestor_id=eq.${id}&select=disambiguation`);
-      const dis = Array.isArray(r) ? r[0]?.disambiguation : null;
-      const timedOut = Date.now() - started > 12 * 60 * 1000;
-      if (!dis || dis.state !== 'running' || timedOut) {
-        clearInterval(ARC_DIS_POLL[id]); delete ARC_DIS_POLL[id];
-        if (dis && dis.state === 'running' && timedOut && ARC_CACHE[id]) {
-          ARC_CACHE[id].research = { ...(ARC_CACHE[id].research || {}), disambiguation: { ...dis, state: 'error', error: 'No result after 12 minutes. The search may have been cut off; run it again.' } };
-          if (ARC_OPEN.has(id)) arcRender(id);
-          return;
+      const r = await rest(`client_ancestor_research?client_ancestor_id=eq.${id}&select=${col}`);
+      const run = Array.isArray(r) ? r[0]?.[col] : null;
+      const timedOut = Date.now() - started > 20 * 60 * 1000;
+      if (run && run.state === 'running' && !timedOut) {
+        if (run.stage !== lastStage) {
+          lastStage = run.stage;
+          if (ARC_CACHE[id]) { ARC_CACHE[id].research = { ...(ARC_CACHE[id].research || {}), [col]: run }; if (ARC_OPEN.has(id)) arcRender(id); }
         }
-        await arcLoad(id);
-        if (ARC_OPEN.has(id)) arcRender(id);
+        return;
       }
+      clearInterval(ARC_DIS_POLL[key]); delete ARC_DIS_POLL[key];
+      if (run && run.state === 'running' && timedOut && ARC_CACHE[id]) {
+        ARC_CACHE[id].research = { ...(ARC_CACHE[id].research || {}), [col]: { ...run, state: 'error', error: 'No result after 20 minutes. Run it again.' } };
+        if (ARC_OPEN.has(id)) arcRender(id);
+        return;
+      }
+      await arcLoad(id);
+      if (ARC_OPEN.has(id)) arcRender(id);
+      if (LW.client) lwRefresh();
     } catch { /* keep polling */ }
   }, 6000);
 }
 
 function disTime(t) { try { return new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch { return ''; } }
+function runProgressHtml(run, what) {
+  const step = run.steps ? ` · step ${run.step || 1} of ${run.steps}` : '';
+  return `<div class="dis-box"><span class="loading-glyph">✦</span> ${esc(what)}${step}: ${esc(run.stage_label || 'working')}${run.focus ? ' · focus: ' + esc(run.focus) : ''}. Started ${esc(disTime(run.started_at))}. You can close this record or leave the page; the result waits here for review.</div>`;
+}
+function runMetaHtml(run) {
+  return `<div class="dis-meta">${run.mode === 'recheck' ? 'Re-checked saved findings' : 'Searched'} ${esc(disTime(run.finished_at))}${run.searches ? ` · ${run.searches} searches` : ''}${run.urls?.length ? ` · ${run.urls.length} pages seen` : ''}${run.focus ? ' · focus: ' + esc(run.focus) : ''}</div>`;
+}
 
 function arcDisIdentityHtml(g) {
   const id = g.identity || {};
@@ -5751,130 +5780,236 @@ function arcDisConflictsHtml(g) {
   return `<h5>Conflicts in what is recorded</h5><ul class="dis-list">${c.map(x => `<li class="dis-conflict">${esc(x.issue)}${x.between ? `<div class="dis-meta">${esc(x.between)}</div>` : ''}${x.suggestion ? `<div>${esc(x.suggestion)}</div>` : ''}</li>`).join('')}</ul>`;
 }
 
+// Record fields and relatives offered by a run, with tick boxes. p = 'dis' | 'res'.
+const ARC_FIELD_LABELS = [['name', 'Name'], ['dates', 'Dates'], ['location', 'Place'], ['occupation', 'Occupation'], ['sort_year', 'Year for ordering']];
+function arcFieldOffers(row, rf) {
+  return ARC_FIELD_LABELS.map(([k, l]) => {
+    const v = rf?.[k]; if (v == null || v === '') return null;
+    const cur = row[k];
+    if (cur != null && String(cur).trim() === String(v).trim()) return null;
+    return { k, l, v, cur };
+  }).filter(Boolean);
+}
+function arcRelativeOffers(res, rels) {
+  const have = Array.isArray(res.relationships) ? res.relationships : [];
+  return (rels || []).filter(x => x.name).map(x => {
+    const role = x.role || 'other';
+    if (role === 'father' || role === 'mother') {
+      const cur = res[role];
+      if (cur && normName(cur).startsWith(normName(x.name))) return null;
+      return { ...x, cur: cur || '' };
+    }
+    const R = role.charAt(0).toUpperCase() + role.slice(1);
+    if (have.some(h => h.role === R && normName(h.name) === normName(x.name))) return null;
+    return { ...x, cur: '' };
+  }).filter(Boolean);
+}
+function arcFieldsRelativesHtml(p, id, row, res, rf, rels) {
+  const fo = arcFieldOffers(row, rf), ro = arcRelativeOffers(res, rels);
+  ARC_CACHE[id][p + 'Offers'] = { fo, ro };
+  return `${fo.length ? `<h5>Record fields</h5>${fo.map((o, i) => `<label style="display:flex;gap:0.5rem;align-items:baseline;font-size:15px"><input type="checkbox" id="${p}-fld-${id}-${i}"${!o.cur ? ' checked' : ''}> ${esc(o.l)}: ${esc(String(o.v))}${o.cur ? ` <span class="dis-meta">(replaces ${esc(String(o.cur))})</span>` : ''}</label>`).join('')}` : ''}
+    ${ro.length ? `<h5>Relatives · tick to add to Family</h5><ul class="arc-kin-list">${ro.map((x, i) => `<li><label style="display:flex;gap:0.5rem;align-items:baseline"><input type="checkbox" id="${p}-rel-${id}-${i}"${!x.cur ? ' checked' : ''}><span><span class="arc-kin-role">${esc(x.role)}</span> · ${esc(x.name)}${x.dates ? ' (' + esc(x.dates) + ')' : ''}${x.note ? ` <span class="arc-kin-note">— ${esc(x.note)}</span>` : ''}${x.source ? ` <span class="arc-kin-note">[${esc(x.source)}]</span>` : ''}${x.cur ? ` <span class="dis-meta">(replaces ${esc(x.cur)})</span>` : ''}</span></label></li>`).join('')}</ul>` : ''}`;
+}
+function arcCollectFieldsRelatives(p, id, res, fields, rowPatch) {
+  const offers = ARC_CACHE[id]?.[p + 'Offers'] || { fo: [], ro: [] };
+  offers.fo.forEach((o, i) => { if (document.getElementById(`${p}-fld-${id}-${i}`)?.checked) rowPatch[o.k] = o.k === 'sort_year' ? Number(o.v) : o.v; });
+  const rels = Array.isArray(fields.relationships) ? fields.relationships : (Array.isArray(res.relationships) ? [...res.relationships] : []);
+  let changed = false;
+  offers.ro.forEach((x, i) => {
+    if (!document.getElementById(`${p}-rel-${id}-${i}`)?.checked) return;
+    const full = [x.name, x.dates ? `(${x.dates})` : ''].filter(Boolean).join(' ');
+    if (x.role === 'father' || x.role === 'mother') { fields[x.role] = full; return; }
+    const R = x.role.charAt(0).toUpperCase() + x.role.slice(1);
+    const note = [x.dates, x.note].filter(Boolean).join(' · ');
+    rels.push({ role: R, name: x.name, ...(note ? { note } : {}), ...(x.source ? { source: x.source } : {}) });
+    changed = true;
+  });
+  if (changed) fields.relationships = rels;
+}
+function arcFindingsPickHtml(p, id, list, offset = 0) {
+  return `<ul class="dis-list">${list.map((f, j) => {
+    const i = j + offset;
+    const strong = DIS_STRONG.includes(f.evidence);
+    const pre = strong && f.matches !== 'unclear' && !f.link_unconfirmed;
+    return `<li class="dis-find"><label><input type="checkbox" id="${p}-f-${id}-${i}"${pre ? ' checked' : ''}><span>
+      <span class="dis-tag ${strong ? 'dis-strong' : 'dis-weak'}">${esc(DIS_EVIDENCE_LABEL[f.evidence] || f.evidence)}</span>${f.matches !== 'yes' ? `<span class="dis-tag">${esc(f.matches === 'likely' ? 'likely match' : 'match unclear')}</span>` : ''}
+      <strong style="font-weight:500">${esc([f.date, f.source_label].filter(Boolean).join(' · ') || arcSourceLabel(f.source_type) || 'Finding')}</strong>
+      <div>${esc(f.summary)}</div>
+      ${f.people?.length ? `<div class="dis-meta">${f.people.map(x => `${esc(x.role)}: ${esc(x.name)}`).join(' · ')}</div>` : ''}
+      ${f.significant ? `<div class="dis-meta">✦ ${esc(f.significant)}</div>` : ''}
+      ${f.url ? `<a class="dis-meta" href="${esc(f.url)}" target="_blank" rel="noopener">Open the source ↗</a>` : f.link_unconfirmed ? '<div class="dis-meta">The link given did not come from the search results, so it was removed. Find the record before keeping this.</div>' : ''}
+    </span></label></li>`;
+  }).join('')}</ul>`;
+}
+async function arcSaveFindings(p, id, list, offset = 0) {
+  let n = 0;
+  for (let j = 0; j < list.length; j++) {
+    if (!document.getElementById(`${p}-f-${id}-${j + offset}`)?.checked) continue;
+    const f = list[j], dt = rrNormDate(f.date), ev = DIS_EVIDENCE_LABEL[f.evidence] || f.evidence;
+    const saved = await restPost('client_ancestor_findings', {
+      client_ancestor_id: id, finding_date: dt.date, source_type: f.source_type || null,
+      source_label: ((f.source_label || '') + dt.note + (ev ? ` [${ev}]` : '')).trim() || null,
+      summary: f.summary || null, url: f.url || null, highlight: !!f.significant, highlight_note: f.significant || null
+    });
+    if (!Array.isArray(saved) || !saved[0]?.id) throw new Error(saved?.message || 'a finding could not be saved');
+    n++;
+  }
+  return n;
+}
+async function arcApplyRowPatch(id, rowPatch) {
+  if (!Object.keys(rowPatch).length) return;
+  const ok = await restPatch('client_ancestors', id, rowPatch);
+  if (!ok) throw new Error('the record fields could not be updated');
+  const r = ARC_ROWS.find(x => x.id === id); if (r) Object.assign(r, rowPatch);
+  const l = (LW.rows || []).find(x => x.id === id); if (l) Object.assign(l, rowPatch);
+}
+
+// ── Disambiguation section ──
 function arcDisHtml(id, d) {
   const r = d.row, res = d.research || {};
   if (r.ancestor_id) return '';
   const dis = res.disambiguation;
-  const focusInput = `<input class="form-input" id="dis-focus-${id}" placeholder="Focus for the search (optional), e.g. the Covilhã branch, or her second marriage" aria-label="Focus for the search" style="margin-top:0.5rem">`;
-  const head = '<h4>Identity · disambiguation</h4>';
+  const opts = `<input class="form-input" id="dis-focus-${id}" placeholder="Focus for the search (optional), e.g. the Covilhã branch, or her second marriage" aria-label="Focus for the search" style="margin-top:0.5rem">
+    <label style="display:flex;gap:0.5rem;align-items:baseline;font-size:15px;margin-top:0.4rem"><input type="checkbox" id="dis-recheck-${id}"${dis ? '' : ' disabled'}> Re-check saved findings only (no search, about a minute)</label>`;
+  const head = '<h4>Disambiguation · who this is</h4>';
   if (!dis) {
-    return `<div>${head}<div class="triage-msg">Not yet disambiguated. Disambiguate searches the records and published trees from what is known here (name, dates, place, the client's words, family and the rest of this client's lineage), then shows who this most likely is, who else could be mistaken for them, any conflicts, and findings to keep. It takes a few minutes and runs while you work elsewhere.</div>${focusInput}</div>`;
+    return `<div>${head}<div class="triage-msg">Not yet disambiguated. Disambiguation searches vital records and family trees from what is known here, then shows who this most likely is, who else could be mistaken for them, any conflicts, the record's fields and relatives, and findings to keep. A few minutes, in the background.</div>${opts}</div>`;
   }
-  if (dis.state === 'running') {
-    return `<div>${head}<div class="dis-box"><span class="loading-glyph">✦</span> Searching the records${dis.focus ? ' · focus: ' + esc(dis.focus) : ''}. Started ${esc(disTime(dis.started_at))}. You can close this record or leave the page; the result waits here for review.</div></div>`;
-  }
-  if (dis.state === 'error') {
-    return `<div>${head}<div class="dis-box"><div class="triage-msg" style="color:var(--red)">The search did not finish: ${esc(dis.error || 'unknown error')}</div>${focusInput}<div class="triage-row-btns"><button class="btn btn-outline btn-sm" onclick="arcDisambiguate('${id}')">Run it again</button></div></div></div>`;
-  }
+  if (dis.state === 'running') return `<div>${head}${runProgressHtml(dis, dis.mode === 'recheck' ? 'Re-checking' : 'Disambiguating')}</div>`;
+  if (dis.state === 'error') return `<div>${head}<div class="dis-box"><div class="triage-msg" style="color:var(--red)">Disambiguation did not finish: ${esc(dis.error || 'unknown error')}</div>${opts}<div class="triage-row-btns"><button class="btn btn-outline btn-sm" onclick="arcDisambiguate('${id}')">Run it again</button></div></div></div>`;
   const g = dis.result || {};
-  const vLabel = TRIAGE_VERIFY_LABEL[g.verification_status] || g.verification_status || '';
-  const badge = `<span class="verify-badge verify-${esc(g.verification_status || 'ambiguous')}">${esc(vLabel)}</span>`;
-  const meta = `<div class="dis-meta">Searched ${esc(disTime(dis.finished_at))}${dis.searches ? ` · ${dis.searches} searches` : ''}${dis.sources_seen ? ` · ${dis.sources_seen} pages seen` : ''}${dis.focus ? ' · focus: ' + esc(dis.focus) : ''}</div>`;
-  const reviewed = dis.saved_at || dis.discarded_at;
-  if (reviewed) {
-    return `<div>${head}<div class="dis-box">
-      <div class="triage-status">${badge}${g.documentation_depth ? `<span class="triage-pill">Record: ${esc(g.documentation_depth)}</span>` : ''}</div>
-      ${meta}
-      ${dis.discarded_at && !dis.saved_at ? '<div class="triage-msg">This search was set aside without saving.</div>' : ''}
-      ${g.verification_note ? `<p style="margin:0.6rem 0">${esc(g.verification_note)}</p>` : ''}
-      ${arcDisIdentityHtml(g)}
-      ${arcDisCandidatesHtml(g)}
-      ${arcDisConflictsHtml(g)}
-      ${focusInput}
-    </div></div>`;
-  }
-  const kin = res || {};
-  const idn = g.identity || {};
+  const badge = `<span class="verify-badge verify-${esc(g.verification_status || 'ambiguous')}">${esc(TRIAGE_VERIFY_LABEL[g.verification_status] || g.verification_status || '')}</span>`;
+  const pills = `<div class="triage-status">${badge}${g.documentation_depth ? `<span class="triage-pill">Record: ${esc(g.documentation_depth)}</span>` : ''}${dis.saved_at ? '<span class="triage-pill">Saved</span>' : dis.discarded_at ? '<span class="triage-pill">Set aside</span>' : '<span class="triage-pill">Ready to review</span>'}</div>`;
+  const body = `${pills}${runMetaHtml(dis)}${g.verification_note ? `<p style="margin:0.6rem 0">${esc(g.verification_note)}</p>` : ''}${arcDisIdentityHtml(g)}${arcDisCandidatesHtml(g)}${arcDisConflictsHtml(g)}`;
+  if (dis.saved_at || dis.discarded_at) return `<div>${head}<div class="dis-box">${body}${opts}</div></div>`;
   const findings = Array.isArray(g.findings) ? g.findings : [];
+  const rels = [...(g.relatives || [])];
+  const idn = g.identity || {};
+  if (idn.father && !rels.some(x => x.role === 'father')) rels.unshift({ role: 'father', name: idn.father });
+  if (idn.mother && !rels.some(x => x.role === 'mother')) rels.unshift({ role: 'mother', name: idn.mother });
   const next = Array.isArray(g.next_searches) ? g.next_searches : [];
-  const parentRows = [['father', idn.father, kin.father], ['mother', idn.mother, kin.mother]].filter(([, v]) => v);
-  return `<div>${head}<div class="dis-box">
-    <div class="triage-status">${badge}${g.documentation_depth ? `<span class="triage-pill">Record: ${esc(g.documentation_depth)}</span>` : ''}<span class="triage-pill">Ready to review</span></div>
-    ${meta}
-    ${g.verification_note ? `<p style="margin:0.6rem 0">${esc(g.verification_note)}</p>` : ''}
-    ${arcDisIdentityHtml(g)}
-    ${arcDisCandidatesHtml(g)}
-    ${arcDisConflictsHtml(g)}
-    ${findings.length ? `<h5>Findings · tick to keep</h5><ul class="dis-list">${findings.map((f, i) => {
-      const strong = DIS_STRONG.includes(f.evidence);
-      const pre = strong && f.matches !== 'unclear' && !f.link_unconfirmed;
-      return `<li class="dis-find"><label><input type="checkbox" id="dis-f-${id}-${i}"${pre ? ' checked' : ''}><span>
-        <span class="dis-tag ${strong ? 'dis-strong' : 'dis-weak'}">${esc(DIS_EVIDENCE_LABEL[f.evidence] || f.evidence)}</span>${f.matches !== 'yes' ? `<span class="dis-tag">${esc(f.matches === 'likely' ? 'likely match' : 'match unclear')}</span>` : ''}
-        <strong style="font-weight:500">${esc([f.date, f.source_label].filter(Boolean).join(' · ') || arcSourceLabel(f.source_type) || 'Finding')}</strong>
-        <div>${esc(f.summary)}</div>
-        ${f.people?.length ? `<div class="dis-meta">${f.people.map(p => `${esc(p.role)}: ${esc(p.name)}`).join(' · ')}</div>` : ''}
-        ${f.significant ? `<div class="dis-meta">✦ ${esc(f.significant)}</div>` : ''}
-        ${f.url ? `<a class="dis-meta" href="${esc(f.url)}" target="_blank" rel="noopener">Open the source ↗</a>` : f.link_unconfirmed ? '<div class="dis-meta">The link given did not come from the search results, so it was removed. Find the record before keeping this.</div>' : ''}
-      </span></label></li>`;
-    }).join('')}</ul>` : '<div class="triage-msg" style="margin-top:0.6rem">No findings came back from the search.</div>'}
-    ${parentRows.length ? `<h5>Parents</h5>${parentRows.map(([k, v, cur]) => `<label style="display:flex;gap:0.5rem;align-items:baseline;font-size:15px"><input type="checkbox" id="dis-${k}-${id}"${!cur ? ' checked' : ''}> ${k === 'father' ? 'Father' : 'Mother'}: ${esc(v)}${cur ? ` <span class="dis-meta">(replaces ${esc(cur)})</span>` : ''}</label>`).join('')}` : ''}
-    ${findings.some(f => f.people?.length) ? `<label style="display:flex;gap:0.5rem;align-items:baseline;font-size:15px;margin-top:0.5rem"><input type="checkbox" id="dis-people-${id}" checked> Add the godparents, witnesses and other relatives named in the kept findings to Family</label>` : ''}
+  return `<div>${head}<div class="dis-box">${body}
+    ${arcFieldsRelativesHtml('dis', id, r, res, g.record_fields, rels)}
+    ${findings.length ? `<h5>Findings · tick to keep</h5>${arcFindingsPickHtml('dis', id, findings)}` : (dis.mode === 'recheck' ? '' : '<div class="triage-msg" style="margin-top:0.6rem">No new findings came back from the search.</div>')}
     ${next.length ? `<h5>Next searches</h5><label style="display:flex;gap:0.5rem;align-items:flex-start;font-size:15px;margin-bottom:0.25rem"><input type="checkbox" id="dis-next-${id}" checked> Add these to Still to find:</label><ol class="triage-prompts">${next.map(n => `<li>${esc(n)}</li>`).join('')}</ol>` : ''}
-    <div class="triage-msg" style="margin-top:0.5rem">Saving keeps the ticked findings, sets the identity status and record depth on this ancestor, and keeps the comparison above with the record.</div>
-    <div class="triage-row-btns"><button class="btn btn-gold btn-sm" onclick="arcSaveDisambiguation('${id}', this)">Save to the record</button><button class="btn btn-outline btn-sm" onclick="arcDiscardDisambiguation('${id}')">Set aside</button><span class="triage-msg" id="dis-msg-${id}"></span></div>
+    <div class="triage-msg" style="margin-top:0.5rem">Saving confirms the identity and keeps what is ticked. Research then becomes available.</div>
+    <div class="triage-row-btns"><button class="btn btn-gold btn-sm" onclick="arcSaveDisambiguation('${id}', this)">Save to the record</button><button class="btn btn-outline btn-sm" onclick="arcDiscardRun('${id}','disambiguation')">Set aside</button><span class="triage-msg" id="dis-msg-${id}"></span></div>
   </div></div>`;
 }
 
 async function arcSaveDisambiguation(id, btn) {
   const d = ARC_CACHE[id]; if (!d) return;
   const res = d.research || {}, dis = res.disambiguation || {}, g = dis.result || {};
-  const on = (k) => !!document.getElementById(k)?.checked;
   const msg = document.getElementById(`dis-msg-${id}`);
   btn.disabled = true;
   try {
-    const findings = Array.isArray(g.findings) ? g.findings : [];
-    const kept = findings.filter((f, i) => on(`dis-f-${id}-${i}`));
-    for (const f of kept) {
-      const dt = rrNormDate(f.date);
-      const ev = DIS_EVIDENCE_LABEL[f.evidence] || f.evidence;
-      const saved = await restPost('client_ancestor_findings', {
-        client_ancestor_id: id, finding_date: dt.date, source_type: f.source_type || null,
-        source_label: ((f.source_label || '') + dt.note + (ev ? ` [${ev}]` : '')).trim() || null,
-        summary: f.summary || null, url: f.url || null,
-        highlight: !!f.significant, highlight_note: f.significant || null
-      });
-      if (!Array.isArray(saved) || !saved[0]?.id) throw new Error(saved?.message || 'a finding could not be saved');
-    }
+    const kept = await arcSaveFindings('dis', id, Array.isArray(g.findings) ? g.findings : []);
+    const now = new Date().toISOString();
     const fields = {
-      verification_status: g.verification_status || 'ambiguous',
-      verification_note: g.verification_note || null,
+      verification_status: g.verification_status || 'ambiguous', verification_note: g.verification_note || null,
       documentation_depth: g.documentation_depth || res.documentation_depth || null,
-      assessed_at: new Date().toISOString(),
-      disambiguated_at: new Date().toISOString(),
-      disambiguation: { ...dis, saved_at: new Date().toISOString(), kept: kept.length }
+      assessed_at: now, disambiguated_at: now, disambiguation: { ...dis, saved_at: now, kept }
     };
-    const idn = g.identity || {};
-    if (idn.father && on(`dis-father-${id}`)) fields.father = idn.father;
-    if (idn.mother && on(`dis-mother-${id}`)) fields.mother = idn.mother;
-    if (on(`dis-people-${id}`)) {
-      const rels = Array.isArray(res.relationships) ? [...res.relationships] : [];
-      const before = rels.length;
-      kept.forEach(f => (f.people || []).forEach(p => {
-        if (['father', 'mother'].includes(p.role)) return;
-        const role = p.role.charAt(0).toUpperCase() + p.role.slice(1);
-        if (!rels.some(x => x.role === role && normName(x.name) === normName(p.name))) rels.push({ role, name: p.name, ...(p.note ? { note: p.note } : {}), source: (f.source_type || 'record') + (f.date ? ' ' + String(f.date).slice(0, 4) : '') });
-      }));
-      if (rels.length !== before) fields.relationships = rels;
-    }
-    if (on(`dis-next-${id}`) && Array.isArray(g.next_searches) && g.next_searches.length) {
+    const rowPatch = {};
+    arcCollectFieldsRelatives('dis', id, res, fields, rowPatch);
+    if (document.getElementById(`dis-next-${id}`)?.checked && g.next_searches?.length) {
       const cur = Array.isArray(res.research_prompts) ? res.research_prompts : [];
       fields.research_prompts = [...cur, ...g.next_searches.filter(n => !cur.includes(n))];
     }
     ARC_PREV[id] = { depth: res.documentation_depth || null, status: res.verification_status || null };
+    await arcApplyRowPatch(id, rowPatch);
     await upsertClientAncestorResearch(id, fields);
     await arcRefresh(id);
+    if (LW.client) lwRefresh();
   } catch (err) {
     if (msg) msg.textContent = 'Save failed: ' + err.message;
     btn.disabled = false;
   }
 }
 
-async function arcDiscardDisambiguation(id) {
+async function arcDiscardRun(id, kind) {
   const d = ARC_CACHE[id]; if (!d) return;
-  const dis = d.research?.disambiguation || {};
-  if (!confirm('Set this search aside without saving any of it? The comparison stays visible; nothing is added to the record.')) return;
-  await upsertClientAncestorResearch(id, { disambiguation: { ...dis, discarded_at: new Date().toISOString() } });
+  const col = RUN_COL[kind];
+  const run = d.research?.[col] || {};
+  if (!confirm(`Set this ${kind === 'research' ? 'research' : 'disambiguation'} aside without saving any of it? It stays visible; nothing is added to the record.`)) return;
+  await upsertClientAncestorResearch(id, { [col]: { ...run, discarded_at: new Date().toISOString() } });
   await arcRefresh(id);
+}
+function arcDiscardDisambiguation(id) { return arcDiscardRun(id, 'disambiguation'); }
+
+// ── Research section ──
+function arcResHtml(id, d) {
+  const r = d.row, res = d.research || {};
+  if (r.ancestor_id) return '';
+  const run = res.research_run;
+  const head = '<h4>Research · records, life and terroir</h4>';
+  const focus = `<input class="form-input" id="res-focus-${id}" placeholder="Focus (optional), e.g. his years in Lisbon, or the wool trade" aria-label="Focus for the research" style="margin-top:0.5rem">`;
+  if (!res.disambiguated_at && !run) return `<div>${head}<div class="triage-msg">Available once the Disambiguation is saved.</div></div>`;
+  if (!run) return `<div>${head}<div class="triage-msg">Research searches the vital records of this person and the family, the life history (work, residence, property, wills, military, emigration, census, newspapers), records held in archives but not online, and the historical context of the place and years. Four passes, about eight minutes, in the background.</div>${focus}</div>`;
+  if (run.state === 'running') return `<div>${head}${runProgressHtml(run, 'Researching')}</div>`;
+  if (run.state === 'error') return `<div>${head}<div class="dis-box"><div class="triage-msg" style="color:var(--red)">Research did not finish: ${esc(run.error || 'unknown error')}</div>${focus}<div class="triage-row-btns"><button class="btn btn-outline btn-sm" onclick="arcResearch('${id}')">Run it again</button></div></div></div>`;
+  const g = run.result || {};
+  const vr = g.vital_records || [], lh = g.life_history || [], tr = g.terroir || [], so = g.sources_to_obtain || [];
+  const pills = `<div class="triage-status">${g.documentation_depth ? `<span class="triage-pill">Record: ${esc(g.documentation_depth)}</span>` : ''}${g.placement?.suggested ? `<span class="triage-pill">Suggests: ${esc(g.placement.suggested === 'weaving' ? 'Weaving' : 'Catalog')}</span>` : ''}${run.saved_at ? `<span class="triage-pill">Saved · ${esc(String(run.kept ?? 0))} kept</span>` : run.discarded_at ? '<span class="triage-pill">Set aside</span>' : '<span class="triage-pill">Ready to review</span>'}</div>`;
+  const summary = `${pills}${runMetaHtml(run)}${g.research_note ? `<p style="margin:0.6rem 0">${esc(g.research_note)}</p>` : ''}${g.placement?.reason ? `<div class="dis-meta">${esc(g.placement.reason)}</div>` : ''}`;
+  if (run.saved_at || run.discarded_at) return `<div>${head}<div class="dis-box">${summary}<div class="dis-meta">Vital records ${vr.length} · life history ${lh.length} · historical context ${tr.length} · to obtain ${so.length}</div>${focus}</div></div>`;
+  const next = Array.isArray(g.next_searches) ? g.next_searches : [];
+  return `<div>${head}<div class="dis-box">${summary}
+    ${arcFieldsRelativesHtml('res', id, r, res, g.record_fields, g.relatives || [])}
+    <h5>Vital records · ${vr.length}</h5>${vr.length ? arcFindingsPickHtml('res', id, vr, 0) : '<div class="triage-msg">None new.</div>'}
+    <h5>Life history · ${lh.length}</h5>${lh.length ? arcFindingsPickHtml('res', id, lh, 1000) : '<div class="triage-msg">None new.</div>'}
+    <h5>Historical context · terroir · ${tr.length}</h5>${tr.length ? `<ul class="dis-list">${tr.map((t, i) => `<li class="dis-find"><label><input type="checkbox" id="res-t-${id}-${i}"${t.link_unconfirmed ? '' : ' checked'}><span>
+        <strong style="font-weight:500">${esc(t.title)}</strong>${t.period ? ' · ' + esc(t.period) : ''}${t.place ? ' · ' + esc(t.place) : ''}
+        <div>${esc(t.summary)}</div>
+        ${t.source_label ? `<div class="dis-meta">${esc(t.source_label)}</div>` : ''}
+        ${t.url ? `<a class="dis-meta" href="${esc(t.url)}" target="_blank" rel="noopener">Open the source ↗</a>` : t.link_unconfirmed ? '<div class="dis-meta">Link removed: it did not come from the search results.</div>' : ''}
+      </span></label></li>`).join('')}</ul>` : '<div class="triage-msg">None found.</div>'}
+    <h5>Records to obtain · held offline · ${so.length}</h5>${so.length ? `<label style="display:flex;gap:0.5rem;align-items:flex-start;font-size:15px;margin-bottom:0.25rem"><input type="checkbox" id="res-obtain-${id}" checked> Add these to Still to find:</label><ol class="triage-prompts">${so.map(o => `<li>${esc(arcObtainText(o))}</li>`).join('')}</ol>` : '<div class="triage-msg">None listed.</div>'}
+    ${next.length ? `<h5>Next searches</h5><label style="display:flex;gap:0.5rem;align-items:flex-start;font-size:15px;margin-bottom:0.25rem"><input type="checkbox" id="res-next-${id}" checked> Add these to Still to find:</label><ol class="triage-prompts">${next.map(n => `<li>${esc(n)}</li>`).join('')}</ol>` : ''}
+    <div class="triage-row-btns"><button class="btn btn-gold btn-sm" onclick="arcSaveResearch('${id}', this)">Save to the record</button><button class="btn btn-outline btn-sm" onclick="arcDiscardRun('${id}','research')">Set aside</button><span class="triage-msg" id="res-msg-${id}"></span></div>
+  </div></div>`;
+}
+function arcObtainText(o) {
+  return `Obtain: ${o.record}${o.archive ? ' — ' + o.archive : ''}${o.reference ? ', ' + o.reference : ''}${o.years ? ', ' + o.years : ''}${o.why ? ' (' + o.why + ')' : ''}`;
+}
+
+async function arcSaveResearch(id, btn) {
+  const d = ARC_CACHE[id]; if (!d) return;
+  const res = d.research || {}, run = res.research_run || {}, g = run.result || {};
+  const msg = document.getElementById(`res-msg-${id}`);
+  btn.disabled = true;
+  try {
+    let kept = await arcSaveFindings('res', id, g.vital_records || [], 0);
+    kept += await arcSaveFindings('res', id, g.life_history || [], 1000);
+    const tr = g.terroir || [];
+    for (let i = 0; i < tr.length; i++) {
+      if (!document.getElementById(`res-t-${id}-${i}`)?.checked) continue;
+      const t = tr[i];
+      const saved = await restPost('client_ancestor_findings', {
+        client_ancestor_id: id, finding_date: null, source_type: 'history',
+        source_label: [t.title, t.period, t.place].filter(Boolean).join(' · ') + (t.source_label ? ` — ${t.source_label}` : ''),
+        summary: t.summary || null, url: t.url || null, highlight: false, highlight_note: null
+      });
+      if (!Array.isArray(saved) || !saved[0]?.id) throw new Error(saved?.message || 'a historical context entry could not be saved');
+      kept++;
+    }
+    const now = new Date().toISOString();
+    const fields = { documentation_depth: g.documentation_depth || res.documentation_depth || null, researched_at: now, research_run: { ...run, saved_at: now, kept } };
+    const rowPatch = {};
+    arcCollectFieldsRelatives('res', id, res, fields, rowPatch);
+    const add = [];
+    if (document.getElementById(`res-obtain-${id}`)?.checked) (g.sources_to_obtain || []).forEach(o => add.push(arcObtainText(o)));
+    if (document.getElementById(`res-next-${id}`)?.checked) (g.next_searches || []).forEach(n => add.push(n));
+    if (add.length) { const cur = Array.isArray(res.research_prompts) ? res.research_prompts : []; fields.research_prompts = [...cur, ...add.filter(n => !cur.includes(n))]; }
+    ARC_PREV[id] = { depth: res.documentation_depth || null, status: res.verification_status || null };
+    await arcApplyRowPatch(id, rowPatch);
+    await upsertClientAncestorResearch(id, fields);
+    await arcRefresh(id);
+    if (LW.client) lwRefresh();
+  } catch (err) {
+    if (msg) msg.textContent = 'Save failed: ' + err.message;
+    btn.disabled = false;
+  }
 }
 
 // ── Hand edit of a client's own woven ancestor (voice pass) ──
@@ -5971,7 +6106,7 @@ async function lwRefresh(pickStage) {
         <select class="form-select" id="lw-new-side" aria-label="Lineage side">${sideOpts}</select>
       </div>
       <textarea class="form-textarea" id="lw-new-notes" rows="3" placeholder="What is known so far, and where it came from" aria-label="What is known" style="margin-top:0.5rem"></textarea>
-      <label style="display:flex;gap:0.5rem;align-items:baseline;font-size:15px;margin-top:0.5rem"><input type="checkbox" id="lw-new-dis" checked> Disambiguate now: search the records for who this is (a few minutes, runs in the background)</label>
+      <label style="display:flex;gap:0.5rem;align-items:baseline;font-size:15px;margin-top:0.5rem"><input type="checkbox" id="lw-new-dis" checked> Run Disambiguation now: search the records for who this is (a few minutes, in the background)</label>
       <div class="triage-row-btns"><button class="btn btn-gold btn-sm" onclick="lwBeginResearch(this)">Begin research</button><span class="triage-msg" id="lw-new-msg"></span></div>
     </div>
     <div id="lw-add" class="card lw-form" hidden>
@@ -6156,8 +6291,11 @@ async function lwWeave(id) {
   if (rs.disambiguation?.state === 'running') { alert(`${nm} is still being disambiguated. Review the result before weaving.`); return; }
   if (rs.disambiguation?.state === 'done' && !rs.disambiguation.saved_at && !rs.disambiguation.discarded_at) { if (!confirm(`A disambiguation result for ${nm} is waiting for review in the record. Weave without reviewing it?`)) return; }
   else if (!rs.disambiguated_at) { if (!confirm(`${nm} has not been disambiguated, so identity has not been checked against the records. Weave anyway?`)) return; }
-  else if (rs.verification_status === 'not_found') { if (!confirm(`The records found nothing confirming ${nm}.${rs.verification_note ? '\n\n' + rs.verification_note : ''}\n\nWeave anyway?`)) return; }
-  else if (rs.verification_status === 'ambiguous') { if (!confirm(`${nm}'s identity is ambiguous.${rs.verification_note ? '\n\n' + rs.verification_note : ''}\n\nWeave anyway?`)) return; }
+  else if (rs.research_run?.state === 'running') { alert(`Research on ${nm} is still running. Review it before weaving.`); return; }
+  else if (rs.research_run?.state === 'done' && !rs.research_run.saved_at && !rs.research_run.discarded_at) { if (!confirm(`Research results for ${nm} are waiting for review in the record. Weave without them?`)) return; }
+  else if (!rs.researched_at && !confirm(`Research has not been run for ${nm}, so the writing will rest on the Disambiguation findings alone. Weave anyway?`)) return;
+  if (rs.disambiguated_at && rs.verification_status === 'not_found') { if (!confirm(`The records found nothing confirming ${nm}.${rs.verification_note ? '\n\n' + rs.verification_note : ''}\n\nWeave anyway?`)) return; }
+  else if (rs.disambiguated_at && rs.verification_status === 'ambiguous') { if (!confirm(`${nm}'s identity is ambiguous.${rs.verification_note ? '\n\n' + rs.verification_note : ''}\n\nWeave anyway?`)) return; }
   if (!lwOpenWork('Weave · ' + (row?.name || ''))) return promoteStub(id);
   if (!allFrequencyTags.length) { const t = await rest('frequency_tags?select=id,slug,name,type&order=name'); allFrequencyTags = Array.isArray(t) ? t : []; }
   await promoteStub(id);
@@ -6187,7 +6325,7 @@ async function lwLanding() {
   const ids = list.map(r => r.id).join(',');
   const [fr, rs] = await Promise.all([
     rest(`client_ancestor_findings?client_ancestor_id=in.(${ids})&source_type=neq.history&select=client_ancestor_id`).catch(() => []),
-    rest(`client_ancestor_research?client_ancestor_id=in.(${ids})&select=client_ancestor_id,verification_status,documentation_depth,disambiguated_at,disambiguation->>state`).catch(() => [])
+    rest(`client_ancestor_research?client_ancestor_id=in.(${ids})&select=client_ancestor_id,verification_status,documentation_depth,disambiguated_at,researched_at,state:disambiguation->>state,discarded_at:disambiguation->>discarded_at,rstate:research_run->>state`).catch(() => [])
   ]);
   const fc = {}; (Array.isArray(fr) ? fr : []).forEach(f => { fc[f.client_ancestor_id] = (fc[f.client_ancestor_id] || 0) + 1; });
   const rm = {}; (Array.isArray(rs) ? rs : []).forEach(r => { rm[r.client_ancestor_id] = r; });
@@ -6199,8 +6337,9 @@ async function lwLanding() {
       const m = rm[r.id] || {};
       const dl = { verified: 'identity verified', ambiguous: 'identity ambiguous', not_found: 'identity not found' };
       const st = m.state === 'running' ? 'disambiguating…'
-        : m.state === 'done' && !m.disambiguated_at ? 'disambiguation ready to review'
-        : m.disambiguated_at ? `${dl[m.verification_status] || 'disambiguated'} · record ${m.documentation_depth || '—'}${fc[r.id] ? ` · ${fc[r.id]} finding${fc[r.id] === 1 ? '' : 's'}` : ''}`
+        : m.state === 'done' && !m.disambiguated_at && !m.discarded_at ? 'disambiguation ready to review'
+        : m.rstate === 'running' ? `${dl[m.verification_status] || 'disambiguated'} · researching…`
+        : m.disambiguated_at ? `${dl[m.verification_status] || 'disambiguated'} · ${m.researched_at ? 'researched' : m.rstate === 'done' ? 'research ready to review' : 'not researched'} · record ${m.documentation_depth || '—'}${fc[r.id] ? ` · ${fc[r.id]} finding${fc[r.id] === 1 ? '' : 's'}` : ''}`
         : !fc[r.id] ? 'not disambiguated' : `${fc[r.id]} finding${fc[r.id] === 1 ? '' : 's'} · not disambiguated`;
       return `<div class="client-row" style="cursor:default"><div><div class="client-name">${esc(r.name)}</div><div class="client-meta">${esc(r.dates || '')}${r.dates ? ' · ' : ''}${st}</div></div></div>`;
     }).join('')}</div>`).join('');
@@ -6271,7 +6410,7 @@ function arcRender(id) {
   const prompts = Array.isArray(res.research_prompts) ? res.research_prompts : [];
   const badge = res.verification_status
     ? `<span class="verify-badge verify-${esc(res.verification_status)}">${TRIAGE_VERIFY_LABEL[res.verification_status] || esc(res.verification_status)}</span>`
-    : '<span class="triage-pill">Not assessed</span>';
+    : '<span class="triage-pill">Not disambiguated</span>';
   const layers = [['layer_terroir','Terroir'],['layer_unresolved','Unresolved'],['layer_thread','Thread'],['layer_lineage','Lineage'],['catalog_preview','Catalog'],['sigil_svg','Sigil']]
     .filter(([k]) => r[k]).map(([, l]) => l);
   const weaveHref = `ancestral-weaving.html?client_id=${encodeURIComponent(r.client_id)}#ancestor/${encodeURIComponent(arcSlug(r.name))}`;
@@ -6303,6 +6442,8 @@ function arcRender(id) {
     ${arcActionsHtml(id, d, layers, weaveHref)}
 
     ${arcDisHtml(id, d)}
+
+    ${arcResHtml(id, d)}
 
     ${(r.relation_to_client || r.intake_notes) ? `<div>
       <h4>The client's words · kept for the Convergence</h4>
@@ -6357,8 +6498,8 @@ function arcRender(id) {
     </div>
 
     <div>
-      <h4>Assessment</h4>
-      ${res.assessed_at ? `<div class="triage-msg">Assessed ${esc(arcDate(res.assessed_at))}${res.verification_note ? ': ' + esc(res.verification_note) : ''}</div>` : '<div class="triage-msg">Not assessed.</div>'}
+      <h4>Identity status · still to find</h4>
+      ${res.assessed_at ? `<div class="triage-msg">${res.disambiguated_at ? 'Disambiguated' : 'Assessed'} ${esc(arcDate(res.disambiguated_at || res.assessed_at))}${res.verification_note ? ': ' + esc(res.verification_note) : ''}</div>` : '<div class="triage-msg">Not disambiguated yet.</div>'}
       ${prompts.length ? `<div class="triage-msg" style="margin-top:0.6rem">Still to find:</div><ol class="triage-prompts">${prompts.map(p => `<li>${esc(p)}</li>`).join('')}</ol>` : ''}
     </div>
 
@@ -6367,7 +6508,8 @@ function arcRender(id) {
       ${arcEventsHtml(d.events)}
     </div>
   </div>`;
-  if (res.disambiguation?.state === 'running') arcDisEnsurePoll(id);
+  if (res.disambiguation?.state === 'running') arcEnsurePoll(id, 'disambiguation');
+  if (res.research_run?.state === 'running') arcEnsurePoll(id, 'research');
 }
 
 function arcHighlightsHtml(findings) {
