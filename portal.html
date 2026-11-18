@@ -1147,6 +1147,13 @@ body { font-weight: 400; }
 .list-toolbar .grow { flex: 1 1 260px; }
 .client-row { align-items: flex-start; }
 .client-row .client-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.45rem; }
+.next-steps { list-style: none; margin: 0.6rem 0 0; padding: 0.55rem 0 0; border-top: 1px dashed var(--border); display: grid; gap: 0.35rem; }
+.next-steps li { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; font-size: 15px; line-height: 1.45; color: var(--text); }
+.next-steps li .ns-text { min-width: 0; }
+.next-steps li .ns-text::before { content: '✦'; color: var(--gold); margin-right: 0.45rem; }
+.next-steps li.ns-soon .ns-text::before { color: var(--red); }
+.next-steps li .btn { flex-shrink: 0; }
+.intake-new { margin-left: 0.5rem; padding: 1px 8px; border-radius: 9px; border: 1px solid var(--gold); color: var(--gold); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
 .tag { font-family: 'Jost', sans-serif; font-size: 15px; letter-spacing: 0.02em; color: var(--text-dim);
   border: 1px solid var(--border); border-radius: 4px; padding: 1px 8px; white-space: nowrap; background: var(--surface); }
 .tag.on { color: var(--gold); border-color: var(--border-hover); background: var(--accent); }
@@ -1335,6 +1342,7 @@ body { font-weight: 400; }
           <input class="form-input grow" id="clients-search" placeholder="Search by name or email" oninput="renderClientList()">
           <select class="form-select" id="clients-filter" onchange="renderClientList()">
             <option value="">Everyone</option>
+            <option value="needs">Needs attention</option>
             <option value="active">Active clients</option>
             <option value="login">Has a portal login</option>
             <option value="nologin">No login yet</option>
@@ -3823,7 +3831,7 @@ function cdIntakesCard(d) {
     const answered = INTAKE_Q.filter(([k]) => !intakeBlank(it[k])).length;
     const contact = [it.name_on_form, it.birth_date && ('born ' + it.birth_date + (it.birth_time ? ' ' + it.birth_time : '')), it.birth_place, it.current_address, it.phone].filter(Boolean).map(cdEsc).join(' · ');
     return `<details class="intake-item"${idx === 0 ? ' open' : ''}>
-      <summary><span class="intake-date">${cdEsc(cdIntakeDate(it.submitted_at))}</span>
+      <summary><span class="intake-date">${cdEsc(cdIntakeDate(it.submitted_at))}</span>${it.reviewed_at ? '' : '<span class="intake-new">New</span>'}
         <span class="intake-meta">${cdEsc(it.entry_offering || '—')} · ${cdEsc(INTAKE_SOURCE[it.source] || it.source)} · ${answered} of 6 answered · ${anc.length} ancestor${anc.length === 1 ? '' : 's'}</span></summary>
       <div class="intake-body">
         ${it.admin_note ? `<p class="cd-note">${cdEsc(it.admin_note)}</p>` : ''}
@@ -3834,7 +3842,7 @@ function cdIntakesCard(d) {
         <div class="cd-row stack"><div class="cd-label">Ancestors named</div>
           ${anc.length ? `<ol class="intake-anc">${anc.map(a => `<li><b>${cdEsc(a.name)}</b>${a.relation_to_client ? ' · ' + cdEsc(a.relation_to_client) : ''}${a.dates ? ' · ' + cdEsc(a.dates) : ''}${(a.birthplace || a.location) ? ' · ' + cdEsc(a.location || a.birthplace) : ''}${a.occupation ? ' · ' + cdEsc(a.occupation) : ''}${a.intake_notes ? `<div class="intake-anc-note">${cdEsc(a.intake_notes)}</div>` : ''}</li>`).join('')}</ol>` : '<div class="cd-value muted">— none —</div>'}
         </div>
-        <div class="cd-actions" style="margin-top:0.75rem"><button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(192,112,96,0.3)" onclick="cdIntakeDelete('${it.id}')">Delete this intake</button></div>
+        <div class="cd-actions" style="margin-top:0.75rem">${it.reviewed_at ? '' : `<button class="btn btn-gold btn-sm" onclick="cdIntakeReviewed('${it.id}')">Mark as reviewed</button>`}<button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(192,112,96,0.3)" onclick="cdIntakeDelete('${it.id}')">Delete this intake</button></div>
       </div>
     </details>`;
   }).join('');
@@ -3843,6 +3851,15 @@ function cdIntakesCard(d) {
       <p class="cd-note">Every intake is kept, newest first. All of them are used in the client work: their answers are combined, oldest first, into what session worksheets and the Convergence read. Answers left blank or "NA" are skipped. Deleting an intake removes its answers from that combined record; the ancestors it named stay in the Weaving record.</p>
       <div class="intake-list">${items}</div>
     </div>`;
+}
+async function cdIntakeReviewed(intakeId) {
+  const ok = await restPatch('client_intakes', intakeId, { reviewed_at: new Date().toISOString() });
+  if (!ok) { alert('Could not mark the intake as reviewed.'); return; }
+  const it = (currentDetailData.intakes || []).find(x => x.id === intakeId);
+  if (it) it.reviewed_at = new Date().toISOString();
+  const sec = document.getElementById('cd-sec-intake');
+  if (sec) sec.innerHTML = `${cdIntakesCard(currentDetailData)}${cdMirrorAppCard(currentDetailData)}`;
+  loadNextSteps();
 }
 async function cdIntakeDelete(intakeId) {
   const it = (currentDetailData.intakes || []).find(x => x.id === intakeId); if (!it) return;
@@ -4782,6 +4799,130 @@ async function populateOverview() {
   `;
   // Full client list now lives in #clients-list in the same panel — renderClientList() handles it.
   loadUnreadCounts();
+  loadNextSteps();
+}
+
+// ── Next steps: prompts on each client row (2026-11-17) ──
+// Read-only checks across intake, research, weaving, chart, sessions and messages.
+// Each step names what to do and opens the place to do it.
+let NEXT_STEPS = {};
+const NS_DAY = 86400000;
+function nsDate(d) { const x = new Date(d); return isNaN(x) ? '' : x.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+
+async function loadNextSteps() {
+  const get = (q) => rest(q).then(r => Array.isArray(r) ? r : []).catch(() => []);
+  const [intakes, cas, research, findings, written, msgs, sessions, sessWithWs, charts, convs] = await Promise.all([
+    get('client_intakes?select=client_id,submitted_at,reviewed_at'),
+    get('client_ancestors?select=id,client_id,status,keynote_ancestor_ids'),
+    get('client_ancestor_research?select=client_ancestor_id,verification_status'),
+    get('client_ancestor_findings?select=client_ancestor_id,created_at'),
+    get('client_ancestor_events?event_type=eq.written&select=client_ancestor_id,created_at'),
+    get('client_messages?select=client_id,sender,created_at,read_at&order=created_at.asc'),
+    get('client_session_worksheets?select=id,client_id,session_number,session_date,status,after_worked,after_opened,after_carry'),
+    get('client_session_worksheets?content=not.is.null&select=id'),
+    get('client_chart_analysis?select=client_id,status'),
+    get('convergences?select=client_id,updated_at')
+  ]);
+  const now = Date.now();
+  const steps = {};
+  const add = (cid, text, action, label, soon) => { (steps[cid] = steps[cid] || []).push({ text, action, label, soon: !!soon }); };
+  const LEAD = ['signals_tier1', 'tier2_quiz'];
+
+  // Messages: waiting on a reply
+  const lastMsg = {};
+  msgs.forEach(m => { lastMsg[m.client_id] = m; });
+  Object.values(lastMsg).forEach(m => {
+    if (m.sender === 'client') {
+      const days = Math.floor((now - new Date(m.created_at)) / NS_DAY);
+      add(m.client_id, `Reply to their message from ${nsDate(m.created_at)}${days >= 3 ? ` (${days} days)` : ''}`, `openClientMessages('${m.client_id}')`, 'Messages', days >= 3);
+    }
+  });
+
+  // New intake forms
+  const newIntakes = {};
+  intakes.filter(i => !i.reviewed_at).forEach(i => { (newIntakes[i.client_id] = newIntakes[i.client_id] || []).push(i); });
+  Object.entries(newIntakes).forEach(([cid, list]) => {
+    const latest = list.map(i => i.submitted_at).sort().pop();
+    add(cid, `Read ${list.length === 1 ? 'the new intake form' : list.length + ' new intake forms'} (${nsDate(latest)})`, `nsOpen('${cid}','intake')`, 'Intake', true);
+  });
+
+  // Ancestors
+  const rMap = {}; research.forEach(r => { rMap[r.client_ancestor_id] = r; });
+  const fCount = {}, fLatest = {};
+  findings.forEach(f => { fCount[f.client_ancestor_id] = (fCount[f.client_ancestor_id] || 0) + 1; if (!fLatest[f.client_ancestor_id] || f.created_at > fLatest[f.client_ancestor_id]) fLatest[f.client_ancestor_id] = f.created_at; });
+  const wLatest = {}; written.forEach(w => { if (!wLatest[w.client_ancestor_id] || w.created_at > wLatest[w.client_ancestor_id]) wLatest[w.client_ancestor_id] = w.created_at; });
+  const byClient = {};
+  cas.forEach(a => { (byClient[a.client_id] = byClient[a.client_id] || []).push(a); });
+  Object.entries(byClient).forEach(([cid, list]) => {
+    const stubs = list.filter(a => a.status === 'intake_stub');
+    const unstarted = stubs.filter(a => !fCount[a.id]);
+    const ready = stubs.filter(a => fCount[a.id] && rMap[a.id]?.verification_status);
+    const inProgress = stubs.length - unstarted.length - ready.length;
+    if (unstarted.length) add(cid, `Start research on ${unstarted.length} ancestor${unstarted.length === 1 ? '' : 's'} named at intake`, `nsTriage()`, 'Triage');
+    if (inProgress > 0) add(cid, `Assess ${inProgress} ancestor${inProgress === 1 ? '' : 's'} with findings but no assessment yet`, `nsTriage()`, 'Triage');
+    if (ready.length) add(cid, `Weave ${ready.length} researched ancestor${ready.length === 1 ? '' : 's'}`, `nsTriage()`, 'Triage');
+    const woven = list.filter(a => ['weaving', 'catalog'].includes(a.status) && !a.keynote_ancestor_ids);
+    const stale = woven.filter(a => fLatest[a.id] && wLatest[a.id] && fLatest[a.id] > wLatest[a.id]);
+    if (stale.length) add(cid, `${stale.length} woven ancestor${stale.length === 1 ? ' has' : 's have'} new findings since writing: consider Augment`, `nsWeaving('${cid}')`, 'Weaving');
+    const conv = convs.filter(c => c.client_id === cid).map(c => c.updated_at).sort().pop();
+    const lastWritten = woven.map(a => wLatest[a.id]).filter(Boolean).sort().pop();
+    if (woven.length && !conv) add(cid, `${woven.length} ancestor${woven.length === 1 ? '' : 's'} woven, no Convergence yet`, `nsOpen('${cid}','ancestral')`, 'Ancestral');
+    else if (conv && lastWritten && lastWritten > conv) add(cid, 'The Weaving changed after the last Convergence', `nsOpen('${cid}','ancestral')`, 'Ancestral');
+  });
+
+  // Chart analysis
+  const chartBy = {}; charts.forEach(c => { chartBy[c.client_id] = c; });
+  allClients.forEach(c => {
+    if (LEAD.includes(c.intake_status) || c.client_relationship === 'staff') return;
+    const ch = chartBy[c.id];
+    if (ch && ch.status === 'draft') add(c.id, 'Review and approve the chart analysis draft', `nsOpen('${c.id}','chart')`, 'Chart');
+    else if (!ch && c.birth_date) add(c.id, 'Birth data is in; chart analysis not run yet', `nsOpen('${c.id}','chart')`, 'Chart');
+    else if (!c.birth_date && (c.intake_status === 'submitted' || c.intake_status === 'activated')) add(c.id, 'No birth data on file for the chart', `nsOpen('${c.id}','record')`, 'Record');
+  });
+
+  // Sessions
+  const hasWs = new Set(sessWithWs.map(s => s.id));
+  sessions.filter(s => s.status === 'planned').forEach(s => {
+    if (!s.session_date) return;
+    const t = new Date(s.session_date + 'T12:00:00').getTime();
+    const days = Math.round((t - now) / NS_DAY);
+    if (days >= 0 && days <= 14 && !hasWs.has(s.id)) add(s.client_id, `Prep the worksheet for session ${s.session_number || ''} on ${nsDate(t)}`, `nsOpen('${s.client_id}','session')`, 'Session', days <= 3);
+    if (days < 0 && !(s.after_worked || s.after_opened || s.after_carry)) add(s.client_id, `Record how session ${s.session_number || ''} went (${nsDate(t)})`, `nsOpen('${s.client_id}','session')`, 'Session');
+  });
+
+  // Gone quiet: active work, no messages in 30 days, nothing scheduled
+  allClients.forEach(c => {
+    if (LEAD.includes(c.intake_status) || c.client_relationship === 'staff') return;
+    const active = (byClient[c.id] || []).length || sessions.some(s => s.client_id === c.id);
+    if (!active) return;
+    const upcoming = sessions.some(s => s.client_id === c.id && s.status === 'planned' && s.session_date && new Date(s.session_date) >= new Date(now - NS_DAY));
+    const last = lastMsg[c.id];
+    const quiet = !last || (now - new Date(last.created_at)) > 30 * NS_DAY;
+    if (quiet && !upcoming && !(steps[c.id] || []).some(x => x.label === 'Messages')) add(c.id, last ? `No contact since ${nsDate(last.created_at)}: send a check-in` : 'No messages yet: send a check-in', `openClientMessages('${c.id}')`, 'Messages');
+  });
+
+  NEXT_STEPS = steps;
+  const n = Object.keys(steps).filter(id => allClients.some(c => c.id === id)).length;
+  const strip = document.getElementById('overview-stats');
+  if (strip && !strip.querySelector('.ns-count')) strip.insertAdjacentHTML('afterbegin', `<span class="ns-count"><b>${n}</b> ${n === 1 ? 'person needs' : 'people need'} attention</span>`);
+  renderClientList();
+}
+
+function nextStepsHtml(cid) {
+  const list = NEXT_STEPS[cid] || [];
+  if (!list.length) return '';
+  const sorted = [...list].sort((a, b) => (b.soon ? 1 : 0) - (a.soon ? 1 : 0));
+  return `<ul class="next-steps" onclick="event.stopPropagation()" aria-label="Next steps">${sorted.map(s =>
+    `<li class="${s.soon ? 'ns-soon' : ''}"><span class="ns-text">${cdEsc(s.text)}</span><button class="btn btn-outline btn-sm" onclick="${s.action}">${cdEsc(s.label)}</button></li>`).join('')}</ul>`;
+}
+
+async function nsOpen(cid, section) { await showClientDetail(cid); cdShowSection(section); }
+function nsTriage() { showPanel('panel-ancestor-research'); initAncestorResearch(); showTriageMode(); }
+async function nsWeaving(cid) {
+  showPanel('panel-weaving');
+  populateWeavingClientSelect();
+  const sel = document.getElementById('weaving-client-select');
+  if (sel) { sel.value = cid; await loadClientWeaving(); }
 }
 
 // ════════════════════════════════════════════════════
@@ -4801,6 +4942,7 @@ function renderClientList() {
     if (f === 'nologin') return !c.auth_user_id;
     if (f === 'unread')  return (unreadByClient[c.id] || 0) > 0;
     if (f === 'leads')   return LEAD.includes(c.intake_status);
+    if (f === 'needs')   return (NEXT_STEPS[c.id] || []).length > 0;
     return true;
   });
   if (!list.length) { el.innerHTML = '<div class="empty">No one matches that search.</div>'; return; }
@@ -4821,6 +4963,7 @@ function renderClientList() {
           ${access}
           ${unread ? `<span class="tag alert">${unread} new message${unread === 1 ? '' : 's'}</span>` : ''}
         </div>
+        ${nextStepsHtml(c.id)}
       </div>
       <div style="display:flex;gap:0.5rem;flex-shrink:0;align-items:center" onclick="event.stopPropagation()">
         ${login}
