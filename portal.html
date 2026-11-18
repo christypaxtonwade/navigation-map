@@ -470,6 +470,35 @@ a.ancestor-row.weave-row:focus-visible { outline: 2px solid var(--gold); outline
 .arc-advice { margin: 0; padding: 0.6rem 0.8rem; border: 1px solid var(--gold); border-left-width: 3px; border-radius: 6px; list-style: none; display: grid; gap: 0.4rem; font-size: 15px; line-height: 1.5; color: var(--text); }
 .arc-advice li { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; }
 .arc-advice li .btn { flex-shrink: 0; }
+.lw-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+.lw-form { margin-bottom: 1rem; }
+.lw-stages { display: flex; gap: 0.25rem; flex-wrap: wrap; border-bottom: 1px solid var(--border); margin: 1rem 0 1.25rem; }
+.lw-stage { background: none; border: none; border-bottom: 2px solid transparent; padding: 0.55rem 0.8rem; font: inherit; font-size: 15px; color: var(--text-dim); cursor: pointer; display: inline-flex; gap: 0.4rem; align-items: center; }
+.lw-stage.active { color: var(--gold); border-bottom-color: var(--gold); }
+.lw-stage:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.lw-count { font-size: 13px; padding: 0 7px; border-radius: 9px; border: 1px solid var(--border); color: var(--text-dim); }
+.lw-work { border: 1px solid var(--gold); border-radius: 8px; padding: 1rem 1.1rem; margin-bottom: 1.25rem; }
+.lw-work-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+.arc-tools { border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem 0.8rem; }
+.arc-tools summary { cursor: pointer; color: var(--gold); font-size: 15px; letter-spacing: 0.04em; }
+.arc-tools-body { padding-top: 0.75rem; }
+.rr-result { margin-top: 0.75rem; padding: 0.75rem; border: 1px dashed var(--gold); border-radius: 6px; }
+.dis-box { padding: 0.9rem 1rem; border: 1px solid rgba(122,86,24,0.35); border-radius: 6px; background: rgba(122,86,24,0.04); }
+.dis-box h5 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); margin: 0.9rem 0 0.4rem; font-weight: 500; }
+.dis-id { display: grid; grid-template-columns: max-content 1fr; gap: 0.2rem 0.9rem; font-size: 15px; line-height: 1.5; }
+.dis-id dt { color: var(--text-faint); }
+.dis-id dd { margin: 0; }
+.dis-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.dis-list li { font-size: 15px; line-height: 1.5; padding: 0.5rem 0.65rem; border: 1px solid var(--border, rgba(0,0,0,0.1)); border-radius: 5px; }
+.dis-list li.dis-ruled { opacity: 0.65; }
+.dis-list li.dis-conflict { border-color: rgba(192,112,96,0.45); }
+.dis-tag { display: inline-block; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.05rem 0.4rem; border-radius: 3px; border: 1px solid currentColor; margin-right: 0.35rem; color: var(--text-dim); }
+.dis-tag.dis-strong { color: var(--gold); }
+.dis-tag.dis-weak { color: var(--amber, #b07a2a); }
+.dis-find label { display: flex; gap: 0.6rem; align-items: flex-start; }
+.dis-find input[type=checkbox] { margin-top: 0.3rem; }
+.dis-meta { font-size: 13px; color: var(--text-faint); }
+.arc-edit { display: grid; gap: 0.35rem; padding: 0.75rem; border: 1px dashed var(--border); border-radius: 6px; }
 .arc-bulk { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin: 0.25rem 0 0.75rem; }
 .arc-switch { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 15px; color: var(--text); cursor: pointer; user-select: none; }
 .arc-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
@@ -1536,72 +1565,23 @@ body { font-weight: 400; }
         </div>
       </div>
 
-      <!-- ══ ADMIN: Weaving Builder ══ -->
+      <!-- ══ ADMIN: Lineage (landing) — 2026-11-17 ══ -->
       <div class="panel" id="panel-weaving">
         <div class="panel-header">
-          <div class="eyebrow">Administration</div>
-          <div class="panel-title">Ancestral Weaving</div>
-          <p class="panel-sub">Build and manage client ancestor assignments.</p>
+          <div class="eyebrow">Offerings</div>
+          <div class="panel-title">Lineage</div>
+          <p class="panel-sub">Each client's ancestral work happens in their Lineage workspace: research, the Weaving and Catalog, Historical Keynotes, Mythic Resonance and the Convergence. Start from the research queue or choose a client.</p>
         </div>
-        <div class="two-col">
-          <div class="sidebar-sticky">
-            <div class="card">
-              <div class="eyebrow" style="margin-bottom:1rem">Select Client</div>
-              <select class="form-select" id="weaving-client-select" onchange="loadClientWeaving()">
-                <option value="">— Choose a client —</option>
-              </select>
-            </div>
-            <div class="card" style="margin-top:1rem;display:none" id="weaving-add-ancestor">
-              <div class="eyebrow" style="margin-bottom:1rem">Add from the shared pool</div>
-              <select class="form-select" id="ancestor-select" style="margin-bottom:0.75rem">
-                <option value="">— Choose ancestor —</option>
-              </select>
-              <input type="hidden" id="ancestor-strength" value="noted">
-              <select class="form-select" id="ancestor-side" style="margin-bottom:0.75rem">
-                <option value="">Lineage side — unspecified</option>
-                <option value="maternal">Maternal</option>
-                <option value="paternal">Paternal</option>
-                <option value="both">Both / chosen</option>
-                <option value="unknown">Unknown</option>
-              </select>
-              <button class="btn btn-gold" style="width:100%" onclick="addAncestorToClient()">Add to Weaving</button>
-              <div id="weaving-add-msg" style="margin-top:0.75rem;"></div>
-
-              <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)">
-                <button class="btn btn-outline btn-sm" style="width:100%" onclick="toggleNewPersonalAncestor()">+ New personal ancestor for this client</button>
-                <div id="new-personal-ancestor" style="display:none;margin-top:1rem">
-                  <p style="font-size:15px;color:var(--text-dim);margin-bottom:0.75rem">Held in this client's weaving only — not added to the shared pool.</p>
-                  <input class="form-input" id="pa-name" placeholder="Name *" style="margin-bottom:0.5rem">
-                  <input class="form-input" id="pa-dates" placeholder="Dates (e.g. 1850–1912)" style="margin-bottom:0.5rem">
-                  <input class="form-input" id="pa-year" type="number" placeholder="Approx. year (for ordering)" style="margin-bottom:0.5rem">
-                  <input class="form-input" id="pa-relation" placeholder="Relation (e.g. great-grandmother)" style="margin-bottom:0.5rem">
-                  <input class="form-input" id="pa-occupation" placeholder="Occupation (optional)" style="margin-bottom:0.5rem">
-                  <select class="form-select" id="pa-side" style="margin-bottom:0.5rem">
-                    <option value="">Lineage side — unspecified</option>
-                    <option value="maternal">Maternal</option>
-                    <option value="paternal">Paternal</option>
-                    <option value="both">Both / chosen</option>
-                    <option value="unknown">Unknown</option>
-                  </select>
-                  <details style="margin-bottom:0.5rem">
-                    <summary style="cursor:pointer;font-size:15px;color:var(--text-dim);margin:0.25rem 0 0.6rem">Layers (optional — write now or later)</summary>
-                    <textarea class="form-textarea" id="pa-terroir" placeholder="Terroir" rows="2" style="margin-bottom:0.4rem"></textarea>
-                    <textarea class="form-textarea" id="pa-unresolved" placeholder="The Unresolved" rows="2" style="margin-bottom:0.4rem"></textarea>
-                    <textarea class="form-textarea" id="pa-thread" placeholder="The Living Thread" rows="2" style="margin-bottom:0.4rem"></textarea>
-                    <textarea class="form-textarea" id="pa-lineage" placeholder="The Lineage" rows="2" style="margin-bottom:0.4rem"></textarea>
-                    <textarea class="form-textarea" id="pa-preview" placeholder="Catalog preview" rows="2"></textarea>
-                  </details>
-                  <button class="btn btn-gold" style="width:100%" onclick="createPersonalAncestor()">Create in this weaving</button>
-                  <div id="pa-msg" style="margin-top:0.5rem"></div>
-                </div>
-              </div>
-            </div>
+        <div class="card" style="margin-bottom:1.5rem">
+          <div class="eyebrow" style="margin-bottom:0.75rem">Open a client's Lineage</div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center">
+            <select class="form-select" id="lw-land-client" style="max-width:360px" aria-label="Client"></select>
+            <button class="btn btn-gold btn-sm" onclick="lwOpenFromLanding()">Open Lineage</button>
           </div>
-          <div>
-            <div id="weaving-content">
-              <div class="empty">Select a client to view their weaving.</div>
-            </div>
-          </div>
+        </div>
+        <div class="card" style="margin-bottom:1.5rem">
+          <div class="eyebrow" style="margin-bottom:0.75rem">Research queue · every client</div>
+          <div id="lw-queue"><div class="loading"><span class="loading-glyph">✦</span>Loading…</div></div>
         </div>
       </div>
 
@@ -1715,13 +1695,12 @@ body { font-weight: 400; }
       <div class="panel" id="panel-ancestor-research">
         <div class="panel-header">
           <div class="eyebrow">Administration</div>
-          <div class="panel-title">Ancestor Research</div>
+          <div class="panel-title">My Archive</div>
         </div>
 
         <!-- Mode toggle -->
         <div class="mode-toggle">
           <button class="mode-btn active" id="mode-btn-generate" onclick="showGenerateMode()">✦ Generate New</button>
-          <button class="mode-btn" id="mode-btn-triage" onclick="showTriageMode()">⤴ Triage Intake</button>
           <button class="mode-btn" id="mode-btn-augment" onclick="showAugmentMode()">⊕ Augment Existing</button>
           <button class="mode-btn" id="mode-btn-edit" onclick="showEditMode()">✎ Edit Existing</button>
         </div>
@@ -1779,7 +1758,6 @@ body { font-weight: 400; }
             <div class="ai-loading-sub">Disambiguation · Documentation · Frequency mapping</div>
           </div>
 
-          <div id="ar-review" style="display:none"></div>
         </div>
 
         <!-- ═══ TRIAGE INTAKE MODE ═══ -->
@@ -1799,7 +1777,7 @@ body { font-weight: 400; }
           <p class="panel-sub" style="margin-bottom:1.5rem">Pick an existing ancestor and paste new findings — census record, will, ship manifest, oral history. The AI will integrate the findings into the existing record (preserving what works, weaving new specifics into the right register) and surface a side-by-side review. Confirm updates the ancestor in place; layers, sigil, frequency tags, and research prompts can each be accepted or rejected individually before save.</p>
 
           <div class="card" style="max-width:720px;margin-bottom:2rem">
-            <div class="form-group" style="margin-bottom:1rem">
+            <div class="form-group" id="aug-owner-group" style="margin-bottom:1rem;display:none">
               <label class="form-label" for="aug-owner-select">Whose ancestors</label>
               <select class="form-select" id="aug-owner-select" onchange="augOwnerChanged()">
                 <option value="">My archive</option>
@@ -1863,6 +1841,9 @@ body { font-weight: 400; }
             <div class="ai-loading-sub">Reading the existing record · Weaving in what's new · Holding the registers</div>
           </div>
         </div>
+
+        <!-- Review (Generate, Weave and Augment share it) -->
+        <div id="ar-review" style="display:none"></div>
 
         <!-- ═══ EDIT MODE ═══ -->
         <div id="ar-edit-mode" style="display:none">
@@ -2316,12 +2297,11 @@ function buildNav() {
     { id: 'panel-followups',          label: 'Follow-ups' },
     { group: 'Offerings' },
     { id: 'panel-offerings',          label: 'Offering Tracker' },
+    { id: 'panel-weaving',            label: 'Lineage' },
     { id: 'panel-courses-admin',      label: 'Courses' },
     { group: 'Build' },
-    { id: 'panel-weaving',            label: 'Weaving Builder' },
-    { id: 'panel-ancestor-research',  label: 'Ancestor Research' },
+    { id: 'panel-ancestor-research',  label: 'My Archive' },
     { id: 'panel-tapestry',           label: 'Tapestry Builder' },
-    { id: 'panel-convergence-admin',  label: 'Convergences' },
   ];
   // Phase C: client tabs derived from access_* flags on the active client.
   // Phase F: Signal Reading prepended when signals_reading is on record (no flag).
@@ -2828,8 +2808,10 @@ async function loadClientDetail() {
     document.getElementById('cd-subtitle').textContent =
       [client.email, client.pronouns, client.entry_offering ? 'came in for ' + client.entry_offering : ''].filter(Boolean).join(' · ');
 
+    if (LW.workOpen) lwReturnWork(); // keep the shared Weave/Augment screens safe before the page is redrawn
     wrap.innerHTML = renderClientDetail(currentDetailData);
     wireClientDetail();
+    if (CD_SEC.client === id && CD_SEC.key && CD_SEC.key !== 'overview') cdShowSection(CD_SEC.key, true);
   } catch (err) {
     if (err && err.message === 'SESSION_EXPIRED') return; // re-auth already surfaced to the user
     wrap.innerHTML = `<div class="msg msg-error">Failed to load: ${err.message}</div>`;
@@ -3544,7 +3526,7 @@ function cdLoadChartFrame() {
 }
 // my-chart.html (embed mode) reports its height so the frame never scrolls on its own.
 window.addEventListener('message', e => {
-  if (e.origin !== window.location.origin || !e.data || !/^(my-chart|chart-admin|my-courses)-height$/.test(e.data.type || '')) return;
+  if (e.origin !== window.location.origin || !e.data || !/^(my-chart|chart-admin|my-courses|convergence)-height$/.test(e.data.type || '')) return;
   const f = [...document.querySelectorAll('iframe.chart-frame')].find(x => x.contentWindow === e.source);
   if (!f) return;
   if (f) f.style.height = Math.max(600, Number(e.data.height) || 0) + 'px';
@@ -3581,8 +3563,8 @@ function renderClientDetail(d) {
       html: cdChartTab(d) },
     { key: 'signals',   label: 'Signals',
       html: cdSignalsTab(d) },
-    { key: 'ancestral', label: 'Ancestral',
-      html: `${cdWeavingCard(d)}${cdResonanceCard(d)}${cdConvergencesCard(d)}<div class="cd-card full" style="margin-bottom:1.25rem">${cdConvergenceEditorBlock(d)}</div>${pages}` },
+    { key: 'ancestral', label: 'Lineage',
+      html: `${pages}<div id="lw-root"></div>` },
     { key: 'messages',  label: 'Messages',
       html: cdMessagesCard(d) },
     { key: 'intake',    label: 'Intake',
@@ -3601,7 +3583,10 @@ function renderClientDetail(d) {
   ).join('');
 }
 
-function cdShowSection(key) {
+let CD_SEC = { client: null, key: null };
+function cdShowSection(key, noScroll) {
+  CD_SEC = { client: currentDetailClient, key };
+  if (key === 'ancestral') lwRender();
   document.querySelectorAll('#client-detail-content .cd-section').forEach(el => {
     el.style.display = (el.id === 'cd-sec-' + key) ? 'block' : 'none';
   });
@@ -3610,7 +3595,7 @@ function cdShowSection(key) {
   });
   if (key === 'messages') loadClientMessages();
   if (key === 'chart') { const w = document.querySelector('.cd-subnav button[data-chart="working"].active'); w ? cdLoadWorkingFrame() : cdLoadChartFrame(); }
-  window.scrollTo(0, 0);
+  if (!noScroll) window.scrollTo(0, 0);
 }
 
 function cdDangerZoneCard(d) {
@@ -4863,16 +4848,16 @@ async function loadNextSteps() {
     const unstarted = stubs.filter(a => !fCount[a.id]);
     const ready = stubs.filter(a => fCount[a.id] && rMap[a.id]?.verification_status);
     const inProgress = stubs.length - unstarted.length - ready.length;
-    if (unstarted.length) add(cid, `Start research on ${unstarted.length} ancestor${unstarted.length === 1 ? '' : 's'} named at intake`, `nsTriage()`, 'Triage');
-    if (inProgress > 0) add(cid, `Assess ${inProgress} ancestor${inProgress === 1 ? '' : 's'} with findings but no assessment yet`, `nsTriage()`, 'Triage');
-    if (ready.length) add(cid, `Weave ${ready.length} researched ancestor${ready.length === 1 ? '' : 's'}`, `nsTriage()`, 'Triage');
+    if (unstarted.length) add(cid, `Start research on ${unstarted.length} ancestor${unstarted.length === 1 ? '' : 's'} waiting in research`, `nsStage('${cid}','research')`, 'Research');
+    if (inProgress > 0) add(cid, `Assess ${inProgress} ancestor${inProgress === 1 ? '' : 's'} with findings but no assessment yet`, `nsStage('${cid}','research')`, 'Research');
+    if (ready.length) add(cid, `Weave ${ready.length} researched ancestor${ready.length === 1 ? '' : 's'}`, `nsStage('${cid}','research')`, 'Research');
     const woven = list.filter(a => ['weaving', 'catalog'].includes(a.status) && !a.keynote_ancestor_ids);
     const stale = woven.filter(a => fLatest[a.id] && wLatest[a.id] && fLatest[a.id] > wLatest[a.id]);
-    if (stale.length) add(cid, `${stale.length} woven ancestor${stale.length === 1 ? ' has' : 's have'} new findings since writing: reassess, then Augment (Record → top)`, `nsWeaving('${cid}')`, 'Weaving');
+    if (stale.length) add(cid, `${stale.length} woven ancestor${stale.length === 1 ? ' has' : 's have'} new findings since writing: reassess, then Augment (Record → top)`, `nsStage('${cid}','weaving')`, 'Lineage');
     const conv = convs.filter(c => c.client_id === cid).map(c => c.updated_at).sort().pop();
     const lastWritten = woven.map(a => wLatest[a.id]).filter(Boolean).sort().pop();
-    if (woven.length && !conv) add(cid, `${woven.length} ancestor${woven.length === 1 ? '' : 's'} woven, no Convergence yet`, `nsOpen('${cid}','ancestral')`, 'Ancestral');
-    else if (conv && lastWritten && lastWritten > conv) add(cid, 'The Weaving changed after the last Convergence', `nsOpen('${cid}','ancestral')`, 'Ancestral');
+    if (woven.length && !conv) add(cid, `${woven.length} ancestor${woven.length === 1 ? '' : 's'} woven, no Convergence yet`, `nsStage('${cid}','convergence')`, 'Convergence');
+    else if (conv && lastWritten && lastWritten > conv) add(cid, 'The Weaving changed after the last Convergence', `nsStage('${cid}','convergence')`, 'Convergence');
   });
 
   // Chart analysis
@@ -4922,8 +4907,9 @@ function nextStepsHtml(cid) {
 }
 
 async function nsOpen(cid, section) { await showClientDetail(cid); cdShowSection(section); }
-function nsTriage() { showPanel('panel-ancestor-research'); initAncestorResearch(); showTriageMode(); }
-async function nsWeaving(cid) {
+function nsTriage() { showPanel('panel-weaving'); lwLanding(); }
+async function nsStage(cid, stage) { LW.stage = stage; LW.client = cid; await nsOpen(cid, 'ancestral'); }
+async function _legacyNsWeaving(cid) {
   showPanel('panel-weaving');
   populateWeavingClientSelect();
   const sel = document.getElementById('weaving-client-select');
@@ -5043,7 +5029,8 @@ async function createClient() {
 // ════════════════════════════════════════════════════
 // ADMIN — WEAVING BUILDER
 // ════════════════════════════════════════════════════
-function populateWeavingClientSelect() {
+function populateWeavingClientSelect() { return lwLanding(); }
+function _legacyPopulateWeavingClientSelect() {
   const sel = document.getElementById('weaving-client-select');
   sel.innerHTML = '<option value="">— Choose a client —</option>';
   allClients.forEach(c => { sel.innerHTML += `<option value="${c.id}">${c.name}</option>`; });
@@ -5056,7 +5043,10 @@ function populateWeavingClientSelect() {
   });
 }
 
-async function loadClientWeaving() {
+// The Weaving Builder became each client's Lineage workspace (2026-11-17). Every caller
+// that used to reload the builder now refreshes the workspace.
+async function loadClientWeaving() { return lwRefresh(); }
+async function _legacyLoadClientWeaving() {
   const clientId = document.getElementById('weaving-client-select').value;
   const container = document.getElementById('weaving-content');
   if (!clientId) {
@@ -5207,7 +5197,7 @@ async function knEnsureTags() {
 }
 
 function knOpenNew() {
-  KN.open = true; KN.clientId = document.getElementById('weaving-client-select').value; KN.id = null;
+  KN.open = true; KN.clientId = LW.client; KN.id = null;
   KN.draft = { topic: '', place: '', period: '', notes: '', ancestor_ids: [] };
   KN.tags = []; KN.sources = [];
   knRender();
@@ -5468,14 +5458,750 @@ function arcActionsHtml(id, d, layers, weaveHref) {
   if (writable && sinceWriting) advice.push([`${sinceWriting} finding${sinceWriting === 1 ? '' : 's'} logged since the profile was written (${esc(arcDate(lastWritten))}).`, `<button class="btn btn-outline btn-sm" onclick="augmentFromRecord('${id}','${r.client_id}')">Augment</button>`]);
   if (r.status === 'catalog' && DEPTH[res.documentation_depth] >= 2) advice.push([`The record is now ${esc(res.documentation_depth)}: it may carry a full Weaving profile. Move it, then Augment to write the layers.`, `<button class="btn btn-outline btn-sm" onclick="arcMoveToWeaving('${id}')">Move to Weaving</button>`]);
   if (r.status === 'weaving' && res.documentation_depth === 'thin' && prev) advice.push(['The record is thin for a full Weaving profile. Keep it, or place it in the Catalog.', `<button class="btn btn-outline btn-sm" onclick="arcMoveToCatalog('${id}')">Move to Catalog</button>`]);
+  const inResearch = ['intake_stub', 'held'].includes(r.status);
+  const linked = !!r.ancestor_id;
+  const dis = res.disambiguation || null;
+  if (!linked && inResearch && !res.disambiguated_at && dis?.state !== 'running' && dis?.state !== 'done') advice.unshift(['Not yet disambiguated: identity has not been checked against the records.', `<button class="btn btn-outline btn-sm" onclick="arcDisambiguate('${id}')">Disambiguate</button>`]);
   return `<div class="arc-actions">
+      ${!linked ? `<button class="btn ${inResearch && !res.disambiguated_at ? 'btn-gold' : 'btn-outline'} btn-sm" id="arc-dis-btn-${id}" onclick="arcDisambiguate('${id}')" ${dis?.state === 'running' ? 'disabled' : ''} title="Search the records to establish who this is and who they could be confused with">${dis?.state === 'running' ? 'Disambiguating…' : res.disambiguated_at ? 'Disambiguate again' : 'Disambiguate'}</button>` : ''}
+      ${inResearch ? `<button class="btn btn-gold btn-sm" onclick="lwWeave('${id}')" title="Write this ancestor from the research into the client's Weaving or Catalog">Weave</button>` : ''}
       ${writable ? `<button class="btn btn-gold btn-sm" onclick="augmentFromRecord('${id}','${r.client_id}')">Augment with new findings</button>` : ''}
       <button class="btn btn-outline btn-sm" id="arc-reassess-${id}" onclick="arcReassess('${id}', this)">${res.assessed_at ? 'Reassess record' : 'Assess record'}</button>
-      ${layers.length && !['intake_stub', 'held'].includes(r.status) ? `<a class="btn btn-outline btn-sm" href="${weaveHref}" target="_blank" rel="noopener">Open in the Weaving ↗</a>` : ''}
+      ${writable && !linked ? `<button class="btn btn-outline btn-sm" onclick="arcEditText('${id}')">Edit text</button>` : ''}
+      ${layers.length && !inResearch ? `<a class="btn btn-outline btn-sm" href="${weaveHref}" target="_blank" rel="noopener">Open in the Weaving ↗</a>` : ''}
+      ${r.status === 'intake_stub' ? `<button class="btn btn-outline btn-sm" onclick="lwSetStatus('${id}','held')" title="Keep the research; hide this ancestor from the client">Hold</button>` : ''}
+      ${r.status === 'held' ? `<button class="btn btn-outline btn-sm" onclick="lwSetStatus('${id}','intake_stub')">Return to research</button>` : ''}
+      <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(192,112,96,0.3)" onclick="lwDeleteAncestor('${id}')">${inResearch ? 'Delete' : 'Remove from client'}</button>
       <span class="triage-msg" id="arc-act-msg-${id}"></span>
     </div>
+    ${linked && writable ? `<div class="triage-msg">Linked to your archive: edit it in My Archive and every client copy updates.</div>` : ''}
+    <div id="arc-edit-${id}"></div>
+    ${arcToolsHtml(id, d)}
     ${advice.length ? `<ul class="arc-advice" aria-label="What the research supports">${advice.map(([t, b]) => `<li><span>${t}</span>${b}</li>`).join('')}</ul>` : ''}`;
 }
+
+// ── Research tools in every record (2026-11-17): search links and Read a record ──
+const ARC_READ = {};
+function arcSearchLinks(d) {
+  const r = d.row, res = d.research || {};
+  const E = encodeURIComponent;
+  const parts = String(r.name || '').trim().split(/\s+/);
+  const given = parts[0] || '', surname = parts.slice(1).join(' ');
+  const yr = (String(r.dates || '').match(/\b(1[0-9]{3}|20[0-9]{2})\b/) || [])[1];
+  const y = yr ? Number(yr) : null;
+  const place = r.location || '';
+  const first = (t) => String(t || '').split(/[\s(,]/)[0];
+  const fs = `https://www.familysearch.org/search/record/results?q.givenName=${E(given)}&q.surname=${E(surname)}${y ? `&q.birthLikeDate.from=${y - 2}&q.birthLikeDate.to=${y + 2}` : ''}${place ? `&q.anyPlace=${E(place)}` : ''}${res.father ? `&q.fatherGivenName=${E(first(res.father))}` : ''}${res.mother ? `&q.motherGivenName=${E(first(res.mother))}` : ''}`;
+  const tree = `https://www.familysearch.org/search/tree/results?q.givenName=${E(given)}&q.surname=${E(surname)}${y ? `&q.birthLikeDate.from=${y - 2}&q.birthLikeDate.to=${y + 2}` : ''}${place ? `&q.birthLikePlace=${E(place)}` : ''}`;
+  const links = [
+    ['FamilySearch records', fs],
+    ['FamilySearch family tree', tree],
+    ['Geneanet', `https://en.geneanet.org/fonds/individus/?nom=${E(surname)}&prenom=${E(given)}${place ? `&place__0__=${E(place)}` : ''}`],
+    ['Ancestry', `https://www.ancestry.com/search/?name=${E(given)}_${E(surname)}${y ? `&birth=${y}` : ''}`],
+  ];
+  if (place) links.push(['Digitarq (Portuguese archives)', `https://digitarq.arquivos.pt/search?query=${E(place)}&isAdvancedSearch=false`]);
+  return links.map(([l, u]) => `<a class="btn btn-outline btn-sm" href="${u}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('');
+}
+
+function arcToolsHtml(id, d) {
+  const open = ARC_READ[id] ? ' open' : '';
+  return `<details class="arc-tools"${open}>
+    <summary>Research tools · search the records, read a record</summary>
+    <div class="arc-tools-body">
+      <div class="triage-msg">Searches open in a new tab with the name, years, place and parents filled in. Sign in on each site as needed.</div>
+      <div class="arc-actions" style="margin:0.5rem 0 1rem">${arcSearchLinks(d)}</div>
+      <h4>Read a record</h4>
+      <div class="triage-msg">Add a photo or screenshot of the register entry (or a PDF), or paste its text. The record is read against everything already known about this ancestor; you review it before anything is saved.</div>
+      <input class="form-input" type="file" id="rr-file-${id}" accept="image/*,application/pdf" multiple aria-label="Record images or PDF" style="margin:0.5rem 0">
+      <textarea class="form-textarea" id="rr-text-${id}" rows="3" placeholder="Or paste the text of the record, or your own transcription" aria-label="Record text"></textarea>
+      <div class="triage-finding-form" style="margin-top:0.5rem">
+        <input class="form-input" id="rr-label-${id}" placeholder="Where it is from, e.g. Sobral baptisms liv. B1, image 113" aria-label="Source">
+        <input class="form-input" id="rr-url-${id}" placeholder="Link to the image or record" aria-label="Link">
+        <input class="form-input" id="rr-focus-${id}" placeholder="Which entry, if the page has several (optional)" aria-label="Which entry">
+      </div>
+      <div class="triage-row-btns"><button class="btn btn-gold btn-sm" id="rr-btn-${id}" onclick="arcReadRecord('${id}')">Read the record</button><span class="triage-msg" id="rr-msg-${id}"></span></div>
+      <div id="rr-out-${id}">${ARC_READ[id] ? arcReadingHtml(id) : ''}</div>
+    </div>
+  </details>`;
+}
+
+function arcImagePart(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const max = 2200, k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve({ media_type: 'image/jpeg', data: c.toDataURL('image/jpeg', 0.88).split(',')[1] });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not open ' + file.name)); };
+    img.src = url;
+  });
+}
+function arcFileBase64(file) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(String(fr.result).split(',')[1]);
+    fr.onerror = () => reject(new Error('Could not read ' + file.name));
+    fr.readAsDataURL(file);
+  });
+}
+
+async function arcReadRecord(id) {
+  const d = ARC_CACHE[id]; if (!d) return;
+  const v = (k) => (document.getElementById(`rr-${k}-${id}`)?.value || '').trim();
+  const msg = document.getElementById(`rr-msg-${id}`), btn = document.getElementById(`rr-btn-${id}`);
+  const files = [...(document.getElementById(`rr-file-${id}`)?.files || [])];
+  if (!files.length && !v('text')) { msg.textContent = 'Add an image or PDF, or paste the text.'; return; }
+  btn.disabled = true; msg.textContent = 'Reading the record. Up to a minute.';
+  try {
+    const images = [], pdfs = [];
+    for (const f of files.slice(0, 4)) {
+      if (f.type === 'application/pdf') pdfs.push({ media_type: 'application/pdf', data: await arcFileBase64(f) });
+      else if (f.type.startsWith('image/')) images.push(await arcImagePart(f));
+    }
+    const fresh = await ensureFreshToken();
+    if (!fresh) { forceReauth('Your session has expired — please sign in again.'); return; }
+    const r = d.row;
+    const findings = (d.findings || []).filter(f => f.source_type !== 'history');
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/read-record`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}`, 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify({ images, pdfs, text: v('text'), source_hint: v('label'), focus: v('focus'),
+        ancestor: { name: r.name, dates: r.dates, location: r.location },
+        known: composeClientAncestorContext(r, d.research || {}, findings) })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) throw new Error(data.error || `Request failed (${res.status})`);
+    ARC_READ[id] = { reading: data.reading, label: v('label'), url: v('url') };
+    msg.textContent = '';
+    document.getElementById(`rr-out-${id}`).innerHTML = arcReadingHtml(id);
+  } catch (err) {
+    msg.textContent = 'Could not read it: ' + err.message;
+  } finally { btn.disabled = false; }
+}
+
+const RR_FAMILY_DEFAULT = ['father', 'mother', 'spouse', 'child', 'sibling', 'paternal grandfather', 'paternal grandmother', 'maternal grandfather', 'maternal grandmother', 'godfather', 'godmother', 'witness'];
+function arcReadingHtml(id) {
+  const st = ARC_READ[id]; if (!st) return '';
+  const g = st.reading || {};
+  const typeOpts = TRIAGE_SOURCE_TYPES.map(([v, l]) => `<option value="${v}"${v === g.source_type ? ' selected' : ''}>${l}</option>`).join('');
+  const match = { yes: 'Matches this ancestor', no: 'Does not match this ancestor', unclear: 'Match unclear' }[g.matches_ancestor] || 'Match unclear';
+  const people = Array.isArray(g.people) ? g.people : [];
+  const next = Array.isArray(g.next_searches) ? g.next_searches : [];
+  const unsure = Array.isArray(g.uncertain) ? g.uncertain : [];
+  return `<div class="rr-result">
+    <div class="triage-status"><span class="verify-badge verify-${g.matches_ancestor === 'yes' ? 'verified' : g.matches_ancestor === 'no' ? 'not_found' : 'ambiguous'}">${esc(match)}</span><span class="triage-msg">${esc(g.match_reason || '')}</span></div>
+    <label class="form-label" for="rr-sum-${id}">What the record says</label>
+    <textarea class="form-textarea" id="rr-sum-${id}" rows="5">${esc(g.summary || '')}</textarea>
+    <div class="triage-finding-form" style="margin-top:0.5rem">
+      <input class="form-input" id="rr-date-${id}" value="${esc(g.finding_date || '')}" placeholder="YYYY-MM-DD" aria-label="Record date">
+      <select class="form-select" id="rr-type-${id}" aria-label="Source type">${typeOpts}</select>
+      <input class="form-input" id="rr-slabel-${id}" value="${esc(st.label || g.source_label_suggestion || '')}" aria-label="Source label">
+    </div>
+    <input class="form-input" id="rr-surl-${id}" value="${esc(st.url || '')}" placeholder="Link" aria-label="Link" style="margin-bottom:0.5rem">
+    <label style="display:flex;gap:0.5rem;align-items:center;font-size:15px"><input type="checkbox" id="rr-hl-${id}"${g.significant ? ' checked' : ''}> Highlight as significant</label>
+    <input class="form-input" id="rr-hlnote-${id}" value="${esc(g.significant || '')}" placeholder="Why it matters" aria-label="Why it matters" style="margin:0.35rem 0 0.75rem">
+    ${people.length ? `<h4>People named · tick to add to Family</h4><ul class="arc-kin-list">${people.map((p, i) => `<li><label style="display:flex;gap:0.5rem;align-items:baseline"><input type="checkbox" id="rr-p-${id}-${i}"${RR_FAMILY_DEFAULT.includes(p.role) ? ' checked' : ''}><span><span class="arc-kin-role">${esc(p.role)}</span> · ${esc(p.name)}${p.note ? ` <span class="arc-kin-note">— ${esc(p.note)}</span>` : ''}</span></label></li>`).join('')}</ul>` : ''}
+    ${next.length ? `<label style="display:flex;gap:0.5rem;align-items:flex-start;font-size:15px;margin-bottom:0.25rem"><input type="checkbox" id="rr-next-${id}" checked> Add these to Still to find:</label><ol class="triage-prompts">${next.map(n => `<li>${esc(n)}</li>`).join('')}</ol>` : ''}
+    ${unsure.length ? `<div class="triage-msg">Uncertain readings: ${unsure.map(esc).join(' · ')}</div>` : ''}
+    ${g.transcription ? `<details style="margin-top:0.5rem"><summary class="triage-msg">Transcription</summary><div class="triage-intake">${esc(g.transcription)}</div></details>
+    <label style="display:flex;gap:0.5rem;align-items:center;font-size:15px;margin-top:0.5rem"><input type="checkbox" id="rr-tx-${id}" checked> Keep the transcription with the finding</label>` : ''}
+    <div class="triage-row-btns"><button class="btn btn-gold btn-sm" onclick="arcSaveReading('${id}', this)">Save to the record</button><button class="btn btn-outline btn-sm" onclick="arcDiscardReading('${id}')">Discard</button><span class="triage-msg" id="rr-smsg-${id}"></span></div>
+  </div>`;
+}
+
+function arcDiscardReading(id) { delete ARC_READ[id]; const o = document.getElementById(`rr-out-${id}`); if (o) o.innerHTML = ''; }
+
+function rrNormDate(v) {
+  const t = String(v || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return { date: t, note: '' };
+  if (/^\d{4}-\d{2}$/.test(t)) return { date: t + '-01', note: ' (month only)' };
+  if (/^\d{4}$/.test(t)) return { date: t + '-01-01', note: ' (year only)' };
+  return { date: null, note: '' };
+}
+
+async function arcSaveReading(id, btn) {
+  const st = ARC_READ[id], d = ARC_CACHE[id]; if (!st || !d) return;
+  const g = st.reading || {};
+  const v = (k) => (document.getElementById(`rr-${k}-${id}`)?.value || '').trim();
+  const on = (k) => !!document.getElementById(`rr-${k}-${id}`)?.checked;
+  const msg = document.getElementById(`rr-smsg-${id}`);
+  btn.disabled = true;
+  try {
+    const dt = rrNormDate(v('date'));
+    const label = v('slabel') + dt.note;
+    let summary = v('sum');
+    if (on('tx') && g.transcription) summary += `\n\nTranscription:\n${g.transcription}`;
+    const saved = await restPost('client_ancestor_findings', {
+      client_ancestor_id: id, finding_date: dt.date, source_type: v('type') || null, source_label: label || null,
+      summary: summary || null, url: v('surl') || null, highlight: on('hl'), highlight_note: on('hl') ? (v('hlnote') || null) : null
+    });
+    if (!Array.isArray(saved) || !saved[0]?.id) throw new Error(saved?.message || 'save failed');
+    const res = d.research || {};
+    const fields = {};
+    const rels = Array.isArray(res.relationships) ? [...res.relationships] : [];
+    const before = rels.length;
+    let father = res.father || null, mother = res.mother || null;
+    const src = (v('type') || 'record') + (dt.date ? ' ' + dt.date.slice(0, 4) : '');
+    (g.people || []).forEach((p, i) => {
+      if (!document.getElementById(`rr-p-${id}-${i}`)?.checked) return;
+      const full = p.note ? `${p.name} (${p.note})` : p.name;
+      if (p.role === 'father' && !father) { father = full; return; }
+      if (p.role === 'mother' && !mother) { mother = full; return; }
+      if (p.role === 'subject') return;
+      const role = p.role.charAt(0).toUpperCase() + p.role.slice(1);
+      if (!rels.some(x => x.role === role && normName(x.name) === normName(p.name))) rels.push({ role, name: p.name, ...(p.note ? { note: p.note } : {}), source: src });
+    });
+    if (father !== (res.father || null)) fields.father = father;
+    if (mother !== (res.mother || null)) fields.mother = mother;
+    if (rels.length !== before) fields.relationships = rels;
+    if (on('next') && Array.isArray(g.next_searches) && g.next_searches.length) {
+      const cur = Array.isArray(res.research_prompts) ? res.research_prompts : [];
+      fields.research_prompts = [...cur, ...g.next_searches.filter(n => !cur.includes(n))];
+    }
+    if (Object.keys(fields).length) await upsertClientAncestorResearch(id, fields);
+    delete ARC_READ[id];
+    await arcRefresh(id);
+  } catch (err) {
+    if (msg) msg.textContent = 'Save failed: ' + err.message;
+    btn.disabled = false;
+  }
+}
+
+// ── Disambiguation (2026-11-17): the first step of research. Searches the records and published
+// trees, names who this most likely is and who they could be confused with, checks what is already
+// recorded for conflicts, and offers findings. Runs in the background (edge function
+// disambiguate-ancestor); the result waits in the research record until it is reviewed. ──
+const ARC_DIS_POLL = {};
+const DIS_EVIDENCE_LABEL = { 'original record': 'Original record', index: 'Index', 'family tree': 'Family tree · lead only', published: 'Published', inferred: 'Inferred' };
+const DIS_STRONG = ['original record', 'index', 'published'];
+
+async function arcDisambiguate(id, focus) {
+  const btn = document.getElementById(`arc-dis-btn-${id}`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Starting…'; }
+  try {
+    const fresh = await ensureFreshToken();
+    if (!fresh) { forceReauth('Your session has expired — please sign in again.'); return; }
+    const f = focus != null ? focus : (document.getElementById(`dis-focus-${id}`)?.value || '').trim();
+    const call = () => fetch(`${SUPABASE_URL}/functions/v1/disambiguate-ancestor`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}`, 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify({ client_ancestor_id: id, focus: f })
+    });
+    let res = await call();
+    if (res.status === 401) { if (await ensureFreshToken()) res = await call(); }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) throw new Error(data.error || `Request failed (${res.status})`);
+    await arcLoad(id);
+    if (ARC_OPEN.has(id)) arcRender(id);
+    arcDisEnsurePoll(id);
+  } catch (err) {
+    const msg = document.getElementById(`arc-act-msg-${id}`);
+    if (msg) msg.textContent = 'Disambiguation could not start: ' + err.message;
+    if (btn) { btn.disabled = false; btn.textContent = 'Disambiguate'; }
+  }
+}
+
+function arcDisEnsurePoll(id) {
+  if (ARC_DIS_POLL[id]) return;
+  const started = Date.now();
+  ARC_DIS_POLL[id] = setInterval(async () => {
+    try {
+      const r = await rest(`client_ancestor_research?client_ancestor_id=eq.${id}&select=disambiguation`);
+      const dis = Array.isArray(r) ? r[0]?.disambiguation : null;
+      const timedOut = Date.now() - started > 12 * 60 * 1000;
+      if (!dis || dis.state !== 'running' || timedOut) {
+        clearInterval(ARC_DIS_POLL[id]); delete ARC_DIS_POLL[id];
+        if (dis && dis.state === 'running' && timedOut && ARC_CACHE[id]) {
+          ARC_CACHE[id].research = { ...(ARC_CACHE[id].research || {}), disambiguation: { ...dis, state: 'error', error: 'No result after 12 minutes. The search may have been cut off; run it again.' } };
+          if (ARC_OPEN.has(id)) arcRender(id);
+          return;
+        }
+        await arcLoad(id);
+        if (ARC_OPEN.has(id)) arcRender(id);
+      }
+    } catch { /* keep polling */ }
+  }, 6000);
+}
+
+function disTime(t) { try { return new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch { return ''; } }
+
+function arcDisIdentityHtml(g) {
+  const id = g.identity || {};
+  const rows = [['Name', id.name], ['Born', id.born], ['Died', id.died], ['Father', id.father], ['Mother', id.mother], ['Spouse', id.spouse], ['Children', id.children], ['Rests on', id.rests_on]].filter(([, v]) => v);
+  return rows.length ? `<dl class="dis-id">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : '';
+}
+function arcDisCandidatesHtml(g) {
+  const c = Array.isArray(g.candidates) ? g.candidates : [];
+  if (!c.length) return '';
+  const order = { best: 0, possible: 1, 'ruled out': 2 };
+  return `<h5>Who this could be confused with</h5><ul class="dis-list">${[...c].sort((a, b) => (order[a.fits] ?? 1) - (order[b.fits] ?? 1)).map(x => `<li class="${x.fits === 'ruled out' ? 'dis-ruled' : ''}">
+      <span class="dis-tag ${x.fits === 'best' ? 'dis-strong' : ''}">${esc(x.fits === 'best' ? 'best fit' : x.fits)}</span><strong style="font-weight:500">${esc(x.name)}</strong>${x.dates ? ' · ' + esc(x.dates) : ''}${x.place ? ' · ' + esc(x.place) : ''}
+      ${x.family ? `<div class="dis-meta">${esc(x.family)}</div>` : ''}
+      ${x.tell_apart ? `<div>${esc(x.tell_apart)}</div>` : ''}
+      ${x.url ? `<a class="dis-meta" href="${esc(x.url)}" target="_blank" rel="noopener">Source ↗</a>` : ''}</li>`).join('')}</ul>`;
+}
+function arcDisConflictsHtml(g) {
+  const c = Array.isArray(g.conflicts) ? g.conflicts : [];
+  if (!c.length) return '';
+  return `<h5>Conflicts in what is recorded</h5><ul class="dis-list">${c.map(x => `<li class="dis-conflict">${esc(x.issue)}${x.between ? `<div class="dis-meta">${esc(x.between)}</div>` : ''}${x.suggestion ? `<div>${esc(x.suggestion)}</div>` : ''}</li>`).join('')}</ul>`;
+}
+
+function arcDisHtml(id, d) {
+  const r = d.row, res = d.research || {};
+  if (r.ancestor_id) return '';
+  const dis = res.disambiguation;
+  const focusInput = `<input class="form-input" id="dis-focus-${id}" placeholder="Focus for the search (optional), e.g. the Covilhã branch, or her second marriage" aria-label="Focus for the search" style="margin-top:0.5rem">`;
+  const head = '<h4>Identity · disambiguation</h4>';
+  if (!dis) {
+    return `<div>${head}<div class="triage-msg">Not yet disambiguated. Disambiguate searches the records and published trees from what is known here (name, dates, place, the client's words, family and the rest of this client's lineage), then shows who this most likely is, who else could be mistaken for them, any conflicts, and findings to keep. It takes a few minutes and runs while you work elsewhere.</div>${focusInput}</div>`;
+  }
+  if (dis.state === 'running') {
+    return `<div>${head}<div class="dis-box"><span class="loading-glyph">✦</span> Searching the records${dis.focus ? ' · focus: ' + esc(dis.focus) : ''}. Started ${esc(disTime(dis.started_at))}. You can close this record or leave the page; the result waits here for review.</div></div>`;
+  }
+  if (dis.state === 'error') {
+    return `<div>${head}<div class="dis-box"><div class="triage-msg" style="color:var(--red)">The search did not finish: ${esc(dis.error || 'unknown error')}</div>${focusInput}<div class="triage-row-btns"><button class="btn btn-outline btn-sm" onclick="arcDisambiguate('${id}')">Run it again</button></div></div></div>`;
+  }
+  const g = dis.result || {};
+  const vLabel = TRIAGE_VERIFY_LABEL[g.verification_status] || g.verification_status || '';
+  const badge = `<span class="verify-badge verify-${esc(g.verification_status || 'ambiguous')}">${esc(vLabel)}</span>`;
+  const meta = `<div class="dis-meta">Searched ${esc(disTime(dis.finished_at))}${dis.searches ? ` · ${dis.searches} searches` : ''}${dis.sources_seen ? ` · ${dis.sources_seen} pages seen` : ''}${dis.focus ? ' · focus: ' + esc(dis.focus) : ''}</div>`;
+  const reviewed = dis.saved_at || dis.discarded_at;
+  if (reviewed) {
+    return `<div>${head}<div class="dis-box">
+      <div class="triage-status">${badge}${g.documentation_depth ? `<span class="triage-pill">Record: ${esc(g.documentation_depth)}</span>` : ''}</div>
+      ${meta}
+      ${dis.discarded_at && !dis.saved_at ? '<div class="triage-msg">This search was set aside without saving.</div>' : ''}
+      ${g.verification_note ? `<p style="margin:0.6rem 0">${esc(g.verification_note)}</p>` : ''}
+      ${arcDisIdentityHtml(g)}
+      ${arcDisCandidatesHtml(g)}
+      ${arcDisConflictsHtml(g)}
+      ${focusInput}
+    </div></div>`;
+  }
+  const kin = res || {};
+  const idn = g.identity || {};
+  const findings = Array.isArray(g.findings) ? g.findings : [];
+  const next = Array.isArray(g.next_searches) ? g.next_searches : [];
+  const parentRows = [['father', idn.father, kin.father], ['mother', idn.mother, kin.mother]].filter(([, v]) => v);
+  return `<div>${head}<div class="dis-box">
+    <div class="triage-status">${badge}${g.documentation_depth ? `<span class="triage-pill">Record: ${esc(g.documentation_depth)}</span>` : ''}<span class="triage-pill">Ready to review</span></div>
+    ${meta}
+    ${g.verification_note ? `<p style="margin:0.6rem 0">${esc(g.verification_note)}</p>` : ''}
+    ${arcDisIdentityHtml(g)}
+    ${arcDisCandidatesHtml(g)}
+    ${arcDisConflictsHtml(g)}
+    ${findings.length ? `<h5>Findings · tick to keep</h5><ul class="dis-list">${findings.map((f, i) => {
+      const strong = DIS_STRONG.includes(f.evidence);
+      const pre = strong && f.matches !== 'unclear' && !f.link_unconfirmed;
+      return `<li class="dis-find"><label><input type="checkbox" id="dis-f-${id}-${i}"${pre ? ' checked' : ''}><span>
+        <span class="dis-tag ${strong ? 'dis-strong' : 'dis-weak'}">${esc(DIS_EVIDENCE_LABEL[f.evidence] || f.evidence)}</span>${f.matches !== 'yes' ? `<span class="dis-tag">${esc(f.matches === 'likely' ? 'likely match' : 'match unclear')}</span>` : ''}
+        <strong style="font-weight:500">${esc([f.date, f.source_label].filter(Boolean).join(' · ') || arcSourceLabel(f.source_type) || 'Finding')}</strong>
+        <div>${esc(f.summary)}</div>
+        ${f.people?.length ? `<div class="dis-meta">${f.people.map(p => `${esc(p.role)}: ${esc(p.name)}`).join(' · ')}</div>` : ''}
+        ${f.significant ? `<div class="dis-meta">✦ ${esc(f.significant)}</div>` : ''}
+        ${f.url ? `<a class="dis-meta" href="${esc(f.url)}" target="_blank" rel="noopener">Open the source ↗</a>` : f.link_unconfirmed ? '<div class="dis-meta">The link given did not come from the search results, so it was removed. Find the record before keeping this.</div>' : ''}
+      </span></label></li>`;
+    }).join('')}</ul>` : '<div class="triage-msg" style="margin-top:0.6rem">No findings came back from the search.</div>'}
+    ${parentRows.length ? `<h5>Parents</h5>${parentRows.map(([k, v, cur]) => `<label style="display:flex;gap:0.5rem;align-items:baseline;font-size:15px"><input type="checkbox" id="dis-${k}-${id}"${!cur ? ' checked' : ''}> ${k === 'father' ? 'Father' : 'Mother'}: ${esc(v)}${cur ? ` <span class="dis-meta">(replaces ${esc(cur)})</span>` : ''}</label>`).join('')}` : ''}
+    ${findings.some(f => f.people?.length) ? `<label style="display:flex;gap:0.5rem;align-items:baseline;font-size:15px;margin-top:0.5rem"><input type="checkbox" id="dis-people-${id}" checked> Add the godparents, witnesses and other relatives named in the kept findings to Family</label>` : ''}
+    ${next.length ? `<h5>Next searches</h5><label style="display:flex;gap:0.5rem;align-items:flex-start;font-size:15px;margin-bottom:0.25rem"><input type="checkbox" id="dis-next-${id}" checked> Add these to Still to find:</label><ol class="triage-prompts">${next.map(n => `<li>${esc(n)}</li>`).join('')}</ol>` : ''}
+    <div class="triage-msg" style="margin-top:0.5rem">Saving keeps the ticked findings, sets the identity status and record depth on this ancestor, and keeps the comparison above with the record.</div>
+    <div class="triage-row-btns"><button class="btn btn-gold btn-sm" onclick="arcSaveDisambiguation('${id}', this)">Save to the record</button><button class="btn btn-outline btn-sm" onclick="arcDiscardDisambiguation('${id}')">Set aside</button><span class="triage-msg" id="dis-msg-${id}"></span></div>
+  </div></div>`;
+}
+
+async function arcSaveDisambiguation(id, btn) {
+  const d = ARC_CACHE[id]; if (!d) return;
+  const res = d.research || {}, dis = res.disambiguation || {}, g = dis.result || {};
+  const on = (k) => !!document.getElementById(k)?.checked;
+  const msg = document.getElementById(`dis-msg-${id}`);
+  btn.disabled = true;
+  try {
+    const findings = Array.isArray(g.findings) ? g.findings : [];
+    const kept = findings.filter((f, i) => on(`dis-f-${id}-${i}`));
+    for (const f of kept) {
+      const dt = rrNormDate(f.date);
+      const ev = DIS_EVIDENCE_LABEL[f.evidence] || f.evidence;
+      const saved = await restPost('client_ancestor_findings', {
+        client_ancestor_id: id, finding_date: dt.date, source_type: f.source_type || null,
+        source_label: ((f.source_label || '') + dt.note + (ev ? ` [${ev}]` : '')).trim() || null,
+        summary: f.summary || null, url: f.url || null,
+        highlight: !!f.significant, highlight_note: f.significant || null
+      });
+      if (!Array.isArray(saved) || !saved[0]?.id) throw new Error(saved?.message || 'a finding could not be saved');
+    }
+    const fields = {
+      verification_status: g.verification_status || 'ambiguous',
+      verification_note: g.verification_note || null,
+      documentation_depth: g.documentation_depth || res.documentation_depth || null,
+      assessed_at: new Date().toISOString(),
+      disambiguated_at: new Date().toISOString(),
+      disambiguation: { ...dis, saved_at: new Date().toISOString(), kept: kept.length }
+    };
+    const idn = g.identity || {};
+    if (idn.father && on(`dis-father-${id}`)) fields.father = idn.father;
+    if (idn.mother && on(`dis-mother-${id}`)) fields.mother = idn.mother;
+    if (on(`dis-people-${id}`)) {
+      const rels = Array.isArray(res.relationships) ? [...res.relationships] : [];
+      const before = rels.length;
+      kept.forEach(f => (f.people || []).forEach(p => {
+        if (['father', 'mother'].includes(p.role)) return;
+        const role = p.role.charAt(0).toUpperCase() + p.role.slice(1);
+        if (!rels.some(x => x.role === role && normName(x.name) === normName(p.name))) rels.push({ role, name: p.name, ...(p.note ? { note: p.note } : {}), source: (f.source_type || 'record') + (f.date ? ' ' + String(f.date).slice(0, 4) : '') });
+      }));
+      if (rels.length !== before) fields.relationships = rels;
+    }
+    if (on(`dis-next-${id}`) && Array.isArray(g.next_searches) && g.next_searches.length) {
+      const cur = Array.isArray(res.research_prompts) ? res.research_prompts : [];
+      fields.research_prompts = [...cur, ...g.next_searches.filter(n => !cur.includes(n))];
+    }
+    ARC_PREV[id] = { depth: res.documentation_depth || null, status: res.verification_status || null };
+    await upsertClientAncestorResearch(id, fields);
+    await arcRefresh(id);
+  } catch (err) {
+    if (msg) msg.textContent = 'Save failed: ' + err.message;
+    btn.disabled = false;
+  }
+}
+
+async function arcDiscardDisambiguation(id) {
+  const d = ARC_CACHE[id]; if (!d) return;
+  const dis = d.research?.disambiguation || {};
+  if (!confirm('Set this search aside without saving any of it? The comparison stays visible; nothing is added to the record.')) return;
+  await upsertClientAncestorResearch(id, { disambiguation: { ...dis, discarded_at: new Date().toISOString() } });
+  await arcRefresh(id);
+}
+
+// ── Hand edit of a client's own woven ancestor (voice pass) ──
+const ARC_EDIT_FIELDS = [['epithet', 'Epithet', 1], ['catalog_preview', 'Catalog', 3], ['layer_terroir', 'Terroir', 5], ['layer_unresolved', 'Unresolved', 5], ['layer_thread', 'Thread', 6], ['layer_lineage', 'Lineage', 5]];
+function arcEditText(id) {
+  const d = ARC_CACHE[id]; const el = document.getElementById(`arc-edit-${id}`); if (!d || !el) return;
+  if (el.innerHTML) { el.innerHTML = ''; return; }
+  const r = d.row;
+  el.innerHTML = `<div class="arc-edit">
+    ${ARC_EDIT_FIELDS.map(([k, l, rows]) => `<label class="form-label" for="ae-${k}-${id}">${l}</label>
+      ${rows === 1 ? `<input class="form-input" id="ae-${k}-${id}" value="${esc(r[k] || '')}">` : `<textarea class="form-textarea" id="ae-${k}-${id}" rows="${rows}">${esc(r[k] || '')}</textarea>`}`).join('')}
+    <div class="triage-row-btns"><button class="btn btn-gold btn-sm" onclick="arcSaveText('${id}', this)">Save text</button><button class="btn btn-outline btn-sm" onclick="arcEditText('${id}')">Cancel</button><span class="triage-msg" id="ae-msg-${id}"></span></div>
+  </div>`;
+}
+async function arcSaveText(id, btn) {
+  const body = {};
+  ARC_EDIT_FIELDS.forEach(([k]) => { const el = document.getElementById(`ae-${k}-${id}`); if (el) body[k] = el.value.trim() || null; });
+  btn.disabled = true;
+  const ok = await restPatch('client_ancestors', id, body);
+  if (!ok) { document.getElementById(`ae-msg-${id}`).textContent = 'Save failed.'; btn.disabled = false; return; }
+  const row = ARC_ROWS.find(x => x.id === id); if (row) Object.assign(row, body);
+  await arcRefresh(id);
+}
+
+function archStatusLabel(s) { return ({ keynote: 'historical keynote', weaving: 'weaving', catalog: 'catalog', margin: 'margin' })[s] || s || 'catalog'; }
+
+// ════════════════════════════════════════════════════
+// LINEAGE WORKSPACE (2026-11-17)
+// One place per client, on the client's Lineage tab, for everything from research to
+// Convergence. Every ancestor at every stage opens the same Ancestral Record. Weave and
+// Augment open in a work area inside the workspace (the shared Generate / Augment / Review
+// screens are moved in and returned to My Archive afterwards).
+// ════════════════════════════════════════════════════
+const LW = { client: null, stage: 'research', rows: [], freq: {}, workOpen: false };
+const LW_STAGES = [['research', 'In research'], ['weaving', 'Weaving'], ['catalog', 'Catalog'], ['held', 'Held'], ['keynotes', 'Historical Keynotes'], ['mythic', 'Mythic Resonance'], ['convergence', 'Convergence']];
+
+function lwStageRows(rows, key) {
+  const people = rows.filter(r => !isContextKeynote(r));
+  if (key === 'research') return people.filter(r => r.status === 'intake_stub');
+  if (key === 'weaving') return people.filter(r => r.status === 'weaving');
+  if (key === 'catalog') return people.filter(r => r.status === 'catalog');
+  if (key === 'held') return people.filter(r => r.status === 'held');
+  if (key === 'keynotes') return rows.filter(isContextKeynote);
+  return [];
+}
+
+async function lwRender() {
+  const root = document.getElementById('lw-root'); if (!root) return;
+  const cid = currentDetailClient; if (!cid) return;
+  if (!document.getElementById('lw-body')) root.innerHTML = '<div id="lw-head"></div><div id="lw-work" class="lw-work" hidden></div><div id="lw-body"><div class="loading"><span class="loading-glyph">✦</span>Loading the lineage…</div></div>';
+  const fresh = LW.client !== cid;
+  LW.client = cid;
+  await lwRefresh(fresh);
+}
+
+async function lwRefresh(pickStage) {
+  const head = document.getElementById('lw-head'), body = document.getElementById('lw-body');
+  if (!head || !body || !LW.client) return;
+  const cid = LW.client;
+  const rows = await rest(`client_ancestors?client_id=eq.${cid}&select=*&order=sort_year.asc`).catch(() => []);
+  LW.rows = Array.isArray(rows) ? rows : [];
+  const people = LW.rows.filter(r => !isContextKeynote(r));
+  ARC_ROWS = people; KN.people = people;
+  if (pickStage) LW.stage = lwStageRows(LW.rows, 'research').length ? 'research' : 'weaving';
+  const ids = people.map(r => r.id).join(',');
+  const fr = ids ? await rest(`client_ancestor_frequencies?select=client_ancestor_id&client_ancestor_id=in.(${ids})`).catch(() => []) : [];
+  const fc = {}; (Array.isArray(fr) ? fr : []).forEach(x => { fc[x.client_ancestor_id] = (fc[x.client_ancestor_id] || 0) + 1; });
+  LW.freq = fc;
+  const d = currentDetailData || {};
+  const counts = {
+    research: lwStageRows(LW.rows, 'research').length, weaving: lwStageRows(LW.rows, 'weaving').length, catalog: lwStageRows(LW.rows, 'catalog').length,
+    held: lwStageRows(LW.rows, 'held').length, keynotes: lwStageRows(LW.rows, 'keynotes').length,
+    mythic: (d.resonance || []).length, convergence: (d.convs || []).length
+  };
+  const visCount = people.filter(r => r.research_visible && r.status !== 'held').length;
+  const archiveOpts = allAncestors.filter(a => ['weaving', 'catalog'].includes(a.status) && !people.some(r => r.ancestor_id === a.id))
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '')).map(a => `<option value="${a.id}">${esc(a.name)}${a.dates ? ' · ' + esc(a.dates) : ''}</option>`).join('');
+  const sideOpts = `<option value="">Lineage side</option><option value="maternal">Maternal</option><option value="paternal">Paternal</option><option value="both">Both / chosen</option><option value="unknown">Unknown</option>`;
+  head.innerHTML = `
+    <div class="lw-actions">
+      <button class="btn btn-gold btn-sm" onclick="lwToggle('lw-new')">+ Begin research on an ancestor</button>
+      <button class="btn btn-outline btn-sm" onclick="lwToggle('lw-add')">+ Add from my archive</button>
+      <span class="triage-msg">Research shown to the client: ${visCount} of ${people.filter(r => r.status !== 'held').length}</span>
+      <button class="btn btn-outline btn-sm" onclick="arcSetAllVisible(true)">Show all research</button>
+      <button class="btn btn-outline btn-sm" onclick="arcSetAllVisible(false)">Hide all research</button>
+    </div>
+    <div id="lw-new" class="card lw-form" hidden>
+      <div class="eyebrow" style="margin-bottom:0.75rem">Begin research</div>
+      <div class="review-grid-2">
+        <input class="form-input" id="lw-new-name" placeholder="Name" aria-label="Name">
+        <input class="form-input" id="lw-new-dates" placeholder="Dates, e.g. b. 1834" aria-label="Dates">
+        <input class="form-input" id="lw-new-place" placeholder="Place" aria-label="Place">
+        <input class="form-input" id="lw-new-rel" placeholder="Relation to the client, e.g. great-grandfather" aria-label="Relation to the client">
+        <select class="form-select" id="lw-new-side" aria-label="Lineage side">${sideOpts}</select>
+      </div>
+      <textarea class="form-textarea" id="lw-new-notes" rows="3" placeholder="What is known so far, and where it came from" aria-label="What is known" style="margin-top:0.5rem"></textarea>
+      <label style="display:flex;gap:0.5rem;align-items:baseline;font-size:15px;margin-top:0.5rem"><input type="checkbox" id="lw-new-dis" checked> Disambiguate now: search the records for who this is (a few minutes, runs in the background)</label>
+      <div class="triage-row-btns"><button class="btn btn-gold btn-sm" onclick="lwBeginResearch(this)">Begin research</button><span class="triage-msg" id="lw-new-msg"></span></div>
+    </div>
+    <div id="lw-add" class="card lw-form" hidden>
+      <div class="eyebrow" style="margin-bottom:0.75rem">Add one of your ancestors</div>
+      <div class="triage-msg" style="margin-bottom:0.5rem">Your archive ancestors are already researched. The client's copy stays in step with your archive.</div>
+      <div class="review-grid-2">
+        <select class="form-select" id="lw-add-anc" aria-label="Ancestor"><option value="">Choose an ancestor</option>${archiveOpts}</select>
+        <select class="form-select" id="lw-add-side" aria-label="Lineage side">${sideOpts}</select>
+        <select class="form-select" id="lw-add-place" aria-label="Placement"><option value="">Placement as in your archive</option><option value="weaving">Weaving</option><option value="catalog">Catalog</option></select>
+      </div>
+      <div class="triage-row-btns"><button class="btn btn-gold btn-sm" onclick="lwAddFromArchive(this)">Add to this Lineage</button><span class="triage-msg" id="lw-add-msg"></span></div>
+    </div>
+    ${duplicateBannerHtml(people)}
+    <div class="lw-stages" role="tablist" aria-label="Lineage stages">${LW_STAGES.map(([k, l]) => `<button role="tab" class="lw-stage${LW.stage === k ? ' active' : ''}" data-stage="${k}" aria-selected="${LW.stage === k}" onclick="lwStage('${k}')">${l}<span class="lw-count">${counts[k]}</span></button>`).join('')}</div>`;
+  lwRenderStage();
+}
+
+function lwToggle(id) { const el = document.getElementById(id); if (el) el.hidden = !el.hidden; }
+function lwStage(k) {
+  LW.stage = k;
+  document.querySelectorAll('.lw-stage').forEach(b => { const on = b.dataset.stage === k; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
+  lwRenderStage();
+}
+
+function lwRowHtml(a) {
+  const sideSelect = `<select class="form-select" style="width:auto;min-width:118px;font-size:15px" aria-label="Lineage side" onchange="updateClientAncestorSide('${a.id}', this.value)">
+    <option value=""${!a.lineage_side ? ' selected' : ''}>— side —</option>
+    <option value="maternal"${a.lineage_side === 'maternal' ? ' selected' : ''}>Maternal</option>
+    <option value="paternal"${a.lineage_side === 'paternal' ? ' selected' : ''}>Paternal</option>
+    <option value="both"${a.lineage_side === 'both' ? ' selected' : ''}>Both / chosen</option>
+    <option value="unknown"${a.lineage_side === 'unknown' ? ' selected' : ''}>Unknown</option></select>`;
+  const placeSelect = ['weaving', 'catalog'].includes(a.status)
+    ? `<select class="form-select" style="width:auto;min-width:112px;font-size:15px" aria-label="Placement" title="Which of the client's pages shows this ancestor" onchange="updateClientAncestorPlacement('${a.id}', this.value)">
+        <option value="weaving"${a.status === 'weaving' ? ' selected' : ''}>Weaving</option>
+        <option value="catalog"${a.status === 'catalog' ? ' selected' : ''}>Catalog</option></select>` : '';
+  const n = (LW.freq || {})[a.id] || 0;
+  return `<div class="arc-item"><div class="ancestor-row">
+      <span class="ancestor-era-dot ${eraDot(a.era)}"></span>
+      <div class="ancestor-name-block">
+        <div class="ancestor-name-text">${esc(a.name)}${a.ancestor_id ? ' <span class="added-via">from my archive</span>' : ''} ${addedViaPill(a)} <span class="added-via arc-vis-pill" id="arc-vis-${a.id}" style="${a.research_visible ? '' : 'display:none'}">research shown</span></div>
+        <div class="ancestor-dates">${esc(a.dates || '')}${a.location ? ' · ' + esc(a.location) : ''}${a.relation_to_client ? ' · ' + esc(a.relation_to_client) : ''}</div>
+      </div>
+      ${['weaving', 'catalog'].includes(a.status) ? `<span class="ancestor-freq-count">${n} freq${n !== 1 ? 's' : ''}</span>` : ''}
+      ${placeSelect}${sideSelect}
+      <button class="btn btn-outline btn-sm" id="arc-btn-${a.id}" onclick="arcToggle('${a.id}')" aria-expanded="${ARC_OPEN.has(a.id)}">${ARC_OPEN.has(a.id) ? 'Close record' : 'Record'}</button>
+    </div><div class="arc-panel" id="arc-${a.id}"></div></div>`;
+}
+
+function lwRenderStage() {
+  const body = document.getElementById('lw-body'); if (!body) return;
+  const k = LW.stage, cid = LW.client, d = currentDetailData || {};
+  if (['research', 'weaving', 'catalog', 'held'].includes(k)) {
+    const list = lwStageRows(LW.rows, k);
+    const intro = {
+      research: 'Ancestors being researched. Open a record to search the records, read and log findings, record the family, assess, then Weave into the Weaving or Catalog.',
+      weaving: 'Woven ancestors the client reads in their Weaving.',
+      catalog: 'Ancestors placed in the client\'s Catalog.',
+      held: 'Research kept but hidden from the client.'
+    }[k];
+    if (!list.length) { body.innerHTML = `<p class="panel-sub">${intro}</p><div class="empty">None yet.</div>`; return; }
+    const groups = [['maternal', 'Maternal line'], ['paternal', 'Paternal line'], ['both', 'Both / chosen'], ['unknown', 'Side not set']];
+    body.innerHTML = `<p class="panel-sub">${intro}</p>` + groups.map(([g, label]) => {
+      const items = list.filter(r => (g === 'unknown' ? !['maternal', 'paternal', 'both'].includes(r.lineage_side) : r.lineage_side === g));
+      return items.length ? `<div class="section-header" style="margin-top:1.25rem"><div class="section-title">${label} — ${items.length}</div></div><div class="ancestor-list">${sortClientAncestors(items).map(lwRowHtml).join('')}</div>` : '';
+    }).join('');
+    list.filter(r => ARC_OPEN.has(r.id)).forEach(r => { delete ARC_CACHE[r.id]; arcRender(r.id); arcLoad(r.id).then(() => arcRender(r.id)); });
+    return;
+  }
+  if (k === 'keynotes') {
+    body.innerHTML = knSectionHtml(cid, lwStageRows(LW.rows, 'keynotes'));
+    if (KN.open && KN.clientId === cid) knRender();
+    return;
+  }
+  if (k === 'mythic') { body.innerHTML = cdResonanceCard(d); return; }
+  if (k === 'convergence') {
+    body.innerHTML = `${cdConvergencesCard(d)}<div class="cd-card full" style="margin-bottom:1.25rem">${cdConvergenceEditorBlock(d)}</div>
+      <div class="cd-card full"><h3 class="cd-card-title">Generate, read and release</h3>
+        <p class="cd-note">The Convergence page, opened here for this client. Generate New Convergence reads the Weaving, Mythic Resonance and the intake answers. Edit the section text above once it is generated.</p>
+        <iframe class="chart-frame" id="lw-conv-frame" title="Convergence" loading="lazy" src="convergence.html?client_id=${encodeURIComponent(cid)}&embed=1"></iframe></div>`;
+    return;
+  }
+}
+
+async function lwBeginResearch(btn) {
+  const v = (k) => (document.getElementById(`lw-new-${k}`)?.value || '').trim();
+  const msg = document.getElementById('lw-new-msg');
+  if (!v('name')) { msg.textContent = 'Add a name.'; return; }
+  if (!(await confirmNoClientDuplicate(LW.client, v('name')))) return;
+  btn.disabled = true;
+  const res = await restPost('client_ancestors', {
+    client_id: LW.client, name: v('name'), dates: v('dates') || null, location: v('place') || null,
+    relation_to_client: v('rel') || null, lineage_side: v('side') || null, intake_notes: v('notes') || null,
+    status: 'intake_stub', added_via: 'research'
+  });
+  btn.disabled = false;
+  if (!Array.isArray(res) || !res[0]?.id) { msg.textContent = 'Could not save: ' + (res?.message || 'unknown error'); return; }
+  const newId = res[0].id;
+  const disNow = !!document.getElementById('lw-new-dis')?.checked;
+  ARC_OPEN.add(newId);
+  LW.stage = 'research';
+  await lwRefresh();
+  document.getElementById(`arc-${newId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (disNow) arcDisambiguate(newId, '');
+}
+
+async function lwAddFromArchive(btn) {
+  const ancestorId = document.getElementById('lw-add-anc').value;
+  const side = document.getElementById('lw-add-side').value || null;
+  const place = document.getElementById('lw-add-place').value;
+  const msg = document.getElementById('lw-add-msg');
+  const a = allAncestors.find(x => x.id === ancestorId);
+  if (!a) { msg.textContent = 'Choose an ancestor.'; return; }
+  if (!(await confirmNoClientDuplicate(LW.client, a.name))) return;
+  btn.disabled = true;
+  const status = place || (a.status === 'weaving' ? 'weaving' : 'catalog');
+  const res = await restPost('client_ancestors', { client_id: LW.client, ancestor_id: a.id, slug: a.slug, name: a.name, epithet: a.epithet || null, dates: a.dates || null, era: a.era || null, sort_year: a.sort_year || 0, status, lineage_side: side, added_via: 'research' });
+  const caId = Array.isArray(res) ? res[0]?.id : null;
+  if (caId) {
+    const fr = await rest(`ancestor_frequencies?ancestor_id=eq.${a.id}&select=frequency_tag_id,strength,note,notes`).catch(() => []);
+    for (const f of (Array.isArray(fr) ? fr : [])) await restPost('client_ancestor_frequencies', { client_ancestor_id: caId, frequency_tag_id: f.frequency_tag_id, strength: f.strength || 'noted', note: f.note || f.notes || null });
+  }
+  btn.disabled = false;
+  if (!caId) { msg.textContent = 'Could not add: ' + (res?.message || 'unknown error'); return; }
+  LW.stage = status;
+  await lwRefresh();
+}
+
+async function lwSetStatus(id, status) {
+  const ok = await restPatch('client_ancestors', id, { status });
+  if (!ok) { alert('Could not update this ancestor.'); return; }
+  ARC_OPEN.delete(id); delete ARC_CACHE[id];
+  await lwRefresh();
+}
+
+async function lwDeleteAncestor(id) {
+  const row = LW.rows.find(r => r.id === id) || ARC_ROWS.find(r => r.id === id);
+  const name = row?.name || 'this ancestor';
+  const research = row && ['intake_stub', 'held'].includes(row.status);
+  if (!confirm(research
+    ? `Delete "${name}" from this client's research?\n\nThe findings, family and notes for this ancestor are deleted with it. Hold keeps them instead.`
+    : `Remove "${name}" from this client's Lineage?\n\nThe record, its findings and its history are deleted for this client.${row?.ancestor_id ? ' Your archive ancestor is unaffected.' : ''}`)) return;
+  await restDelete(`client_ancestor_frequencies?client_ancestor_id=eq.${id}`);
+  await restDelete(`client_ancestors?id=eq.${id}`);
+  ARC_OPEN.delete(id); delete ARC_CACHE[id];
+  await lwRefresh();
+}
+
+// ── Work area: Weave and Augment open inside the workspace ──
+const LW_WORK_NODES = ['ar-generate-mode', 'ar-augment-mode', 'ar-review'];
+function lwOpenWork(title) {
+  const w = document.getElementById('lw-work'); if (!w) return false;
+  w.innerHTML = `<div class="lw-work-head"><span class="eyebrow">${esc(title)}</span><button class="btn btn-outline btn-sm" onclick="lwCloseWork()">Close</button></div>`;
+  LW_WORK_NODES.forEach(id => { const el = document.getElementById(id); if (el) w.appendChild(el); });
+  w.hidden = false; LW.workOpen = true;
+  return true;
+}
+function lwReturnWork() {
+  const panel = document.getElementById('panel-ancestor-research');
+  const edit = document.getElementById('ar-edit-mode');
+  if (!panel || !edit) return;
+  LW_WORK_NODES.forEach(id => { const el = document.getElementById(id); if (el && !panel.contains(el)) edit.parentNode.insertBefore(el, edit); });
+  const w = document.getElementById('lw-work'); if (w) { w.hidden = true; w.innerHTML = ''; }
+  if (LW.workOpen) {
+    LW.workOpen = false;
+    arPromoteStubId = null; arPromoteStubData = null; arAugmentExistingId = null; arAugmentExistingRecord = null; arAugmentClientAncestorId = null;
+    const banner = document.getElementById('ar-promote-banner'); if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
+    const rv = document.getElementById('ar-review'); if (rv) { rv.style.display = 'none'; rv.innerHTML = ''; }
+    showGenerateMode();
+  }
+}
+function lwCloseWork() { lwReturnWork(); }
+async function lwWeave(id) {
+  const row = LW.rows.find(r => r.id === id);
+  if (row && !row.lineage_side) { alert(`Set the lineage side for ${row.name} first (the side menu on its row).`); return; }
+  if (!ARC_CACHE[id]) await arcLoad(id);
+  const rs = ARC_CACHE[id]?.research || {};
+  const nm = row?.name || 'This ancestor';
+  if (rs.disambiguation?.state === 'running') { alert(`${nm} is still being disambiguated. Review the result before weaving.`); return; }
+  if (rs.disambiguation?.state === 'done' && !rs.disambiguation.saved_at && !rs.disambiguation.discarded_at) { if (!confirm(`A disambiguation result for ${nm} is waiting for review in the record. Weave without reviewing it?`)) return; }
+  else if (!rs.disambiguated_at) { if (!confirm(`${nm} has not been disambiguated, so identity has not been checked against the records. Weave anyway?`)) return; }
+  else if (rs.verification_status === 'not_found') { if (!confirm(`The records found nothing confirming ${nm}.${rs.verification_note ? '\n\n' + rs.verification_note : ''}\n\nWeave anyway?`)) return; }
+  else if (rs.verification_status === 'ambiguous') { if (!confirm(`${nm}'s identity is ambiguous.${rs.verification_note ? '\n\n' + rs.verification_note : ''}\n\nWeave anyway?`)) return; }
+  if (!lwOpenWork('Weave · ' + (row?.name || ''))) return promoteStub(id);
+  if (!allFrequencyTags.length) { const t = await rest('frequency_tags?select=id,slug,name,type&order=name'); allFrequencyTags = Array.isArray(t) ? t : []; }
+  await promoteStub(id);
+  const f = document.getElementById('ancestor-research-form'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+async function lwAugment(id) {
+  const row = LW.rows.find(r => r.id === id);
+  if (!lwOpenWork('Augment · ' + (row?.name || ''))) return;
+  if (!allFrequencyTags.length) { const t = await rest('frequency_tags?select=id,slug,name,type&order=name'); allFrequencyTags = Array.isArray(t) ? t : []; }
+  AUG_PRESELECT = { owner: LW.client, value: 'ca:' + id };
+  showAugmentMode();
+  document.getElementById('lw-work').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+async function lwAfterSave() {
+  Object.keys(ARC_CACHE).forEach(k => delete ARC_CACHE[k]);
+  await lwRefresh();
+}
+
+// ── Lineage landing (sidebar): research queue across clients ──
+async function lwLanding() {
+  const sel = document.getElementById('lw-land-client');
+  if (sel) sel.innerHTML = '<option value="">Choose a client</option>' + [...allClients].sort((a, b) => (a.name || '').localeCompare(b.name || '')).map(c => `<option value="${c.id}">${esc(c.name || c.email || '—')}</option>`).join('');
+  const q = document.getElementById('lw-queue'); if (!q) return;
+  const rows = await rest('client_ancestors?status=eq.intake_stub&select=id,client_id,name,dates,created_at,clients(name)&order=created_at.asc').catch(() => []);
+  const list = Array.isArray(rows) ? rows : [];
+  if (!list.length) { q.innerHTML = '<div class="empty">No ancestors waiting in research.</div>'; return; }
+  const ids = list.map(r => r.id).join(',');
+  const [fr, rs] = await Promise.all([
+    rest(`client_ancestor_findings?client_ancestor_id=in.(${ids})&source_type=neq.history&select=client_ancestor_id`).catch(() => []),
+    rest(`client_ancestor_research?client_ancestor_id=in.(${ids})&select=client_ancestor_id,verification_status,documentation_depth,disambiguated_at,disambiguation->>state`).catch(() => [])
+  ]);
+  const fc = {}; (Array.isArray(fr) ? fr : []).forEach(f => { fc[f.client_ancestor_id] = (fc[f.client_ancestor_id] || 0) + 1; });
+  const rm = {}; (Array.isArray(rs) ? rs : []).forEach(r => { rm[r.client_ancestor_id] = r; });
+  const by = {}; list.forEach(r => { (by[r.client_id] = by[r.client_id] || []).push(r); });
+  q.innerHTML = Object.entries(by).map(([cid, items]) => `
+    <div class="section-header" style="margin-top:1rem"><div class="section-title">${esc(items[0].clients?.name || 'Client')} — ${items.length}</div>
+      <button class="btn btn-gold btn-sm" onclick="nsStage('${cid}','research')">Open Lineage</button></div>
+    <div class="client-list">${items.map(r => {
+      const m = rm[r.id] || {};
+      const dl = { verified: 'identity verified', ambiguous: 'identity ambiguous', not_found: 'identity not found' };
+      const st = m.state === 'running' ? 'disambiguating…'
+        : m.state === 'done' && !m.disambiguated_at ? 'disambiguation ready to review'
+        : m.disambiguated_at ? `${dl[m.verification_status] || 'disambiguated'} · record ${m.documentation_depth || '—'}${fc[r.id] ? ` · ${fc[r.id]} finding${fc[r.id] === 1 ? '' : 's'}` : ''}`
+        : !fc[r.id] ? 'not disambiguated' : `${fc[r.id]} finding${fc[r.id] === 1 ? '' : 's'} · not disambiguated`;
+      return `<div class="client-row" style="cursor:default"><div><div class="client-name">${esc(r.name)}</div><div class="client-meta">${esc(r.dates || '')}${r.dates ? ' · ' : ''}${st}</div></div></div>`;
+    }).join('')}</div>`).join('');
+}
+function lwOpenFromLanding() { const v = document.getElementById('lw-land-client')?.value; if (v) nsOpen(v, 'ancestral'); }
 
 async function arcReassess(id, btn) {
   const d = ARC_CACHE[id]; if (!d) return;
@@ -5572,6 +6298,8 @@ function arcRender(id) {
 
     ${arcActionsHtml(id, d, layers, weaveHref)}
 
+    ${arcDisHtml(id, d)}
+
     ${(r.relation_to_client || r.intake_notes) ? `<div>
       <h4>The client's words · kept for the Convergence</h4>
       <div class="triage-intake">${r.relation_to_client ? esc(r.relation_to_client) + '\n' : ''}${esc(r.intake_notes || '')}</div>
@@ -5635,6 +6363,7 @@ function arcRender(id) {
       ${arcEventsHtml(d.events)}
     </div>
   </div>`;
+  if (res.disambiguation?.state === 'running') arcDisEnsurePoll(id);
 }
 
 function arcHighlightsHtml(findings) {
@@ -7633,6 +8362,7 @@ const PDF_MAX_BYTES_PER_FILE = 30 * 1024 * 1024; // 30 MB safety margin under An
 let allFrequencyTags = [];    // loaded from DB
 
 async function initAncestorResearch() {
+  lwReturnWork();
   if (!allFrequencyTags.length) {
     const tags = await rest('frequency_tags?select=id,slug,name,type&order=name');
     allFrequencyTags = Array.isArray(tags) ? tags : [];
@@ -7758,7 +8488,7 @@ function renderAncestorReview(d) {
   const isPersonal = !!(arPromoteStubId || arAugmentClientAncestorId);
   const placeDefault = ['weaving','catalog'].includes(d.status) ? d.status : (isPersonal ? 'catalog' : d.status);
   const statusOptions = (isPersonal ? ['catalog','weaving'] : ['catalog','weaving','margin','keynote'])
-    .map(s => `<option value="${s}" ${s === placeDefault ? 'selected' : ''}>${s}</option>`).join('');
+    .map(s => `<option value="${s}" ${s === placeDefault ? 'selected' : ''}>${archStatusLabel(s)}</option>`).join('');
   const clientOptions = allClients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
   // Weave from research and Augment of a client's record write onto that client's own record:
   // placement comes from Status ("Place in") and strength from each tag, so the archive's
@@ -7899,11 +8629,8 @@ function renderAncestorReview(d) {
           <input type="hidden" id="ar-assign-strength" value="noted">
         </div>` : `
         <div class="confirm-bar-left">
-          <label class="form-label" style="margin:0;white-space:nowrap">Assign to client:</label>
-          <select class="form-select" id="ar-assign-client" style="min-width:200px;margin:0">
-            <option value="">— My archive only (no client) —</option>
-            ${clientOptions}
-          </select>
+          <span class="triage-msg">Saves to My Archive. Add it to a client from their Lineage → Add from my archive.</span>
+          <input type="hidden" id="ar-assign-client" value="">
           <input type="hidden" id="ar-assign-strength" value="noted">
         </div>`}
         <div style="display:flex;gap:0.75rem;align-items:center">
@@ -8257,6 +8984,7 @@ ${same.map(a => `• ${a.name}${a.dates ? ' (' + a.dates + ')' : ''}: ${a.status
     arLastSavedReview = arReviewData;
     btn.textContent = '✓ Saved';
     btn.disabled = true;
+    if (LW.workOpen) lwAfterSave();
 
   } catch (err) {
     msgEl.innerHTML = `<span style="color:var(--red)">${err.message}</span>`;
@@ -8369,6 +9097,7 @@ function showTriageMode() {
 
 function showAugmentMode() {
   _hideAllModePanels();
+  { const rv = document.getElementById('ar-review'); if (rv) { rv.style.display = 'none'; rv.innerHTML = ''; } }
   document.getElementById('ar-augment-mode').style.display = 'block';
   _setActiveMode('mode-btn-augment');
   arPromoteStubId = null;
@@ -8380,6 +9109,7 @@ function showAugmentMode() {
 
 function showEditMode() {
   _hideAllModePanels();
+  { const rv = document.getElementById('ar-review'); if (rv) { rv.style.display = 'none'; rv.innerHTML = ''; } }
   document.getElementById('ar-edit-mode').style.display = 'block';
   _setActiveMode('mode-btn-edit');
   populateAncestorEditorSelector();
@@ -8426,7 +9156,7 @@ const TRIAGE_SOURCE_TYPES = [
   ['census', 'Census'], ['will', 'Will / Probate'], ['land', 'Land / Property'], ['ship-manifest', 'Ship Manifest / Passport'],
   ['military', 'Military'], ['newspaper', 'Newspaper'], ['family-tree', 'Family tree (FamilySearch etc.)'],
   ['life-story', 'Life story / Memory'], ['oral-history', 'Oral History'], ['photo', 'Photograph'],
-  ['history', 'Local history / Context'], ['dna', 'DNA Match'], ['other', 'Other']
+  ['history', 'Historical keynote · local history'], ['dna', 'DNA Match'], ['other', 'Other']
 ];
 
 function _triageSideOptions(v) {
@@ -8783,7 +9513,7 @@ async function promoteStub(stubId) {
     const thin = !findings.length
       ? `<div style="margin-top:0.4rem;color:var(--amber)">No findings logged for this ancestor. The draft will rest on the intake alone.</div>` : '';
     banner.style.display = 'block';
-    banner.innerHTML = `Weaving <strong style="font-weight:500">${esc(stub.name)}</strong> into <strong style="font-weight:500">${esc(stub.clients?.name || 'client')}</strong>'s Weaving · ${esc(stub.lineage_side)} · ${findings.length} finding${findings.length === 1 ? '' : 's'}${depth}. Personal record, not added to the shared archive. Context Notes can be edited before generating. · <a href="#" onclick="event.preventDefault();showTriageMode()" style="color:var(--gold);text-decoration:underline">cancel and return to research</a>${thin}`;
+    banner.innerHTML = `Weaving <strong style="font-weight:500">${esc(stub.name)}</strong> into <strong style="font-weight:500">${esc(stub.clients?.name || 'client')}</strong>'s Weaving · ${esc(stub.lineage_side)} · ${findings.length} finding${findings.length === 1 ? '' : 's'}${depth}. Personal record, not added to the shared archive. Context Notes can be edited before generating. · <a href="#" onclick="event.preventDefault();lwCloseWork()" style="color:var(--gold);text-decoration:underline">cancel and return to research</a>${thin}`;
   }
 
   document.getElementById('ar-review').style.display = 'none';
@@ -8806,7 +9536,7 @@ let AUG_PRESELECT = null; // { owner, value } set by augmentFromRecord()
 async function populateAugmentOwners() {
   const own = document.getElementById('aug-owner-select');
   if (!own) return;
-  const keep = AUG_PRESELECT ? AUG_PRESELECT.owner : own.value;
+  const keep = AUG_PRESELECT ? AUG_PRESELECT.owner : '';
   const rows = await rest(`client_ancestors?status=in.(weaving,catalog)&keynote_ancestor_ids=is.null&select=client_id,clients(name)`).catch(() => []);
   const seen = new Map();
   (Array.isArray(rows) ? rows : []).forEach(r => { if (r.client_id && !seen.has(r.client_id)) seen.set(r.client_id, r.clients?.name || 'Client'); });
@@ -8824,6 +9554,7 @@ function augOwnerChanged() {
 }
 
 async function augmentFromRecord(caId, clientId) {
+  if (document.getElementById('lw-root')) return lwAugment(caId);
   AUG_PRESELECT = { owner: clientId, value: 'ca:' + caId };
   showPanel('panel-ancestor-research');
   await initAncestorResearch();
@@ -8845,7 +9576,7 @@ async function populateAugmentSelector() {
       .forEach(a => {
         const opt = document.createElement('option');
         opt.value = a.id;
-        opt.textContent = `${a.name}${a.dates ? ' · ' + a.dates : ''} (${a.status || 'catalog'})`;
+        opt.textContent = `${a.name}${a.dates ? ' · ' + a.dates : ''} (${archStatusLabel(a.status)})`;
         if (a.id === current) opt.selected = true;
         sel.appendChild(opt);
       });
@@ -9122,7 +9853,7 @@ function populateAncestorEditorSelector() {
     .forEach(a => {
       const opt = document.createElement('option');
       opt.value = a.id;
-      opt.textContent = `${a.name}${a.dates ? ' · ' + a.dates : ''} (${a.status || 'catalog'})`;
+      opt.textContent = `${a.name}${a.dates ? ' · ' + a.dates : ''} (${archStatusLabel(a.status)})`;
       if (a.id === current) opt.selected = true;
       sel.appendChild(opt);
     });
@@ -9375,20 +10106,9 @@ function renderEditorForm(a) {
 
     <!-- Client Assignments -->
     <div class="card" style="margin-bottom:1.5rem">
-      <div class="editor-section-title">Client Assignments</div>
+      <div class="editor-section-title">In these clients' Weavings</div>
       <div id="ed-client-chips" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;min-height:32px"></div>
-      <div class="chip-add-row">
-        <select class="chip-add-select" id="ed-client-assign-select">
-          <option value="">— Assign to client —</option>
-          ${clientOptions}
-        </select>
-        <select class="chip-strength-select" id="ed-client-assign-strength">
-          <option value="dominant">Dominant</option>
-          <option value="emerging">Emerging</option>
-          <option value="noted">Noted</option>
-        </select>
-        <button class="btn-chip-add" onclick="assignAncestorToClientEditor()">+ Assign</button>
-      </div>
+      <p class="triage-msg">Every copy updates when you save here. To add this ancestor to a client, open that client's Lineage → Add from my archive.</p>
       <div id="ed-client-msg" style="margin-top:0.5rem;font-size:15px"></div>
     </div>
 

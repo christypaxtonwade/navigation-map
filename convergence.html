@@ -483,6 +483,16 @@ body::before {
 </style>
 </head>
 <body>
+<script>
+// Embedded in the portal's Lineage workspace (2026-11-17): no page header, report height.
+if (new URLSearchParams(location.search).get('embed') === '1') {
+  document.documentElement.classList.add('embed');
+  const post = () => { try { parent.postMessage({ type: 'convergence-height', height: document.documentElement.scrollHeight }, location.origin); } catch (e) {} };
+  window.addEventListener('load', post);
+  new ResizeObserver(post).observe(document.documentElement);
+}
+</script>
+<style>html.embed .header { display: none; } html.embed body { min-height: 0; } html.embed .page { padding-top: 0.5rem; }</style>
 <div class="page">
 
   <div class="header">
