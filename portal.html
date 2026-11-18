@@ -6123,8 +6123,12 @@ async function lwDeleteAncestor(id) {
 const LW_WORK_NODES = ['ar-generate-mode', 'ar-augment-mode', 'ar-review'];
 function lwOpenWork(title) {
   const w = document.getElementById('lw-work'); if (!w) return false;
+  // Hold the work nodes before the header is rewritten: if the work area is already open they
+  // live inside it, and replacing its contents would otherwise destroy them (2026-11-17 fix).
+  const nodes = LW_WORK_NODES.map(id => document.getElementById(id)).filter(Boolean);
+  if (nodes.length < LW_WORK_NODES.length) { alert('The writing panel needs to reload. The page will refresh; then click Weave again.'); location.reload(); return true; }
   w.innerHTML = `<div class="lw-work-head"><span class="eyebrow">${esc(title)}</span><button class="btn btn-outline btn-sm" onclick="lwCloseWork()">Close</button></div>`;
-  LW_WORK_NODES.forEach(id => { const el = document.getElementById(id); if (el) w.appendChild(el); });
+  nodes.forEach(el => w.appendChild(el));
   w.hidden = false; LW.workOpen = true;
   return true;
 }
