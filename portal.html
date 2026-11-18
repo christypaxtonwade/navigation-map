@@ -498,6 +498,7 @@ a.ancestor-row.weave-row:focus-visible { outline: 2px solid var(--gold); outline
 .dis-find label { display: flex; gap: 0.6rem; align-items: flex-start; }
 .dis-find input[type=checkbox] { margin-top: 0.3rem; }
 .dis-meta { font-size: 13px; color: var(--text-faint); }
+.dis-why { font-style: italic; }
 .arc-edit { display: grid; gap: 0.35rem; padding: 0.75rem; border: 1px dashed var(--border); border-radius: 6px; }
 .arc-bulk { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin: 0.25rem 0 0.75rem; }
 .arc-switch { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 15px; color: var(--text); cursor: pointer; user-select: none; }
@@ -5808,7 +5809,7 @@ function arcFieldsRelativesHtml(p, id, row, res, rf, rels) {
   const fo = arcFieldOffers(row, rf), ro = arcRelativeOffers(res, rels);
   ARC_CACHE[id][p + 'Offers'] = { fo, ro };
   return `${fo.length ? `<h5>Record fields</h5>${fo.map((o, i) => `<label style="display:flex;gap:0.5rem;align-items:baseline;font-size:15px"><input type="checkbox" id="${p}-fld-${id}-${i}"${!o.cur ? ' checked' : ''}> ${esc(o.l)}: ${esc(String(o.v))}${o.cur ? ` <span class="dis-meta">(replaces ${esc(String(o.cur))})</span>` : ''}</label>`).join('')}` : ''}
-    ${ro.length ? `<h5>Relatives · tick to add to Family</h5><ul class="arc-kin-list">${ro.map((x, i) => `<li><label style="display:flex;gap:0.5rem;align-items:baseline"><input type="checkbox" id="${p}-rel-${id}-${i}"${!x.cur ? ' checked' : ''}><span><span class="arc-kin-role">${esc(x.role)}</span> · ${esc(x.name)}${x.dates ? ' (' + esc(x.dates) + ')' : ''}${x.note ? ` <span class="arc-kin-note">— ${esc(x.note)}</span>` : ''}${x.source ? ` <span class="arc-kin-note">[${esc(x.source)}]</span>` : ''}${x.cur ? ` <span class="dis-meta">(replaces ${esc(x.cur)})</span>` : ''}</span></label></li>`).join('')}</ul>` : ''}`;
+    ${ro.length ? `<h5>Relatives · tick to add to Family</h5><ul class="arc-kin-list">${ro.map((x, i) => `<li><label style="display:flex;gap:0.5rem;align-items:baseline"><input type="checkbox" id="${p}-rel-${id}-${i}"${!x.cur && (x.keep == null || x.keep) ? ' checked' : ''}><span><span class="arc-kin-role">${esc(x.role)}</span> · ${esc(x.name)}${x.dates ? ' (' + esc(x.dates) + ')' : ''}${x.note ? ` <span class="arc-kin-note">— ${esc(x.note)}</span>` : ''}${x.source ? ` <span class="arc-kin-note">[${esc(x.source)}]</span>` : ''}${x.cur ? ` <span class="dis-meta">(replaces ${esc(x.cur)})</span>` : ''}${x.why ? ` <span class="dis-meta dis-why">— ${x.keep ? 'keep' : 'leave out'}: ${esc(x.why)}</span>` : ''}</span></label></li>`).join('')}</ul>` : ''}`;
 }
 function arcCollectFieldsRelatives(p, id, res, fields, rowPatch) {
   const offers = ARC_CACHE[id]?.[p + 'Offers'] || { fo: [], ro: [] };
@@ -5830,13 +5831,14 @@ function arcFindingsPickHtml(p, id, list, offset = 0) {
   return `<ul class="dis-list">${list.map((f, j) => {
     const i = j + offset;
     const strong = DIS_STRONG.includes(f.evidence);
-    const pre = strong && f.matches !== 'unclear' && !f.link_unconfirmed;
+    const pre = f.keep != null ? !!f.keep : (strong && f.matches !== 'unclear' && !f.link_unconfirmed);
     return `<li class="dis-find"><label><input type="checkbox" id="${p}-f-${id}-${i}"${pre ? ' checked' : ''}><span>
       <span class="dis-tag ${strong ? 'dis-strong' : 'dis-weak'}">${esc(DIS_EVIDENCE_LABEL[f.evidence] || f.evidence)}</span>${f.matches !== 'yes' ? `<span class="dis-tag">${esc(f.matches === 'likely' ? 'likely match' : 'match unclear')}</span>` : ''}
       <strong style="font-weight:500">${esc([f.date, f.source_label].filter(Boolean).join(' · ') || arcSourceLabel(f.source_type) || 'Finding')}</strong>
       <div>${esc(f.summary)}</div>
       ${f.people?.length ? `<div class="dis-meta">${f.people.map(x => `${esc(x.role)}: ${esc(x.name)}`).join(' · ')}</div>` : ''}
       ${f.significant ? `<div class="dis-meta">✦ ${esc(f.significant)}</div>` : ''}
+      ${f.why ? `<div class="dis-meta dis-why">${f.keep ? 'Keep' : 'Leave out'}: ${esc(f.why)}</div>` : ''}
       ${f.url ? `<a class="dis-meta" href="${esc(f.url)}" target="_blank" rel="noopener">Open the source ↗</a>` : f.link_unconfirmed ? '<div class="dis-meta">The link given did not come from the search results, so it was removed. Find the record before keeping this.</div>' : ''}
     </span></label></li>`;
   }).join('')}</ul>`;
@@ -5882,7 +5884,7 @@ function arcDisHtml(id, d) {
   const pills = `<div class="triage-status">${badge}${g.documentation_depth ? `<span class="triage-pill">Record: ${esc(g.documentation_depth)}</span>` : ''}${dis.saved_at ? '<span class="triage-pill">Saved</span>' : dis.discarded_at ? '<span class="triage-pill">Set aside</span>' : '<span class="triage-pill">Ready to review</span>'}</div>`;
   const body = `${pills}${runMetaHtml(dis)}${g.verification_note ? `<p style="margin:0.6rem 0">${esc(g.verification_note)}</p>` : ''}${arcDisIdentityHtml(g)}${arcDisCandidatesHtml(g)}${arcDisConflictsHtml(g)}`;
   if (dis.saved_at || dis.discarded_at) return `<div>${head}<div class="dis-box">${body}${opts}</div></div>`;
-  const findings = Array.isArray(g.findings) ? g.findings : [];
+  const findings = arcNewOnly(g.findings, d);
   const rels = [...(g.relatives || [])];
   const idn = g.identity || {};
   if (idn.father && !rels.some(x => x.role === 'father')) rels.unshift({ role: 'father', name: idn.father });
@@ -5903,7 +5905,7 @@ async function arcSaveDisambiguation(id, btn) {
   const msg = document.getElementById(`dis-msg-${id}`);
   btn.disabled = true;
   try {
-    const kept = await arcSaveFindings('dis', id, Array.isArray(g.findings) ? g.findings : []);
+    const kept = await arcSaveFindings('dis', id, arcNewOnly(g.findings, d));
     const now = new Date().toISOString();
     const fields = {
       verification_status: g.verification_status || 'ambiguous', verification_note: g.verification_note || null,
@@ -5945,42 +5947,49 @@ function arcResHtml(id, d) {
   const head = '<h4>Research · records, life and terroir</h4>';
   const focus = `<input class="form-input" id="res-focus-${id}" placeholder="Focus (optional), e.g. his years in Lisbon, or the wool trade" aria-label="Focus for the research" style="margin-top:0.5rem">`;
   if (!res.disambiguated_at && !run) return `<div>${head}<div class="triage-msg">Available once the Disambiguation is saved.</div></div>`;
-  if (!run) return `<div>${head}<div class="triage-msg">Research searches the vital records of this person and the family, the life history (work, residence, property, wills, military, emigration, census, newspapers), records held in archives but not online, and the historical context of the place and years. Four passes, about eight minutes, in the background.</div>${focus}</div>`;
+  if (!run) return `<div>${head}<div class="triage-msg">Research searches the vital records of this person and the family, the life history (work, residence, property, wills, military, emigration, census, newspapers), records held in archives but not online, and the historical context of the place and years. Three search passes and three sorting passes, about ten minutes, in the background.</div>${focus}</div>`;
   if (run.state === 'running') return `<div>${head}${runProgressHtml(run, 'Researching')}</div>`;
   if (run.state === 'error') return `<div>${head}<div class="dis-box"><div class="triage-msg" style="color:var(--red)">Research did not finish: ${esc(run.error || 'unknown error')}</div>${focus}<div class="triage-row-btns"><button class="btn btn-outline btn-sm" onclick="arcResearch('${id}')">Run it again</button></div></div></div>`;
   const g = run.result || {};
-  const vr = g.vital_records || [], lh = g.life_history || [], tr = g.terroir || [], so = g.sources_to_obtain || [];
+  const vr = arcNewOnly(g.vital_records, d), lh = arcNewOnly(g.life_history, d), tr = g.terroir || [], so = g.sources_to_obtain || [];
   const pills = `<div class="triage-status">${g.documentation_depth ? `<span class="triage-pill">Record: ${esc(g.documentation_depth)}</span>` : ''}${g.placement?.suggested ? `<span class="triage-pill">Suggests: ${esc(g.placement.suggested === 'weaving' ? 'Weaving' : 'Catalog')}</span>` : ''}${run.saved_at ? `<span class="triage-pill">Saved · ${esc(String(run.kept ?? 0))} kept</span>` : run.discarded_at ? '<span class="triage-pill">Set aside</span>' : '<span class="triage-pill">Ready to review</span>'}</div>`;
   const summary = `${pills}${runMetaHtml(run)}${g.research_note ? `<p style="margin:0.6rem 0">${esc(g.research_note)}</p>` : ''}${g.placement?.reason ? `<div class="dis-meta">${esc(g.placement.reason)}</div>` : ''}`;
   if (run.saved_at || run.discarded_at) return `<div>${head}<div class="dis-box">${summary}<div class="dis-meta">Vital records ${vr.length} · life history ${lh.length} · historical context ${tr.length} · to obtain ${so.length}</div>${focus}</div></div>`;
   const next = Array.isArray(g.next_searches) ? g.next_searches : [];
   return `<div>${head}<div class="dis-box">${summary}
+    <div class="triage-msg" style="margin-top:0.5rem">Pre-sorted for the writing: ticked items are what the record supports as fact about this life, or shaped it directly. Unticked are leads (family trees, inference) and context outside this place and these years. Change any tick before saving.</div>
     ${arcFieldsRelativesHtml('res', id, r, res, g.record_fields, g.relatives || [])}
     <h5>Vital records · ${vr.length}</h5>${vr.length ? arcFindingsPickHtml('res', id, vr, 0) : '<div class="triage-msg">None new.</div>'}
     <h5>Life history · ${lh.length}</h5>${lh.length ? arcFindingsPickHtml('res', id, lh, 1000) : '<div class="triage-msg">None new.</div>'}
-    <h5>Historical context · terroir · ${tr.length}</h5>${tr.length ? `<ul class="dis-list">${tr.map((t, i) => `<li class="dis-find"><label><input type="checkbox" id="res-t-${id}-${i}"${t.link_unconfirmed ? '' : ' checked'}><span>
+    <h5>Historical context · terroir · ${tr.length}</h5>${tr.length ? `<ul class="dis-list">${tr.map((t, i) => `<li class="dis-find"><label><input type="checkbox" id="res-t-${id}-${i}"${(t.keep != null ? t.keep : !t.link_unconfirmed) ? ' checked' : ''}><span>
         <strong style="font-weight:500">${esc(t.title)}</strong>${t.period ? ' · ' + esc(t.period) : ''}${t.place ? ' · ' + esc(t.place) : ''}
         <div>${esc(t.summary)}</div>
         ${t.source_label ? `<div class="dis-meta">${esc(t.source_label)}</div>` : ''}
+        ${t.why ? `<div class="dis-meta dis-why">${t.keep ? 'Keep' : 'Leave out'}: ${esc(t.why)}</div>` : ''}
         ${t.url ? `<a class="dis-meta" href="${esc(t.url)}" target="_blank" rel="noopener">Open the source ↗</a>` : t.link_unconfirmed ? '<div class="dis-meta">Link removed: it did not come from the search results.</div>' : ''}
       </span></label></li>`).join('')}</ul>` : '<div class="triage-msg">None found.</div>'}
     <h5>Records to obtain · held offline · ${so.length}</h5>${so.length ? `<label style="display:flex;gap:0.5rem;align-items:flex-start;font-size:15px;margin-bottom:0.25rem"><input type="checkbox" id="res-obtain-${id}" checked> Add these to Still to find:</label><ol class="triage-prompts">${so.map(o => `<li>${esc(arcObtainText(o))}</li>`).join('')}</ol>` : '<div class="triage-msg">None listed.</div>'}
     ${next.length ? `<h5>Next searches</h5><label style="display:flex;gap:0.5rem;align-items:flex-start;font-size:15px;margin-bottom:0.25rem"><input type="checkbox" id="res-next-${id}" checked> Add these to Still to find:</label><ol class="triage-prompts">${next.map(n => `<li>${esc(n)}</li>`).join('')}</ol>` : ''}
-    <div class="triage-row-btns"><button class="btn btn-gold btn-sm" onclick="arcSaveResearch('${id}', this)">Save to the record</button><button class="btn btn-outline btn-sm" onclick="arcDiscardRun('${id}','research')">Set aside</button><span class="triage-msg" id="res-msg-${id}"></span></div>
+    <div class="triage-row-btns"><button class="btn btn-gold btn-sm" onclick="arcSaveResearchRun('${id}', this)">Save to the record</button><button class="btn btn-outline btn-sm" onclick="arcDiscardRun('${id}','research')">Set aside</button><span class="triage-msg" id="res-msg-${id}"></span></div>
   </div></div>`;
+}
+// Leave out findings the record already holds (same date and record type) and placeholder entries.
+function arcNewOnly(list, d) {
+  const have = new Set((d.findings || []).filter(f => f.finding_date).map(f => f.finding_date + '|' + f.source_type));
+  return (list || []).filter(f => !/^already saved/i.test(String(f.summary || '').trim()) && !(f.date && have.has(rrNormDate(f.date).date + '|' + f.source_type)));
 }
 function arcObtainText(o) {
   return `Obtain: ${o.record}${o.archive ? ' — ' + o.archive : ''}${o.reference ? ', ' + o.reference : ''}${o.years ? ', ' + o.years : ''}${o.why ? ' (' + o.why + ')' : ''}`;
 }
 
-async function arcSaveResearch(id, btn) {
+async function arcSaveResearchRun(id, btn) {
   const d = ARC_CACHE[id]; if (!d) return;
   const res = d.research || {}, run = res.research_run || {}, g = run.result || {};
   const msg = document.getElementById(`res-msg-${id}`);
   btn.disabled = true;
   try {
-    let kept = await arcSaveFindings('res', id, g.vital_records || [], 0);
-    kept += await arcSaveFindings('res', id, g.life_history || [], 1000);
+    let kept = await arcSaveFindings('res', id, arcNewOnly(g.vital_records, d), 0);
+    kept += await arcSaveFindings('res', id, arcNewOnly(g.life_history, d), 1000);
     const tr = g.terroir || [];
     for (let i = 0; i < tr.length; i++) {
       if (!document.getElementById(`res-t-${id}-${i}`)?.checked) continue;
