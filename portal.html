@@ -1809,7 +1809,8 @@ body { font-weight: 400; }
             </div>
             <div id="aug-ancestor-summary" style="display:none;padding:0.875rem 1rem;border:1px solid var(--border);border-radius:6px;margin-bottom:1.25rem;background:rgba(122,86,24,0.04)"></div>
             <div class="form-group" id="aug-findings-wrap" style="display:none">
-              <label class="form-label">New Findings <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">paste sources, transcripts, dates, names, places, anything you've located</span></label>
+              <label class="form-label">New Findings <span style="color:var(--text-faint);font-size:15px;text-transform:none;letter-spacing:0">loaded from the record; add anything else you've located</span></label>
+              <div id="aug-findings-note" class="triage-msg" style="margin-bottom:0.5rem"></div>
               <textarea class="form-textarea" id="aug-new-findings" rows="8" placeholder="e.g. 1851 UK Census, Liverpool ED 12, Household 47: John Detton, age 38, journeyman cooper, b. Birkenhead; wife Mary, 35, b. Glasgow; sons Robert (12), James (8) — confirms 1849 arrival in Liverpool from Glasgow, contradicting earlier assumption of Edinburgh origin. Also: Glasgow Trades House records show John apprenticed to Andrew McTavish 1825–1832."></textarea>
             </div>
             <div class="form-group" id="aug-pdfs-wrap" style="display:none">
@@ -8861,10 +8862,64 @@ async function loadAncestorForAugment() {
   // Cache the existing record + tag names for the augment call (incl. locks/guidance the function reads)
   arAugmentExistingRecord = { ...ancestor, frequency_tags: tagList };
 
+  // Load the findings already in the record (2026-11-17): those logged since the profile
+  // was last written, or all of them if it has never been written from findings.
+  await augPrefillFindings(caId, caId ? null : id);
+
   wrap.style.display = 'block';
   if (pdfsWrap) pdfsWrap.style.display = 'block';
   log.style.display = 'block';
   runBtn.style.display = 'inline-flex';
+}
+
+async function augPrefillFindings(caId, archiveId) {
+  const ta = document.getElementById('aug-new-findings');
+  const note = document.getElementById('aug-findings-note');
+  const cb = document.getElementById('aug-also-log-check');
+  const logBox = document.getElementById('aug-also-log');
+  if (!ta) return;
+  ta.value = '';
+  if (note) note.textContent = '';
+  let findings = [], since = null, kin = null;
+  if (caId) {
+    const [f, w, r] = await Promise.all([
+      rest(`client_ancestor_findings?client_ancestor_id=eq.${caId}&source_type=neq.history&select=*&order=finding_date.asc.nullslast,created_at.asc`).catch(() => []),
+      rest(`client_ancestor_events?client_ancestor_id=eq.${caId}&event_type=eq.written&select=created_at&order=created_at.desc&limit=1`).catch(() => []),
+      rest(`client_ancestor_research?client_ancestor_id=eq.${caId}&select=father,mother,relationships`).catch(() => [])
+    ]);
+    findings = Array.isArray(f) ? f : [];
+    since = Array.isArray(w) && w[0] ? w[0].created_at : null;
+    kin = Array.isArray(r) ? r[0] : null;
+    // Findings loaded from the record are already logged: don't log them twice.
+    if (cb) { cb.checked = false; document.getElementById('aug-also-log-fields').style.display = 'none'; }
+    if (logBox) logBox.style.display = 'none';
+  } else if (archiveId) {
+    const f = await rest(`ancestor_research_findings?ancestor_id=eq.${archiveId}&select=*&order=finding_date.asc.nullslast,created_at.asc`).catch(() => []);
+    findings = Array.isArray(f) ? f : [];
+    since = arAugmentExistingRecord?.updated_at || null;
+  }
+  const newer = since ? findings.filter(x => x.created_at > since) : findings;
+  const use = newer.length ? newer : findings;
+  const lines = use.map(x => {
+    const head = [x.finding_date, x.source_type && arcSourceLabel(x.source_type), x.source_label].filter(Boolean).join(' · ');
+    return `${head}\n${x.summary || ''}${x.highlight_note ? `\nSignificant: ${x.highlight_note}` : ''}${x.url ? `\nSource: ${x.url}` : ''}`;
+  });
+  if (kin) {
+    const fam = [];
+    if (kin.father) fam.push(`Father: ${kin.father}`);
+    if (kin.mother) fam.push(`Mother: ${kin.mother}`);
+    (Array.isArray(kin.relationships) ? kin.relationships : []).forEach(x => fam.push(`${x.role}: ${x.name}${x.note ? ' (' + x.note + ')' : ''}`));
+    if (fam.length) lines.push('Family as recorded:\n' + fam.join('\n'));
+  }
+  ta.value = lines.join('\n\n');
+  if (note) {
+    const when = since ? new Date(since).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+    note.textContent = !findings.length
+      ? 'No findings in the record yet. Paste what you have found, or log findings in the Record first.'
+      : newer.length && since
+        ? `Loaded ${newer.length} finding${newer.length === 1 ? '' : 's'} logged since this profile was last written (${when}). Edit or add to them, then Integrate Findings.`
+        : `Loaded all ${findings.length} finding${findings.length === 1 ? '' : 's'} in the record${since ? ' (none are newer than the last writing)' : ''}. Edit or add to them, then Integrate Findings.`;
+  }
 }
 
 async function runAugment() {
