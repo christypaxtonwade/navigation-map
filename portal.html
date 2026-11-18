@@ -466,6 +466,10 @@ a.ancestor-row.weave-row:focus-visible { outline: 2px solid var(--gold); outline
 .arc-panel-inner { display: grid; gap: 1.25rem; }
 .arc-panel h4 { font-size: 15px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin: 0 0 0.5rem; }
 .arc-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.arc-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.arc-advice { margin: 0; padding: 0.6rem 0.8rem; border: 1px solid var(--gold); border-left-width: 3px; border-radius: 6px; list-style: none; display: grid; gap: 0.4rem; font-size: 15px; line-height: 1.5; color: var(--text); }
+.arc-advice li { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; }
+.arc-advice li .btn { flex-shrink: 0; }
 .arc-bulk { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin: 0.25rem 0 0.75rem; }
 .arc-switch { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 15px; color: var(--text); cursor: pointer; user-select: none; }
 .arc-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
@@ -4864,7 +4868,7 @@ async function loadNextSteps() {
     if (ready.length) add(cid, `Weave ${ready.length} researched ancestor${ready.length === 1 ? '' : 's'}`, `nsTriage()`, 'Triage');
     const woven = list.filter(a => ['weaving', 'catalog'].includes(a.status) && !a.keynote_ancestor_ids);
     const stale = woven.filter(a => fLatest[a.id] && wLatest[a.id] && fLatest[a.id] > wLatest[a.id]);
-    if (stale.length) add(cid, `${stale.length} woven ancestor${stale.length === 1 ? ' has' : 's have'} new findings since writing: consider Augment`, `nsWeaving('${cid}')`, 'Weaving');
+    if (stale.length) add(cid, `${stale.length} woven ancestor${stale.length === 1 ? ' has' : 's have'} new findings since writing: reassess, then Augment (Record → top)`, `nsWeaving('${cid}')`, 'Weaving');
     const conv = convs.filter(c => c.client_id === cid).map(c => c.updated_at).sort().pop();
     const lastWritten = woven.map(a => wLatest[a.id]).filter(Boolean).sort().pop();
     if (woven.length && !conv) add(cid, `${woven.length} ancestor${woven.length === 1 ? '' : 's'} woven, no Convergence yet`, `nsOpen('${cid}','ancestral')`, 'Ancestral');
@@ -5442,6 +5446,91 @@ async function arcLoad(id) {
   };
 }
 
+// Actions at the top of the record, and advice on what the research now supports (2026-11-17).
+const ARC_PREV = {}; // id -> { depth, status } before the last Reassess, to show what changed
+function arcActionsHtml(id, d, layers, weaveHref) {
+  const r = d.row, res = d.research || {};
+  const writable = ['weaving', 'catalog'].includes(r.status) && !r.keynote_ancestor_ids;
+  const findings = (d.findings || []).filter(f => f.source_type !== 'history');
+  const lastWritten = (d.events || []).filter(e => e.event_type === 'written').map(e => e.created_at).sort().pop();
+  const latestFinding = findings.map(f => f.created_at).sort().pop();
+  const sinceWriting = lastWritten ? findings.filter(f => f.created_at > lastWritten).length : 0;
+  const sinceAssess = res.assessed_at ? findings.filter(f => f.created_at > res.assessed_at).length : findings.length;
+  const DEPTH = { thin: 1, moderate: 2, rich: 3 };
+  const advice = [];
+  const prev = ARC_PREV[id];
+  if (prev && res.documentation_depth && prev.depth !== res.documentation_depth) {
+    advice.push([`Reassessed: record ${esc(prev.depth || 'not assessed')} → ${esc(res.documentation_depth)}.`, '']);
+  } else if (prev) {
+    advice.push([`Reassessed: record stays ${esc(res.documentation_depth || '—')}.`, '']);
+  }
+  if (findings.length && sinceAssess) advice.push([`${sinceAssess} finding${sinceAssess === 1 ? '' : 's'} added since the last assessment${res.assessed_at ? ' (' + esc(arcDate(res.assessed_at)) + ')' : ''}.`, `<button class="btn btn-outline btn-sm" onclick="arcReassess('${id}', this)">Reassess</button>`]);
+  if (writable && sinceWriting) advice.push([`${sinceWriting} finding${sinceWriting === 1 ? '' : 's'} logged since the profile was written (${esc(arcDate(lastWritten))}).`, `<button class="btn btn-outline btn-sm" onclick="augmentFromRecord('${id}','${r.client_id}')">Augment</button>`]);
+  if (r.status === 'catalog' && DEPTH[res.documentation_depth] >= 2) advice.push([`The record is now ${esc(res.documentation_depth)}: it may carry a full Weaving profile. Move it, then Augment to write the layers.`, `<button class="btn btn-outline btn-sm" onclick="arcMoveToWeaving('${id}')">Move to Weaving</button>`]);
+  if (r.status === 'weaving' && res.documentation_depth === 'thin' && prev) advice.push(['The record is thin for a full Weaving profile. Keep it, or place it in the Catalog.', `<button class="btn btn-outline btn-sm" onclick="arcMoveToCatalog('${id}')">Move to Catalog</button>`]);
+  return `<div class="arc-actions">
+      ${writable ? `<button class="btn btn-gold btn-sm" onclick="augmentFromRecord('${id}','${r.client_id}')">Augment with new findings</button>` : ''}
+      <button class="btn btn-outline btn-sm" id="arc-reassess-${id}" onclick="arcReassess('${id}', this)">${res.assessed_at ? 'Reassess record' : 'Assess record'}</button>
+      ${layers.length && !['intake_stub', 'held'].includes(r.status) ? `<a class="btn btn-outline btn-sm" href="${weaveHref}" target="_blank" rel="noopener">Open in the Weaving ↗</a>` : ''}
+      <span class="triage-msg" id="arc-act-msg-${id}"></span>
+    </div>
+    ${advice.length ? `<ul class="arc-advice" aria-label="What the research supports">${advice.map(([t, b]) => `<li><span>${t}</span>${b}</li>`).join('')}</ul>` : ''}`;
+}
+
+async function arcReassess(id, btn) {
+  const d = ARC_CACHE[id]; if (!d) return;
+  const r = d.row, research = d.research || {};
+  const msg = document.getElementById(`arc-act-msg-${id}`);
+  const all = document.querySelectorAll(`#arc-${id} button[onclick^="arcReassess"]`);
+  all.forEach(b => { b.disabled = true; });
+  if (btn) btn.textContent = 'Assessing…';
+  if (msg) msg.textContent = 'Checking identity and the record against every finding. Up to a minute.';
+  try {
+    const fresh = await ensureFreshToken();
+    if (!fresh) { forceReauth('Your session has expired — please sign in again.'); return; }
+    const findings = (d.findings || []).filter(f => f.source_type !== 'history');
+    const call = () => fetch(`${SUPABASE_URL}/functions/v1/generate-ancestor`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}`, 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify({
+        name: r.name, dates: r.dates || '', location: r.location || '', level: 'catalog', client_id: r.client_id, client_ancestor_id: r.id,
+        notes: composeClientAncestorContext(r, research, findings),
+        editorial_guidance: 'This call is a reassessment of an ancestor already in research or woven. Judge identity strictly from the findings provided: verified only when the sources place this person by name, dates and place; ambiguous when more than one person could fit or links are inferred; not_found when there is nothing to confirm. Judge documentation depth from the findings as they now stand: thin = little beyond a name and one or two events; moderate = baptism, marriage or death and family placed by records; rich = several records with life detail. Research prompts must be specific record searches (which register, which parish, which years, which names) not already covered by the findings.'
+      })
+    });
+    let res = await call();
+    if (res.status === 401) { if (await ensureFreshToken()) res = await call(); }
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || data.message || `Request failed (${res.status})`);
+    ARC_PREV[id] = { depth: research.documentation_depth || null, status: research.verification_status || null };
+    const vs = ['verified', 'ambiguous', 'not_found'].includes(data.verification_status) ? data.verification_status : 'ambiguous';
+    const dd = ['thin', 'moderate', 'rich'].includes(data.documentation_depth) ? data.documentation_depth : null;
+    await upsertClientAncestorResearch(id, {
+      verification_status: vs,
+      verification_note: data.verification_note || null,
+      documentation_depth: dd,
+      research_prompts: Array.isArray(data.research_prompts) ? data.research_prompts : [],
+      assessed_at: new Date().toISOString()
+    });
+    await arcRefresh(id);
+  } catch (err) {
+    if (msg) msg.textContent = 'Assessment failed: ' + err.message;
+    all.forEach(b => { b.disabled = false; });
+    if (btn) btn.textContent = 'Reassess record';
+  }
+}
+
+async function arcMoveToWeaving(id) {
+  if (!confirm('Move this ancestor from the Catalog to the Weaving? Then use Augment to write the full profile.')) return;
+  await updateClientAncestorPlacement(id, 'weaving');
+  delete ARC_PREV[id];
+}
+async function arcMoveToCatalog(id) {
+  if (!confirm('Place this ancestor in the Catalog? The full record is kept.')) return;
+  await updateClientAncestorPlacement(id, 'catalog');
+  delete ARC_PREV[id];
+}
+
 function arcRender(id) {
   const el = document.getElementById(`arc-${id}`);
   if (!el) return;
@@ -5481,6 +5570,8 @@ function arcRender(id) {
     </div>
     <div class="triage-msg" style="margin-top:-0.5rem">When on, the client sees the findings below (date, source, summary, link) in My Weaving. Research notes, assessment and history stay private.</div>
 
+    ${arcActionsHtml(id, d, layers, weaveHref)}
+
     ${(r.relation_to_client || r.intake_notes) ? `<div>
       <h4>The client's words · kept for the Convergence</h4>
       <div class="triage-intake">${r.relation_to_client ? esc(r.relation_to_client) + '\n' : ''}${esc(r.intake_notes || '')}</div>
@@ -5519,7 +5610,7 @@ function arcRender(id) {
     <div>
       <h4>Writing</h4>
       <div class="triage-msg">${layers.length ? 'Written: ' + layers.map(esc).join(' · ') : 'Not written yet.'}</div>
-      ${layers.length && !['intake_stub','held'].includes(r.status) ? `<div class="triage-row-btns"><a class="btn btn-outline btn-sm" href="${weaveHref}" target="_blank" rel="noopener">Open in the Weaving ↗</a>${['weaving','catalog'].includes(r.status) && !r.keynote_ancestor_ids ? `<button class="btn btn-outline btn-sm" onclick="augmentFromRecord('${id}','${r.client_id}')">Augment with new findings</button>` : ''}</div>` : ''}
+
     </div>
 
     <div>
@@ -8373,8 +8464,15 @@ function composeClientAncestorContext(row, research, findings) {
   if (findings && findings.length) {
     parts.push('Research findings (primary sources; these are the ground of the record):\n' + findings.map(f => {
       const head = [f.finding_date, f.source_type, f.source_label].filter(Boolean).join(' · ');
-      return `- ${head ? head + ': ' : ''}${f.summary || ''}${f.url ? ` (${f.url})` : ''}`;
+      return `- ${head ? head + ': ' : ''}${f.summary || ''}${f.highlight_note ? ` [Significant: ${f.highlight_note}]` : ''}${f.url ? ` (${f.url})` : ''}`;
     }).join('\n'));
+  }
+  if (research && (research.father || research.mother || (Array.isArray(research.relationships) && research.relationships.length))) {
+    const fam = [];
+    if (research.father) fam.push(`Father: ${research.father}`);
+    if (research.mother) fam.push(`Mother: ${research.mother}`);
+    (Array.isArray(research.relationships) ? research.relationships : []).forEach(x => fam.push(`${x.role}: ${x.name}${x.note ? ' (' + x.note + ')' : ''}${x.source ? ' [' + x.source + ']' : ''}`));
+    parts.push('Family as recorded in the sources (for identity and placement; name the client\'s relationship to no one):\n' + fam.join('\n'));
   }
   const idParts = [];
   if (row.relation_to_client) idParts.push(`Relation to client: ${row.relation_to_client}`);
