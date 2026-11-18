@@ -1166,6 +1166,17 @@ body { font-weight: 400; }
 .cd-subbar .cd-subnav { margin-bottom: 0; }
 .cd-subnav-link { font-size: 15px; color: var(--gold); text-decoration: none; border-bottom: 1px solid var(--border-hover); }
 .ws-stale { color: var(--amber); }
+.intake-list { display: grid; gap: 0.6rem; margin-top: 0.75rem; }
+.intake-item { border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.9rem; }
+.intake-item[open] { border-color: var(--border-hover); }
+.intake-item summary { cursor: pointer; display: flex; flex-wrap: wrap; gap: 0.25rem 0.9rem; align-items: baseline; font-size: 15px; }
+.intake-item summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.intake-date { color: var(--gold); font-weight: 500; }
+.intake-meta { color: var(--text-dim); }
+.intake-body { margin-top: 0.75rem; }
+.intake-anc { margin: 0.25rem 0 0; padding-left: 1.3rem; font-size: 15px; line-height: 1.6; color: var(--text); }
+.intake-anc li { margin-bottom: 0.35rem; }
+.intake-anc-note { color: var(--text-dim); white-space: pre-wrap; }
 .sess-list { display: grid; gap: 0.4rem; margin-top: 0.9rem; }
 .sess-row { display: grid; grid-template-columns: 110px 1fr auto; gap: 0.75rem; align-items: center; text-align: left; width: 100%; padding: 0.6rem 0.85rem; border: 1px solid var(--border); border-radius: 6px; background: transparent; color: var(--text); font: inherit; font-size: 15px; cursor: pointer; }
 .sess-row:hover { border-color: var(--border-hover); }
@@ -2774,7 +2785,8 @@ async function loadClientDetail() {
     const worksheets = await rest(`client_session_worksheets?client_id=eq.${id}&order=created_at.desc&select=${WS_SELECT}`).catch(() => []);
     cdSessSel = null;
     const synRow = (await rest(`client_chart_synthesis?client_id=eq.${id}&select=updated_at`).catch(() => []))[0] || null;
-    currentDetailData = { worksheets: Array.isArray(worksheets) ? worksheets : [], synthesis: synRow, client, birth, hd, gk, ancestors, convs, refByNum, fieldById, resonance: resonance || [], allTapestry: allTapestry || [], planets: planets || [], sig1: sig1 || [], sig2: sig2 || [], recentConv, convSections: convSections || [], threshold, sevenGates: Array.isArray(sevenGates) ? sevenGates : [] };
+    const intakes = await rest(`client_intakes?client_id=eq.${id}&order=submitted_at.desc&select=*`).catch(() => []);
+    currentDetailData = { intakes: Array.isArray(intakes) ? intakes : [], worksheets: Array.isArray(worksheets) ? worksheets : [], synthesis: synRow, client, birth, hd, gk, ancestors, convs, refByNum, fieldById, resonance: resonance || [], allTapestry: allTapestry || [], planets: planets || [], sig1: sig1 || [], sig2: sig2 || [], recentConv, convSections: convSections || [], threshold, sevenGates: Array.isArray(sevenGates) ? sevenGates : [] };
 
     document.getElementById('cd-title').textContent = client.name || '—';
     document.getElementById('cd-subtitle').textContent =
@@ -3538,7 +3550,7 @@ function renderClientDetail(d) {
     { key: 'messages',  label: 'Messages',
       html: cdMessagesCard(d) },
     { key: 'intake',    label: 'Intake',
-      html: `${cdIntakePatternsCard(d)}${cdMirrorAppCard(d)}` },
+      html: `${cdIntakesCard(d)}${cdMirrorAppCard(d)}` },
     { key: 'record',    label: 'Record',
       html: `<div class="cd-grid">${cdIdentityCard(d)}${cdLifecycleCard(d)}</div>${cdAccessCard(d)}${cdAdminNotesCard(d)}${cdDangerZoneCard(d)}` },
   ];
@@ -3767,6 +3779,61 @@ function cdIntakePatternsCard(d) {
         ${cdIntakeBlock('Open remarks', c.open_remarks)}
       ` : '<div class="cd-value muted">No intake submitted yet.</div>'}
     </div>`;
+}
+
+// ── Intake history (2026-11-17) ──
+// Every intake is its own dated record (client_intakes). The client row's answers are rebuilt
+// from all of them by a database trigger, oldest first, skipping blank / "NA" answers, and that
+// combined record is what session worksheets and the Convergence read.
+const INTAKE_SOURCE = { form: 'web form', manual: 'entered by hand', reconstructed: 'entered by hand · recovered' };
+const INTAKE_Q = [
+  ['pattern_repeating', '01 · Repeating pattern'], ['pattern_somatic', '02 · In the body'], ['pattern_inherited', '03 · Inherited'],
+  ['pattern_threshold', '04 · Threshold'], ['pattern_unreceived', '05 · Not yet received'], ['open_remarks', 'Open remarks'],
+];
+function intakeBlank(v) { return v == null || ['', 'na', 'n/a', 'none', '-', '—', 'nil', 'notapplicable'].includes(String(v).trim().toLowerCase().replace(/[.\s]/g, '')); }
+function cdIntakeDate(ts) { return new Date(ts).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); }
+function cdIntakesCard(d) {
+  const list = d.intakes || [];
+  if (!list.length) return cdIntakePatternsCard(d);
+  const items = list.map((it, idx) => {
+    const anc = Array.isArray(it.ancestors) ? it.ancestors : [];
+    const answered = INTAKE_Q.filter(([k]) => !intakeBlank(it[k])).length;
+    const contact = [it.name_on_form, it.birth_date && ('born ' + it.birth_date + (it.birth_time ? ' ' + it.birth_time : '')), it.birth_place, it.current_address, it.phone].filter(Boolean).map(cdEsc).join(' · ');
+    return `<details class="intake-item"${idx === 0 ? ' open' : ''}>
+      <summary><span class="intake-date">${cdEsc(cdIntakeDate(it.submitted_at))}</span>
+        <span class="intake-meta">${cdEsc(it.entry_offering || '—')} · ${cdEsc(INTAKE_SOURCE[it.source] || it.source)} · ${answered} of 6 answered · ${anc.length} ancestor${anc.length === 1 ? '' : 's'}</span></summary>
+      <div class="intake-body">
+        ${it.admin_note ? `<p class="cd-note">${cdEsc(it.admin_note)}</p>` : ''}
+        ${contact ? `<div class="cd-row stack"><div class="cd-label">On the form</div><div class="cd-value">${contact}</div></div>` : ''}
+        ${INTAKE_Q.map(([k, l]) => intakeBlank(it[k])
+          ? `<div class="cd-row stack"><div class="cd-label">${l}</div><div class="cd-value muted">— left blank${it[k] ? ' (' + cdEsc(it[k]) + ')' : ''} —</div></div>`
+          : cdIntakeBlock(l, it[k])).join('')}
+        <div class="cd-row stack"><div class="cd-label">Ancestors named</div>
+          ${anc.length ? `<ol class="intake-anc">${anc.map(a => `<li><b>${cdEsc(a.name)}</b>${a.relation_to_client ? ' · ' + cdEsc(a.relation_to_client) : ''}${a.dates ? ' · ' + cdEsc(a.dates) : ''}${(a.birthplace || a.location) ? ' · ' + cdEsc(a.location || a.birthplace) : ''}${a.occupation ? ' · ' + cdEsc(a.occupation) : ''}${a.intake_notes ? `<div class="intake-anc-note">${cdEsc(a.intake_notes)}</div>` : ''}</li>`).join('')}</ol>` : '<div class="cd-value muted">— none —</div>'}
+        </div>
+        <div class="cd-actions" style="margin-top:0.75rem"><button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(192,112,96,0.3)" onclick="cdIntakeDelete('${it.id}')">Delete this intake</button></div>
+      </div>
+    </details>`;
+  }).join('');
+  return `<div class="cd-card full" style="margin-bottom:1.25rem">
+      <h3 class="cd-card-title">Intake forms · ${list.length}</h3>
+      <p class="cd-note">Every intake is kept, newest first. All of them are used in the client work: their answers are combined, oldest first, into what session worksheets and the Convergence read. Answers left blank or "NA" are skipped. Deleting an intake removes its answers from that combined record; the ancestors it named stay in the Weaving record.</p>
+      <div class="intake-list">${items}</div>
+    </div>`;
+}
+async function cdIntakeDelete(intakeId) {
+  const it = (currentDetailData.intakes || []).find(x => x.id === intakeId); if (!it) return;
+  if (!confirm(`Delete the intake from ${cdIntakeDate(it.submitted_at)}? Its answers leave the client's combined record. The ancestors it named stay. This can't be undone.`)) return;
+  await restDelete(`client_intakes?id=eq.${intakeId}`);
+  const cid = currentDetailData.client.id;
+  const [rows, cl] = await Promise.all([
+    rest(`client_intakes?client_id=eq.${cid}&order=submitted_at.desc&select=*`).catch(() => []),
+    rest(`clients?id=eq.${cid}&limit=1`).catch(() => [])
+  ]);
+  currentDetailData.intakes = Array.isArray(rows) ? rows : [];
+  if (Array.isArray(cl) && cl[0]) currentDetailData.client = cl[0];
+  const sec = document.getElementById('cd-sec-intake');
+  if (sec) sec.innerHTML = `${cdIntakesCard(currentDetailData)}${cdMirrorAppCard(currentDetailData)}`;
 }
 
 function cdMirrorAppCard(d) {
