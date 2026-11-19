@@ -3,6 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+// The portal never runs inside a frame of itself (2026-11-19): a page embedded in the portal that
+// navigates its frame to the portal would otherwise nest a whole portal inside a client's page.
+if (window.self !== window.top) {
+  let sameOrigin = false;
+  try { sameOrigin = window.top.location.origin === location.origin; } catch (e) {}
+  if (sameOrigin) {
+    window.stop();
+    document.documentElement.innerHTML = '<body style="margin:0;padding:1.5rem;font:15px/1.6 sans-serif;color:#8a7a62">This page could not open here. Open it in its own tab.</body>';
+    try { parent.postMessage({ type: 'convergence-height', height: 120 }, location.origin); } catch (e) {}
+  }
+}
+</script>
 <title>Map Guide & Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 
