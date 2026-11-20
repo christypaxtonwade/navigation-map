@@ -5482,6 +5482,7 @@ function arcActionsHtml(id, d, layers, weaveHref) {
       ${!linked && (res.disambiguated_at || res.research_run) ? `<button class="btn ${inResearch && res.disambiguated_at && !res.researched_at ? 'btn-gold' : 'btn-outline'} btn-sm" id="arc-res-btn-${id}" onclick="arcResearch('${id}')" ${res.research_run?.state === 'running' ? 'disabled' : ''} title="Vital records, life history, records held offline and historical context">${res.research_run?.state === 'running' ? 'Researching…' : res.researched_at ? 'Research again' : 'Research'}</button>` : ''}
       ${inResearch ? `<button class="btn btn-gold btn-sm" onclick="lwWeave('${id}')" title="Write this ancestor from the research into the client's Weaving or Catalog">Weave</button>` : ''}
       ${writable ? `<button class="btn btn-gold btn-sm" onclick="augmentFromRecord('${id}','${r.client_id}')">Augment with new findings</button>` : ''}
+      ${!linked ? `<button class="btn btn-outline btn-sm" onclick="arcEditDetails('${id}')" title="Name, dates, place, occupation, relation to the client">Edit details</button>` : ''}
       ${writable && !linked ? `<button class="btn btn-outline btn-sm" onclick="arcEditText('${id}')">Edit text</button>` : ''}
       ${layers.length && !inResearch ? `<a class="btn btn-outline btn-sm" href="${weaveHref}" target="_blank" rel="noopener">Open in the Weaving ↗</a>` : ''}
       ${r.status === 'intake_stub' ? `<button class="btn btn-outline btn-sm" onclick="lwSetStatus('${id}','held')" title="Keep the research; hide this ancestor from the client">Hold</button>` : ''}
@@ -6038,8 +6039,8 @@ async function arcSaveResearchRun(id, btn) {
 const ARC_EDIT_FIELDS = [['epithet', 'Epithet', 1], ['catalog_preview', 'Catalog', 3], ['layer_terroir', 'Terroir', 5], ['layer_unresolved', 'Unresolved', 5], ['layer_thread', 'Thread', 6], ['layer_lineage', 'Lineage', 5]];
 function arcEditText(id) {
   const d = ARC_CACHE[id]; const el = document.getElementById(`arc-edit-${id}`); if (!d || !el) return;
-  if (el.innerHTML) { el.innerHTML = ''; return; }
-  const r = d.row;
+  if (el.dataset.mode === 'text' && el.innerHTML) { el.innerHTML = ''; el.dataset.mode = ''; return; }
+  const r = d.row; el.dataset.mode = 'text';
   el.innerHTML = `<div class="arc-edit">
     ${ARC_EDIT_FIELDS.map(([k, l, rows]) => `<label class="form-label" for="ae-${k}-${id}">${l}</label>
       ${rows === 1 ? `<input class="form-input" id="ae-${k}-${id}" value="${esc(r[k] || '')}">` : `<textarea class="form-textarea" id="ae-${k}-${id}" rows="${rows}">${esc(r[k] || '')}</textarea>`}`).join('')}
@@ -6054,6 +6055,48 @@ async function arcSaveText(id, btn) {
   if (!ok) { document.getElementById(`ae-msg-${id}`).textContent = 'Save failed.'; btn.disabled = false; return; }
   const row = ARC_ROWS.find(x => x.id === id); if (row) Object.assign(row, body);
   await arcRefresh(id);
+}
+
+// ── Edit the record's details by hand (2026-11-20): name, dates, place, occupation, year for
+// ordering, relation to the client. Any stage; a client's own record only (archive copies are
+// edited in My Archive). ──
+const ARC_DETAIL_FIELDS = [['name', 'Name'], ['dates', 'Dates', 'e.g. 11 July 1928 – 21 February 2020'], ['location', 'Place'], ['occupation', 'Occupation'], ['sort_year', 'Year for ordering', 'Birth year; sets the order in the Weaving'], ['relation_to_client', 'Relation to the client', 'e.g. great-grandmother']];
+function arcEditDetails(id) {
+  const d = ARC_CACHE[id]; const el = document.getElementById(`arc-edit-${id}`); if (!d || !el) return;
+  if (el.dataset.mode === 'details' && el.innerHTML) { el.innerHTML = ''; el.dataset.mode = ''; return; }
+  const r = d.row; el.dataset.mode = 'details';
+  el.innerHTML = `<div class="arc-edit">
+    ${ARC_DETAIL_FIELDS.map(([k, l, ph]) => `<label class="form-label" for="ad-${k}-${id}">${l}</label>
+      <input class="form-input" id="ad-${k}-${id}" ${k === 'sort_year' ? 'type="number" step="1"' : ''} value="${esc(r[k] == null ? '' : String(r[k]))}" placeholder="${esc(ph || '')}">`).join('')}
+    <label class="form-label" for="ad-note-${id}">Note for the research record (optional)</label>
+    <input class="form-input" id="ad-note-${id}" placeholder="e.g. Birth year confirmed as 1928; the intake gave 1927">
+    <div class="triage-msg">Changing details does not rewrite the written layers. If a layer mentions the old detail, use Edit text or Augment.</div>
+    <div class="triage-row-btns"><button class="btn btn-gold btn-sm" onclick="arcSaveDetails('${id}', this)">Save details</button><button class="btn btn-outline btn-sm" onclick="arcEditDetails('${id}')">Cancel</button><span class="triage-msg" id="ad-msg-${id}"></span></div>
+  </div>`;
+}
+async function arcSaveDetails(id, btn) {
+  const d = ARC_CACHE[id]; if (!d) return;
+  const body = {};
+  ARC_DETAIL_FIELDS.forEach(([k]) => {
+    const v = (document.getElementById(`ad-${k}-${id}`)?.value || '').trim();
+    body[k] = k === 'sort_year' ? (v === '' ? null : Math.round(Number(v))) : (v || null);
+  });
+  const msg = document.getElementById(`ad-msg-${id}`);
+  if (!body.name) { msg.textContent = 'The name cannot be empty.'; return; }
+  if (body.sort_year != null && !Number.isFinite(body.sort_year)) { msg.textContent = 'Year for ordering must be a year, e.g. 1928.'; return; }
+  btn.disabled = true;
+  const ok = await restPatch('client_ancestors', id, body);
+  if (!ok) { msg.textContent = 'Save failed.'; btn.disabled = false; return; }
+  const note = (document.getElementById(`ad-note-${id}`)?.value || '').trim();
+  if (note) {
+    const cur = d.research?.research_notes || '';
+    try { await upsertClientAncestorResearch(id, { research_notes: (cur ? cur + '\n\n' : '') + new Date().toISOString().slice(0, 10) + ': ' + note }); } catch (e) { /* details are saved; the note is optional */ }
+  }
+  const row = ARC_ROWS.find(x => x.id === id); if (row) Object.assign(row, body);
+  const l = (LW.rows || []).find(x => x.id === id); if (l) Object.assign(l, body);
+  const el = document.getElementById(`arc-edit-${id}`); if (el) { el.innerHTML = ''; el.dataset.mode = ''; }
+  await arcRefresh(id);
+  if (LW.client) lwRefresh();
 }
 
 function archStatusLabel(s) { return ({ keynote: 'historical keynote', weaving: 'weaving', catalog: 'catalog', margin: 'margin' })[s] || s || 'catalog'; }
